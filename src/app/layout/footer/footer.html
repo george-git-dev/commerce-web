@@ -1,0 +1,73 @@
+<footer class="footer">
+  <div class="ui-container footer__grid">
+    <div class="footer__col footer__col--brand">
+      <a routerLink="/" class="footer__brand">
+        <span class="footer__mark" aria-hidden="true"></span>
+        <span>
+          <strong>{{ store.name }}</strong>
+          <small>{{ store.tagline }}</small>
+        </span>
+      </a>
+      <p class="footer__about">
+        Mais que perfumes, uma jornada pelos sentidos. Fragrâncias que contam histórias e
+        eternizam momentos.
+      </p>
+    </div>
+
+    <div class="footer__col">
+      <h4>Coleção</h4>
+      <ul class="footer__links">
+        @for (link of navLinks; track link.fragment) {
+          <li><a routerLink="/" [fragment]="link.fragment">{{ link.label }}</a></li>
+        }
+      </ul>
+    </div>
+
+    <div class="footer__col">
+      <h4>Atendimento</h4>
+      <ul class="footer__links">
+        <li><a [href]="store.whatsappHref" target="_blank" rel="noopener">WhatsApp</a></li>
+        <li><a [href]="store.phoneHref">{{ store.phone }}</a></li>
+        <li><a routerLink="/" [fragment]="sections.contact">Consultoria olfativa</a></li>
+      </ul>
+      <ul class="footer__facts">
+        <li>Entrega em {{ store.delivery }}</li>
+        <li>Frascos lacrados e originais</li>
+      </ul>
+    </div>
+
+    <div class="footer__col">
+      <h4>Receba novidades e ofertas</h4>
+      <form class="footer__form" (submit)="$event.preventDefault()">
+        <label class="footer__field">
+          <span>Seu e-mail</span>
+          <input type="email" name="email" placeholder="Seu e-mail" autocomplete="email" />
+        </label>
+        <button matIconButton type="submit" aria-label="Assinar newsletter">
+          <mat-icon>arrow_forward</mat-icon>
+        </button>
+      </form>
+
+      <div class="footer__socials">
+        @for (social of socials; track social.label) {
+          <a [href]="social.url" [attr.aria-label]="social.label" target="_blank" rel="noopener">
+            <mat-icon>{{ social.icon }}</mat-icon>
+          </a>
+        }
+      </div>
+
+      <div class="footer__payments">
+        @for (payment of payments; track payment) {
+          <span>{{ payment }}</span>
+        }
+      </div>
+    </div>
+  </div>
+
+  <div class="footer__bar">
+    <div class="ui-container footer__bar-inner">
+      <span>© {{ year }} {{ store.name }} {{ store.tagline }}. Todos os direitos reservados.</span>
+      <span>CNPJ {{ store.cnpj }}</span>
+    </div>
+  </div>
+</footer>

@@ -1,0 +1,21 @@
+.not-found {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  min-height: 52dvh;
+  padding-block: 72px;
+
+  h1 {
+    font-size: clamp(1.75rem, 1.2rem + 2vw, 2.5rem);
+    letter-spacing: -0.02em;
+  }
+
+  p {
+    margin: 16px 0 32px;
+    max-width: 46ch;
+    color: var(--muted);
+    font-size: 1.0625rem;
+  }
+}

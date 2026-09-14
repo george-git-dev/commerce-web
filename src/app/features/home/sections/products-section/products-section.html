@@ -1,0 +1,15 @@
+<section [id]="sections.products" class="ui-section products">
+  <div class="ui-container">
+    <header class="ui-section-head">
+      <span class="ui-eyebrow">Mais vendidos</span>
+      <h2>Favoritos dos nossos clientes</h2>
+      <p>Descubra os perfumes que conquistaram quem já vive essa experiência.</p>
+    </header>
+
+    <div class="products__grid">
+      @for (product of products(); track product.id) {
+        <app-product-card [product]="product" (addToCart)="onAddToCart($event)" />
+      }
+    </div>
+  </div>
+</section>

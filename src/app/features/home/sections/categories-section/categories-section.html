@@ -1,0 +1,27 @@
+<section [id]="sections.categories" class="categories">
+  <img class="categories__bg" [src]="imagery.categoriesBand" alt="" loading="lazy" />
+
+  <div class="ui-container categories__inner">
+    <header class="categories__head">
+      <h2>Explore por categoria</h2>
+      <p>Encontre o perfume ideal para cada momento.</p>
+    </header>
+
+    <div class="categories__grid">
+      @for (category of categories(); track category.id) {
+        <a
+          [id]="anchorId(category.id)"
+          class="tile"
+          routerLink="/"
+          [fragment]="sections.products"
+        >
+          <img [src]="category.image" [alt]="category.name" width="900" height="700" loading="lazy" />
+          <span class="tile__body">
+            <span class="tile__name">{{ category.name }}</span>
+            <span class="tile__link">Ver perfumes <mat-icon>arrow_forward</mat-icon></span>
+          </span>
+        </a>
+      }
+    </div>
+  </div>
+</section>

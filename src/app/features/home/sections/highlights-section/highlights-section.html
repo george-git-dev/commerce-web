@@ -1,0 +1,13 @@
+<section class="highlights">
+  <div class="ui-container highlights__grid">
+    @for (highlight of highlights(); track highlight.title) {
+      <div class="benefit">
+        <mat-icon>{{ highlight.icon }}</mat-icon>
+        <div class="benefit__text">
+          <strong>{{ highlight.title }}</strong>
+          <span>{{ highlight.text }}</span>
+        </div>
+      </div>
+    }
+  </div>
+</section>

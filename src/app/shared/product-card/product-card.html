@@ -1,0 +1,37 @@
+@let item = product();
+
+<article class="card">
+  <div class="card__media">
+    <img [src]="item.image" [alt]="item.name" width="800" height="800" loading="lazy" />
+    @if (item.badge) {
+      <span class="card__badge" [class.card__badge--sale]="!!item.oldPrice">{{ item.badge }}</span>
+    }
+    <button matIconButton class="card__wish" aria-label="Adicionar aos favoritos">
+      <mat-icon>favorite_border</mat-icon>
+    </button>
+  </div>
+
+  <div class="card__body">
+    <h3 class="card__name">{{ item.name }}</h3>
+    <p class="card__subtitle">{{ item.subtitle }}</p>
+
+    <div class="card__rating">
+      @for (star of stars; track star) {
+        <mat-icon aria-hidden="true">{{ star <= item.rating ? 'star' : 'star_border' }}</mat-icon>
+      }
+      <span>({{ item.reviews }})</span>
+    </div>
+
+    <p class="card__price">
+      <strong>{{ item.price | currency: 'BRL' }}</strong>
+      @if (item.oldPrice) {
+        <s>{{ item.oldPrice | currency: 'BRL' }}</s>
+      }
+    </p>
+
+    <button matButton="filled" class="card__buy" (click)="addToCart.emit(item)">
+      <mat-icon>shopping_cart</mat-icon>
+      Adicionar ao carrinho
+    </button>
+  </div>
+</article>

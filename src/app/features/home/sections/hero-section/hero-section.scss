@@ -1,0 +1,105 @@
+:host {
+  display: block;
+}
+
+.hero {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: 640px;
+  overflow: hidden;
+  background: var(--beige-deep);
+
+  // Fotografia sangrando na largura total.
+  &__bg {
+    position: absolute;
+    inset: 0;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: 60% center;
+    }
+  }
+
+  // Véu claro à esquerda, para o texto ficar legível sobre a foto.
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      100deg,
+      rgb(250 247 242 / 96%) 0%,
+      rgb(250 247 242 / 88%) 32%,
+      rgb(250 247 242 / 45%) 55%,
+      rgb(250 247 242 / 5%) 78%
+    );
+  }
+
+  &__inner {
+    position: relative;
+    z-index: 1;
+    padding-block: 96px;
+  }
+
+  &__copy {
+    max-width: 560px;
+  }
+
+  h1 {
+    font-size: clamp(2.75rem, 1.6rem + 4.2vw, 4.75rem);
+    font-weight: 500;
+    line-height: 1.05;
+    letter-spacing: -0.015em;
+  }
+
+  p {
+    margin: 26px 0 38px;
+    max-width: 44ch;
+    font-size: 1.0625rem;
+    line-height: 1.7;
+    color: var(--ink-soft);
+  }
+
+  &__btn.mat-mdc-button-base {
+    padding-inline: 30px;
+
+    mat-icon {
+      margin-left: 12px;
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+  }
+}
+
+@media (max-width: 900px) {
+  .hero {
+    min-height: 520px;
+
+    &__bg img {
+      object-position: 70% center;
+    }
+
+    // Em telas estreitas o véu cobre tudo: a foto vira textura de fundo.
+    &::after {
+      background: linear-gradient(
+        180deg,
+        rgb(250 247 242 / 94%) 0%,
+        rgb(250 247 242 / 86%) 60%,
+        rgb(250 247 242 / 72%) 100%
+      );
+    }
+
+    &__inner {
+      padding-block: 64px;
+    }
+  }
+}
+
+@media (max-width: 420px) {
+  .hero__btn.mat-mdc-button-base {
+    width: 100%;
+  }
+}

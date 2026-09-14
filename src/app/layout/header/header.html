@@ -1,0 +1,55 @@
+<div class="announce">
+  <div class="ui-container announce__inner">
+    <ul class="announce__list">
+      <li>Frete grátis para todo o Brasil</li>
+      <li>Parcele em até 12x</li>
+      <li>Compra segura</li>
+    </ul>
+    <a [href]="store.phoneHref" class="announce__phone">{{ store.phone }}</a>
+  </div>
+</div>
+
+<mat-toolbar class="bar">
+  <div class="ui-container bar__inner">
+    <a routerLink="/" class="brand" aria-label="ÂMBRA, página inicial">
+      <span class="brand__mark" aria-hidden="true"></span>
+      <span class="brand__text">
+        <strong>{{ store.name }}</strong>
+        <small>{{ store.tagline }}</small>
+      </span>
+    </a>
+
+    <nav id="main-nav" class="nav" [class.nav--open]="menuOpen()" aria-label="Categorias">
+      @for (link of navLinks; track link.fragment) {
+        <a routerLink="/" [fragment]="link.fragment" (click)="closeMenu()">{{ link.label }}</a>
+      }
+    </nav>
+
+    <label class="search">
+      <mat-icon aria-hidden="true">search</mat-icon>
+      <span class="search__label">Buscar perfumes</span>
+      <input type="search" name="q" placeholder="Buscar perfumes..." autocomplete="off" />
+    </label>
+
+    <div class="bar__actions">
+      <button matIconButton class="bar__optional" aria-label="Minha conta">
+        <mat-icon>person_outline</mat-icon>
+      </button>
+      <button matIconButton aria-label="Carrinho de compras">
+        <mat-icon [matBadge]="cart.count()" matBadgeColor="warn" matBadgeSize="small">
+          shopping_bag
+        </mat-icon>
+      </button>
+      <button
+        matIconButton
+        class="bar__burger"
+        aria-controls="main-nav"
+        [attr.aria-expanded]="menuOpen()"
+        aria-label="Abrir menu de categorias"
+        (click)="toggleMenu()"
+      >
+        <mat-icon>{{ menuOpen() ? 'close' : 'menu' }}</mat-icon>
+      </button>
+    </div>
+  </div>
+</mat-toolbar>

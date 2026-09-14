@@ -1,0 +1,50 @@
+:host {
+  display: block;
+}
+
+// Banda de respiro entre a faixa escura e os selos: só tipografia e espaço.
+.cta {
+  background: var(--beige);
+  // Compensa o header sticky ao rolar até a âncora de contato.
+  scroll-margin-top: 100px;
+
+  &__inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding-block: 88px;
+  }
+
+  h2 {
+    font-size: clamp(2rem, 1.3rem + 2.4vw, 2.875rem);
+  }
+
+  p {
+    margin: 16px 0 34px;
+    max-width: 56ch;
+    font-size: 1.0625rem;
+    line-height: 1.7;
+    color: var(--ink-soft);
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 14px;
+  }
+}
+
+@media (max-width: 900px) {
+  .cta__inner {
+    padding-block: 64px;
+  }
+}
+
+@media (max-width: 420px) {
+  .cta__actions {
+    display: grid;
+    width: 100%;
+  }
+}

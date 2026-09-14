@@ -1,0 +1,292 @@
+:host {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: block;
+}
+
+// Faixa superior clara, com os selos comerciais à esquerda.
+.announce {
+  background: var(--beige);
+  color: var(--ink-soft);
+  font-size: 0.8125rem;
+
+  &__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    height: 42px;
+  }
+
+  &__list {
+    display: flex;
+    align-items: center;
+    gap: 22px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+
+    li + li {
+      padding-left: 22px;
+      border-left: 1px solid var(--line);
+    }
+  }
+
+  &__phone {
+    white-space: nowrap;
+    letter-spacing: 0.02em;
+
+    &:hover {
+      color: var(--brand-strong);
+    }
+  }
+}
+
+.bar.mat-toolbar {
+  position: relative;
+  height: auto;
+  padding: 0;
+  background: #fff;
+  border-bottom: 1px solid var(--line);
+
+  &__inner {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    height: 92px;
+  }
+
+  &__actions {
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    margin-left: auto;
+    color: var(--ink);
+  }
+
+  &__burger {
+    display: none;
+  }
+}
+
+.brand {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 13px;
+  min-width: 0;
+
+  // Losango vazado em vez de ícone: emblema discreto, sem ilustração.
+  &__mark {
+    flex: none;
+    width: 26px;
+    height: 26px;
+    transform: rotate(45deg);
+    border: 1px solid var(--gold);
+    box-shadow: inset 0 0 0 4px #fff, inset 0 0 0 5px var(--gold);
+  }
+
+  &__text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    line-height: 1.05;
+  }
+
+  strong {
+    font-family: var(--font-display);
+    font-size: 1.875rem;
+    font-weight: 600;
+    letter-spacing: 0.26em;
+    color: var(--ink);
+  }
+
+  small {
+    font-family: var(--font-ui);
+    font-size: 0.5625rem;
+    letter-spacing: 0.34em;
+    text-transform: uppercase;
+    color: var(--brand-strong);
+    white-space: nowrap;
+  }
+}
+
+// Navegação inline, com marcador dourado sob o item sob o cursor.
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  a {
+    position: relative;
+    padding: 8px 14px;
+    font-family: var(--font-ui);
+    font-size: 0.875rem;
+    font-weight: 400;
+    color: var(--ink-soft);
+    white-space: nowrap;
+    transition: color 0.2s ease;
+
+    &::after {
+      content: '';
+      position: absolute;
+      left: 14px;
+      right: 14px;
+      bottom: 0;
+      height: 1px;
+      background: var(--gold);
+      transform: scaleX(0);
+      transition: transform 0.25s ease;
+    }
+
+    &:hover {
+      color: var(--brand-strong);
+    }
+
+    &:hover::after {
+      transform: scaleX(1);
+    }
+  }
+}
+
+.search {
+  flex: 0 1 320px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+  padding: 0 18px;
+  height: 46px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--bone);
+  color: var(--muted);
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease;
+
+  &:focus-within {
+    border-color: var(--gold);
+    background: #fff;
+  }
+
+  mat-icon {
+    flex: none;
+    font-size: 19px;
+    width: 19px;
+    height: 19px;
+  }
+
+  // Rótulo acessível sem poluir o visual do campo.
+  &__label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  input {
+    width: 100%;
+    border: 0;
+    background: none;
+    outline: none;
+    font-family: var(--font-ui);
+    font-size: 0.875rem;
+    color: var(--ink);
+
+    &::placeholder {
+      color: var(--muted);
+    }
+  }
+}
+
+// A navegação inline não cabe: vira painel suspenso sob a barra.
+@media (max-width: 1180px) {
+  .bar.mat-toolbar__burger {
+    display: inline-flex;
+  }
+
+  .nav {
+    display: none;
+
+    &--open {
+      display: flex;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0;
+      padding: 8px 0;
+      max-height: 60dvh;
+      overflow-y: auto;
+      background: #fff;
+      border-bottom: 1px solid var(--line);
+      box-shadow: var(--shadow-md);
+    }
+
+    a {
+      padding: 14px 24px;
+      font-size: 0.9375rem;
+
+      &::after {
+        display: none;
+      }
+    }
+  }
+}
+
+@media (max-width: 900px) {
+  .announce__list li:nth-child(n + 2) {
+    display: none;
+  }
+
+  .bar.mat-toolbar__inner {
+    height: 74px;
+    gap: 16px;
+  }
+
+  .search {
+    flex-basis: 220px;
+  }
+}
+
+@media (max-width: 760px) {
+  .search,
+  .bar__optional {
+    display: none;
+  }
+}
+
+@media (max-width: 420px) {
+  .announce {
+    font-size: 0.75rem;
+  }
+
+  .bar__actions {
+    --mdc-icon-button-state-layer-size: 44px;
+  }
+
+  .brand {
+    gap: 10px;
+
+    &__mark {
+      width: 22px;
+      height: 22px;
+    }
+
+    small {
+      display: none;
+    }
+
+    strong {
+      font-size: 1.5rem;
+      letter-spacing: 0.2em;
+    }
+  }
+}

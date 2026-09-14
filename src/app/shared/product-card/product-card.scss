@@ -1,0 +1,131 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: #fff;
+  transition:
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
+
+  &:hover {
+    border-color: var(--gold);
+    box-shadow: var(--shadow-md);
+  }
+
+  &__media {
+    position: relative;
+    background: var(--beige);
+
+    img {
+      width: 100%;
+      aspect-ratio: 1;
+      object-fit: cover;
+    }
+  }
+
+  &__badge {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    padding: 5px 12px;
+    border-radius: 999px;
+    background: rgb(28 23 20 / 82%);
+    color: #fff;
+    font-family: var(--font-ui);
+    font-size: 0.6875rem;
+    font-weight: 400;
+    letter-spacing: 0.02em;
+
+    // Promoções ganham o tom vinho da paleta, separando desconto de novidade.
+    &--sale {
+      background: var(--wine);
+    }
+  }
+
+  &__wish.mat-mdc-icon-button {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    color: var(--ink-soft);
+  }
+
+  &__body {
+    // `flex: 1` é o que dá espaço livre para o `margin-top: auto` do botão
+    // absorver, alinhando os CTAs entre cards de alturas diferentes.
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 22px 22px 24px;
+  }
+
+  &__name {
+    font-size: 1.375rem;
+    font-weight: 500;
+    line-height: 1.2;
+  }
+
+  &__subtitle {
+    margin: 7px 0 0;
+    font-size: 0.8125rem;
+    color: var(--muted);
+  }
+
+  &__rating {
+    display: flex;
+    align-items: center;
+    gap: 1px;
+    margin-top: 14px;
+    color: var(--gold);
+    font-size: 0.75rem;
+
+    mat-icon {
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
+    }
+
+    span {
+      margin-left: 7px;
+      color: var(--muted);
+    }
+  }
+
+  &__price {
+    display: flex;
+    align-items: baseline;
+    gap: 9px;
+    margin: 14px 0 20px;
+
+    strong {
+      font-family: var(--font-ui);
+      font-size: 1.1875rem;
+      font-weight: 600;
+      color: var(--ink);
+    }
+
+    s {
+      color: var(--muted);
+      font-size: 0.8125rem;
+    }
+  }
+
+  &__buy.mat-mdc-button-base {
+    --mdc-filled-button-container-shape: 2px;
+    height: 48px;
+    width: 100%;
+    margin-top: auto;
+    font-family: var(--font-ui);
+    font-weight: 400;
+    font-size: 0.8125rem;
+    letter-spacing: 0.03em;
+
+    mat-icon {
+      margin-right: 8px;
+      font-size: 17px;
+      width: 17px;
+      height: 17px;
+    }
+  }
+}
