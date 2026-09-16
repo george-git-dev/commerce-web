@@ -12,6 +12,12 @@
       "sourceType": "github",
       "skillPath": "angular-new-app/SKILL.md",
       "computedHash": "d9f712544847ab80ef7ed20043820afd275c394ca05340c2f20a0f051e35d945"
+    },
+    "responsive-craft": {
+      "source": "kylezantos/responsive-craft",
+      "sourceType": "github",
+      "skillPath": "SKILL.md",
+      "computedHash": "10e1d8b1eae6412a0d59879bd0f6d10ab3792b424c8738c833eac6d655d4f2b5"
     }
   }
 }

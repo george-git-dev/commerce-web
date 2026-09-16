@@ -47,3 +47,4 @@ Thumbs.db
 .agents/
 .claude/skills/
 .claude/settings.local.json
+.vscode/

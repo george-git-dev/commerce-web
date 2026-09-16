@@ -40,6 +40,12 @@ Angular 22 storefront ("ÂMBRA" perfumery), standalone components only (no NgMod
 
 Angular Material (`@angular/material`, `@angular/cdk`) is the component library in use (toolbar, buttons, icons, badge). Prefer Material modules over hand-rolled equivalents for consistency with existing components (`header.ts`, `product-card.ts`).
 
+## Frontend Standards
+
+- **Mobile-first is mandatory.** Every new component, section, or layout change must be designed and coded starting from the smallest viewport, then progressively enhanced with `min-width` media queries (or Angular CDK `BreakpointObserver` where behavior — not just style — needs to change). Never build desktop-first and retrofit responsiveness afterward.
+- Act as a senior frontend specialist applying current market best practices by default, not only when explicitly asked: semantic HTML, accessible markup (native semantics first, ARIA only to fill real gaps), touch targets ≥44x44px, no layout shift on load, and consistent use of the project's existing spacing/type scale rather than ad-hoc values.
+- The `responsive-craft` skill is this project's standard for responsive/mobile-first implementation and review — use it (`/responsive-craft build` for new UI, `/responsive-craft audit` for reviewing existing layouts) whenever touching `features/`, `layout/`, or `shared/` components.
+
 ## Conventions
 
 - Prettier: single quotes, 100-char print width, Angular parser for `.html` templates.
