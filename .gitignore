@@ -42,3 +42,8 @@ __screenshots__/
 # System files
 .DS_Store
 Thumbs.db
+
+# Skills installed via npx skills
+.agents/
+.claude/skills/
+.claude/settings.local.json
