@@ -19,5 +19,6 @@ export class ProductCard {
   readonly product = input.required<Product>();
   readonly addToCart = output<Product>();
 
-  protected readonly stars = [1, 2, 3, 4, 5];
+  /** A API ainda não retorna imagem por produto. */
+  protected readonly placeholderImage = 'img/product-placeholder.svg';
 }

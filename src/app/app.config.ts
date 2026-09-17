@@ -6,6 +6,7 @@ import {
 } from '@angular/core';
 import { registerLocaleData } from '@angular/common';
 import ptBr from '@angular/common/locales/pt';
+import { provideHttpClient, withFetch } from '@angular/common/http';
 import { provideRouter, withInMemoryScrolling, withRouterConfig } from '@angular/router';
 import { routes } from './app.routes';
 
@@ -16,6 +17,8 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     // Explícito: o projeto não usa zone.js e todos os componentes são OnPush + signals.
     provideZonelessChangeDetection(),
+    // withFetch(): usa a Fetch API em vez de XHR, evitando warning de interceptor fora do browser.
+    provideHttpClient(withFetch()),
     provideRouter(
       routes,
       withInMemoryScrolling({ anchorScrolling: 'enabled', scrollPositionRestoration: 'enabled' }),

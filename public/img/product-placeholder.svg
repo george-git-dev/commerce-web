@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-label="Imagem do produto indisponível">
+  <rect width="400" height="400" fill="#f3ece1" />
+  <g fill="none" stroke="#b08d4f" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M170 90h60v40h-60z" />
+    <path d="M180 130h40v20h-40z" />
+    <path d="M150 150h100c11 0 20 9 20 20v110c0 11-9 20-20 20H150c-11 0-20-9-20-20V170c0-11 9-20 20-20z" />
+  </g>
+  <text x="200" y="330" text-anchor="middle" font-family="Jost, Segoe UI, sans-serif" font-size="15" fill="#6e655c">
+    Sem imagem
+  </text>
+</svg>

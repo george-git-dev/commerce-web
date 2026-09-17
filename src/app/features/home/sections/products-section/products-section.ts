@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { SECTION_IDS } from '../../../../core/config/navigation';
 import { CartStore } from '../../../../core/services/cart-store';
@@ -18,7 +18,9 @@ export class ProductsSection {
   private readonly cart = inject(CartStore);
   private readonly snackBar = inject(MatSnackBar);
 
-  protected readonly products = this.catalog.featuredProducts;
+  // Teaser da home: só os 8 primeiros. O catálogo completo (com paginação/filtro)
+  // vira uma página própria em breve — hoje a API ainda não pagina.
+  protected readonly products = computed(() => this.catalog.products().slice(0, 8));
   protected readonly sections = SECTION_IDS;
 
   /** O card apenas emite a intenção; quem decide o efeito é esta seção (container). */

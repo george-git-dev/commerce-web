@@ -1,6 +1,5 @@
 import { Category } from '../models/category';
 import { Highlight } from '../models/highlight';
-import { Product } from '../models/product';
 
 /**
  * Dados mockados do catálogo. Consumidos apenas pelo `CatalogService` — nenhum
@@ -66,52 +65,5 @@ export const CATEGORIES_MOCK: readonly Category[] = [
     name: 'Ofertas',
     text: 'Seleção com até 40% off',
     image: 'img/cat-ofertas.svg',
-  },
-];
-
-export const FEATURED_PRODUCTS_MOCK: readonly Product[] = [
-  {
-    id: 'noite-de-oud',
-    name: 'Noite de Oud',
-    subtitle: 'Eau de Parfum 100ml',
-    category: 'Árabes',
-    price: 389.9,
-    oldPrice: 649.9,
-    image: 'img/prod-noite-oud.svg',
-    rating: 5,
-    reviews: 142,
-    badge: 'Oferta',
-  },
-  {
-    id: 'ambar-real',
-    name: 'Âmbar Real',
-    subtitle: 'Eau de Parfum 100ml',
-    category: 'Árabes',
-    price: 449.9,
-    image: 'img/prod-ambar-real.svg',
-    rating: 5,
-    reviews: 87,
-    badge: 'Lançamento',
-  },
-  {
-    id: 'flor-de-damasco',
-    name: 'Flor de Damasco',
-    subtitle: 'Eau de Parfum 75ml',
-    category: 'Femininos',
-    price: 329.9,
-    image: 'img/prod-flor-damasco.svg',
-    rating: 4,
-    reviews: 96,
-    badge: 'Mais vendido',
-  },
-  {
-    id: 'madeira-do-deserto',
-    name: 'Madeira do Deserto',
-    subtitle: 'Eau de Parfum 100ml',
-    category: 'Masculinos',
-    price: 519.9,
-    image: 'img/prod-madeira.svg',
-    rating: 5,
-    reviews: 64,
   },
 ];

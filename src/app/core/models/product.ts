@@ -1,13 +1,26 @@
-export interface Product {
-  id: string;
+export interface ProductAttribute {
   name: string;
-  /** Concentração e volume, exibidos sob o nome no card. */
-  subtitle: string;
-  category: string;
+  value: string;
+}
+
+/**
+ * Espelha o `ProductResponse` da Commerce API.
+ *
+ * A API ainda não tem campo de imagem — enquanto isso não muda, a UI usa um
+ * placeholder genérico (ver `product-card`).
+ */
+export interface Product {
+  id: number;
+  name: string;
+  description: string;
   price: number;
-  oldPrice?: number;
-  image: string;
-  rating: number;
-  reviews: number;
-  badge?: string;
+  stock: number;
+  active: boolean;
+  categoryId: number;
+  categoryName: string;
+  brandId: number;
+  brandName: string;
+  attributes: readonly ProductAttribute[];
+  finalPrice: number;
+  promotionActive: boolean;
 }
