@@ -23,4 +23,15 @@ export interface Product {
   attributes: readonly ProductAttribute[];
   finalPrice: number;
   promotionActive: boolean;
+
+  // Mock-only enquanto o visual não é validado — ver se viram campos reais
+  // da API ou se somem quando reconectarmos em dado de verdade.
+  gender?: 'Masculino' | 'Feminino' | 'Unissex';
+  family?: string;
+  volume?: string;
+  rating?: number;
+  reviews?: number;
+  oldPrice?: number;
+  badge?: string;
+  notes?: readonly [string, string, string];
 }

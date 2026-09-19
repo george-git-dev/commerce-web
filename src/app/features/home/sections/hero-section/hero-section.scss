@@ -6,100 +6,94 @@
   position: relative;
   display: flex;
   align-items: center;
-  min-height: 640px;
+  min-height: 560px;
+  min-height: 78dvh;
+  max-height: 820px;
   overflow: hidden;
-  background: var(--beige-deep);
+  background: var(--surface-dark);
 
-  // Fotografia sangrando na largura total.
   &__bg {
     position: absolute;
     inset: 0;
-
-    img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      object-position: 60% center;
-    }
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 60% center;
   }
 
-  // Véu claro à esquerda, para o texto ficar legível sobre a foto.
+  // Gradiente escuro sobre a foto, para o texto claro ficar legível.
   &::after {
     content: '';
     position: absolute;
     inset: 0;
     background: linear-gradient(
-      100deg,
-      rgb(250 247 242 / 96%) 0%,
-      rgb(250 247 242 / 88%) 32%,
-      rgb(250 247 242 / 45%) 55%,
-      rgb(250 247 242 / 5%) 78%
+      180deg,
+      oklch(0.1 0.01 65 / 35%) 0%,
+      oklch(0.1 0.01 65 / 55%) 55%,
+      oklch(0.1 0.01 65 / 78%) 100%
     );
   }
 
   &__inner {
     position: relative;
     z-index: 1;
-    padding-block: 96px;
+    padding-block: 72px;
   }
 
   &__copy {
     max-width: 560px;
+    color: var(--primary-foreground);
+
+    .ui-eyebrow {
+      color: var(--gold);
+    }
   }
 
   h1 {
-    font-size: clamp(2.75rem, 1.6rem + 4.2vw, 4.75rem);
-    font-weight: 500;
-    line-height: 1.05;
-    letter-spacing: -0.015em;
+    color: var(--primary-foreground);
+    font-size: clamp(2.5rem, 1.9rem + 3vw, 4.25rem);
+    font-weight: 400;
+    line-height: 1.08;
+    letter-spacing: 0.01em;
   }
 
   p {
-    margin: 26px 0 38px;
+    margin: 24px 0 34px;
     max-width: 44ch;
     font-size: 1.0625rem;
     line-height: 1.7;
-    color: var(--ink-soft);
+    color: color-mix(in oklch, var(--primary-foreground) 82%, transparent);
   }
 
-  &__btn.mat-mdc-button-base {
-    padding-inline: 30px;
+  &__actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
 
-    mat-icon {
-      margin-left: 12px;
-      font-size: 18px;
-      width: 18px;
-      height: 18px;
-    }
+  &__ghost.mat-mdc-button-base {
+    --mdc-outlined-button-outline-color: color-mix(
+      in oklch,
+      var(--primary-foreground) 45%,
+      transparent
+    );
+    color: var(--primary-foreground);
   }
 }
 
-@media (max-width: 900px) {
+@media (min-width: 640px) {
+  .hero__actions {
+    flex-direction: row;
+  }
+}
+
+@media (min-width: 900px) {
   .hero {
-    min-height: 520px;
-
-    &__bg img {
-      object-position: 70% center;
-    }
-
-    // Em telas estreitas o véu cobre tudo: a foto vira textura de fundo.
-    &::after {
-      background: linear-gradient(
-        180deg,
-        rgb(250 247 242 / 94%) 0%,
-        rgb(250 247 242 / 86%) 60%,
-        rgb(250 247 242 / 72%) 100%
-      );
-    }
+    min-height: 640px;
+    min-height: 82dvh;
 
     &__inner {
-      padding-block: 64px;
+      padding-block: 96px;
     }
-  }
-}
-
-@media (max-width: 420px) {
-  .hero__btn.mat-mdc-button-base {
-    width: 100%;
   }
 }

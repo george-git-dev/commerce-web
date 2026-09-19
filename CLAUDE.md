@@ -38,7 +38,7 @@ Angular 22 storefront ("ÂMBRA" perfumery), standalone components only (no NgMod
 
 ### UI library
 
-Angular Material (`@angular/material`, `@angular/cdk`) is the component library in use (toolbar, buttons, icons, badge). Prefer Material modules over hand-rolled equivalents for consistency with existing components (`header.ts`, `product-card.ts`).
+Angular Material (`@angular/material`, `@angular/cdk`) is the component library in use (toolbar, buttons, icons, badge).
 
 ## Frontend Standards
 

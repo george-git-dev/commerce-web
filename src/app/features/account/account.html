@@ -1,0 +1,28 @@
+<section class="account ui-section">
+  <div class="ui-container">
+    <header class="account__head">
+      <h1>Minha conta</h1>
+      <p>Gerencie pedidos, favoritos e seus dados em um só lugar.</p>
+    </header>
+
+    <div class="account__grid">
+      @for (card of cards; track card.title) {
+        @if (card.link) {
+          <a class="card" [routerLink]="card.link">
+            <mat-icon>{{ card.icon }}</mat-icon>
+            <h2>{{ card.title }}</h2>
+            <p>{{ card.description }}</p>
+            <span class="card__link">Acessar <mat-icon>arrow_forward</mat-icon></span>
+          </a>
+        } @else {
+          <div class="card card--inert">
+            <mat-icon>{{ card.icon }}</mat-icon>
+            <h2>{{ card.title }}</h2>
+            <p>{{ card.description }}</p>
+            <span class="card__badge">Em breve</span>
+          </div>
+        }
+      }
+    </div>
+  </div>
+</section>

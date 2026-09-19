@@ -1,0 +1,31 @@
+:host {
+  display: block;
+}
+
+.favorites {
+  background: var(--background);
+
+  &__head {
+    margin-bottom: 24px;
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+}
+
+@media (min-width: 640px) {
+  .favorites__grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .favorites__grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+  }
+}

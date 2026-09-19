@@ -1,12 +1,13 @@
 /**
- * Fotografias de ambientação (hero e faixa de categorias).
+ * Fotografias de ambientação, servidas localmente em `public/img/`.
  *
- * São imagens sem marca visível, servidas pela CDN do Unsplash. Para usar a
- * produção fotográfica própria da loja, basta trocar as URLs abaixo por
- * arquivos locais em `public/img/`.
+ * `productPlaceholder` substitui a foto por produto: a API ainda não retorna
+ * imagem por produto (ver doc do `Product`), então todo card usa a mesma foto
+ * genérica de coleção.
  */
 export const IMAGERY = {
-  hero: 'https://images.unsplash.com/photo-1615634260167-c8cdede054de?w=1920&q=80',
-  heroSmall: 'https://images.unsplash.com/photo-1615634260167-c8cdede054de?w=900&q=70',
-  categoriesBand: 'https://images.unsplash.com/photo-1615634260167-c8cdede054de?w=1600&q=70',
+  hero: 'img/perfume-hero.jpg',
+  categoriesBand: 'img/perfume-categories.jpg',
+  productPlaceholder: 'img/perfume-collection.jpg',
+  story: 'img/perfume-story.jpg',
 } as const;

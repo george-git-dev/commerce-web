@@ -1,27 +1,60 @@
+import { Category } from '../models/category';
 import { NavLink } from '../models/nav-link';
 
-/**
- * Âncoras das seções da home. Usadas tanto pelo menu quanto pelos `id` do DOM,
- * para que um link nunca aponte para um destino que não existe.
- */
-export const SECTION_IDS = {
-  categories: 'categorias',
-  products: 'produtos',
-  contact: 'contato',
+/** Nomes de query params aceitos por `/produtos` — único ponto de verdade do contrato de filtro. */
+export const CATALOG_QUERY_PARAMS = {
+  gender: 'genero',
+  brand: 'marca',
+  priceMin: 'precoMin',
+  priceMax: 'precoMax',
+  search: 'busca',
+  deal: 'oferta',
+  launch: 'lancamento',
+  sort: 'ordenar',
 } as const;
 
-/** Âncora de um card de categoria dentro da seção de categorias. */
-export function categoryAnchorId(categoryId: string): string {
-  return `categoria-${categoryId}`;
-}
+/** Âncora institucional da home (imagem + texto + CTA "conheça nossa história"). */
+export const HOME_SECTION_IDS = {
+  story: 'historia',
+} as const;
 
 export const NAV_LINKS: readonly NavLink[] = [
-  { label: 'Destaques', fragment: SECTION_IDS.products },
-  { label: 'Masculinos', fragment: categoryAnchorId('masculinos') },
-  { label: 'Femininos', fragment: categoryAnchorId('femininos') },
-  { label: 'Árabes', fragment: categoryAnchorId('arabes') },
-  { label: 'Kits', fragment: categoryAnchorId('kits') },
-  { label: 'Lançamentos', fragment: categoryAnchorId('lancamentos') },
-  { label: 'Ofertas', fragment: categoryAnchorId('ofertas') },
-  { label: 'Contato', fragment: SECTION_IDS.contact },
+  { label: 'Início', path: '/' },
+  { label: 'Perfumes', path: '/produtos' },
+  {
+    label: 'Masculinos',
+    path: '/produtos',
+    queryParams: { [CATALOG_QUERY_PARAMS.gender]: 'Masculino' },
+  },
+  {
+    label: 'Femininos',
+    path: '/produtos',
+    queryParams: { [CATALOG_QUERY_PARAMS.gender]: 'Feminino' },
+  },
+  {
+    label: 'Unissex',
+    path: '/produtos',
+    queryParams: { [CATALOG_QUERY_PARAMS.gender]: 'Unissex' },
+  },
+  { label: 'Ofertas', path: '/produtos', queryParams: { [CATALOG_QUERY_PARAMS.deal]: 'true' } },
+  {
+    label: 'Lançamentos',
+    path: '/produtos',
+    queryParams: { [CATALOG_QUERY_PARAMS.launch]: 'true' },
+  },
 ];
+
+/** Query params de `/produtos` para o tile de uma categoria da home. */
+export function categoryQueryParams(category: Category): Record<string, string> {
+  if (category.genderFilter) {
+    return { [CATALOG_QUERY_PARAMS.gender]: category.genderFilter };
+  }
+  if (category.id === 'ofertas') {
+    return { [CATALOG_QUERY_PARAMS.deal]: 'true' };
+  }
+  if (category.id === 'lancamentos') {
+    return { [CATALOG_QUERY_PARAMS.launch]: 'true' };
+  }
+  // Kits e demais categorias sem filtro estruturado caem de volta na busca textual.
+  return { [CATALOG_QUERY_PARAMS.search]: category.name };
+}

@@ -1,24 +1,46 @@
 @let item = product();
 
 <article class="card">
-  <div class="card__media">
+  <a class="card__media" [routerLink]="['/produtos', item.id]" [attr.aria-label]="item.name">
     <img [src]="placeholderImage" [alt]="item.name" width="800" height="800" loading="lazy" />
-    @if (item.promotionActive) {
+    @if (item.badge) {
+      <span class="card__badge">{{ item.badge }}</span>
+    } @else if (item.promotionActive) {
       <span class="card__badge card__badge--sale">Oferta</span>
     }
-    <button matIconButton class="card__wish" aria-label="Adicionar aos favoritos">
-      <mat-icon>favorite_border</mat-icon>
-    </button>
-  </div>
+  </a>
+
+  <button
+    matIconButton
+    class="card__wish"
+    [class.card__wish--active]="favorite()"
+    [attr.aria-pressed]="favorite()"
+    [attr.aria-label]="favorite() ? 'Remover dos favoritos' : 'Adicionar aos favoritos'"
+    (click)="toggleFavorite.emit(item)"
+  >
+    <mat-icon>{{ favorite() ? 'favorite' : 'favorite_border' }}</mat-icon>
+  </button>
 
   <div class="card__body">
-    <h3 class="card__name">{{ item.name }}</h3>
-    <p class="card__subtitle">{{ item.categoryName }} · {{ item.brandName }}</p>
+    <p class="card__subtitle">{{ item.brandName }}</p>
+
+    @if (item.family) {
+      <span class="card__family">{{ item.family }}</span>
+    }
+
+    <h3 class="card__name">
+      <a [routerLink]="['/produtos', item.id]">{{ item.name }}</a>
+    </h3>
+
+    @if (item.rating) {
+      <app-star-rating class="card__rating" [rating]="item.rating" [reviews]="item.reviews" />
+    }
 
     <p class="card__price">
       <strong>{{ item.finalPrice | currency: 'BRL' }}</strong>
-      @if (item.promotionActive && item.finalPrice < item.price) {
-        <s>{{ item.price | currency: 'BRL' }}</s>
+      @if (item.oldPrice) {
+        <s>{{ item.oldPrice | currency: 'BRL' }}</s>
+        <span class="card__discount">-{{ discount() }}%</span>
       }
     </p>
 
@@ -28,8 +50,13 @@
       [disabled]="!item.active || item.stock <= 0"
       (click)="addToCart.emit(item)"
     >
-      <mat-icon>shopping_cart</mat-icon>
-      {{ item.active && item.stock > 0 ? 'Adicionar ao carrinho' : 'Indisponível' }}
+      <mat-icon>shopping_bag</mat-icon>
+      @if (item.active && item.stock > 0) {
+        <span class="card__buy-label card__buy-label--full">Adicionar ao carrinho</span>
+        <span class="card__buy-label card__buy-label--short">Adicionar</span>
+      } @else {
+        <span class="card__buy-label">Indisponível</span>
+      }
     </button>
   </div>
 </article>

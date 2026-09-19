@@ -1,0 +1,42 @@
+:host {
+  display: block;
+}
+
+.story {
+  background: var(--card);
+  scroll-margin-top: 100px;
+
+  &__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 32px;
+    align-items: center;
+  }
+
+  &__image {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    border-radius: var(--radius);
+  }
+
+  &__copy {
+    p {
+      margin: 20px 0 30px;
+      max-width: 52ch;
+      line-height: 1.75;
+      color: var(--muted-foreground);
+    }
+  }
+}
+
+@media (min-width: 900px) {
+  .story__grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 64px;
+  }
+
+  .story__image {
+    aspect-ratio: 5 / 4;
+  }
+}

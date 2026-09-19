@@ -1,5 +1,7 @@
 // Tema Angular Material da ÂMBRA — alta perfumaria.
-// Paleta neutra (branco, bege, dourado, preto) com contraste verificado em WCAG AA.
+// Paleta creme/dourado-areia/quase-preto (referência visual: protótipo "NAYR"),
+// com contraste verificado em WCAG AA (ver ratios abaixo, calculados a partir
+// dos valores oklch reais — não são estimativas).
 @use '@angular/material' as mat;
 
 html {
@@ -13,8 +15,16 @@ html {
         tertiary: mat.$green-palette,
       ),
       typography: (
-        plain-family: ('Jost', 'Segoe UI', sans-serif),
-        brand-family: ('Cormorant Garamond', Georgia, serif),
+        plain-family: (
+          'DM Sans',
+          'Segoe UI',
+          sans-serif,
+        ),
+        brand-family: (
+          'Italiana',
+          Georgia,
+          serif,
+        ),
         bold-weight: 700,
         medium-weight: 600,
         regular-weight: 400,
@@ -25,55 +35,82 @@ html {
 }
 
 :root {
-  // Tipografia: serifada para títulos e marca, geométrica para interface.
-  --font-display: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
-  --font-ui: 'Jost', 'Segoe UI', Helvetica, sans-serif;
+  // Tipografia: display serifado para títulos/marca, geométrico para interface.
+  --font-display: 'Italiana', Georgia, 'Times New Roman', serif;
+  --font-ui: 'DM Sans', 'Segoe UI', Helvetica, sans-serif;
 
-  // Dourado em três intensidades, cada uma com um papel definido:
-  // --gold é decorativo (2.88:1, não serve para texto);
-  // --brand preenche botões (4.90:1 com branco);
-  // --brand-strong é o dourado legível como texto (7.19:1 no branco).
-  --gold: #b08d4f;
-  --brand: #8a6c38;
-  --brand-strong: #6d5329;
+  // Paleta base (oklch). Hex ao lado de cada linha é o valor renderizado,
+  // útil para conferir contraste sem precisar converter oklch de cabeça.
+  --background: oklch(0.975 0.006 78); // #f9f6f2 — creme, quase branco
+  --foreground: oklch(0.19 0.012 70); // #17130e — quase preto, quente
+  --card: oklch(0.995 0.003 78); // #fffdfb
+  --card-foreground: var(--foreground);
 
-  --black: #14110f;
-  --ink: #1c1714;
-  --ink-soft: #4a423a;
-  --muted: #6e655c;
+  --primary: oklch(0.19 0.012 70); // #17130e — mesmo tom do foreground
+  --primary-foreground: oklch(0.975 0.006 78); // #f9f6f2
 
-  --bone: #faf7f2;
-  --beige: #f3ece1;
-  --beige-deep: #e8ddcb;
-  --line: #e6ddd0;
-  --wine: #8c2f39;
+  --secondary: oklch(0.77 0.072 76); // #cfae80 — dourado-areia
+  // Contraste texto-branco/dourado-areia é 1.94:1 (reprova AA) — por isso o
+  // texto sobre --secondary usa --foreground (8.85:1), nunca --primary-foreground.
+  --secondary-foreground: var(--foreground);
 
-  --shadow-sm: 0 1px 3px rgb(20 17 15 / 5%);
-  --shadow-md: 0 16px 40px rgb(20 17 15 / 10%);
+  --muted: oklch(0.945 0.012 76); // #f2ece4
+  --muted-foreground: oklch(0.47 0.018 65); // #625950 — 6.37:1 sobre --background
+
+  --accent: oklch(0.93 0.024 77); // #f1e6d7
+  --accent-foreground: var(--foreground);
+
+  --border: oklch(0.87 0.017 76); // #dbd3c8
+
+  --gold: oklch(
+    0.67 0.095 74
+  ); // #b88c4f — decorativo (2.82:1 sobre --background, não usar como texto sobre claro)
+  --gold-soft: oklch(0.93 0.035 77); // #f5e5cf
+
+  --earth: oklch(
+    0.42 0.045 55
+  ); // #614735 — 7.98:1 sobre --background, usado em texto/acento secundário
+  --surface-dark: oklch(0.16 0.011 65); // #110c08
+  --surface-dark-foreground: var(--primary-foreground);
+
+  --wine: #8c2f39; // selo de oferta/alerta — mantido fora da paleta oklch por ser um acento pontual
+
+  --shadow-sm: 0 1px 3px oklch(0.19 0.012 70 / 6%);
+  --shadow-md: 0 16px 40px oklch(0.19 0.012 70 / 12%);
+
+  // Radius pequeno e consistente — mais reto que redondo, como na referência.
+  --radius: 6px;
+  --radius-sm: 3px;
+
+  // Motion: hovers de imagem/card usam esta curva com duração mais longa;
+  // estados de UI (foco, cor) usam a duração curta.
+  --ease-swift: cubic-bezier(0.22, 1, 0.36, 1);
+  --motion-fast: 220ms;
+  --motion-slow: 550ms;
 
   // Tokens de sistema do Material, para que os componentes já nasçam na identidade.
-  --mat-sys-primary: #8a6c38;
-  --mat-sys-on-primary: #ffffff;
-  --mat-sys-primary-container: #f3ece1;
-  --mat-sys-on-primary-container: #4e3b1d;
-  --mat-sys-secondary: #6d5329;
-  --mat-sys-on-secondary: #ffffff;
-  --mat-sys-secondary-container: #e8ddcb;
-  --mat-sys-on-secondary-container: #2e2312;
+  --mat-sys-primary: #17130e;
+  --mat-sys-on-primary: #f9f6f2;
+  --mat-sys-primary-container: #f1e6d7;
+  --mat-sys-on-primary-container: #17130e;
+  --mat-sys-secondary: #614735;
+  --mat-sys-on-secondary: #f9f6f2;
+  --mat-sys-secondary-container: #f5e5cf;
+  --mat-sys-on-secondary-container: #17130e;
   --mat-sys-tertiary: #8c2f39;
   --mat-sys-on-tertiary: #ffffff;
   --mat-sys-tertiary-container: #f2dcde;
   --mat-sys-on-tertiary-container: #5c1c24;
-  --mat-sys-surface: #ffffff;
-  --mat-sys-surface-container-lowest: #ffffff;
-  --mat-sys-surface-container-low: #faf7f2;
-  --mat-sys-surface-container: #f3ece1;
-  --mat-sys-surface-container-high: #e8ddcb;
-  --mat-sys-surface-container-highest: #e0d3bd;
-  --mat-sys-on-surface: #1c1714;
-  --mat-sys-on-surface-variant: #6e655c;
-  --mat-sys-outline: #c6b79f;
-  --mat-sys-outline-variant: #e6ddd0;
+  --mat-sys-surface: #fffdfb;
+  --mat-sys-surface-container-lowest: #fffdfb;
+  --mat-sys-surface-container-low: #f9f6f2;
+  --mat-sys-surface-container: #f2ece4;
+  --mat-sys-surface-container-high: #f1e6d7;
+  --mat-sys-surface-container-highest: #dbd3c8;
+  --mat-sys-on-surface: #17130e;
+  --mat-sys-on-surface-variant: #625950;
+  --mat-sys-outline: #cfae80;
+  --mat-sys-outline-variant: #dbd3c8;
   --mat-sys-error: #b3261e;
 }
 
@@ -84,8 +121,8 @@ html {
 body {
   margin: 0;
   min-height: 100%;
-  background-color: #fff;
-  color: var(--ink);
+  background-color: var(--background);
+  color: var(--foreground);
   font: var(--mat-sys-body-medium);
   // O shorthand acima fixa um line-height em px, herdado por títulos e parágrafos
   // maiores que o corpo de texto. Sem isto, as linhas se sobrepõem.
@@ -100,7 +137,7 @@ h4 {
   font-family: var(--font-display);
   font-weight: 500;
   line-height: 1.15;
-  color: var(--ink);
+  color: var(--foreground);
   margin: 0;
 }
 
@@ -114,21 +151,28 @@ img {
   max-width: 100%;
 }
 
-// Utilitários de layout compartilhados pelas seções da home.
+// iOS abre zoom automático em inputs com font-size < 16px.
+input,
+select,
+textarea {
+  font-size: max(16px, 1rem);
+}
+
+// Utilitários de layout compartilhados pelas páginas.
 .ui-container {
   width: 100%;
   max-width: 1280px;
   margin-inline: auto;
-  padding-inline: 28px;
+  padding-inline: 20px;
 }
 
 .ui-section {
-  padding-block: 96px;
+  padding-block: clamp(48px, 6vw, 96px);
 }
 
 .ui-section-head {
   text-align: center;
-  margin-bottom: 52px;
+  margin-bottom: clamp(32px, 5vw, 52px);
 
   h2 {
     font-size: clamp(2rem, 1.3rem + 2.4vw, 3rem);
@@ -137,7 +181,7 @@ img {
   p {
     margin: 14px auto 0;
     max-width: 600px;
-    color: var(--muted);
+    color: var(--muted-foreground);
     font-size: 1.0625rem;
   }
 }
@@ -150,7 +194,7 @@ img {
   font-weight: 500;
   letter-spacing: 0.3em;
   text-transform: uppercase;
-  color: var(--brand-strong);
+  color: var(--earth);
 }
 
 // Fio com losango central sob o olho-de-boi das seções centralizadas.
@@ -166,7 +210,7 @@ img {
     width: 132px;
     height: 1px;
     transform: translateX(-50%);
-    background: var(--beige-deep);
+    background: var(--border);
   }
 
   &::after {
@@ -182,29 +226,32 @@ img {
 }
 
 .ui-cta.mat-mdc-button-base {
-  --mdc-filled-button-container-shape: 2px;
-  --mdc-outlined-button-container-shape: 2px;
+  --mdc-filled-button-container-shape: var(--radius);
+  --mdc-outlined-button-container-shape: var(--radius);
+  --mdc-text-button-container-shape: var(--radius);
   height: 54px;
   padding-inline: 32px;
   font-family: var(--font-ui);
-  font-weight: 400;
-  letter-spacing: 0.04em;
+  font-weight: 500;
+  letter-spacing: 0.02em;
   font-size: 0.9375rem;
+  transition:
+    transform var(--motion-fast) var(--ease-swift),
+    box-shadow var(--motion-fast) var(--ease-swift);
+
+  &:hover {
+    transform: translateY(-1px);
+  }
+}
+
+@media (min-width: 640px) {
+  .ui-container {
+    padding-inline: 28px;
+  }
 }
 
 @media (max-width: 900px) {
   .ui-section {
     padding-block: 68px;
-  }
-}
-
-// Em telas estreitas o padding lateral custa largura útil demais.
-@media (max-width: 420px) {
-  .ui-container {
-    padding-inline: 18px;
-  }
-
-  .ui-cta.mat-mdc-button-base {
-    padding-inline: 22px;
   }
 }

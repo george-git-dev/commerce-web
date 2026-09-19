@@ -1,14 +1,21 @@
-<section [id]="sections.products" class="ui-section products">
+<section [attr.id]="sectionId() ?? null" class="ui-section products">
   <div class="ui-container">
     <header class="ui-section-head">
-      <span class="ui-eyebrow">Catálogo</span>
-      <h2>Conheça nossos produtos</h2>
-      <p>Uma seleção do que temos disponível agora.</p>
+      <span class="ui-eyebrow">{{ eyebrow() }}</span>
+      <h2>{{ title() }}</h2>
+      @if (subtitle(); as text) {
+        <p>{{ text }}</p>
+      }
     </header>
 
     <div class="products__grid">
       @for (product of products(); track product.id) {
-        <app-product-card [product]="product" (addToCart)="onAddToCart($event)" />
+        <app-product-card
+          [product]="product"
+          [favorite]="isFavorite(product)"
+          (addToCart)="onAddToCart($event)"
+          (toggleFavorite)="onToggleFavorite($event)"
+        />
       }
     </div>
   </div>

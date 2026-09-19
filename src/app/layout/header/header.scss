@@ -1,91 +1,140 @@
+// Altura combinada de announce + bar em mobile — usada para o overlay do menu
+// não nascer por baixo da barra fixa. Se as alturas abaixo mudarem, atualizar aqui.
+$header-h-mobile: 120px;
+
 :host {
   position: sticky;
   top: 0;
   z-index: 20;
   display: block;
+  isolation: isolate;
 }
 
 // Faixa superior clara, com os selos comerciais à esquerda.
 .announce {
-  background: var(--beige);
-  color: var(--ink-soft);
-  font-size: 0.8125rem;
+  background: var(--muted);
+  color: var(--earth);
+  font-size: 0.75rem;
 
   &__inner {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 16px;
-    height: 42px;
+    height: 36px;
   }
 
   &__list {
     display: flex;
     align-items: center;
-    gap: 22px;
+    gap: 18px;
     margin: 0;
     padding: 0;
     list-style: none;
+    min-width: 0;
 
-    li + li {
-      padding-left: 22px;
-      border-left: 1px solid var(--line);
+    li:not(:first-child) {
+      display: none;
+    }
+
+    li:first-child {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
   }
 
   &__phone {
+    flex: none;
     white-space: nowrap;
     letter-spacing: 0.02em;
 
     &:hover {
-      color: var(--brand-strong);
+      color: var(--foreground);
     }
   }
 }
 
+// Bug histórico corrigido aqui: `&__inner`/`&__actions` aninhados dentro deste
+// bloco compilavam para `.bar.mat-toolbar__inner` (classes "bar" E
+// "mat-toolbar__inner" no MESMO elemento) — um seletor composto que nunca
+// bateu com a div real (classes "ui-container bar__inner"), deixando o
+// header em `display: block` (3 linhas empilhadas) desde a primeira versão
+// do redesign. `.bar__inner`/`.bar__actions` agora são seletores próprios.
 .bar.mat-toolbar {
   position: relative;
+  z-index: 2;
   height: auto;
   padding: 0;
-  background: #fff;
-  border-bottom: 1px solid var(--line);
+  background: color-mix(in oklch, var(--card) 92%, transparent);
+  border-bottom: 1px solid var(--border);
+  transition:
+    background-color var(--motion-fast) ease,
+    box-shadow var(--motion-fast) ease;
+}
 
-  &__inner {
-    display: flex;
-    align-items: center;
-    gap: 28px;
-    height: 92px;
-  }
+// Mesmo bug do seletor composto: precisa ficar fora de `.bar.mat-toolbar` para bater
+// com o elemento real (classes "bar" + "bar--scrolled", não "mat-toolbar--scrolled").
+.bar--scrolled {
+  background: color-mix(in oklch, var(--card) 86%, transparent);
+  backdrop-filter: blur(10px);
+  box-shadow: var(--shadow-sm);
+}
 
-  &__actions {
-    flex: none;
-    display: flex;
-    align-items: center;
-    gap: 2px;
-    margin-left: auto;
-    color: var(--ink);
-  }
+.bar__inner {
+  // Grid de 3 zonas com as colunas laterais em fr iguais: a coluna do meio
+  // (logo) fica sempre centralizada de verdade, não importa a largura do
+  // hambúrguer de um lado nem a dos ícones do outro.
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  column-gap: 12px;
+  padding-block: 18px;
+}
 
-  &__burger {
-    display: none;
-  }
+.bar__actions {
+  grid-column: 3;
+  justify-self: end;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  color: var(--foreground);
+}
+
+.nav {
+  // Mobile-first: a navegação inline só existe a partir do breakpoint de desktop.
+  display: none;
+}
+
+.bar__burger {
+  grid-column: 1;
+  justify-self: start;
+}
+
+// Já existe um atalho para a conta no menu fullscreen do mobile — o ícone some
+// da barra só para não competir com busca/favoritos/carrinho num espaço curto.
+.bar__account {
+  display: none;
 }
 
 .brand {
-  flex: none;
+  grid-column: 2;
+  justify-self: center;
   display: inline-flex;
   align-items: center;
-  gap: 13px;
+  gap: 11px;
   min-width: 0;
 
   // Losango vazado em vez de ícone: emblema discreto, sem ilustração.
   &__mark {
     flex: none;
-    width: 26px;
-    height: 26px;
+    width: 22px;
+    height: 22px;
     transform: rotate(45deg);
     border: 1px solid var(--gold);
-    box-shadow: inset 0 0 0 4px #fff, inset 0 0 0 5px var(--gold);
+    box-shadow:
+      inset 0 0 0 4px var(--card),
+      inset 0 0 0 5px var(--gold);
   }
 
   &__text {
@@ -97,196 +146,217 @@
 
   strong {
     font-family: var(--font-display);
-    font-size: 1.875rem;
-    font-weight: 600;
-    letter-spacing: 0.26em;
-    color: var(--ink);
+    font-size: 1.5rem;
+    font-weight: 400;
+    letter-spacing: 0.2em;
+    color: var(--foreground);
   }
 
   small {
+    display: none;
     font-family: var(--font-ui);
     font-size: 0.5625rem;
-    letter-spacing: 0.34em;
+    letter-spacing: 0.3em;
     text-transform: uppercase;
-    color: var(--brand-strong);
+    color: var(--earth);
     white-space: nowrap;
   }
 }
 
-// Navegação inline, com marcador dourado sob o item sob o cursor.
-.nav {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-
-  a {
-    position: relative;
-    padding: 8px 14px;
-    font-family: var(--font-ui);
-    font-size: 0.875rem;
-    font-weight: 400;
-    color: var(--ink-soft);
-    white-space: nowrap;
-    transition: color 0.2s ease;
-
-    &::after {
-      content: '';
-      position: absolute;
-      left: 14px;
-      right: 14px;
-      bottom: 0;
-      height: 1px;
-      background: var(--gold);
-      transform: scaleX(0);
-      transition: transform 0.25s ease;
-    }
-
-    &:hover {
-      color: var(--brand-strong);
-    }
-
-    &:hover::after {
-      transform: scaleX(1);
-    }
-  }
-}
-
-.search {
-  flex: 0 1 320px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-left: auto;
-  padding: 0 18px;
-  height: 46px;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  background: var(--bone);
-  color: var(--muted);
+// Painel de busca: dropdown de largura total, oculto por padrão.
+.search-panel {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 1;
+  overflow: hidden;
+  max-height: 0;
+  background: var(--card);
+  border-bottom: 1px solid transparent;
   transition:
-    border-color 0.2s ease,
-    background-color 0.2s ease;
+    max-height var(--motion-fast) var(--ease-swift),
+    border-color var(--motion-fast) ease;
 
-  &:focus-within {
-    border-color: var(--gold);
-    background: #fff;
+  &--open {
+    max-height: 88px;
+    border-bottom-color: var(--border);
   }
 
-  mat-icon {
-    flex: none;
-    font-size: 19px;
-    width: 19px;
-    height: 19px;
-  }
+  &__form {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-block: 18px;
 
-  // Rótulo acessível sem poluir o visual do campo.
-  &__label {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-    white-space: nowrap;
-  }
-
-  input {
-    width: 100%;
-    border: 0;
-    background: none;
-    outline: none;
-    font-family: var(--font-ui);
-    font-size: 0.875rem;
-    color: var(--ink);
-
-    &::placeholder {
-      color: var(--muted);
-    }
-  }
-}
-
-// A navegação inline não cabe: vira painel suspenso sob a barra.
-@media (max-width: 1180px) {
-  .bar.mat-toolbar__burger {
-    display: inline-flex;
-  }
-
-  .nav {
-    display: none;
-
-    &--open {
-      display: flex;
-      position: absolute;
-      top: 100%;
-      left: 0;
-      right: 0;
-      flex-direction: column;
-      align-items: stretch;
-      gap: 0;
-      padding: 8px 0;
-      max-height: 60dvh;
-      overflow-y: auto;
-      background: #fff;
-      border-bottom: 1px solid var(--line);
-      box-shadow: var(--shadow-md);
+    mat-icon {
+      flex: none;
+      color: var(--muted-foreground);
     }
 
-    a {
-      padding: 14px 24px;
-      font-size: 0.9375rem;
+    input {
+      flex: 1;
+      min-width: 0;
+      border: 0;
+      outline: none;
+      background: none;
+      font-family: var(--font-ui);
+      font-size: 1rem;
+      color: var(--foreground);
 
-      &::after {
-        display: none;
+      &::placeholder {
+        color: var(--muted-foreground);
       }
     }
   }
 }
 
-@media (max-width: 900px) {
-  .announce__list li:nth-child(n + 2) {
-    display: none;
+// Overlay fullscreen do menu mobile.
+.mobile-menu {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: calc(#{$header-h-mobile} + 12px) 24px calc(env(safe-area-inset-bottom, 0px) + 24px);
+  height: 100dvh;
+  background: var(--card);
+  overflow-y: auto;
+  transform: translateX(100%);
+  transition: transform var(--motion-fast) var(--ease-swift);
+
+  &--open {
+    transform: translateX(0);
   }
 
-  .bar.mat-toolbar__inner {
-    height: 74px;
-    gap: 16px;
+  nav {
+    display: flex;
+    flex-direction: column;
   }
 
-  .search {
-    flex-basis: 220px;
+  nav a {
+    padding: 16px 4px;
+    border-bottom: 1px solid var(--border);
+    font-family: var(--font-display);
+    font-size: 1.75rem;
+    color: var(--foreground);
+
+    // 44px é o alvo mínimo de área de toque recomendado.
+    min-height: 44px;
+  }
+
+  &__account {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 24px;
+    padding: 12px 4px;
+    font-family: var(--font-ui);
+    font-size: 0.9375rem;
+    color: var(--earth);
   }
 }
 
-@media (max-width: 760px) {
-  .search,
-  .bar__optional {
+@media (min-width: 1180px) {
+  .nav {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+
+    a {
+      position: relative;
+      padding: 8px 14px;
+      font-family: var(--font-ui);
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--earth);
+      white-space: nowrap;
+      transition: color var(--motion-fast) ease;
+
+      &::after {
+        content: '';
+        position: absolute;
+        left: 14px;
+        right: 14px;
+        bottom: 2px;
+        height: 1px;
+        background: var(--gold);
+        transform: scaleX(0);
+        transition: transform var(--motion-fast) var(--ease-swift);
+      }
+
+      &:hover {
+        color: var(--foreground);
+      }
+
+      &:hover::after {
+        transform: scaleX(1);
+      }
+    }
+  }
+
+  .bar__burger {
     display: none;
   }
-}
 
-@media (max-width: 420px) {
-  .announce {
-    font-size: 0.75rem;
+  .bar__account {
+    display: inline-flex;
+  }
+
+  .mobile-menu {
+    display: none;
+  }
+
+  .brand small {
+    display: block;
+  }
+
+  .bar__inner {
+    // Volta a ser flex: com o menu de texto de volta, as 3 zonas do grid mobile
+    // (hambúrguer / logo centralizada / ícones) não fazem mais sentido — aqui é
+    // logo à esquerda, nav em seguida, ícones empurrados pro fim com margin-left auto.
+    display: flex;
+    padding-block: 24px;
+    gap: 28px;
   }
 
   .bar__actions {
-    --mdc-icon-button-state-layer-size: 44px;
+    margin-left: auto;
   }
 
   .brand {
-    gap: 10px;
+    justify-self: initial;
+    gap: 13px;
 
     &__mark {
-      width: 22px;
-      height: 22px;
-    }
-
-    small {
-      display: none;
+      width: 26px;
+      height: 26px;
     }
 
     strong {
-      font-size: 1.5rem;
-      letter-spacing: 0.2em;
+      font-size: 1.875rem;
+      letter-spacing: 0.26em;
+    }
+  }
+
+  .announce__list li:not(:first-child) {
+    display: inline;
+    padding-left: 22px;
+    border-left: 1px solid var(--border);
+  }
+
+  .search-panel__form {
+    padding-block: 22px;
+  }
+}
+
+@media (min-width: 640px) {
+  .announce {
+    font-size: 0.8125rem;
+
+    &__inner {
+      height: 40px;
     }
   }
 }

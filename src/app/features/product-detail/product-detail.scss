@@ -1,0 +1,278 @@
+:host {
+  display: block;
+}
+
+.detail {
+  background: var(--background);
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 24px;
+  font-size: 0.8125rem;
+  color: var(--muted-foreground);
+  flex-wrap: wrap;
+
+  a:hover {
+    color: var(--earth);
+  }
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+  }
+
+  span {
+    color: var(--foreground);
+  }
+}
+
+.detail__layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 32px;
+  margin-bottom: 56px;
+}
+
+.detail__gallery {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.detail__main-image {
+  width: 100%;
+  // `width`/`height="800"` no HTML (evitam layout shift) viram um `height: 800px`
+  // de baixa prioridade — sem este `auto`, `aspect-ratio` nunca chega a agir e a
+  // imagem fica travada em 800px de altura real, ignorando a largura do container.
+  height: auto;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: var(--radius);
+  background: var(--muted);
+}
+
+.detail__thumbs {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+
+  img {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1;
+    object-fit: cover;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--muted);
+  }
+}
+
+.detail__brand {
+  margin: 0;
+  font-family: var(--font-ui);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+
+.detail__info h1 {
+  margin-top: 6px;
+  font-size: clamp(1.75rem, 1.3rem + 1.8vw, 2.5rem);
+}
+
+.detail__rating {
+  margin-top: 12px;
+}
+
+.detail__price {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin: 18px 0 2px;
+
+  strong {
+    font-family: var(--font-ui);
+    font-size: 1.75rem;
+    font-weight: 600;
+  }
+
+  s {
+    color: var(--muted-foreground);
+    font-size: 1rem;
+  }
+}
+
+.detail__installment {
+  margin: 0 0 22px;
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+}
+
+.detail__description {
+  max-width: 60ch;
+  line-height: 1.75;
+  color: var(--muted-foreground);
+}
+
+.detail__specs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 22px 0;
+}
+
+.spec-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+
+  mat-icon {
+    color: var(--earth);
+  }
+
+  div {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.3;
+  }
+
+  span {
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--muted-foreground);
+  }
+
+  strong {
+    font-size: 0.9375rem;
+  }
+}
+
+.detail__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 12px;
+  margin-top: 8px;
+
+  .ui-cta {
+    flex: 1 1 220px;
+  }
+}
+
+.detail__wish.mat-mdc-icon-button {
+  flex: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--foreground);
+
+  // Idem product-card: `&--active` viraria sufixo de "mat-mdc-icon-button", não a
+  // classe real aplicada pelo template (`detail__wish--active`).
+  &.detail__wish--active {
+    color: var(--wine);
+    border-color: var(--wine);
+  }
+}
+
+.detail__trust {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 28px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.8125rem;
+  color: var(--muted-foreground);
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  mat-icon {
+    color: var(--earth);
+    font-size: 19px;
+    width: 19px;
+    height: 19px;
+  }
+}
+
+.pyramid {
+  padding-block: 48px;
+  border-top: 1px solid var(--border);
+}
+
+.pyramid__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+  text-align: center;
+}
+
+.pyramid__col p {
+  margin: 0;
+  color: var(--muted-foreground);
+}
+
+.related {
+  padding-block: 48px;
+  border-top: 1px solid var(--border);
+}
+
+.related__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
+.detail__not-found {
+  text-align: center;
+  padding-block: 64px;
+
+  p {
+    margin: 12px 0 28px;
+    color: var(--muted-foreground);
+  }
+}
+
+@media (min-width: 560px) {
+  .related__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 900px) {
+  .detail__layout {
+    grid-template-columns: 1fr 1fr;
+    gap: 56px;
+  }
+
+  .pyramid__grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .pyramid__col {
+    padding-inline: 16px;
+
+    & + & {
+      border-left: 1px solid var(--border);
+    }
+  }
+}
+
+@media (min-width: 1024px) {
+  .related__grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}

@@ -1,7 +1,7 @@
 <div class="announce">
   <div class="ui-container announce__inner">
     <ul class="announce__list">
-      <li>Frete grátis para todo o Brasil</li>
+      <li>Frete grátis acima de R$ 299</li>
       <li>Parcele em até 12x</li>
       <li>Compra segura</li>
     </ul>
@@ -9,8 +9,19 @@
   </div>
 </div>
 
-<mat-toolbar class="bar">
+<mat-toolbar class="bar" [class.bar--scrolled]="scrolled()">
   <div class="ui-container bar__inner">
+    <button
+      matIconButton
+      class="bar__burger"
+      aria-controls="mobile-menu"
+      [attr.aria-expanded]="menuOpen()"
+      aria-label="Abrir menu"
+      (click)="toggleMenu()"
+    >
+      <mat-icon>{{ menuOpen() ? 'close' : 'menu' }}</mat-icon>
+    </button>
+
     <a routerLink="/" class="brand" aria-label="ÂMBRA, página inicial">
       <span class="brand__mark" aria-hidden="true"></span>
       <span class="brand__text">
@@ -19,37 +30,81 @@
       </span>
     </a>
 
-    <nav id="main-nav" class="nav" [class.nav--open]="menuOpen()" aria-label="Categorias">
-      @for (link of navLinks; track link.fragment) {
-        <a routerLink="/" [fragment]="link.fragment" (click)="closeMenu()">{{ link.label }}</a>
+    <nav id="main-nav" class="nav" aria-label="Navegação principal">
+      @for (link of navLinks; track link.label) {
+        <a [routerLink]="link.path" [queryParams]="link.queryParams ?? null">{{ link.label }}</a>
       }
     </nav>
 
-    <label class="search">
-      <mat-icon aria-hidden="true">search</mat-icon>
-      <span class="search__label">Buscar perfumes</span>
-      <input type="search" name="q" placeholder="Buscar perfumes..." autocomplete="off" />
-    </label>
-
     <div class="bar__actions">
-      <button matIconButton class="bar__optional" aria-label="Minha conta">
-        <mat-icon>person_outline</mat-icon>
+      <button
+        type="button"
+        matIconButton
+        aria-label="Buscar perfumes"
+        aria-controls="search-panel"
+        [attr.aria-expanded]="searchOpen()"
+        (click)="toggleSearch()"
+      >
+        <mat-icon>search</mat-icon>
       </button>
-      <button matIconButton aria-label="Carrinho de compras">
-        <mat-icon [matBadge]="cart.count()" matBadgeColor="warn" matBadgeSize="small">
+
+      <a routerLink="/minha-conta" matIconButton class="bar__account" aria-label="Minha conta">
+        <mat-icon>person</mat-icon>
+      </a>
+      <a routerLink="/favoritos" matIconButton aria-label="Favoritos">
+        <mat-icon
+          [matBadge]="favorites.count()"
+          [matBadgeHidden]="favorites.count() === 0"
+          matBadgeColor="warn"
+          matBadgeSize="small"
+        >
+          favorite_border
+        </mat-icon>
+      </a>
+      <a routerLink="/carrinho" matIconButton aria-label="Carrinho de compras">
+        <mat-icon
+          [matBadge]="cart.count()"
+          [matBadgeHidden]="cart.count() === 0"
+          matBadgeColor="warn"
+          matBadgeSize="small"
+        >
           shopping_bag
         </mat-icon>
-      </button>
-      <button
-        matIconButton
-        class="bar__burger"
-        aria-controls="main-nav"
-        [attr.aria-expanded]="menuOpen()"
-        aria-label="Abrir menu de categorias"
-        (click)="toggleMenu()"
-      >
-        <mat-icon>{{ menuOpen() ? 'close' : 'menu' }}</mat-icon>
-      </button>
+      </a>
     </div>
   </div>
+
+  <div id="search-panel" class="search-panel" [class.search-panel--open]="searchOpen()">
+    <form
+      class="ui-container search-panel__form"
+      (submit)="$event.preventDefault(); submitSearch()"
+    >
+      <mat-icon aria-hidden="true">search</mat-icon>
+      <input
+        type="search"
+        name="q"
+        placeholder="Buscar perfumes, marcas, notas olfativas..."
+        autocomplete="off"
+        [value]="searchTerm()"
+        (input)="searchTerm.set($any($event.target).value)"
+      />
+      <button type="button" matIconButton aria-label="Fechar busca" (click)="toggleSearch()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </form>
+  </div>
 </mat-toolbar>
+
+<div id="mobile-menu" class="mobile-menu" [class.mobile-menu--open]="menuOpen()">
+  <nav aria-label="Navegação principal (mobile)">
+    @for (link of navLinks; track link.label) {
+      <a [routerLink]="link.path" [queryParams]="link.queryParams ?? null" (click)="closeMenu()">
+        {{ link.label }}
+      </a>
+    }
+  </nav>
+  <a routerLink="/minha-conta" class="mobile-menu__account" (click)="closeMenu()">
+    <mat-icon>person</mat-icon>
+    Minha conta
+  </a>
+</div>

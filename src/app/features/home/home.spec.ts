@@ -2,39 +2,37 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { NAV_LINKS } from '../../core/config/navigation';
 import { Home } from './home';
 
 describe('Home', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [Home],
-      // provideHttpClientTesting: o CatalogService chama a API real (GET /products);
-      // aqui só precisamos que a injeção funcione, sem bater na rede de verdade.
+      // provideHttpClientTesting: o CatalogService (categorias/highlights) é injetado
+      // via CatalogService só para reaproveitar o mock existente; nada aqui bate na rede.
       providers: [provideRouter([]), provideHttpClient(), provideHttpClientTesting()],
     }).compileComponents();
   });
 
-  it('should render the five sections', async () => {
+  it('should render every section of the redesigned home', async () => {
     const fixture = TestBed.createComponent(Home);
     await fixture.whenStable();
     const compiled = fixture.nativeElement as HTMLElement;
 
     expect(compiled.querySelector('.hero')).toBeTruthy();
-    expect(compiled.querySelector('.highlights')).toBeTruthy();
     expect(compiled.querySelector('.categories__grid')).toBeTruthy();
-    expect(compiled.querySelector('.products__grid')).toBeTruthy();
-    expect(compiled.querySelector('.cta')).toBeTruthy();
+    expect(compiled.querySelectorAll('.products__grid').length).toBe(2);
+    expect(compiled.querySelector('.highlights')).toBeTruthy();
+    expect(compiled.querySelector('.brands')).toBeTruthy();
+    expect(compiled.querySelector('#historia')).toBeTruthy();
+    expect(compiled.querySelector('.newsletter')).toBeTruthy();
   });
 
-  // Garante que nenhum item de menu aponte para uma âncora que não existe.
-  it('should expose a real anchor for every nav link', async () => {
+  it('should render the featured products as product cards', async () => {
     const fixture = TestBed.createComponent(Home);
     await fixture.whenStable();
     const compiled = fixture.nativeElement as HTMLElement;
 
-    for (const link of NAV_LINKS) {
-      expect(compiled.querySelector(`#${link.fragment}`)).toBeTruthy();
-    }
+    expect(compiled.querySelectorAll('app-product-card').length).toBeGreaterThan(0);
   });
 });

@@ -3,7 +3,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { RouterLink } from '@angular/router';
 import { IMAGERY } from '../../../../core/config/imagery';
-import { SECTION_IDS } from '../../../../core/config/navigation';
+import { HOME_SECTION_IDS } from '../../../../core/config/navigation';
 
 @Component({
   selector: 'app-hero-section',
@@ -13,6 +13,6 @@ import { SECTION_IDS } from '../../../../core/config/navigation';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HeroSection {
-  protected readonly sections = SECTION_IDS;
+  protected readonly sections = HOME_SECTION_IDS;
   protected readonly imagery = IMAGERY;
 }
