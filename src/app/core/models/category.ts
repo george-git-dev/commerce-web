@@ -2,6 +2,7 @@ export interface Category {
   id: string;
   name: string;
   text: string;
-  image: string;
-  badge?: string;
+  /** Nome de um Material Icon — não há foto por categoria nesta fase. */
+  icon: string;
+  genderFilter?: 'Masculino' | 'Feminino' | 'Unissex';
 }

@@ -1,0 +1,33 @@
+<section class="newsletter">
+  <div class="ui-container newsletter__inner">
+    <span class="ui-eyebrow">Fique por dentro</span>
+    <h2>Receba lançamentos e ofertas em primeira mão</h2>
+    <p>Sem spam — só novidades de catálogo e condições especiais, direto no seu e-mail.</p>
+
+    @if (subscribed()) {
+      <p class="newsletter__success">
+        <mat-icon>check</mat-icon>
+        Inscrição confirmada. Obrigado por acompanhar a ÂMBRA!
+      </p>
+    } @else {
+      <form class="newsletter__form" (submit)="$event.preventDefault(); subscribe()">
+        <label>
+          <span>Seu e-mail</span>
+          <input
+            type="email"
+            name="email"
+            placeholder="Seu e-mail"
+            autocomplete="email"
+            required
+            [value]="email()"
+            (input)="email.set($any($event.target).value)"
+          />
+        </label>
+        <button matButton="filled" class="ui-cta" type="submit">
+          Quero receber
+          <mat-icon iconPositionEnd>arrow_forward</mat-icon>
+        </button>
+      </form>
+    }
+  </div>
+</section>

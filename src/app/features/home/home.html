@@ -1,5 +1,23 @@
 <app-hero-section />
-<app-products-section />
 <app-categories-section />
-<app-cta-section />
+
+<app-products-section
+  sectionId="destaques"
+  eyebrow="Seleção"
+  title="Produtos em destaque"
+  subtitle="Uma curadoria do que há de melhor na coleção ÂMBRA."
+  [products]="featured"
+/>
+
 <app-highlights-section />
+
+<app-products-section
+  eyebrow="Preferidos"
+  title="Mais vendidos"
+  subtitle="Os perfumes que mais conquistaram nossos clientes."
+  [products]="bestsellers"
+/>
+
+<app-brands-strip-section />
+<app-institutional-section />
+<app-newsletter-section />

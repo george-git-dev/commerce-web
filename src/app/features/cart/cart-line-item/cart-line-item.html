@@ -1,0 +1,49 @@
+@let item = line();
+
+<article class="line">
+  <a class="line__media" [routerLink]="['/produtos', item.product.id]">
+    <img
+      [src]="placeholderImage"
+      [alt]="item.product.name"
+      width="140"
+      height="140"
+      loading="lazy"
+    />
+  </a>
+
+  <div class="line__info">
+    <p class="line__brand">{{ item.product.brandName }}</p>
+    <a class="line__name" [routerLink]="['/produtos', item.product.id]">{{ item.product.name }}</a>
+    @if (item.product.volume) {
+      <p class="line__volume">{{ item.product.volume }}</p>
+    }
+
+    <button type="button" class="line__remove" (click)="remove.emit()">
+      <mat-icon>delete</mat-icon>
+      Remover
+    </button>
+  </div>
+
+  <div class="line__quantity">
+    <button
+      type="button"
+      matIconButton
+      aria-label="Diminuir quantidade"
+      [disabled]="item.quantity <= 1"
+      (click)="quantityChange.emit(item.quantity - 1)"
+    >
+      <mat-icon>remove</mat-icon>
+    </button>
+    <span>{{ item.quantity }}</span>
+    <button
+      type="button"
+      matIconButton
+      aria-label="Aumentar quantidade"
+      (click)="quantityChange.emit(item.quantity + 1)"
+    >
+      <mat-icon>add</mat-icon>
+    </button>
+  </div>
+
+  <p class="line__subtotal">{{ item.product.finalPrice * item.quantity | currency: 'BRL' }}</p>
+</article>

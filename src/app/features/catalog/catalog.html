@@ -1,0 +1,208 @@
+<ng-template #filterControls>
+  <div class="filter-group">
+    <h3>Gênero</h3>
+    <div class="filter-group__options">
+      <button
+        type="button"
+        class="chip"
+        [class.chip--active]="!gender()"
+        (click)="setFilter(params.gender, null)"
+      >
+        Todos
+      </button>
+      @for (option of ['Masculino', 'Feminino', 'Unissex']; track option) {
+        <button
+          type="button"
+          class="chip"
+          [class.chip--active]="gender() === option"
+          (click)="setFilter(params.gender, option)"
+        >
+          {{ option }}
+        </button>
+      }
+    </div>
+  </div>
+
+  <div class="filter-group">
+    <h3>Marca</h3>
+    <div class="filter-group__options">
+      <button
+        type="button"
+        class="chip"
+        [class.chip--active]="!brand()"
+        (click)="setFilter(params.brand, null)"
+      >
+        Todas
+      </button>
+      @for (option of brands; track option) {
+        <button
+          type="button"
+          class="chip"
+          [class.chip--active]="brand() === option"
+          (click)="setFilter(params.brand, option)"
+        >
+          {{ option }}
+        </button>
+      }
+    </div>
+  </div>
+
+  <div class="filter-group">
+    <h3>Faixa de preço</h3>
+    <div class="filter-group__range">
+      <label>
+        <span>Mín.</span>
+        <input
+          type="number"
+          min="0"
+          placeholder="R$ 0"
+          [value]="priceMin()"
+          (change)="setFilter(params.priceMin, $any($event.target).value)"
+        />
+      </label>
+      <label>
+        <span>Máx.</span>
+        <input
+          type="number"
+          min="0"
+          placeholder="R$ 1000"
+          [value]="priceMax()"
+          (change)="setFilter(params.priceMax, $any($event.target).value)"
+        />
+      </label>
+    </div>
+  </div>
+
+  <!-- Acordeões visuais — sem lógica de filtro nesta fase. -->
+  <details class="filter-accordion">
+    <summary>Família olfativa</summary>
+    <div class="filter-accordion__body">
+      @for (family of ['Amadeirado', 'Floral', 'Oriental', 'Cítrico', 'Aromático']; track family) {
+        <label class="checkbox"><input type="checkbox" />{{ family }}</label>
+      }
+    </div>
+  </details>
+
+  <details class="filter-accordion">
+    <summary>Volume</summary>
+    <div class="filter-accordion__body">
+      @for (volume of ['50 ml', '75 ml', '90 ml', '100 ml']; track volume) {
+        <label class="checkbox"><input type="checkbox" />{{ volume }}</label>
+      }
+    </div>
+  </details>
+
+  <details class="filter-accordion">
+    <summary>Avaliação</summary>
+    <div class="filter-accordion__body">
+      @for (stars of [4, 3, 2]; track stars) {
+        <label class="checkbox"><input type="checkbox" />{{ stars }} estrelas ou mais</label>
+      }
+    </div>
+  </details>
+
+  <details class="filter-accordion">
+    <summary>Disponibilidade</summary>
+    <div class="filter-accordion__body">
+      <label class="checkbox"><input type="checkbox" />Em estoque</label>
+      <label class="checkbox"><input type="checkbox" />Frete grátis</label>
+    </div>
+  </details>
+
+  @if (hasActiveFilters()) {
+    <button matButton class="filter-clear" type="button" (click)="clearFilters()">
+      <mat-icon>close</mat-icon>
+      Limpar filtros
+    </button>
+  }
+</ng-template>
+
+<section class="catalog ui-section">
+  <div class="ui-container">
+    <header class="catalog__head">
+      <span class="ui-eyebrow">Catálogo</span>
+      <h1>Todos os perfumes</h1>
+      <p>Explore nossa seleção completa de eau de parfum masculinos, femininos e unissex.</p>
+    </header>
+
+    <div class="catalog__toolbar">
+      <span class="catalog__count">{{ products().length }} perfume(s) encontrado(s)</span>
+
+      <div class="catalog__toolbar-actions">
+        <button
+          matButton="outlined"
+          class="catalog__filter-toggle"
+          type="button"
+          (click)="filtersOpen.set(true)"
+        >
+          <mat-icon>tune</mat-icon>
+          Filtrar
+        </button>
+
+        <label class="catalog__sort">
+          <span>Ordenar por</span>
+          <select [value]="sort()" (change)="setFilter(params.sort, $any($event.target).value)">
+            <option value="relevancia">Relevância</option>
+            <option value="menor-preco">Menor preço</option>
+            <option value="maior-preco">Maior preço</option>
+            <option value="avaliacao">Melhor avaliados</option>
+          </select>
+        </label>
+      </div>
+    </div>
+
+    <div class="catalog__layout">
+      <aside class="catalog__filters">
+        <ng-container [ngTemplateOutlet]="filterControls" />
+      </aside>
+
+      <div class="catalog__results">
+        @if (products().length) {
+          <div class="catalog__grid">
+            @for (product of products(); track product.id) {
+              <app-product-card
+                [product]="product"
+                [favorite]="isFavorite(product)"
+                (addToCart)="onAddToCart($event)"
+                (toggleFavorite)="onToggleFavorite($event)"
+              />
+            }
+          </div>
+        } @else {
+          <app-empty-state
+            icon="search_off"
+            title="Nenhum perfume encontrado"
+            message="Tente ajustar os filtros ou buscar por outro termo."
+            ctaLabel="Limpar filtros"
+            (ctaClick)="clearFilters()"
+          />
+        }
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="filters-drawer" [class.filters-drawer--open]="filtersOpen()">
+  <header class="filters-drawer__head">
+    <h2>Filtrar</h2>
+    <button
+      matIconButton
+      type="button"
+      aria-label="Fechar filtros"
+      (click)="filtersOpen.set(false)"
+    >
+      <mat-icon>close</mat-icon>
+    </button>
+  </header>
+  <div class="filters-drawer__body">
+    <ng-container [ngTemplateOutlet]="filterControls" />
+  </div>
+  <button
+    matButton="filled"
+    class="ui-cta filters-drawer__apply"
+    type="button"
+    (click)="filtersOpen.set(false)"
+  >
+    Ver {{ products().length }} resultado(s)
+  </button>
+</div>

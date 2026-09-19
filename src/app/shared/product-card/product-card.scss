@@ -1,44 +1,87 @@
+:host {
+  display: block;
+  height: 100%;
+  // O card se adapta à própria largura (2 colunas no mobile, mais no desktop),
+  // não ao viewport — o mesmo componente aparece em grids de larguras bem diferentes.
+  container-type: inline-size;
+  container-name: product-card;
+}
+
+// Cards em posição par mostram a metade de baixo da foto (frasco verde) — evita
+// que a mesma imagem repetida em cards vizinhos pareça o card anterior clonado.
+// `:host` aqui é o próprio `<app-product-card>`, daí o `nth-child` contar a
+// posição real dele entre os irmãos no grid, não um elemento interno ao template.
+:host:nth-child(even) .card__media img {
+  transform-origin: bottom center;
+}
+
 .card {
+  position: relative;
   display: flex;
   flex-direction: column;
   height: 100%;
   overflow: hidden;
-  border: 1px solid var(--line);
-  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
   transition:
-    border-color 0.25s ease,
-    box-shadow 0.25s ease;
+    border-color var(--motion-fast) var(--ease-swift),
+    box-shadow var(--motion-fast) var(--ease-swift),
+    transform var(--motion-fast) var(--ease-swift);
 
   &:hover {
     border-color: var(--gold);
     box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
   }
 
   &__media {
     position: relative;
-    background: var(--beige);
+    display: block;
+    background: var(--muted);
+    overflow: hidden;
 
     img {
       width: 100%;
+      // Essencial: os atributos HTML `width="800" height="800"` (presentes de
+      // propósito, pra evitar layout shift antes da imagem carregar) traduzem
+      // pra um `height: 800px` de baixa prioridade no UA stylesheet. Sem este
+      // `height: auto` aqui, esse height "ganha" por não ser mais `auto`, e
+      // `aspect-ratio` não tem o que preencher — o card__media renderizava a
+      // 800px de altura fixos (proporção ~1:4.8), não os 1:1 declarados.
+      height: auto;
       aspect-ratio: 1;
       object-fit: cover;
+      // `perfume-collection.jpg` é uma foto só, com 2 frascos empilhados (bege em
+      // cima, verde embaixo), reaproveitada em todo card por falta de foto por
+      // produto na API. Sem este zoom, cover mostra os dois frascos — como é a
+      // mesma imagem em cards vizinhos, parece o mesmo card duplicado. O scale(2)
+      // ancorado no topo (ou embaixo, alternando por card — ver `:nth-child` acima)
+      // mostra só metade da foto, ou seja, um frasco só, preenchendo o quadrado.
+      transform: scale(2);
+      transform-origin: top center;
+      transition: transform var(--motion-slow) var(--ease-swift);
     }
+  }
+
+  &:hover &__media img {
+    transform: scale(2.08);
   }
 
   &__badge {
     position: absolute;
-    top: 14px;
-    left: 14px;
-    padding: 5px 12px;
-    border-radius: 999px;
-    background: rgb(28 23 20 / 82%);
-    color: #fff;
+    top: 10px;
+    left: 10px;
+    padding: 4px 10px;
+    border-radius: var(--radius-sm);
+    background: var(--primary);
+    color: var(--primary-foreground);
     font-family: var(--font-ui);
-    font-size: 0.6875rem;
-    font-weight: 400;
+    font-size: 0.625rem;
+    font-weight: 500;
     letter-spacing: 0.02em;
 
-    // Promoções ganham o tom vinho da paleta, separando desconto de novidade.
+    // Promoções ganham o tom vinho, separando desconto de novidade/mais-vendido.
     &--sale {
       background: var(--wine);
     }
@@ -46,86 +89,211 @@
 
   &__wish.mat-mdc-icon-button {
     position: absolute;
-    top: 8px;
-    right: 8px;
-    color: var(--ink-soft);
+    top: 6px;
+    right: 6px;
+    z-index: 1;
+    color: var(--foreground);
+    background: color-mix(in oklch, var(--card) 82%, transparent);
+
+    // Não pode ser `&--active`: `&` aqui já é o composto `.card__wish.mat-mdc-icon-button`,
+    // e `&--active` viraria sufixo de "mat-mdc-icon-button" em vez da classe de
+    // verdade (`card__wish--active`) que o template aplica.
+    &.card__wish--active {
+      color: var(--wine);
+    }
   }
 
+  // Estética "marketplace": card compacto e quadrado, priorizando ver muitos
+  // produtos por tela — não o card grande/espaçoso de boutique.
   &__body {
     // `flex: 1` é o que dá espaço livre para o `margin-top: auto` do botão
     // absorver, alinhando os CTAs entre cards de alturas diferentes.
     flex: 1;
     display: flex;
     flex-direction: column;
-    padding: 22px 22px 24px;
-  }
-
-  &__name {
-    font-size: 1.375rem;
-    font-weight: 500;
-    line-height: 1.2;
+    min-width: 0;
+    padding: 12px 12px 14px;
   }
 
   &__subtitle {
-    margin: 7px 0 0;
-    font-size: 0.8125rem;
-    color: var(--muted);
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-family: var(--font-ui);
+    font-size: 0.625rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted-foreground);
+  }
+
+  &__family {
+    // Sem isto, o pill herda `align-items: stretch` do flex column do
+    // `&__body` e vira uma barra de largura cheia em vez de um chip discreto.
+    align-self: flex-start;
+    margin-top: 5px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: var(--muted);
+    color: var(--earth);
+    font-family: var(--font-ui);
+    font-size: 0.5625rem;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+  }
+
+  &__name {
+    margin-top: 5px;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    line-height: 1.25;
+
+    a:hover {
+      color: var(--earth);
+    }
   }
 
   &__rating {
-    display: flex;
-    align-items: center;
-    gap: 1px;
-    margin-top: 14px;
-    color: var(--gold);
-    font-size: 0.75rem;
-
-    mat-icon {
-      font-size: 16px;
-      width: 16px;
-      height: 16px;
-    }
-
-    span {
-      margin-left: 7px;
-      color: var(--muted);
-    }
+    margin-top: 5px;
   }
 
   &__price {
     display: flex;
     align-items: baseline;
-    gap: 9px;
-    margin: 14px 0 20px;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 8px 0 10px;
 
     strong {
       font-family: var(--font-ui);
-      font-size: 1.1875rem;
+      font-size: 1rem;
       font-weight: 600;
-      color: var(--ink);
+      color: var(--foreground);
     }
 
     s {
-      color: var(--muted);
-      font-size: 0.8125rem;
+      color: var(--muted-foreground);
+      font-size: 0.75rem;
     }
   }
 
+  &__discount {
+    padding: 1px 6px;
+    border-radius: var(--radius-sm);
+    background: color-mix(in oklch, var(--wine) 12%, transparent);
+    color: var(--wine);
+    font-family: var(--font-ui);
+    font-size: 0.6875rem;
+    font-weight: 600;
+  }
+
   &__buy.mat-mdc-button-base {
-    --mdc-filled-button-container-shape: 2px;
-    height: 48px;
+    --mdc-filled-button-container-shape: var(--radius);
+    height: 40px;
     width: 100%;
     margin-top: auto;
+    padding-inline: 12px;
     font-family: var(--font-ui);
-    font-weight: 400;
-    font-size: 0.8125rem;
-    letter-spacing: 0.03em;
+    font-weight: 500;
+    font-size: 0.75rem;
+    letter-spacing: 0.02em;
 
     mat-icon {
-      margin-right: 8px;
-      font-size: 17px;
-      width: 17px;
-      height: 17px;
+      margin-right: 6px;
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
     }
+  }
+
+  &__buy-label--short {
+    display: none;
+  }
+}
+
+// Card estreito (ex.: grid de 2 colunas no mobile) — o que já era compacto no
+// desktop aperta mais ainda: tipografia mínima legível, botão pequeno com
+// rótulo curto, badges/coração reduzidos pra caber num quadrado bem menor.
+@container product-card (max-width: 190px) {
+  .card__body {
+    padding: 9px 9px 11px;
+  }
+
+  .card__subtitle {
+    font-size: 0.5625rem;
+  }
+
+  .card__family {
+    padding: 1px 6px;
+    font-size: 0.5rem;
+  }
+
+  .card__name {
+    margin-top: 3px;
+    font-size: 0.8125rem;
+  }
+
+  .card__rating {
+    margin-top: 3px;
+  }
+
+  .card__price {
+    margin: 6px 0 8px;
+    gap: 4px;
+
+    strong {
+      font-size: 0.875rem;
+    }
+
+    s {
+      font-size: 0.625rem;
+    }
+  }
+
+  .card__discount {
+    padding: 0 5px;
+    font-size: 0.5625rem;
+  }
+
+  .card__buy.mat-mdc-button-base {
+    height: 34px;
+    padding-inline: 8px;
+    font-size: 0.6875rem;
+
+    mat-icon {
+      margin-right: 4px;
+      font-size: 14px;
+      width: 14px;
+      height: 14px;
+    }
+  }
+
+  .card__buy-label--full {
+    display: none;
+  }
+
+  .card__buy-label--short {
+    display: inline;
+  }
+
+  .card__wish.mat-mdc-icon-button {
+    --mdc-icon-button-state-layer-size: 36px;
+    top: 4px;
+    right: 4px;
+
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+  }
+
+  .card__badge {
+    top: 6px;
+    left: 6px;
+    padding: 3px 7px;
+    font-size: 0.5625rem;
   }
 }

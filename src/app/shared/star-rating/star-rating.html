@@ -1,0 +1,10 @@
+<span class="rating" [attr.aria-label]="'Avaliação ' + rating() + ' de 5'">
+  <span class="rating__stars" aria-hidden="true">
+    @for (star of stars(); track $index) {
+      <mat-icon>{{ star }}</mat-icon>
+    }
+  </span>
+  @if (reviews(); as total) {
+    <span class="rating__count">({{ total }})</span>
+  }
+</span>

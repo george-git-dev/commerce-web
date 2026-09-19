@@ -1,0 +1,26 @@
+:host {
+  display: inline-flex;
+}
+
+.rating {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  &__stars {
+    display: inline-flex;
+    gap: 1px;
+    color: var(--gold);
+
+    mat-icon {
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
+    }
+  }
+
+  &__count {
+    font-size: 0.75rem;
+    color: var(--muted-foreground);
+  }
+}
