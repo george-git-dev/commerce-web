@@ -1,0 +1,63 @@
+<section class="cart ui-section">
+  <div class="ui-container">
+    <header class="cart__head">
+      <h1>Sua sacola</h1>
+    </header>
+
+    @if (cart.items().length) {
+      <div class="cart__layout">
+        <div class="cart__items">
+          @for (line of cart.items(); track line.product.id) {
+            <app-cart-line-item
+              [line]="line"
+              (quantityChange)="cart.setQuantity(line.product.id, $event)"
+              (remove)="cart.remove(line.product.id)"
+            />
+          }
+        </div>
+
+        <aside class="cart__summary">
+          <h2>Resumo do pedido</h2>
+
+          <div class="cart__row">
+            <span>Subtotal</span>
+            <span>{{ cart.subtotal() | currency: 'BRL' }}</span>
+          </div>
+          <p class="cart__shipping-note">O frete é calculado no checkout.</p>
+
+          <label class="cart__coupon">
+            <span>Cupom de desconto</span>
+            <div class="cart__coupon-row">
+              <input
+                type="text"
+                placeholder="Código do cupom"
+                [value]="coupon()"
+                (input)="coupon.set($any($event.target).value)"
+              />
+              <button matButton="outlined" type="button">Aplicar</button>
+            </div>
+          </label>
+
+          <div class="cart__row cart__row--total">
+            <span>Total</span>
+            <span>{{ cart.subtotal() | currency: 'BRL' }}</span>
+          </div>
+
+          <button matButton="filled" class="ui-cta cart__checkout" type="button" disabled>
+            Ir para o checkout
+            <mat-icon iconPositionEnd>arrow_forward</mat-icon>
+          </button>
+          <p class="cart__checkout-note">Checkout em breve — próxima etapa do roadmap.</p>
+        </aside>
+      </div>
+    } @else {
+      <app-empty-state
+        icon="shopping_bag"
+        title="Sua sacola está vazia"
+        message="Explore o catálogo e encontre o perfume ideal para você."
+        ctaLabel="Ver catálogo"
+        ctaLink="/produtos"
+      />
+    }
+  </div>
+</section>

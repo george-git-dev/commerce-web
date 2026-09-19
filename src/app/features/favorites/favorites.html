@@ -1,0 +1,28 @@
+<section class="favorites ui-section">
+  <div class="ui-container">
+    <header class="favorites__head">
+      <h1>Seus favoritos</h1>
+    </header>
+
+    @if (favorites.products().length) {
+      <div class="favorites__grid">
+        @for (product of favorites.products(); track product.id) {
+          <app-product-card
+            [product]="product"
+            [favorite]="true"
+            (addToCart)="onAddToCart($event)"
+            (toggleFavorite)="onToggleFavorite($event)"
+          />
+        }
+      </div>
+    } @else {
+      <app-empty-state
+        icon="favorite_border"
+        title="Sua lista está vazia"
+        message="Toque no coração de um perfume para guardá-lo aqui."
+        ctaLabel="Ver catálogo"
+        ctaLink="/produtos"
+      />
+    }
+  </div>
+</section>

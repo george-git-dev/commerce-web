@@ -1,0 +1,89 @@
+<section class="auth ui-section">
+  <div class="ui-container auth__container">
+    <div class="auth__card">
+      <div class="auth__tabs" role="tablist">
+        <button
+          type="button"
+          role="tab"
+          class="auth__tab"
+          [class.auth__tab--active]="mode() === 'entrar'"
+          [attr.aria-selected]="mode() === 'entrar'"
+          (click)="setMode('entrar')"
+        >
+          Entrar
+        </button>
+        <button
+          type="button"
+          role="tab"
+          class="auth__tab"
+          [class.auth__tab--active]="mode() === 'cadastro'"
+          [attr.aria-selected]="mode() === 'cadastro'"
+          (click)="setMode('cadastro')"
+        >
+          Criar conta
+        </button>
+      </div>
+
+      <h1>{{ mode() === 'entrar' ? 'Bem-vindo de volta' : 'Crie sua conta' }}</h1>
+      <p class="auth__subtitle">
+        {{
+          mode() === 'entrar'
+            ? 'Acesse para ver seus pedidos e favoritos.'
+            : 'Leva menos de um minuto.'
+        }}
+      </p>
+
+      <!-- Formulário só visual/demo — sem autenticação real nesta fase. -->
+      <form class="auth__form" (submit)="$event.preventDefault(); submit()">
+        @if (mode() === 'cadastro') {
+          <label>
+            <span>Nome</span>
+            <input
+              type="text"
+              name="name"
+              placeholder="Seu nome completo"
+              autocomplete="name"
+              required
+            />
+          </label>
+        }
+
+        <label>
+          <span>E-mail</span>
+          <input
+            type="email"
+            name="email"
+            placeholder="seu@email.com"
+            autocomplete="email"
+            required
+          />
+        </label>
+
+        <label>
+          <span>Senha</span>
+          <input
+            type="password"
+            name="password"
+            placeholder="••••••••"
+            autocomplete="current-password"
+            required
+          />
+        </label>
+
+        <button matButton="filled" class="ui-cta auth__submit" type="submit">
+          {{ mode() === 'entrar' ? 'Entrar' : 'Criar conta' }}
+        </button>
+      </form>
+
+      <p class="auth__switch">
+        @if (mode() === 'entrar') {
+          Ainda não tem conta?
+          <button type="button" (click)="setMode('cadastro')">Criar conta</button>
+        } @else {
+          Já tem conta?
+          <button type="button" (click)="setMode('entrar')">Entrar</button>
+        }
+      </p>
+    </div>
+  </div>
+</section>

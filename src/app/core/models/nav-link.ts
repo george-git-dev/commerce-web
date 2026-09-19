@@ -1,8 +1,6 @@
-/**
- * Item de menu. Como a aplicação tem uma única rota, todo link navega para a home
- * e rola até um `fragment` que existe no DOM — não há destinos inexistentes.
- */
+/** Item de navegação: sempre uma rota real, com filtros opcionais do catálogo via query params. */
 export interface NavLink {
   label: string;
-  fragment: string;
+  path: string;
+  queryParams?: Record<string, string>;
 }

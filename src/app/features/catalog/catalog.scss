@@ -1,0 +1,276 @@
+:host {
+  display: block;
+}
+
+.catalog {
+  background: var(--background);
+
+  &__head {
+    max-width: 60ch;
+    margin-bottom: 28px;
+
+    p {
+      margin: 12px 0 0;
+      color: var(--muted-foreground);
+    }
+  }
+
+  &__toolbar {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding-block: 18px;
+    margin-bottom: 24px;
+    border-block: 1px solid var(--border);
+  }
+
+  &__toolbar-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  &__count {
+    font-size: 0.875rem;
+    color: var(--muted-foreground);
+  }
+
+  &__filter-toggle.mat-mdc-button-base {
+    height: 40px;
+    padding-inline: 16px;
+    font-size: 0.8125rem;
+
+    mat-icon {
+      margin-right: 6px;
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+  }
+
+  &__sort {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.8125rem;
+    color: var(--muted-foreground);
+
+    select {
+      height: 40px;
+      padding-inline: 10px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--card);
+      color: var(--foreground);
+    }
+  }
+
+  &__layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+
+  &__filters {
+    display: none;
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+}
+
+// Grupos de filtro — reaproveitados pela sidebar de desktop e pelo drawer mobile.
+.filter-group {
+  margin-bottom: 26px;
+
+  h3 {
+    margin-bottom: 12px;
+    font-family: var(--font-ui);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--foreground);
+  }
+
+  &__options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  &__range {
+    display: flex;
+    gap: 12px;
+
+    label {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 0.75rem;
+      color: var(--muted-foreground);
+    }
+
+    input {
+      height: 40px;
+      padding-inline: 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--card);
+      color: var(--foreground);
+    }
+  }
+}
+
+.chip {
+  height: 36px;
+  padding-inline: 14px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--card);
+  color: var(--foreground);
+  font-family: var(--font-ui);
+  font-size: 0.8125rem;
+  transition:
+    border-color var(--motion-fast) ease,
+    background-color var(--motion-fast) ease;
+
+  &--active {
+    border-color: var(--primary);
+    background: var(--primary);
+    color: var(--primary-foreground);
+  }
+}
+
+.filter-accordion {
+  border-top: 1px solid var(--border);
+  padding-block: 14px;
+
+  summary {
+    cursor: pointer;
+    font-family: var(--font-ui);
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--foreground);
+    list-style: none;
+
+    &::-webkit-details-marker {
+      display: none;
+    }
+  }
+
+  &__body {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 14px;
+  }
+}
+
+.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+  min-height: 24px;
+}
+
+.filter-clear {
+  margin-top: 8px;
+  color: var(--earth);
+
+  mat-icon {
+    margin-right: 6px;
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+}
+
+// Drawer fullscreen de filtros (mobile) — mesmo padrão do menu do header.
+.filters-drawer {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  background: var(--card);
+  transform: translateY(100%);
+  transition: transform var(--motion-fast) var(--ease-swift);
+
+  &--open {
+    transform: translateY(0);
+  }
+
+  &__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: calc(env(safe-area-inset-top, 0px) + 16px) 20px 16px;
+    border-bottom: 1px solid var(--border);
+
+    h2 {
+      font-size: 1.25rem;
+    }
+  }
+
+  &__body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+  }
+
+  &__apply {
+    margin: 12px 20px calc(env(safe-area-inset-bottom, 0px) + 16px);
+  }
+}
+
+@media (min-width: 640px) {
+  .catalog__grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .catalog__toolbar-actions {
+    justify-content: flex-end;
+  }
+
+  .catalog__filter-toggle {
+    display: none;
+  }
+
+  .catalog__layout {
+    grid-template-columns: 260px 1fr;
+    align-items: start;
+  }
+
+  .catalog__filters {
+    display: block;
+    position: sticky;
+    top: 132px;
+  }
+
+  .catalog__grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+
+  .filters-drawer {
+    display: none;
+  }
+}
+
+@media (min-width: 1280px) {
+  .catalog__grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

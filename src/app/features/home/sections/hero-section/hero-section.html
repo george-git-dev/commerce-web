@@ -1,21 +1,35 @@
 <section class="hero">
-  <picture class="hero__bg">
-    <source [srcset]="imagery.heroSmall" media="(max-width: 900px)" />
-    <img [src]="imagery.hero" alt="" width="1920" height="1080" fetchpriority="high" />
-  </picture>
+  <img
+    class="hero__bg"
+    [src]="imagery.hero"
+    alt=""
+    width="1920"
+    height="1088"
+    fetchpriority="high"
+  />
 
   <div class="ui-container hero__inner">
     <div class="hero__copy">
-      <span class="ui-eyebrow">Perfumes árabes</span>
+      <span class="ui-eyebrow">Alta perfumaria</span>
       <h1>A fragrância que<br />traduz quem você é</h1>
       <p>
         Eau de parfum de alta concentração, com fixação que atravessa o dia. Notas amadeiradas,
         orientais e florais selecionadas frasco a frasco.
       </p>
-      <a matButton="filled" class="ui-cta hero__btn" routerLink="/" [fragment]="sections.products">
-        Explorar perfumes
-        <mat-icon iconPositionEnd>arrow_forward</mat-icon>
-      </a>
+      <div class="hero__actions">
+        <a matButton="filled" class="ui-cta" routerLink="/produtos">
+          Explorar coleção
+          <mat-icon iconPositionEnd>arrow_forward</mat-icon>
+        </a>
+        <a
+          matButton="outlined"
+          class="ui-cta hero__ghost"
+          routerLink="/"
+          [fragment]="sections.story"
+        >
+          Nossa história
+        </a>
+      </div>
     </div>
   </div>
 </section>

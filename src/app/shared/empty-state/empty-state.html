@@ -1,0 +1,16 @@
+<div class="empty">
+  <mat-icon class="empty__icon" aria-hidden="true">{{ icon() }}</mat-icon>
+  <h2>{{ title() }}</h2>
+  @if (message(); as text) {
+    <p>{{ text }}</p>
+  }
+  @if (ctaLabel(); as label) {
+    @if (ctaLink(); as link) {
+      <a matButton="filled" class="ui-cta" [routerLink]="link">{{ label }}</a>
+    } @else {
+      <button matButton="filled" class="ui-cta" type="button" (click)="ctaClick.emit()">
+        {{ label }}
+      </button>
+    }
+  }
+</div>

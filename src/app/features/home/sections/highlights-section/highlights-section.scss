@@ -4,12 +4,13 @@
 
 // Faixa de selos sobre branco, sem caixas: só ícone, texto e divisores finos.
 .highlights {
-  background: #fff;
-  border-bottom: 1px solid var(--line);
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
 
   &__grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: 1fr;
+    gap: 22px;
     padding-block: 34px;
   }
 }
@@ -18,18 +19,13 @@
   display: flex;
   align-items: center;
   gap: 16px;
-  padding-inline: 28px;
-
-  & + & {
-    border-left: 1px solid var(--line);
-  }
 
   mat-icon {
     flex: none;
     font-size: 28px;
     width: 28px;
     height: 28px;
-    color: var(--brand-strong);
+    color: var(--earth);
   }
 
   &__text {
@@ -42,42 +38,42 @@
     font-family: var(--font-ui);
     font-size: 0.9375rem;
     font-weight: 600;
-    color: var(--ink);
+    color: var(--foreground);
   }
 
   span {
     font-size: 0.8125rem;
-    color: var(--muted);
+    color: var(--muted-foreground);
   }
 }
 
-@media (max-width: 1024px) {
+@media (min-width: 640px) {
   .highlights__grid {
     grid-template-columns: repeat(2, 1fr);
-    gap: 26px 0;
   }
 
-  // Com duas colunas, só o item da direita de cada linha mantém o divisor.
-  .benefit + .benefit {
-    border-left: 0;
-  }
-
-  .benefit:nth-child(even) {
-    border-left: 1px solid var(--line);
+  .benefit:nth-child(odd) {
+    padding-right: 22px;
+    border-right: 1px solid var(--border);
   }
 }
 
-@media (max-width: 560px) {
+@media (min-width: 1024px) {
   .highlights__grid {
-    grid-template-columns: 1fr;
-    gap: 22px;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
   }
 
   .benefit {
-    padding-inline: 0;
+    padding-inline: 28px;
+    border-right: 0;
+  }
 
-    &:nth-child(even) {
-      border-left: 0;
-    }
+  .benefit:not(:first-child) {
+    border-left: 1px solid var(--border);
+  }
+
+  .benefit:nth-child(odd) {
+    border-right: 0;
   }
 }

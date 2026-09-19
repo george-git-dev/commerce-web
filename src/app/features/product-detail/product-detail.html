@@ -1,0 +1,170 @@
+@if (product(); as item) {
+  <section class="detail ui-section">
+    <div class="ui-container">
+      <nav class="breadcrumb" aria-label="Trilha de navegação">
+        <a routerLink="/">Início</a>
+        <mat-icon aria-hidden="true">chevron_right</mat-icon>
+        <a routerLink="/produtos">Perfumes</a>
+        <mat-icon aria-hidden="true">chevron_right</mat-icon>
+        <span aria-current="page">{{ item.name }}</span>
+      </nav>
+
+      <div class="detail__layout">
+        <div class="detail__gallery">
+          <img
+            class="detail__main-image"
+            [src]="imagery.productPlaceholder"
+            [alt]="item.name"
+            width="800"
+            height="800"
+          />
+          <div class="detail__thumbs">
+            @for (thumb of thumbnails; track thumb) {
+              <img
+                [src]="imagery.productPlaceholder"
+                [alt]="item.name"
+                width="160"
+                height="160"
+                loading="lazy"
+              />
+            }
+          </div>
+        </div>
+
+        <div class="detail__info">
+          <p class="detail__brand">{{ item.brandName }}</p>
+          <h1>{{ item.name }}</h1>
+
+          @if (item.rating) {
+            <app-star-rating
+              class="detail__rating"
+              [rating]="item.rating"
+              [reviews]="item.reviews"
+            />
+          }
+
+          <p class="detail__price">
+            <strong>{{ item.finalPrice | currency: 'BRL' }}</strong>
+            @if (item.oldPrice) {
+              <s>{{ item.oldPrice | currency: 'BRL' }}</s>
+            }
+          </p>
+          <p class="detail__installment">
+            em até 6x de {{ installment() | currency: 'BRL' }} sem juros
+          </p>
+
+          <p class="detail__description">{{ item.description }}</p>
+
+          <div class="detail__specs">
+            @if (item.family) {
+              <div class="spec-card">
+                <mat-icon>spa</mat-icon>
+                <div>
+                  <span>Família olfativa</span>
+                  <strong>{{ item.family }}</strong>
+                </div>
+              </div>
+            }
+            @if (item.volume) {
+              <div class="spec-card">
+                <mat-icon>science</mat-icon>
+                <div>
+                  <span>Volume</span>
+                  <strong>{{ item.volume }}</strong>
+                </div>
+              </div>
+            }
+          </div>
+
+          <div class="detail__actions">
+            <button
+              matButton="filled"
+              class="ui-cta"
+              [disabled]="!item.active || item.stock <= 0"
+              (click)="buyNow(item)"
+            >
+              Comprar agora
+            </button>
+            <button
+              matButton="outlined"
+              class="ui-cta"
+              [disabled]="!item.active || item.stock <= 0"
+              (click)="addToCart(item)"
+            >
+              <mat-icon>shopping_bag</mat-icon>
+              Adicionar ao carrinho
+            </button>
+            <button
+              matIconButton
+              class="detail__wish"
+              [class.detail__wish--active]="isFavorite(item)"
+              [attr.aria-pressed]="isFavorite(item)"
+              [attr.aria-label]="
+                isFavorite(item) ? 'Remover dos favoritos' : 'Adicionar aos favoritos'
+              "
+              (click)="toggleFavorite(item)"
+            >
+              <mat-icon>{{ isFavorite(item) ? 'favorite' : 'favorite_border' }}</mat-icon>
+            </button>
+          </div>
+
+          <ul class="detail__trust">
+            <li><mat-icon>inventory_2</mat-icon> Produto original</li>
+            <li><mat-icon>local_shipping</mat-icon> Envio seguro</li>
+            <li><mat-icon>lock</mat-icon> Compra protegida</li>
+          </ul>
+        </div>
+      </div>
+
+      @if (item.notes; as notes) {
+        <section class="pyramid">
+          <header class="ui-section-head">
+            <span class="ui-eyebrow">Pirâmide olfativa</span>
+            <h2>Como a fragrância se revela</h2>
+          </header>
+          <div class="pyramid__grid">
+            <div class="pyramid__col">
+              <span class="ui-eyebrow">Saída</span>
+              <p>{{ notes[0] }}</p>
+            </div>
+            <div class="pyramid__col">
+              <span class="ui-eyebrow">Coração</span>
+              <p>{{ notes[1] }}</p>
+            </div>
+            <div class="pyramid__col">
+              <span class="ui-eyebrow">Fundo</span>
+              <p>{{ notes[2] }}</p>
+            </div>
+          </div>
+        </section>
+      }
+
+      @if (related().length) {
+        <section class="related">
+          <header class="ui-section-head">
+            <span class="ui-eyebrow">Para você</span>
+            <h2>Você também pode gostar</h2>
+          </header>
+          <div class="related__grid">
+            @for (product of related(); track product.id) {
+              <app-product-card
+                [product]="product"
+                [favorite]="isFavorite(product)"
+                (addToCart)="addToCart($event)"
+                (toggleFavorite)="toggleFavorite($event)"
+              />
+            }
+          </div>
+        </section>
+      }
+    </div>
+  </section>
+} @else {
+  <section class="ui-section">
+    <div class="ui-container detail__not-found">
+      <h1>Produto não encontrado</h1>
+      <p>Este perfume pode ter saído do catálogo.</p>
+      <a matButton="filled" class="ui-cta" routerLink="/produtos">Ver catálogo</a>
+    </div>
+  </section>
+}
