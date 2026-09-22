@@ -52,3 +52,7 @@ Angular Material (`@angular/material`, `@angular/cdk`) is the component library 
 - Path-alias-free relative imports (`../../core/...`), consistent with existing files.
 - `noPropertyAccessFromIndexSignature`, `strictTemplates`, and `strictInjectionParameters` are on — keep new code strict-mode clean.
 - Component class files are named without a `.component` suffix (e.g. `header.ts`, not `header.component.ts`); this matches the Angular CLI schematics configured in `angular.json`.
+
+## Regras de Git
+
+- Nunca adicionar linha de coautoria (`Co-Authored-By: Claude`) ou "Generated with Claude Code" nas mensagens de commit ou em descrições de PR.
