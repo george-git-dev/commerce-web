@@ -16,8 +16,8 @@ export interface StoreConfig {
 }
 
 export const STORE_CONFIG: StoreConfig = {
-  name: 'ÂMBRA',
-  tagline: 'Alta Perfumaria',
+  name: 'Nani Perfums',
+  tagline: 'Essência do Oriente',
   phone: '(11) 3456-7890',
   phoneHref: 'tel:+551134567890',
   whatsappHref: 'https://wa.me/551134567890',

@@ -30,43 +30,15 @@
 
   &__brand {
     display: inline-flex;
-    align-items: center;
-    gap: 12px;
     margin-bottom: 18px;
-
-    span {
-      display: flex;
-      flex-direction: column;
-      line-height: 1.05;
-    }
-
-    strong {
-      font-family: var(--font-display);
-      font-size: 1.625rem;
-      font-weight: 400;
-      letter-spacing: 0.2em;
-      color: var(--primary-foreground);
-    }
-
-    small {
-      font-family: var(--font-ui);
-      font-size: 0.5625rem;
-      letter-spacing: 0.3em;
-      text-transform: uppercase;
-      color: var(--gold);
-    }
   }
 
-  // Mesmo losango vazado do header, invertido para o fundo escuro.
-  &__mark {
-    flex: none;
-    width: 22px;
-    height: 22px;
-    transform: rotate(45deg);
-    border: 1px solid var(--gold);
-    box-shadow:
-      inset 0 0 0 4px var(--primary),
-      inset 0 0 0 5px var(--gold);
+  &__logo {
+    display: block;
+    height: 190px;
+    width: auto;
+    object-fit: contain;
+    //filter: brightness(0) invert(1);
   }
 
   &__about {
