@@ -4,5 +4,6 @@ export interface Category {
   text: string;
   /** Nome de um Material Icon — não há foto por categoria nesta fase. */
   icon: string;
+  image?: string;
   genderFilter?: 'Masculino' | 'Feminino' | 'Unissex';
 }
