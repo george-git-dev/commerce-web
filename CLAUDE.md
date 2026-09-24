@@ -94,5 +94,6 @@ Angular Material (`@angular/material`, `@angular/cdk`).
 
 ## Regras de Git
 
+- **O Claude nunca executa `git add`, `git commit` nem `git push`** (nem outros comandos que alterem o histórico ou o remoto, como `merge`, `rebase`, `reset` ou `tag`). Essas ações são sempre feitas manualmente pelo dono do projeto. O Claude pode sugerir o comando e a mensagem de commit, mas não executa.
 - Trabalhar sempre na branch `develop`.
 - Nunca adicionar linha de coautoria (`Co-Authored-By: Claude`) nem "Generated with Claude Code" em mensagens de commit ou descrições de PR.
