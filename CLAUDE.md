@@ -88,7 +88,7 @@ Angular Material (`@angular/material`, `@angular/cdk`).
 
 - O dono do projeto é dev backend Java/Spring e está aprendendo Angular: explicar o "porquê" das decisões de frontend, sem assumir conhecimento avançado.
 - Trabalhar em passos pequenos: propor o plano da sessão, esperar aprovação e então dizer exatamente o que fazer (comando, arquivo, conteúdo). Ele aplica e valida antes do próximo passo. Não rodar comandos nem editar arquivos sem ele pedir.
-- Cada sessão começa e termina uma etapa do roadmap.
+- Cada sessão tem um objetivo claro combinado no início (ex.: ajustar uma tela ou comportamento) e termina com ele funcionando. O roadmap é guia, não ordem obrigatória.
 - Refatorações de arquitetura ficam para a revisão pós-MVP.
 - Ambiente: Windows com Git Bash (MINGW64). Os comandos precisam ser compatíveis com bash.
 
