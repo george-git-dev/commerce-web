@@ -16,7 +16,7 @@ export interface StoreConfig {
 }
 
 export const STORE_CONFIG: StoreConfig = {
-  name: 'Nani Perfums',
+  name: 'Nani Perfumes',
   tagline: 'Essência do Oriente',
   phone: '(11) 3456-7890',
   phoneHref: 'tel:+551134567890',

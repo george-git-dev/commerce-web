@@ -11,7 +11,7 @@ import { Header } from './layout/header/header';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class App implements OnInit, OnDestroy {
-  private readonly fullTitle = 'Nani Perfums ● Essência do Oriente | ';
+  private readonly fullTitle = 'Nani Perfumes ● Essência do Oriente | ';
   private intervalId: ReturnType<typeof setInterval> | null = null;
   private position = 0;
 

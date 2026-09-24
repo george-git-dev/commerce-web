@@ -3,7 +3,7 @@
 Extraído do protótipo publicado em https://oriental-essence-elegance.lovable.app (visualizado em 375px, mobile).
 O protótipo é React + Tailwind + shadcn. **Não copiar código ou classes Tailwind**: esta é a referência visual a ser reproduzida em Angular + Angular Material + SCSS.
 
-> ⚠️ O protótipo usa a marca antiga ("NAYR Parfums"). No projeto a marca é **Nani Perfums**, slogan **"Essência do Oriente"**.
+> ⚠️ O protótipo usa a marca antiga ("NAYR Parfums"). No projeto a marca é **Nani Perfumes**, slogan **"Essência do Oriente"**.
 
 ## Design tokens
 

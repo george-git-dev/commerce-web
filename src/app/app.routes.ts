@@ -3,43 +3,43 @@ import { Routes } from '@angular/router';
 export const routes: Routes = [
   {
     path: '',
-    title: 'Nani Perfums | Essência do Oriente',
+    title: 'Nani Perfumes | Essência do Oriente',
     loadComponent: () => import('./features/home/home').then((m) => m.Home),
   },
   {
     path: 'produtos',
-    title: 'Nani Perfums | Perfumes',
+    title: 'Nani Perfumes | Perfumes',
     loadComponent: () => import('./features/catalog/catalog').then((m) => m.Catalog),
   },
   {
     path: 'produtos/:id',
-    title: 'Nani Perfums | Perfume',
+    title: 'Nani Perfumes | Perfume',
     loadComponent: () =>
       import('./features/product-detail/product-detail').then((m) => m.ProductDetail),
   },
   {
     path: 'carrinho',
-    title: 'Nani Perfums | Carrinho',
+    title: 'Nani Perfumes | Carrinho',
     loadComponent: () => import('./features/cart/cart').then((m) => m.Cart),
   },
   {
     path: 'favoritos',
-    title: 'Nani Perfums | Favoritos',
+    title: 'Nani Perfumes | Favoritos',
     loadComponent: () => import('./features/favorites/favorites').then((m) => m.Favorites),
   },
   {
     path: 'login',
-    title: 'Nani Perfums | Entrar',
+    title: 'Nani Perfumes | Entrar',
     loadComponent: () => import('./features/auth/login').then((m) => m.Login),
   },
   {
     path: 'minha-conta',
-    title: 'Nani Perfums | Minha conta',
+    title: 'Nani Perfumes | Minha conta',
     loadComponent: () => import('./features/account/account').then((m) => m.Account),
   },
   {
     path: '**',
-    title: 'Nani Perfums | Página não encontrada',
+    title: 'Nani Perfumes | Página não encontrada',
     loadComponent: () => import('./features/not-found/not-found').then((m) => m.NotFound),
   },
 ];
