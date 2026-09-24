@@ -8,6 +8,8 @@ Frontend da **Nani Perfums** ("Essência do Oriente"), e-commerce de perfumes co
 
 Fase atual: o layout está sendo redesenhado a partir de um protótipo feito no Lovable. O objetivo é ficar o mais próximo possível do visual dele, mantendo Angular + Angular Material e mobile-first. **Antes de criar ou alterar qualquer tela, ler `docs/design-reference.md`**, que tem as cores, fontes, espaçamentos, componentes e a ordem das seções do protótipo. As telas usam **dados mockados** até o visual fechar; a integração com a API real vem depois.
 
+**O front conduz o projeto:** todas as telas e features são construídas aqui primeiro, com dados mockados. Depois o backend é adaptado para sustentar o front. Por isso, os models (`core/models`) e os mocks (`core/data`) são o contrato de dados: modele-os com cuidado, como se fossem a resposta real da API (nomes de campos claros, tipos corretos, dinheiro como número em reais, datas em ISO 8601, listas grandes já pensando em paginação).
+
 ## ⚠️ MOBILE-FIRST É OBRIGATÓRIO
 
 **Cerca de 90% dos clientes vão acessar pelo celular.** O celular é o produto principal; tablet e desktop são adaptações. Toda decisão de layout, UX e performance parte do mobile.
