@@ -6,7 +6,7 @@ Este arquivo orienta o Claude Code (claude.ai/code) ao trabalhar com o código d
 
 Frontend da **Nani Perfums** ("Essência do Oriente"), e-commerce de perfumes começando por perfumes árabes. Meta: MVP funcional até o fim de 2026. O backend fica em outro repositório (`commerce-api`, Java 21 / Spring Boot).
 
-Fase atual: o layout está sendo redesenhado a partir de um protótipo feito no Lovable. O objetivo é ficar o mais próximo possível do visual dele, mantendo Angular + Angular Material e mobile-first. As telas usam **dados mockados** até o visual fechar; a integração com a API real vem depois.
+Fase atual: o layout está sendo redesenhado a partir de um protótipo feito no Lovable. O objetivo é ficar o mais próximo possível do visual dele, mantendo Angular + Angular Material e mobile-first. **Antes de criar ou alterar qualquer tela, ler `docs/design-reference.md`**, que tem as cores, fontes, espaçamentos, componentes e a ordem das seções do protótipo. As telas usam **dados mockados** até o visual fechar; a integração com a API real vem depois.
 
 ## ⚠️ MOBILE-FIRST É OBRIGATÓRIO
 
