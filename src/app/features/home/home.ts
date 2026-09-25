@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { MOCK_PRODUCTS } from '../../core/data/mock-products';
 import { BrandsStripSection } from './sections/brands-strip-section/brands-strip-section';
 import { CategoriesSection } from './sections/categories-section/categories-section';
-import { HeroSection } from './sections/hero-section/hero-section';
+import { BannerCarousel } from './sections/banner-carousel/banner-carousel';
 import { HighlightsSection } from './sections/highlights-section/highlights-section';
 import { InstitutionalSection } from './sections/institutional-section/institutional-section';
 import { NewsletterSection } from './sections/newsletter-section/newsletter-section';
@@ -11,7 +11,7 @@ import { ProductsSection } from './sections/products-section/products-section';
 @Component({
   selector: 'app-home',
   imports: [
-    HeroSection,
+    BannerCarousel,
     CategoriesSection,
     ProductsSection,
     HighlightsSection,

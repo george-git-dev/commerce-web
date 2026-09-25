@@ -1,0 +1,60 @@
+<section class="banners" aria-label="Promoções e novidades">
+  <!-- O antigo hero tinha o título principal da página; mantemos para SEO e leitores de tela. -->
+  <h1 class="cdk-visually-hidden">Nani Perfumes — Essência do Oriente</h1>
+
+  <swiper-container
+    #swiper
+    class="banners__swiper"
+    init="false"
+    rewind="true"
+    autoplay-delay="6000"
+    autoplay-disable-on-interaction="false"
+    autoplay-pause-on-mouse-enter="true"
+    pagination="true"
+    pagination-clickable="true"
+    navigation="true"
+    a11y="true"
+  >
+    @for (banner of banners; track banner.id; let first = $first) {
+      <swiper-slide>
+        <picture>
+          @if (banner.imageDesktop) {
+            <source
+              media="(min-width: 768px)"
+              [srcset]="banner.imageDesktop"
+              width="1920"
+              height="720"
+            />
+          }
+          <img
+            class="banner__img"
+            [src]="banner.image"
+            [alt]="banner.alt"
+            width="1080"
+            height="1350"
+            [attr.loading]="first ? 'eager' : 'lazy'"
+            [attr.fetchpriority]="first ? 'high' : null"
+          />
+        </picture>
+      </swiper-slide>
+    }
+  </swiper-container>
+
+  <!-- Ornamento da divisão: o arco e a estrela da logo, com linhas laterais. -->
+  <div class="banners__divider" aria-hidden="true">
+    <span class="banners__line"></span>
+    <img src="img/ornamentos/emblema.svg" alt="" width="52" height="46" />
+    <span class="banners__line banners__line--right"></span>
+  </div>
+
+  @if (banners.length > 1) {
+    <button
+      type="button"
+      class="banners__toggle"
+      (click)="toggleAutoplay()"
+      [attr.aria-label]="playing() ? 'Pausar carrossel' : 'Retomar carrossel'"
+    >
+      <mat-icon>{{ playing() ? 'pause' : 'play_arrow' }}</mat-icon>
+    </button>
+  }
+</section>
