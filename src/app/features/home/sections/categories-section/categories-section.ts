@@ -4,10 +4,11 @@ import { RouterLink } from '@angular/router';
 import { IMAGERY } from '../../../../core/config/imagery';
 import { categoryQueryParams } from '../../../../core/config/navigation';
 import { CatalogService } from '../../../../core/services/catalog-service';
+import { NgOptimizedImage } from '@angular/common';
 
 @Component({
   selector: 'app-categories-section',
-  imports: [MatIconModule, RouterLink],
+  imports: [MatIconModule, RouterLink, NgOptimizedImage],
   templateUrl: './categories-section.html',
   styleUrl: './categories-section.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

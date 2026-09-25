@@ -1,0 +1,114 @@
+:host {
+  display: block;
+}
+
+.banners {
+  // Faixa entre o carrossel e a seção seguinte, com o ornamento da marca.
+  --banners-gap: clamp(56px, 6vw, 72px);
+
+  position: relative;
+  background: var(--background);
+  padding-bottom: var(--banners-gap);
+}
+
+// Cores do Swiper ajustadas à marca.
+.banners__swiper {
+  display: block;
+  --swiper-theme-color: var(--gold);
+  --swiper-pagination-bullet-inactive-color: var(--primary-foreground);
+  --swiper-pagination-bullet-inactive-opacity: 0.5;
+  --swiper-pagination-bullet-size: 8px;
+  --swiper-pagination-bottom: 16px;
+  --swiper-navigation-color: var(--primary-foreground);
+  --swiper-navigation-size: 28px;
+}
+
+// Setas só no desktop: no celular a navegação é o swipe.
+.banners__swiper::part(button-prev),
+.banners__swiper::part(button-next) {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .banners__swiper::part(button-prev),
+  .banners__swiper::part(button-next) {
+    display: flex;
+  }
+}
+
+.banner__img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+// Botão de pausar: área de toque de 44px no canto inferior direito da imagem.
+.banners__toggle {
+  position: absolute;
+  right: 12px;
+  // Soma o espaço de baixo para o botão ficar sobre a imagem, não sobre a faixa bege.
+  bottom: calc(var(--banners-gap) + 8px);
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: oklch(0.09 0.01 65 / 55%);
+  color: var(--primary-foreground);
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 2px;
+  }
+}
+
+// Ornamento entre o carrossel e a seção seguinte, inspirado na logo.
+.banners__divider {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  height: var(--banners-gap);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+
+  img {
+    flex-shrink: 0;
+    width: clamp(40px, 5vw, 52px);
+    height: auto;
+  }
+}
+
+// Linha lateral: some na ponta de fora e termina num losango perto do arco.
+.banners__line {
+  position: relative;
+  width: min(32vw, 420px);
+  height: 1px;
+  margin-top: 14px; // alinha as linhas com a estrela; 0 = meio do arco
+  background: linear-gradient(90deg, transparent, var(--gold));
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: -4px;
+    width: 7px;
+    height: 7px;
+    background: var(--gold);
+    transform: translateY(-50%) rotate(45deg);
+  }
+
+  &--right {
+    background: linear-gradient(90deg, var(--gold), transparent);
+
+    &::after {
+      right: auto;
+      left: -4px;
+    }
+  }
+}

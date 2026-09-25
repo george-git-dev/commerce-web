@@ -3,44 +3,43 @@ import { Routes } from '@angular/router';
 export const routes: Routes = [
   {
     path: '',
-    title: 'ÂMBRA | Alta Perfumaria',
+    title: 'Nani Perfumes | Essência do Oriente',
     loadComponent: () => import('./features/home/home').then((m) => m.Home),
   },
   {
     path: 'produtos',
-    title: 'ÂMBRA | Perfumes',
+    title: 'Nani Perfumes | Perfumes',
     loadComponent: () => import('./features/catalog/catalog').then((m) => m.Catalog),
   },
   {
     path: 'produtos/:id',
-    title: 'ÂMBRA | Perfume',
+    title: 'Nani Perfumes | Perfume',
     loadComponent: () =>
       import('./features/product-detail/product-detail').then((m) => m.ProductDetail),
   },
   {
     path: 'carrinho',
-    title: 'ÂMBRA | Carrinho',
+    title: 'Nani Perfumes | Carrinho',
     loadComponent: () => import('./features/cart/cart').then((m) => m.Cart),
   },
   {
     path: 'favoritos',
-    title: 'ÂMBRA | Favoritos',
+    title: 'Nani Perfumes | Favoritos',
     loadComponent: () => import('./features/favorites/favorites').then((m) => m.Favorites),
   },
   {
     path: 'login',
-    title: 'ÂMBRA | Entrar',
+    title: 'Nani Perfumes | Entrar',
     loadComponent: () => import('./features/auth/login').then((m) => m.Login),
   },
   {
     path: 'minha-conta',
-    title: 'ÂMBRA | Minha conta',
+    title: 'Nani Perfumes | Minha conta',
     loadComponent: () => import('./features/account/account').then((m) => m.Account),
   },
   {
-    // Antes havia um redirect silencioso para '', que escondia URLs inválidas.
     path: '**',
-    title: 'ÂMBRA | Página não encontrada',
+    title: 'Nani Perfumes | Página não encontrada',
     loadComponent: () => import('./features/not-found/not-found').then((m) => m.NotFound),
   },
 ];

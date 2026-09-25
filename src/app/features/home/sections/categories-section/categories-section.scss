@@ -65,6 +65,8 @@
 // Tile sem foto própria: painel translúcido com ícone, nome e link.
 .tile {
   position: relative;
+  overflow: hidden;
+  isolation: isolate;
   display: flex;
   flex-direction: column;
   padding: 26px 22px;
@@ -127,6 +129,27 @@
       transform: translateX(4px);
     }
   }
+}
+
+// Card com foto: imagem quase transparente, como textura de fundo.
+.tile__bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 20%;
+  z-index: -1;
+  opacity: 0.18;
+  filter: grayscale(35%) sepia(20%);
+  transition:
+    opacity var(--motion-fast) var(--ease-swift),
+    transform var(--motion-slow, 400ms) var(--ease-swift);
+}
+
+.tile--photo:hover .tile__bg {
+  opacity: 0.3;
+  transform: scale(1.04);
 }
 
 @media (min-width: 640px) {

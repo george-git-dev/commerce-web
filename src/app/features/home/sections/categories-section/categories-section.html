@@ -11,6 +11,15 @@
     <div class="categories__grid">
       @for (category of categories(); track category.id) {
         <a class="tile" routerLink="/produtos" [queryParams]="queryParamsFor(category)">
+          @if (category.image) {
+            <img
+              class="tile__bg"
+              [ngSrc]="category.image"
+              alt=""
+              fill
+              sizes="(min-width: 1024px) 16vw, (min-width: 640px) 33vw, 50vw"
+            />
+          }
           <mat-icon class="tile__icon">{{ category.icon }}</mat-icon>
           <span class="tile__name">{{ category.name }}</span>
           <span class="tile__text">{{ category.text }}</span>

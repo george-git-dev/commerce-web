@@ -35,6 +35,7 @@ export const CATEGORIES_MOCK: readonly Category[] = [
     name: 'Masculinos',
     text: 'Amadeirados, especiados e couros',
     icon: 'male',
+    image: 'img/categorias/masculinos.webp',
     genderFilter: 'Masculino',
   },
   {
@@ -42,6 +43,7 @@ export const CATEGORIES_MOCK: readonly Category[] = [
     name: 'Femininos',
     text: 'Florais, frutados e baunilhas',
     icon: 'female',
+    image: 'img/categorias/femininos.webp',
     genderFilter: 'Feminino',
   },
   {
@@ -49,6 +51,7 @@ export const CATEGORIES_MOCK: readonly Category[] = [
     name: 'Unissex',
     text: 'Notas versáteis, para qualquer ocasião',
     icon: 'diversity_1',
+    image: 'img/categorias/unissex.webp',
     genderFilter: 'Unissex',
   },
   {
@@ -56,17 +59,20 @@ export const CATEGORIES_MOCK: readonly Category[] = [
     name: 'Kits',
     text: 'Conjuntos para presentear',
     icon: 'redeem',
+    image: 'img/categorias/kits.webp',
   },
   {
     id: 'lancamentos',
     name: 'Lançamentos',
     text: 'As novidades da temporada',
     icon: 'auto_awesome',
+    image: 'img/categorias/lancamentos.webp',
   },
   {
     id: 'ofertas',
     name: 'Ofertas',
     text: 'Seleção com até 40% off',
     icon: 'sell',
+    image: 'img/categorias/ofertas.webp',
   },
 ];

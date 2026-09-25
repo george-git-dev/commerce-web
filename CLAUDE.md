@@ -1,54 +1,100 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Este arquivo orienta o Claude Code (claude.ai/code) ao trabalhar com o código deste repositório.
 
-## Commands
+## Contexto do projeto
 
-- `npm start` / `ng serve` — dev server at `http://localhost:4200`
-- `npm run build` / `ng build` — production build to `dist/`
-- `npm run watch` — dev-config build in watch mode
-- `npm test` / `ng test` — run unit tests (Vitest via `@angular/build:unit-test`)
-- Run a single test file: `ng test -- src/app/features/home/home.spec.ts` (Vitest CLI args pass through after `--`)
-- No lint script is configured in `package.json`.
+Frontend da **Nani Perfumes** ("Essência do Oriente"), e-commerce de perfumes começando por perfumes árabes. Meta: MVP funcional até o fim de 2026. O backend fica em outro repositório (`commerce-api`, Java 21 / Spring Boot).
 
-## Architecture
+Fase atual: o layout está sendo redesenhado a partir de um protótipo feito no Lovable. O objetivo é ficar o mais próximo possível do visual dele, mantendo Angular + Angular Material e mobile-first. **Antes de criar ou alterar qualquer tela, ler `docs/design-reference.md`**, que tem as cores, fontes, espaçamentos, componentes e a ordem das seções do protótipo. As telas usam **dados mockados** até o visual fechar; a integração com a API real vem depois.
 
-Angular 22 storefront ("ÂMBRA" perfumery), standalone components only (no NgModules), **zoneless** change detection.
+**O front conduz o projeto:** todas as telas e features são construídas aqui primeiro, com dados mockados. Depois o backend é adaptado para sustentar o front. Por isso, os models (`core/models`) e os mocks (`core/data`) são o contrato de dados: modele-os com cuidado, como se fossem a resposta real da API (nomes de campos claros, tipos corretos, dinheiro como número em reais, datas em ISO 8601, listas grandes já pensando em paginação).
 
-- `provideZonelessChangeDetection()` is enabled in `src/app/app.config.ts` — every component MUST use `ChangeDetectionStrategy.OnPush` and drive state through signals (`signal`/`computed`), not manual mutation, or the view won't update.
-- Locale is hardcoded to `pt-BR` (`LOCALE_ID`), and UI copy/comments are in Portuguese. Keep new user-facing text and code comments consistent with this.
-- Routing (`src/app/app.routes.ts`) is minimal: `''` lazy-loads `Home`, `**` lazy-loads `NotFound`. `withRouterConfig({ onSameUrlNavigation: 'reload' })` is set intentionally so re-clicking a nav link re-scrolls to its in-page anchor — don't remove it.
+## ⚠️ MOBILE-FIRST É OBRIGATÓRIO
 
-### Layer structure (`src/app/`)
+**Cerca de 90% dos clientes vão acessar pelo celular.** O celular é o produto principal; tablet e desktop são adaptações. Toda decisão de layout, UX e performance parte do mobile.
 
-- `core/` — app-wide, singleton stuff:
-  - `config/` — static config objects (`store-config.ts`, `navigation.ts`, `imagery.ts`) — plain exported constants, not services.
-  - `models/` — plain TS interfaces (`Product`, `Category`, `Highlight`, `NavLink`).
-  - `data/catalog-mock.ts` — mock catalog data.
-  - `services/` — `providedIn: 'root'` injectables holding signal state (`CatalogService`, `CartStore`). Services expose only `asReadonly()` signals; consumers never mutate state directly.
-- `features/` — routed pages, currently `home/` (composed of `sections/*`, one component per landing-page section: hero, highlights, categories, products, cta) and `not-found/`.
-- `layout/` — `header/` and `footer/`, wired into the app shell in `app.ts`/`app.html`.
-- `shared/` — reusable presentational components (e.g. `product-card/`). These stay "dumb": they take `input()`/emit `output()` and don't inject stores directly (see the note in `product-card.ts`).
+- **Estilos base = celular.** O CSS sem media query é o do celular (referência: 360px de largura). Tablet e desktop entram depois, só com media queries `min-width`. Nunca usar `max-width` para "consertar" o mobile.
+- **Nunca construir desktop primeiro e adaptar depois.** Ao criar ou alterar qualquer tela, componente ou seção, pensar e codar primeiro para o celular.
+- **Validar sempre nestas larguras:** 360px, 390px (celulares), 768px (tablet), 1024px e 1440px (desktop). Nenhuma delas pode ter scroll horizontal.
+- **Toque, não mouse:** áreas de toque com no mínimo 44x44px e espaçamento entre elas. Nenhuma funcionalidade pode depender de `:hover`.
+- **Zona do polegar:** ações principais (adicionar ao carrinho, finalizar compra) ficam ao alcance do polegar, de preferência fixas na parte de baixo da tela no mobile.
+- **Rede móvel:** imagens com `NgOptimizedImage` (`ngSrc`, tamanhos e `priority` na imagem principal da dobra), sem layout shift no carregamento e com bundle enxuto.
+- **Formulários (login, cadastro, checkout):** usar os `type`, `inputmode` e `autocomplete` corretos para abrir o teclado certo e permitir preenchimento automático.
+- Respeitar as safe areas de celulares com notch (`env(safe-area-inset-*)`) em elementos fixos.
+- Usar o `BreakpointObserver` do Angular CDK só quando o **comportamento** muda entre tamanhos, não apenas o estilo.
+- A skill `responsive-craft` é o padrão do projeto para implementar e revisar responsividade: `/responsive-craft build` para UI nova e `/responsive-craft audit` para revisar layouts existentes, sempre que mexer em `features/`, `layout/` ou `shared/`.
 
-### State pattern
+## Comandos
 
-`CatalogService` currently serves mock data synchronously through signals. The intended migration path (see its doc comment) is to inject `HttpClient` and feed the same signals, or swap them for `resource()` — consuming components read signals and shouldn't need to change. Follow this pattern for any new data-backed service rather than introducing a different state approach (NgRx, RxJS store, etc.).
+- `npm start` / `ng serve`: servidor de desenvolvimento em `http://localhost:4200`
+- `npm run build` / `ng build`: build de produção em `dist/`
+- `npm run watch`: build de desenvolvimento em modo watch
+- `npm test` / `ng test`: testes unitários (Vitest via `@angular/build:unit-test`)
+- Rodar um único arquivo de teste: `ng test -- src/app/features/home/home.spec.ts` (argumentos do Vitest vão depois do `--`)
+- Ainda não há script de lint no `package.json`.
 
-`CartStore` is intentionally minimal (badge count + add-to-cart feedback only) — check its doc comment before extending it for full cart/checkout logic.
+## Arquitetura
 
-### UI library
+Loja em Angular 22, apenas standalone components (sem NgModules) e change detection **zoneless**.
 
-Angular Material (`@angular/material`, `@angular/cdk`) is the component library in use (toolbar, buttons, icons, badge).
+- `provideZonelessChangeDetection()` está ativo em `src/app/app.config.ts`. Todo componente DEVE usar `ChangeDetectionStrategy.OnPush` e controlar estado com signals (`signal`/`computed`), nunca com mutação manual, ou a tela não atualiza.
+- O locale é fixo em `pt-BR` (`LOCALE_ID`). Textos para o usuário e comentários de código são em português; manter esse padrão.
+- As rotas ficam em `src/app/app.routes.ts` e toda feature é carregada com lazy loading (`loadComponent` / `loadChildren`). O `withRouterConfig({ onSameUrlNavigation: 'reload' })` é intencional: faz o clique repetido num link do menu rolar de novo até a âncora da página. Não remover.
 
-## Frontend Standards
+### Estrutura de camadas (`src/app/`)
 
-- **Mobile-first is mandatory.** Every new component, section, or layout change must be designed and coded starting from the smallest viewport, then progressively enhanced with `min-width` media queries (or Angular CDK `BreakpointObserver` where behavior — not just style — needs to change). Never build desktop-first and retrofit responsiveness afterward.
-- Act as a senior frontend specialist applying current market best practices by default, not only when explicitly asked: semantic HTML, accessible markup (native semantics first, ARIA only to fill real gaps), touch targets ≥44x44px, no layout shift on load, and consistent use of the project's existing spacing/type scale rather than ad-hoc values.
-- The `responsive-craft` skill is this project's standard for responsive/mobile-first implementation and review — use it (`/responsive-craft build` for new UI, `/responsive-craft audit` for reviewing existing layouts) whenever touching `features/`, `layout/`, or `shared/` components.
+- `core/`: itens únicos, usados pela aplicação inteira.
+  - `config/`: objetos de configuração estáticos (`store-config.ts`, `navigation.ts`, `imagery.ts`). São constantes exportadas, não services.
+  - `models/`: interfaces TypeScript simples.
+  - `data/`: dados mockados (ex.: `catalog-mock.ts`).
+  - `services/`: injectables `providedIn: 'root'` que guardam estado em signals (ex.: `CatalogService`, `CartStore`). Os services expõem apenas signals `asReadonly()`; quem consome nunca altera o estado diretamente.
+- `features/`: uma pasta por página com rota (home, catalog, product-detail, cart, favorites, auth, account, not-found). Páginas grandes são compostas por `sections/*`, um componente por seção (ver `home/`).
+- `layout/`: `header/` e `footer/`, ligados ao shell da aplicação em `app.ts`/`app.html`.
+- `shared/`: componentes de apresentação reutilizáveis (ex.: `product-card/`). São componentes "burros": recebem `input()`, emitem `output()` e não injetam stores.
 
-## Conventions
+### Padrão de estado
 
-- Prettier: single quotes, 100-char print width, Angular parser for `.html` templates.
-- Path-alias-free relative imports (`../../core/...`), consistent with existing files.
-- `noPropertyAccessFromIndexSignature`, `strictTemplates`, and `strictInjectionParameters` are on — keep new code strict-mode clean.
-- Component class files are named without a `.component` suffix (e.g. `header.ts`, not `header.component.ts`); this matches the Angular CLI schematics configured in `angular.json`.
+O `CatalogService` entrega dados mockados de forma síncrona via signals. O caminho de migração planejado (ver o comentário de documentação dele) é injetar o `HttpClient` e alimentar os mesmos signals, ou trocá-los por `resource()`. Os componentes continuam lendo signals e não precisam mudar. Seguir esse padrão para qualquer novo service com dados; não introduzir outra abordagem de estado (NgRx, store com RxJS etc.).
+
+O `CartStore` é propositalmente mínimo. Ler o comentário de documentação dele antes de estendê-lo para a lógica completa de carrinho e checkout.
+
+### Biblioteca de UI
+
+Angular Material (`@angular/material`, `@angular/cdk`).
+
+## Boas práticas de frontend
+
+- Atuar como especialista sênior em frontend, aplicando as boas práticas atuais de mercado por padrão, mesmo sem pedido explícito: HTML semântico, acessibilidade (semântica nativa primeiro, ARIA só para lacunas reais), sem layout shift e uso consistente da escala de espaçamento e tipografia do projeto, sem valores avulsos.
+- Nada de atalho só para "funcionar". Se um atalho for inevitável por causa do prazo do MVP, sinalizar explicitamente como **dívida técnica**.
+
+## Performance, SSR e segurança
+
+- **Código compatível com SSR.** O SSR/hydration está previsto (SEO das páginas de produto), mas ainda não está ativo. Nunca acessar `window`, `document`, `localStorage` ou outras APIs exclusivas do navegador diretamente. Usar `inject(DOCUMENT)`, `afterNextRender()` ou proteger com `isPlatformBrowser`.
+- Usar `@defer (on viewport)` em seções pesadas abaixo da dobra.
+- Com Observables (ex.: `HttpClient`), preferir `toSignal()` ou `takeUntilDestroyed()`. Nada de `subscribe` manual sem limpeza.
+- Autenticação: usar guards funcionais (`CanActivateFn`) e interceptors funcionais (`HttpInterceptorFn`) para o token. Nunca ler ou anexar token dentro de componentes.
+- Nunca usar `bypassSecurityTrust*` nem fazer bind de `innerHTML` com dados da API ou do usuário.
+- Não importar bibliotecas inteiras para usar uma única função; manter o bundle dentro dos budgets do `angular.json`.
+
+## Convenções
+
+- Prettier: aspas simples, largura de 100 caracteres, parser Angular para templates `.html`.
+- Imports relativos sem path alias (`../../core/...`), como nos arquivos existentes.
+- `noPropertyAccessFromIndexSignature`, `strictTemplates` e `strictInjectionParameters` estão ativos; manter o código novo sem erros de strict mode.
+- Arquivos de classe de componente sem o sufixo `.component` (ex.: `header.ts`, não `header.component.ts`), conforme os schematics configurados no `angular.json`.
+
+## Fluxo de trabalho
+
+- O dono do projeto é dev backend Java/Spring e está aprendendo Angular: explicar o "porquê" das decisões de frontend, sem assumir conhecimento avançado.
+- Trabalhar em passos pequenos: propor o plano da sessão, esperar aprovação e então dizer exatamente o que fazer (comando, arquivo, conteúdo). Ele aplica e valida antes do próximo passo. Não rodar comandos nem editar arquivos sem ele pedir.
+- Cada sessão tem um objetivo claro combinado no início (ex.: ajustar uma tela ou comportamento) e termina com ele funcionando. O roadmap é guia, não ordem obrigatória.
+- Refatorações de arquitetura ficam para a revisão pós-MVP.
+- Ambiente: Windows com Git Bash (MINGW64). Os comandos precisam ser compatíveis com bash.
+
+## Regras de Git
+
+- **O Claude nunca executa `git add`, `git commit` nem `git push`** (nem outros comandos que alterem o histórico ou o remoto, como `merge`, `rebase`, `reset` ou `tag`). Essas ações são sempre feitas manualmente pelo dono do projeto. O Claude pode sugerir o comando e a mensagem de commit, mas não executa.
+- Trabalhar sempre na branch `develop`.
+- Ao sugerir comandos git, entregar em uma linha só, encadeados com `&&`, e sempre com `git push origin develop` (nunca só `git push`). Ex.: `git add <arquivos> && git commit -m "mensagem" && git push origin develop`.
+- Nunca adicionar linha de coautoria (`Co-Authored-By: Claude`) nem "Generated with Claude Code" em mensagens de commit ou descrições de PR.
