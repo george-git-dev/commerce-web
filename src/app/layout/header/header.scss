@@ -321,3 +321,8 @@ $header-h-mobile: 120px;
     }
   }
 }
+
+// Botão de som ambiente: dourado quando ligado.
+.bar__sound--on mat-icon {
+  color: var(--gold);
+}  

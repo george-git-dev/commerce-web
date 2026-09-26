@@ -36,6 +36,18 @@
       <button
         type="button"
         matIconButton
+        class="bar__sound"
+        data-ambient-toggle
+        [class.bar__sound--on]="ambientSound.enabled()"
+        [attr.aria-pressed]="ambientSound.enabled()"
+        [attr.aria-label]="ambientSound.enabled() ? 'Desligar som ambiente' : 'Ligar som ambiente'"
+        (click)="ambientSound.toggle()"
+      >
+        <mat-icon>{{ ambientSound.enabled() ? 'music_note' : 'music_off' }}</mat-icon>
+      </button>
+      <button
+        type="button"
+        matIconButton
         aria-label="Buscar perfumes"
         aria-controls="search-panel"
         [attr.aria-expanded]="searchOpen()"

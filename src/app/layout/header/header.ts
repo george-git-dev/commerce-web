@@ -8,6 +8,7 @@ import { CATALOG_QUERY_PARAMS, NAV_LINKS } from '../../core/config/navigation';
 import { STORE_CONFIG } from '../../core/config/store-config';
 import { CartStore } from '../../core/services/cart-store';
 import { FavoritesStore } from '../../core/services/favorites-store';
+import { AmbientSoundService } from '../../core/services/ambient-sound-service';
 
 @Component({
   selector: 'app-header',
@@ -21,6 +22,7 @@ export class Header {
   protected readonly navLinks = NAV_LINKS;
   protected readonly cart = inject(CartStore);
   protected readonly favorites = inject(FavoritesStore);
+  protected readonly ambientSound = inject(AmbientSoundService);
   private readonly router = inject(Router);
 
   protected readonly menuOpen = signal(false);
@@ -53,3 +55,4 @@ export class Header {
     });
   }
 }
+
