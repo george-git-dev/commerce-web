@@ -19,7 +19,7 @@ describe('Home', () => {
     await fixture.whenStable();
     const compiled = fixture.nativeElement as HTMLElement;
 
-    expect(compiled.querySelector('.hero')).toBeTruthy();
+    expect(compiled.querySelector('.banners')).toBeTruthy();
     expect(compiled.querySelector('.categories__grid')).toBeTruthy();
     expect(compiled.querySelectorAll('.products__grid').length).toBe(2);
     expect(compiled.querySelector('.highlights')).toBeTruthy();

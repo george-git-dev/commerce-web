@@ -6,7 +6,6 @@
  * genérica de coleção.
  */
 export const IMAGERY = {
-  hero: 'img/perfume-hero.jpg',
   categoriesBand: 'img/perfume-categories.jpg',
   productPlaceholder: 'img/perfume-collection.jpg',
   story: 'img/perfume-story.jpg',
