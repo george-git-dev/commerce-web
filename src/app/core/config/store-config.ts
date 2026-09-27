@@ -37,7 +37,7 @@ export const SOCIAL_LINKS: readonly SocialLink[] = [
 
 /** Mensagens da faixa rolante no topo do site, na ordem de exibição. */
 export const ANNOUNCEMENTS: readonly string[] = [
-  'Frete grátis acima de R$ 299',
+  'Frete grátis acima de R$ 599',
   'Parcele em até 12x',
   'Compra segura',
 ];

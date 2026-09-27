@@ -10,7 +10,7 @@ export const HIGHLIGHTS_MOCK: readonly Highlight[] = [
   {
     icon: 'local_shipping',
     title: 'Frete grátis',
-    text: 'Acima de R$ 299, para todo o Brasil',
+    text: 'Acima de R$ 599, para todo o Brasil',
   },
   {
     icon: 'lock',
@@ -20,7 +20,7 @@ export const HIGHLIGHTS_MOCK: readonly Highlight[] = [
   {
     icon: 'inventory_2',
     title: 'Produto original',
-    text: 'Frascos lacrados, direto do fabricante',
+    text: 'Frascos lacrados, direto do importador',
   },
   {
     icon: 'payments',
