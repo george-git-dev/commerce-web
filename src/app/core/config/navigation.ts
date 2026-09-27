@@ -20,7 +20,7 @@ export const HOME_SECTION_IDS = {
 
 export const NAV_LINKS: readonly NavLink[] = [
   { label: 'Início', path: '/' },
-  { label: 'Perfumes', path: '/produtos' },
+  { label: 'Ver tudo', path: '/produtos' },
   {
     label: 'Masculinos',
     path: '/produtos',
@@ -36,6 +36,11 @@ export const NAV_LINKS: readonly NavLink[] = [
     path: '/produtos',
     queryParams: { [CATALOG_QUERY_PARAMS.gender]: 'Unissex' },
   },
+  {
+    label: 'Kits',
+    path: '/produtos',
+    queryParams: { [CATALOG_QUERY_PARAMS.gender]: 'Kits' },
+  },  
   { label: 'Ofertas', path: '/produtos', queryParams: { [CATALOG_QUERY_PARAMS.deal]: 'true' } },
   {
     label: 'Lançamentos',
