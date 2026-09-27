@@ -108,6 +108,10 @@
 </mat-toolbar>
 
 <div id="mobile-menu" class="mobile-menu" [class.mobile-menu--open]="menuOpen()">
+  <a routerLink="/minha-conta" class="mobile-menu__account" (click)="closeMenu()">
+    <mat-icon>person</mat-icon>
+    Minha conta
+  </a>
   <nav aria-label="Navegação principal (mobile)">
     @for (link of navLinks; track link.label) {
       <a [routerLink]="link.path" [queryParams]="link.queryParams ?? null" (click)="closeMenu()">
@@ -115,8 +119,4 @@
       </a>
     }
   </nav>
-  <a routerLink="/minha-conta" class="mobile-menu__account" (click)="closeMenu()">
-    <mat-icon>person</mat-icon>
-    Minha conta
-  </a>
 </div>
