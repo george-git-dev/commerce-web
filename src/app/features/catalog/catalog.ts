@@ -15,10 +15,15 @@ import { ProductCard } from '../../shared/product-card/product-card';
 
 type SortOption = 'relevancia' | 'menor-preco' | 'maior-preco' | 'avaliacao';
 
-function toNumber(value: string | null): number | null {
-  if (!value) return null;
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : null;
+const MAX_PRICE_DIGITS = 5; // até R$ 99.999
+
+/**
+ * Lê um preço da URL. Aceita só inteiros positivos com até 5 dígitos;
+ * qualquer outra coisa (texto, negativo, decimal, notação 1e5…) é ignorada.
+ */
+function toPrice(value: string | null): number | null {
+  if (!value || !new RegExp(`^\\d{1,${MAX_PRICE_DIGITS}}$`).test(value)) return null;
+  return Number(value);
 }
 
 /**
@@ -55,10 +60,10 @@ export class Catalog {
   protected readonly gender = computed(() => this.queryParamMap().get(this.params.gender));
   protected readonly brand = computed(() => this.queryParamMap().get(this.params.brand));
   protected readonly priceMin = computed(() =>
-    toNumber(this.queryParamMap().get(this.params.priceMin)),
+    toPrice(this.queryParamMap().get(this.params.priceMin)),
   );
   protected readonly priceMax = computed(() =>
-    toNumber(this.queryParamMap().get(this.params.priceMax)),
+    toPrice(this.queryParamMap().get(this.params.priceMax)),
   );
   protected readonly search = computed(() => this.queryParamMap().get(this.params.search) ?? '');
   protected readonly dealOnly = computed(
@@ -134,6 +139,12 @@ export class Catalog {
       queryParamsHandling: 'merge',
       replaceUrl: true,
     });
+  }
+
+  /** Remove, enquanto o usuário digita, tudo que não for dígito, e limita o tamanho. */
+  protected keepDigitsOnly(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    input.value = input.value.replace(/\D/g, '').slice(0, MAX_PRICE_DIGITS);
   }
 
   protected clearFilters(): void {

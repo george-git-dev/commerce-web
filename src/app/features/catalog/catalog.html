@@ -53,20 +53,28 @@
       <label>
         <span>Mín.</span>
         <input
-          type="number"
-          min="0"
+          type="text"
+          inputmode="numeric"
+          pattern="[0-9]*"
+          maxlength="5"
+          autocomplete="off"
           placeholder="R$ 0"
           [value]="priceMin()"
+          (input)="keepDigitsOnly($event)"
           (change)="setFilter(params.priceMin, $any($event.target).value)"
         />
       </label>
       <label>
         <span>Máx.</span>
         <input
-          type="number"
-          min="0"
+          type="text"
+          inputmode="numeric"
+          pattern="[0-9]*"
+          maxlength="5"
+          autocomplete="off"
           placeholder="R$ 1000"
           [value]="priceMax()"
+          (input)="keepDigitsOnly($event)"
           (change)="setFilter(params.priceMax, $any($event.target).value)"
         />
       </label>
