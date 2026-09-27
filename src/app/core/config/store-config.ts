@@ -34,3 +34,10 @@ export const STORE_CONFIG: StoreConfig = {
 export const SOCIAL_LINKS: readonly SocialLink[] = [
   { icon: 'chat', label: 'WhatsApp', url: STORE_CONFIG.whatsappHref },
 ];
+
+/** Mensagens da faixa rolante no topo do site, na ordem de exibição. */
+export const ANNOUNCEMENTS: readonly string[] = [
+  'Frete grátis acima de R$ 299',
+  'Parcele em até 12x',
+  'Compra segura',
+];

@@ -1,11 +1,15 @@
 <div class="announce">
-  <div class="ui-container announce__inner">
-    <ul class="announce__list">
-      <li>Frete grátis acima de R$ 299</li>
-      <li>Parcele em até 12x</li>
-      <li>Compra segura</li>
-    </ul>
-    <a [href]="store.phoneHref" class="announce__phone">{{ store.phone }}</a>
+  <div class="announce__viewport">
+    <div class="announce__track">
+      <!-- Duas cópias da lista para o loop ficar contínuo; a segunda é ignorada por leitores de tela. -->
+      @for (copy of [0, 1]; track copy) {
+        <ul class="announce__list" [attr.aria-hidden]="copy === 1 ? 'true' : null">
+          @for (message of announcements; track $index) {
+            <li>{{ message }}</li>
+          }
+        </ul>
+      }
+    </div>
   </div>
 </div>
 

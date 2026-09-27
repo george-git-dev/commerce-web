@@ -40,13 +40,13 @@ export const NAV_LINKS: readonly NavLink[] = [
     label: 'Kits',
     path: '/produtos',
     queryParams: { [CATALOG_QUERY_PARAMS.gender]: 'Kits' },
-  },  
-  { label: 'Ofertas', path: '/produtos', queryParams: { [CATALOG_QUERY_PARAMS.deal]: 'true' } },
+  },
   {
     label: 'Lançamentos',
     path: '/produtos',
     queryParams: { [CATALOG_QUERY_PARAMS.launch]: 'true' },
   },
+  { label: 'Ofertas', path: '/produtos', queryParams: { [CATALOG_QUERY_PARAMS.deal]: 'true' } },
 ];
 
 /** Query params de `/produtos` para o tile de uma categoria da home. */

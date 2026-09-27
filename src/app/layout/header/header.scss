@@ -10,47 +10,50 @@ $header-h-mobile: 120px;
   isolation: isolate;
 }
 
-// Faixa superior clara, com os selos comerciais à esquerda.
+// Faixa superior clara, com as mensagens rolando de ponta a ponta.
 .announce {
   background: var(--muted);
   color: var(--earth);
   font-size: 0.75rem;
 
-  &__inner {
+  // Área visível das mensagens: largura total da tela.
+  &__viewport {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 16px;
     height: 28px;
+    overflow: hidden;
+    mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+  }
+
+  // As duas cópias lado a lado; anda uma cópia e recomeça, sem emenda.
+  &__track {
+    display: flex;
+    width: max-content;
+    animation: announce-scroll 80s linear infinite;
+  }
+
+  &__viewport:hover &__track {
+    animation-play-state: paused;
   }
 
   &__list {
     display: flex;
     align-items: center;
-    gap: 18px;
     margin: 0;
     padding: 0;
     list-style: none;
-    min-width: 0;
 
-    li:not(:first-child) {
-      display: none;
-    }
-
-    li:first-child {
+    li {
       white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-  }
 
-  &__phone {
-    flex: none;
-    white-space: nowrap;
-    letter-spacing: 0.02em;
-
-    &:hover {
-      color: var(--foreground);
+      // Estrela da logo como separador (inclusive entre o fim de uma cópia e o começo da outra).
+      &::after {
+        content: '✦';
+        margin-inline: 22px;
+        color: var(--gold);
+        font-size: 0.625rem;
+        vertical-align: middle;
+      }
     }
   }
 }
@@ -301,12 +304,6 @@ $header-h-mobile: 120px;
     }
   }
 
-  .announce__list li:not(:first-child) {
-    display: inline;
-    padding-left: 22px;
-    border-left: 1px solid var(--border);
-  }
-
   .search-panel__form {
     padding-block: 22px;
   }
@@ -316,7 +313,7 @@ $header-h-mobile: 120px;
   .announce {
     font-size: 0.8125rem;
 
-    &__inner {
+    &__viewport {
       height: 32px;
     }
   }
@@ -325,4 +322,21 @@ $header-h-mobile: 120px;
 // Botão de som ambiente: dourado quando ligado.
 .bar__sound--on mat-icon {
   color: var(--gold);
-}  
+}
+
+@keyframes announce-scroll {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+// Quem pediu "reduzir movimento": mensagens paradas, só a primeira cópia.
+@media (prefers-reduced-motion: reduce) {
+  .announce__track {
+    animation: none;
+  }
+
+  .announce__list[aria-hidden] {
+    display: none;
+  }
+}

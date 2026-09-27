@@ -5,7 +5,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { Router, RouterLink } from '@angular/router';
 import { CATALOG_QUERY_PARAMS, NAV_LINKS } from '../../core/config/navigation';
-import { STORE_CONFIG } from '../../core/config/store-config';
+import { ANNOUNCEMENTS } from '../../core/config/store-config';
 import { CartStore } from '../../core/services/cart-store';
 import { FavoritesStore } from '../../core/services/favorites-store';
 import { AmbientSoundService } from '../../core/services/ambient-sound-service';
@@ -18,7 +18,9 @@ import { AmbientSoundService } from '../../core/services/ambient-sound-service';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Header {
-  protected readonly store = STORE_CONFIG;
+  // A lista é repetida para que cada "cópia" da faixa fique mais larga que qualquer tela
+  // (inclusive monitores ultrawide); senão sobra espaço vazio à direita durante o loop.
+  protected readonly announcements = Array.from({ length: 4 }, () => ANNOUNCEMENTS).flat();
   protected readonly navLinks = NAV_LINKS;
   protected readonly cart = inject(CartStore);
   protected readonly favorites = inject(FavoritesStore);
