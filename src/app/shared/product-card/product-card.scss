@@ -7,14 +7,6 @@
   container-name: product-card;
 }
 
-// Cards em posição par mostram a metade de baixo da foto (frasco verde) — evita
-// que a mesma imagem repetida em cards vizinhos pareça o card anterior clonado.
-// `:host` aqui é o próprio `<app-product-card>`, daí o `nth-child` contar a
-// posição real dele entre os irmãos no grid, não um elemento interno ao template.
-:host:nth-child(even) .card__media img {
-  transform-origin: bottom center;
-}
-
 .card {
   position: relative;
   display: flex;
@@ -52,20 +44,12 @@
       height: auto;
       aspect-ratio: 1;
       object-fit: cover;
-      // `perfume-collection.jpg` é uma foto só, com 2 frascos empilhados (bege em
-      // cima, verde embaixo), reaproveitada em todo card por falta de foto por
-      // produto na API. Sem este zoom, cover mostra os dois frascos — como é a
-      // mesma imagem em cards vizinhos, parece o mesmo card duplicado. O scale(2)
-      // ancorado no topo (ou embaixo, alternando por card — ver `:nth-child` acima)
-      // mostra só metade da foto, ou seja, um frasco só, preenchendo o quadrado.
-      transform: scale(2);
-      transform-origin: top center;
       transition: transform var(--motion-slow) var(--ease-swift);
     }
   }
 
   &:hover &__media img {
-    transform: scale(2.08);
+    transform: scale(1.04);
   }
 
   &__badge {

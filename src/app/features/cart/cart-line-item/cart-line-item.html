@@ -3,7 +3,7 @@
 <article class="line">
   <a class="line__media" [routerLink]="['/produtos', item.product.id]">
     <img
-      [src]="placeholderImage"
+      [src]="item.product.images[0] || placeholderImage"
       [alt]="item.product.name"
       width="140"
       height="140"

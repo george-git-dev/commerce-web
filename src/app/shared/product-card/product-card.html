@@ -2,7 +2,13 @@
 
 <article class="card">
   <a class="card__media" [routerLink]="['/produtos', item.id]" [attr.aria-label]="item.name">
-    <img [src]="placeholderImage" [alt]="item.name" width="800" height="800" loading="lazy" />
+    <img
+      [src]="item.images[0] || placeholderImage"
+      [alt]="item.name"
+      width="800"
+      height="800"
+      loading="lazy"
+    />
     @if (item.badge) {
       <span class="card__badge">{{ item.badge }}</span>
     } @else if (item.promotionActive) {
