@@ -5,7 +5,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { IMAGERY } from '../../core/config/imagery';
+import { ProductGallery } from './product-gallery/product-gallery';
 import { MOCK_PRODUCTS } from '../../core/data/mock-products';
 import { CartStore } from '../../core/services/cart-store';
 import { FavoritesStore } from '../../core/services/favorites-store';
@@ -13,10 +13,10 @@ import { Product } from '../../core/models/product';
 import { ProductCard } from '../../shared/product-card/product-card';
 import { StarRating } from '../../shared/star-rating/star-rating';
 
-/** `/produtos/:id`. Dado mockado — a mesma foto de coleção cobre as 4 miniaturas. */
+/** `/produtos/:id`. Dado mockado; a galeria usa `product.images`. */
 @Component({
   selector: 'app-product-detail',
-  imports: [CurrencyPipe, MatButtonModule, MatIconModule, RouterLink, ProductCard, StarRating],
+  imports: [CurrencyPipe, MatButtonModule, MatIconModule, RouterLink, ProductCard, StarRating, ProductGallery],
   templateUrl: './product-detail.html',
   styleUrl: './product-detail.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -29,9 +29,6 @@ export class ProductDetail {
   private readonly snackBar = inject(MatSnackBar);
 
   private readonly paramMap = toSignal(this.route.paramMap, { requireSync: true });
-
-  protected readonly imagery = IMAGERY;
-  protected readonly thumbnails = [0, 1, 2, 3];
 
   protected readonly product = computed<Product | undefined>(() => {
     const id = Number(this.paramMap().get('id'));

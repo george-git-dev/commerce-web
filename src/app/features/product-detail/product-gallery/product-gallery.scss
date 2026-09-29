@@ -1,0 +1,100 @@
+:host {
+  display: block;
+  // A galeria é item do grid da página; sem isto o Swiper estica a coluna.
+  min-width: 0;
+}
+
+.gallery {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.gallery__main {
+  display: block;
+  // Sem width: 100%, o Swiper dentro do flex calcula largura infinita e a foto fica gigante.
+  width: 100%;
+  overflow: hidden;
+  border-radius: var(--radius);
+  background: var(--muted);
+  --swiper-theme-color: var(--gold);
+  --swiper-pagination-bullet-inactive-color: var(--foreground);
+  --swiper-pagination-bullet-inactive-opacity: 0.3;
+  --swiper-pagination-bullet-size: 8px;
+}
+
+// A foto inteira é o botão que abre o zoom.
+.gallery__zoom {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: zoom-in;
+
+  img {
+    display: block;
+    width: 100%;
+    height: auto; // sem isso o height="800" do HTML trava a altura
+    aspect-ratio: 1;
+    object-fit: cover;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: -4px;
+  }
+}
+
+// Celular: sem miniaturas, a navegação é o swipe + bolinhas.
+.gallery__thumbs {
+  display: none;
+}
+
+.gallery__thumb {
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--muted);
+  cursor: pointer;
+  opacity: 0.6;
+  transition:
+    opacity 0.2s,
+    border-color 0.2s;
+
+  img {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1;
+    object-fit: cover;
+  }
+
+  &:hover,
+  &--active {
+    opacity: 1;
+  }
+
+  &--active {
+    border-color: var(--gold);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 2px;
+  }
+}
+
+// Desktop: miniaturas no lugar das bolinhas.
+@media (min-width: 900px) {
+  .gallery__main::part(pagination) {
+    display: none;
+  }
+
+  .gallery__thumbs {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+  }
+}

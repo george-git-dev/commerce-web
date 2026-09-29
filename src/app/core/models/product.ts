@@ -23,6 +23,12 @@ export interface Product {
   attributes: readonly ProductAttribute[];
   finalPrice: number;
   promotionActive: boolean;
+  /**
+   * Fotos do produto, na ordem da galeria; a primeira é a principal.
+   * Caminhos relativos a `public/` (ex.: 'img/produtos/garrafa-preta.webp').
+   * Campo oficial do contrato: a API vai devolver as URLs (S3/CloudFront).
+   */
+  images: readonly string[];
 
   // Mock-only enquanto o visual não é validado — ver se viram campos reais
   // da API ou se somem quando reconectarmos em dado de verdade.

@@ -10,26 +10,7 @@
       </nav>
 
       <div class="detail__layout">
-        <div class="detail__gallery">
-          <img
-            class="detail__main-image"
-            [src]="imagery.productPlaceholder"
-            [alt]="item.name"
-            width="800"
-            height="800"
-          />
-          <div class="detail__thumbs">
-            @for (thumb of thumbnails; track thumb) {
-              <img
-                [src]="imagery.productPlaceholder"
-                [alt]="item.name"
-                width="160"
-                height="160"
-                loading="lazy"
-              />
-            }
-          </div>
-        </div>
+        <app-product-gallery [images]="item.images" [alt]="item.name" />
 
         <div class="detail__info">
           <p class="detail__brand">{{ item.brandName }}</p>

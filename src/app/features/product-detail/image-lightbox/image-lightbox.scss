@@ -1,0 +1,96 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
+.lightbox {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--surface-dark);
+  color: var(--surface-dark-foreground);
+}
+
+// Topo: contador à esquerda, fechar à direita. Respeita o notch do celular.
+.lightbox__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: max(8px, env(safe-area-inset-top)) 8px 8px 16px;
+}
+
+.lightbox__counter {
+  font-size: 0.875rem;
+  letter-spacing: 0.08em;
+}
+
+.lightbox__close {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 2px;
+  }
+}
+
+// O carrossel ocupa todo o espaço entre o topo e a dica.
+.lightbox__swiper {
+  display: block;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  --swiper-navigation-color: var(--surface-dark-foreground);
+  --swiper-navigation-size: 28px;
+}
+
+.lightbox__swiper::part(container) {
+  height: 100%;
+}
+
+swiper-slide {
+  height: 100%;
+}
+
+// Setas só no desktop: no celular a navegação é o swipe.
+.lightbox__swiper::part(button-prev),
+.lightbox__swiper::part(button-next) {
+  display: none;
+}
+
+.swiper-zoom-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+
+  img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+  }
+}
+
+.lightbox__hint {
+  margin: 0;
+  padding: 12px 16px max(12px, env(safe-area-inset-bottom));
+  text-align: center;
+  font-size: 0.8125rem;
+  opacity: 0.7;
+}
+
+@media (min-width: 1024px) {
+  .lightbox__swiper::part(button-prev),
+  .lightbox__swiper::part(button-next) {
+    display: flex;
+  }
+}

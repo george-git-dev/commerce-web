@@ -37,40 +37,6 @@
   margin-bottom: 56px;
 }
 
-.detail__gallery {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.detail__main-image {
-  width: 100%;
-  // `width`/`height="800"` no HTML (evitam layout shift) viram um `height: 800px`
-  // de baixa prioridade — sem este `auto`, `aspect-ratio` nunca chega a agir e a
-  // imagem fica travada em 800px de altura real, ignorando a largura do container.
-  height: auto;
-  aspect-ratio: 1;
-  object-fit: cover;
-  border-radius: var(--radius);
-  background: var(--muted);
-}
-
-.detail__thumbs {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
-
-  img {
-    width: 100%;
-    height: auto;
-    aspect-ratio: 1;
-    object-fit: cover;
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--border);
-    background: var(--muted);
-  }
-}
-
 .detail__brand {
   margin: 0;
   font-family: var(--font-ui);

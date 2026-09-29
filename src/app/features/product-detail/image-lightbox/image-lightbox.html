@@ -1,0 +1,34 @@
+<div class="lightbox">
+  <div class="lightbox__bar">
+    <span class="lightbox__counter" aria-live="polite">
+      {{ current() }} / {{ data.images.length }}
+    </span>
+    <button type="button" class="lightbox__close" (click)="close()" aria-label="Fechar fotos">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <swiper-container
+    #swiper
+    class="lightbox__swiper"
+    init="false"
+    [attr.initial-slide]="data.start"
+    zoom="true"
+    zoom-max-ratio="3"
+    navigation="true"
+    keyboard="true"
+    a11y="true"
+    (swiperslidechange)="onSlideChange()"
+  >
+    @for (src of data.images; track $index; let i = $index) {
+      <swiper-slide>
+        <!-- O Swiper aplica o zoom neste container. -->
+        <div class="swiper-zoom-container">
+          <img [src]="src" [alt]="data.alt + ' — foto ' + (i + 1)" />
+        </div>
+      </swiper-slide>
+    }
+  </swiper-container>
+
+  <p class="lightbox__hint">Toque duas vezes (ou use dois dedos) para dar zoom</p>
+</div>

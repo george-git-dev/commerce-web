@@ -1,0 +1,50 @@
+<div class="gallery">
+  <swiper-container
+    #swiper
+    class="gallery__main"
+    init="false"
+    observer="true"
+    pagination="true"
+    pagination-clickable="true"
+    a11y="true"
+    (swiperslidechange)="onSlideChange()"
+  >
+    @for (src of images(); track $index; let i = $index) {
+      <swiper-slide>
+        <button
+          type="button"
+          class="gallery__zoom"
+          (click)="openZoom(i)"
+          [attr.aria-label]="'Ampliar foto ' + (i + 1) + ' de ' + images().length"
+        >
+          <img
+            [src]="src"
+            [alt]="alt() + ' — foto ' + (i + 1)"
+            width="800"
+            height="800"
+            [attr.loading]="i === 0 ? 'eager' : 'lazy'"
+            [attr.fetchpriority]="i === 0 ? 'high' : null"
+          />
+        </button>
+      </swiper-slide>
+    }
+  </swiper-container>
+
+  <!-- Miniaturas: só aparecem no desktop (ver .scss). -->
+  @if (images().length > 1) {
+    <div class="gallery__thumbs">
+      @for (src of images(); track $index; let i = $index) {
+        <button
+          type="button"
+          class="gallery__thumb"
+          [class.gallery__thumb--active]="i === active()"
+          [attr.aria-current]="i === active() ? 'true' : null"
+          [attr.aria-label]="'Ver foto ' + (i + 1)"
+          (click)="goTo(i)"
+        >
+          <img [src]="src" alt="" width="160" height="160" loading="lazy" />
+        </button>
+      }
+    </div>
+  }
+</div>
