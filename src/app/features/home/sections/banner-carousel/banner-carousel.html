@@ -17,28 +17,39 @@
   >
     @for (banner of banners; track banner.id; let first = $first) {
       <swiper-slide>
-        <picture>
-          @if (banner.imageDesktop) {
-            <source
-              media="(min-width: 768px)"
-              [srcset]="banner.imageDesktop"
-              width="1920"
-              height="720"
-            />
-          }
-          <img
-            class="banner__img"
-            [src]="banner.image"
-            [alt]="banner.alt"
-            width="1080"
-            height="1350"
-            [attr.loading]="first ? 'eager' : 'lazy'"
-            [attr.fetchpriority]="first ? 'high' : null"
-          />
-        </picture>
+        @if (banner.link; as link) {
+          <a class="banner__link" [routerLink]="link.path" [queryParams]="link.queryParams">
+            <ng-container *ngTemplateOutlet="art; context: { $implicit: banner, first }" />
+          </a>
+        } @else {
+          <ng-container *ngTemplateOutlet="art; context: { $implicit: banner, first }" />
+        }
       </swiper-slide>
     }
   </swiper-container>
+
+  <!-- Arte do banner. Fica num template para não repetir o <picture> com e sem link. -->
+  <ng-template #art let-banner let-first="first">
+    <picture>
+      @if (banner.imageDesktop) {
+        <source
+          media="(min-width: 768px)"
+          [srcset]="banner.imageDesktop"
+          width="1920"
+          height="720"
+        />
+      }
+      <img
+        class="banner__img"
+        [src]="banner.image"
+        [alt]="banner.alt"
+        width="1080"
+        height="1350"
+        [attr.loading]="first ? 'eager' : 'lazy'"
+        [attr.fetchpriority]="first ? 'high' : null"
+      />
+    </picture>
+  </ng-template>
 
   <!-- Ornamento da divisão: o arco e a estrela da logo, com linhas laterais. -->
   <div class="banners__divider" aria-hidden="true">

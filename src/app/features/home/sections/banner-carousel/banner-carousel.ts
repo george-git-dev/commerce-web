@@ -7,13 +7,15 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
+import { RouterLink } from '@angular/router';
 import type { SwiperContainer } from 'swiper/element';
 import { BANNERS } from '../../../../core/config/banners';
 
 @Component({
   selector: 'app-banner-carousel',
-  imports: [MatIconModule],
+  imports: [MatIconModule, RouterLink, NgTemplateOutlet],
   templateUrl: './banner-carousel.html',
   styleUrl: './banner-carousel.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

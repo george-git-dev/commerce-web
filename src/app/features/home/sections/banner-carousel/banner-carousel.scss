@@ -42,6 +42,16 @@
   height: auto;
 }
 
+// Banner com link: o banner inteiro é a área de toque.
+.banner__link {
+  display: block;
+
+  &:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: -4px; // por dentro, senão o carrossel corta o contorno
+  }
+}
+
 // Botão de pausar: área de toque de 44px no canto inferior direito da imagem.
 .banners__toggle {
   position: absolute;
