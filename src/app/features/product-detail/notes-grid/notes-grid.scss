@@ -3,7 +3,7 @@
 }
 
 .notes {
-  padding-block: 48px;
+  padding-block: 32px;
   border-top: 1px solid var(--border);
 }
 
@@ -13,7 +13,7 @@
   flex-wrap: wrap;
   justify-content: center;
   gap: 10px;
-  margin: -8px 0 32px;
+  margin: -8px 0 20px;
 }
 
 .fact {
@@ -49,7 +49,7 @@
 
 .notes__layers {
   display: grid;
-  gap: 28px;
+  gap: 20px;
 }
 
 .notes__title {
@@ -110,6 +110,14 @@
 // Desktop: as três camadas lado a lado, centralizadas como o título — as
 // imagens têm largura fixa e não sobra vazio à direita de cada camada.
 @media (min-width: 900px) {
+  .notes {
+    padding-block: 48px;
+  }
+
+  .notes__facts {
+    margin-bottom: 32px;
+  }
+
   .notes__layers {
     grid-template-columns: repeat(3, 1fr);
     gap: 32px;

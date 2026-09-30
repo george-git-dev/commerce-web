@@ -4,7 +4,7 @@
   font-size: 0.875rem;
 
   h4 {
-    margin: 0 0 18px;
+    margin: 0 0 12px;
     color: var(--primary-foreground);
     font-family: var(--font-ui);
     font-size: 0.8125rem;
@@ -17,11 +17,13 @@
     color: var(--gold);
   }
 
+  // Celular: marca em cima e as colunas de links lado a lado (2 por linha),
+  // com espaços enxutos. O desktop volta aos valores maiores (ver fim do arquivo).
   &__grid {
     display: grid;
-    grid-template-columns: 1fr;
-    gap: 40px;
-    padding-block: 56px 44px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 28px 20px;
+    padding-block: 36px 28px;
   }
 
   &__col--brand {
@@ -30,12 +32,12 @@
 
   &__brand {
     display: inline-flex;
-    margin-bottom: 18px;
+    margin-bottom: 12px;
   }
 
   &__logo {
     display: block;
-    height: 190px;
+    height: 120px;
     width: auto;
     object-fit: contain;
     //filter: brightness(0) invert(1);
@@ -53,7 +55,7 @@
     list-style: none;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
 
     // Itens sem página própria ainda (ex.: "Trocas e devoluções") ficam como texto simples.
     span {
@@ -64,7 +66,7 @@
   &__socials {
     display: flex;
     gap: 10px;
-    margin-top: 20px;
+    margin-top: 16px;
 
     a {
       display: grid;
@@ -95,8 +97,8 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 14px;
-    padding-block: 22px;
+    gap: 12px;
+    padding-block: 18px;
     text-align: center;
   }
 
@@ -116,21 +118,21 @@
   }
 }
 
-@media (min-width: 640px) {
-  .footer__grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .footer__col--brand {
-    grid-column: 1 / -1;
-  }
-}
-
 @media (min-width: 1024px) {
+  .footer {
+    h4 {
+      margin-bottom: 18px;
+    }
+  }
+
   .footer__grid {
     grid-template-columns: 1.4fr 1fr 1fr 1fr;
     gap: 48px;
     padding-block: 72px 56px;
+  }
+
+  .footer__logo {
+    height: 190px;
   }
 
   .footer__col--brand {
