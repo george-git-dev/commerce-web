@@ -159,6 +159,11 @@
   border-top: 1px solid var(--border);
 }
 
+// Reserva espaço enquanto as sugestões não carregam (evita a página "pular").
+.related__placeholder {
+  min-height: 420px;
+}
+
 .related__grid {
   // Mesma grade da home ("Produtos em destaque"): 2 por linha no celular.
   display: grid;

@@ -1,6 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 import { CATEGORIES_MOCK, HIGHLIGHTS_MOCK } from '../data/catalog-mock';
 import { MOCK_PRODUCTS } from '../data/mock-products';
+import { RELATED_MOCK } from '../data/related-mock';
 import { Category } from '../models/category';
 import { Highlight } from '../models/highlight';
 import { Product } from '../models/product';
@@ -27,5 +28,16 @@ export class CatalogService {
   /** Chamado dentro de um `computed`, acompanha as mudanças de `products`. */
   findBySlug(slug: string | null): Product | undefined {
     return slug ? this.products().find((product) => product.slug === slug) : undefined;
+  }
+
+  /**
+   * "Você também pode gostar". Hoje lê o mock; na Fase 2 vira
+   * `GET /products/{slug}/related?limit=4` (a regra de similaridade é do back).
+   */
+  related(product: Product): readonly Product[] {
+    const slugs = RELATED_MOCK[product.slug] ?? [];
+    return slugs
+      .map((slug) => this.findBySlug(slug))
+      .filter((item): item is Product => item !== undefined);
   }
 }

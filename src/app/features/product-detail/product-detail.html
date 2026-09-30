@@ -88,23 +88,28 @@
         [occasions]="item.occasions ?? []"
       />
 
-      @if (related().length) {
-        <section class="related">
-          <header class="ui-section-head">
-            <span class="ui-eyebrow">Para você</span>
-            <h2>Você também pode gostar</h2>
-          </header>
-          <div class="related__grid">
-            @for (product of related(); track product.id) {
-              <app-product-card
-                [product]="product"
-                [favorite]="isFavorite(product)"
-                (addToCart)="addToCart($event)"
-                (toggleFavorite)="toggleFavorite($event)"
-              />
-            }
-          </div>
-        </section>
+      <!-- Só carrega (e busca as sugestões) quando o cliente rola até aqui. -->
+      @defer (on viewport) {
+        @if (related().length) {
+          <section class="related">
+            <header class="ui-section-head">
+              <span class="ui-eyebrow">Para você</span>
+              <h2>Você também pode gostar</h2>
+            </header>
+            <div class="related__grid">
+              @for (product of related(); track product.id) {
+                <app-product-card
+                  [product]="product"
+                  [favorite]="isFavorite(product)"
+                  (addToCart)="addToCart($event)"
+                  (toggleFavorite)="toggleFavorite($event)"
+                />
+              }
+            </div>
+          </section>
+        }
+      } @placeholder {
+        <div class="related__placeholder" aria-hidden="true"></div>
       }
     </div>
   </section>

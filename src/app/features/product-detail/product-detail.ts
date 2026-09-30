@@ -90,14 +90,10 @@ export class ProductDetail {
   protected readonly installment = computed(() => this.price() / 6);
   protected readonly inStock = computed(() => (this.variant()?.stock ?? 0) > 0);
 
+  /** Sugestões vindas do back (hoje, mock). O front não aplica regra nenhuma. */
   protected readonly related = computed<readonly Product[]>(() => {
     const current = this.product();
-    if (!current) return [];
-    // Regra provisória; a similaridade (famílias, notas, ocasião) é a próxima etapa.
-    return this.catalog
-      .products()
-      .filter((item) => item.id !== current.id && item.gender === current.gender)
-      .slice(0, 4);
+    return current ? this.catalog.related(current) : [];
   });
 
   protected readonly isFavorite = (product: Product): boolean =>
