@@ -1,0 +1,125 @@
+:host {
+  display: block;
+}
+
+.notes {
+  padding-block: 48px;
+  border-top: 1px solid var(--border);
+}
+
+// Família e ocasião: faixa discreta entre o título e as notas.
+.notes__facts {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin: -8px 0 32px;
+}
+
+.fact {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--card);
+  font-size: 0.875rem;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    color: var(--earth);
+  }
+
+  dt {
+    color: var(--muted-foreground);
+
+    &::after {
+      content: ':';
+    }
+  }
+
+  dd {
+    margin: 0;
+    font-weight: 600;
+  }
+}
+
+.notes__layers {
+  display: grid;
+  gap: 28px;
+}
+
+.notes__title {
+  margin: 0 0 12px;
+  text-align: center;
+  font-family: var(--font-ui);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.notes__hint {
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--muted-foreground);
+}
+
+// Celular: cada nota ocupa 1/3 da largura; linhas incompletas ficam centralizadas.
+.notes__grid {
+  --gap: 10px;
+
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--gap);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.note {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: calc((100% - 2 * var(--gap)) / 3);
+  min-width: 0;
+
+  img {
+    display: block;
+    width: 100%;
+    height: auto; // sem isso o height="400" do HTML trava a altura
+    aspect-ratio: 1;
+    object-fit: cover;
+    border-radius: var(--radius);
+    background: var(--muted);
+  }
+}
+
+.note__name {
+  font-size: 0.8125rem;
+  text-align: center;
+  color: var(--foreground);
+}
+
+// Desktop: as três camadas lado a lado, centralizadas como o título — as
+// imagens têm largura fixa e não sobra vazio à direita de cada camada.
+@media (min-width: 900px) {
+  .notes__layers {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+  }
+
+  .notes__grid {
+    --gap: 12px;
+  }
+
+  .note {
+    width: 120px;
+  }
+}

@@ -12,7 +12,7 @@ export const routes: Routes = [
     loadComponent: () => import('./features/catalog/catalog').then((m) => m.Catalog),
   },
   {
-    path: 'produtos/:id',
+    path: 'produtos/:slug',
     title: 'Nani Perfumes | Perfume',
     loadComponent: () =>
       import('./features/product-detail/product-detail').then((m) => m.ProductDetail),

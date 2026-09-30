@@ -2,7 +2,8 @@ import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { CartStore } from '../../../../core/services/cart-store';
 import { FavoritesStore } from '../../../../core/services/favorites-store';
-import { Product } from '../../../../core/models/product';
+import { Product, ProductSelection } from '../../../../core/models/product';
+import { variantLabel } from '../../../../core/utils/product-pricing';
 import { ProductCard } from '../../../../shared/product-card/product-card';
 
 /**
@@ -30,11 +31,13 @@ export class ProductsSection {
   protected readonly isFavorite = (product: Product): boolean =>
     this.favorites.isFavorite(product.id);
 
-  protected onAddToCart(product: Product): void {
-    this.cart.add(product);
-    this.snackBar.open(`${product.name} foi adicionado ao carrinho.`, 'Fechar', {
-      duration: 3000,
-    });
+  protected onAddToCart({ product, variant }: ProductSelection): void {
+    this.cart.add(product, variant);
+    this.snackBar.open(
+      `${product.name} (${variantLabel(variant)}) foi adicionado ao carrinho.`,
+      'Fechar',
+      { duration: 3000 },
+    );
   }
 
   protected onToggleFavorite(product: Product): void {

@@ -1,5 +1,5 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { MOCK_PRODUCTS } from '../../core/data/mock-products';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { CatalogService } from '../../core/services/catalog-service';
 import { BrandsStripSection } from './sections/brands-strip-section/brands-strip-section';
 import { CategoriesSection } from './sections/categories-section/categories-section';
 import { BannerCarousel } from './sections/banner-carousel/banner-carousel';
@@ -23,9 +23,10 @@ import { ProductsSection } from './sections/products-section/products-section';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Home {
-  // Dado mockado enquanto o visual não é validado — ver `mock-products.ts`.
-  protected readonly featured = MOCK_PRODUCTS.slice(0, 4);
-  protected readonly bestsellers = [...MOCK_PRODUCTS]
-    .sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0))
-    .slice(0, 4);
+  private readonly catalog = inject(CatalogService);
+
+  protected readonly featured = computed(() => this.catalog.products().slice(0, 4));
+  protected readonly bestsellers = computed(() =>
+    [...this.catalog.products()].sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0)).slice(0, 4),
+  );
 }

@@ -1,7 +1,7 @@
 @let item = product();
 
 <article class="card">
-  <a class="card__media" [routerLink]="['/produtos', item.id]" [attr.aria-label]="item.name">
+  <a class="card__media" [routerLink]="['/produtos', item.slug]" [attr.aria-label]="item.name">
     <img
       [src]="item.images[0] || placeholderImage"
       [alt]="item.name"
@@ -11,8 +11,10 @@
     />
     @if (item.badge) {
       <span class="card__badge">{{ item.badge }}</span>
-    } @else if (item.promotionActive) {
+    } @else if (deal()) {
       <span class="card__badge card__badge--sale">Oferta</span>
+    } @else if (item.launch) {
+      <span class="card__badge">Lançamento</span>
     }
   </a>
 
@@ -30,12 +32,12 @@
   <div class="card__body">
     <p class="card__subtitle">{{ item.brandName }}</p>
 
-    @if (item.family) {
-      <span class="card__family">{{ item.family }}</span>
+    @if (item.families[0]; as family) {
+      <span class="card__family">{{ family }}</span>
     }
 
     <h3 class="card__name">
-      <a [routerLink]="['/produtos', item.id]">{{ item.name }}</a>
+      <a [routerLink]="['/produtos', item.slug]">{{ item.name }}</a>
     </h3>
 
     @if (item.rating) {
@@ -43,21 +45,19 @@
     }
 
     <p class="card__price">
-      <strong>{{ item.finalPrice | currency: 'BRL' }}</strong>
-      @if (item.oldPrice) {
-        <s>{{ item.oldPrice | currency: 'BRL' }}</s>
-        <span class="card__discount">-{{ discount() }}%</span>
+      @if (fromPrice()) {
+        <span class="card__from">a partir de</span>
+      }
+      <strong>{{ price() | currency: 'BRL' }}</strong>
+      @if (discount(); as percent) {
+        <s>{{ variant()?.price | currency: 'BRL' }}</s>
+        <span class="card__discount">-{{ percent }}%</span>
       }
     </p>
 
-    <button
-      matButton="filled"
-      class="card__buy"
-      [disabled]="!item.active || item.stock <= 0"
-      (click)="addToCart.emit(item)"
-    >
+    <button matButton="filled" class="card__buy" [disabled]="!available()" (click)="add()">
       <mat-icon>shopping_bag</mat-icon>
-      @if (item.active && item.stock > 0) {
+      @if (available()) {
         <span class="card__buy-label card__buy-label--full">Adicionar ao carrinho</span>
         <span class="card__buy-label card__buy-label--short">Adicionar</span>
       } @else {

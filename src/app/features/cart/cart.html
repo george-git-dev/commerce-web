@@ -7,11 +7,11 @@
     @if (cart.items().length) {
       <div class="cart__layout">
         <div class="cart__items">
-          @for (line of cart.items(); track line.product.id) {
+          @for (line of cart.items(); track line.variant.id) {
             <app-cart-line-item
               [line]="line"
-              (quantityChange)="cart.setQuantity(line.product.id, $event)"
-              (remove)="cart.remove(line.product.id)"
+              (quantityChange)="cart.setQuantity(line.variant.id, $event)"
+              (remove)="cart.remove(line.variant.id)"
             />
           }
         </div>

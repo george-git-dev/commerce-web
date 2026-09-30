@@ -6,10 +6,17 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CATALOG_QUERY_PARAMS } from '../../core/config/navigation';
-import { MOCK_PRODUCTS } from '../../core/data/mock-products';
 import { CartStore } from '../../core/services/cart-store';
+import { CatalogService } from '../../core/services/catalog-service';
 import { FavoritesStore } from '../../core/services/favorites-store';
-import { Product } from '../../core/models/product';
+import { Product, ProductSelection, VariantKind } from '../../core/models/product';
+import {
+  effectivePrice,
+  hasDeal,
+  hasKind,
+  lowestPrice,
+  variantLabel,
+} from '../../core/utils/product-pricing';
 import { EmptyState } from '../../shared/empty-state/empty-state';
 import { ProductCard } from '../../shared/product-card/product-card';
 
@@ -27,7 +34,7 @@ function toPrice(value: string | null): number | null {
 }
 
 /**
- * `/produtos`. Dado sempre mockado (`MOCK_PRODUCTS`) — a reconexão com a API
+ * `/produtos`. Dado mockado, via `CatalogService` — a reconexão com a API
  * real de listagem/paginação é uma etapa futura do roadmap.
  *
  * Os filtros funcionais (gênero, marca, preço, busca) vivem na URL: cada
@@ -47,15 +54,16 @@ export class Catalog {
   private readonly cart = inject(CartStore);
   private readonly favorites = inject(FavoritesStore);
   private readonly snackBar = inject(MatSnackBar);
+  private readonly catalog = inject(CatalogService);
 
   protected readonly params = CATALOG_QUERY_PARAMS;
   private readonly queryParamMap = toSignal(this.route.queryParamMap, { requireSync: true });
 
   protected readonly filtersOpen = signal(false);
 
-  protected readonly brands = [
-    ...new Set(MOCK_PRODUCTS.map((product) => product.brandName)),
-  ].sort();
+  protected readonly brands = computed(() =>
+    [...new Set(this.catalog.products().map((product) => product.brandName))].sort(),
+  );
 
   protected readonly gender = computed(() => this.queryParamMap().get(this.params.gender));
   protected readonly brand = computed(() => this.queryParamMap().get(this.params.brand));
@@ -72,6 +80,11 @@ export class Catalog {
   protected readonly launchOnly = computed(
     () => this.queryParamMap().get(this.params.launch) === 'true',
   );
+  /** `?tipo=decant` — entra no menu junto com os decants (pós-MVP). */
+  protected readonly kind = computed<VariantKind | null>(() => {
+    const value = this.queryParamMap().get(this.params.kind);
+    return value === 'frasco' || value === 'decant' ? value : null;
+  });
   protected readonly sort = computed<SortOption>(
     () => (this.queryParamMap().get(this.params.sort) as SortOption | null) ?? 'relevancia',
   );
@@ -84,7 +97,8 @@ export class Catalog {
       this.priceMax() !== null ||
       !!this.search() ||
       this.dealOnly() ||
-      this.launchOnly(),
+      this.launchOnly() ||
+      !!this.kind(),
   );
 
   protected readonly products = computed<readonly Product[]>(() => {
@@ -95,17 +109,27 @@ export class Catalog {
     const search = this.search().trim().toLowerCase();
     const dealOnly = this.dealOnly();
     const launchOnly = this.launchOnly();
+    const kind = this.kind();
 
-    let list = MOCK_PRODUCTS.filter((product) => {
+    let list = this.catalog.products().filter((product) => {
       if (gender && product.gender !== gender) return false;
       if (brand && product.brandName !== brand) return false;
-      if (min !== null && product.finalPrice < min) return false;
-      if (max !== null && product.finalPrice > max) return false;
-      if (dealOnly && !product.oldPrice) return false;
-      if (launchOnly && product.badge !== 'Lançamento') return false;
+      // Preço: o produto entra se algum tamanho estiver dentro da faixa.
+      if (
+        (min !== null || max !== null) &&
+        !product.variants.some((variant) => {
+          const price = effectivePrice(variant);
+          return (min === null || price >= min) && (max === null || price <= max);
+        })
+      ) {
+        return false;
+      }
+      if (dealOnly && !hasDeal(product)) return false;
+      if (launchOnly && !product.launch) return false;
+      if (kind && !hasKind(product, kind)) return false;
       if (
         search &&
-        !`${product.name} ${product.brandName} ${product.family ?? ''}`
+        !`${product.name} ${product.brandName} ${product.families.join(' ')}`
           .toLowerCase()
           .includes(search)
       ) {
@@ -117,10 +141,10 @@ export class Catalog {
     list = [...list];
     switch (this.sort()) {
       case 'menor-preco':
-        list.sort((a, b) => a.finalPrice - b.finalPrice);
+        list.sort((a, b) => lowestPrice(a) - lowestPrice(b));
         break;
       case 'maior-preco':
-        list.sort((a, b) => b.finalPrice - a.finalPrice);
+        list.sort((a, b) => lowestPrice(b) - lowestPrice(a));
         break;
       case 'avaliacao':
         list.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
@@ -152,9 +176,13 @@ export class Catalog {
     this.router.navigate([], { relativeTo: this.route, queryParams: {} });
   }
 
-  protected onAddToCart(product: Product): void {
-    this.cart.add(product);
-    this.snackBar.open(`${product.name} foi adicionado ao carrinho.`, 'Fechar', { duration: 3000 });
+  protected onAddToCart({ product, variant }: ProductSelection): void {
+    this.cart.add(product, variant);
+    this.snackBar.open(
+      `${product.name} (${variantLabel(variant)}) foi adicionado ao carrinho.`,
+      'Fechar',
+      { duration: 3000 },
+    );
   }
 
   protected onToggleFavorite(product: Product): void {

@@ -15,6 +15,9 @@
         <div class="detail__info">
           <p class="detail__brand">{{ item.brandName }}</p>
           <h1>{{ item.name }}</h1>
+          @if (item.concentration) {
+            <p class="detail__concentration">{{ item.concentration }}</p>
+          }
 
           @if (item.rating) {
             <app-star-rating
@@ -25,43 +28,25 @@
           }
 
           <p class="detail__price">
-            <strong>{{ item.finalPrice | currency: 'BRL' }}</strong>
-            @if (item.oldPrice) {
-              <s>{{ item.oldPrice | currency: 'BRL' }}</s>
+            <strong>{{ price() | currency: 'BRL' }}</strong>
+            @if (discount(); as percent) {
+              <s>{{ variant()?.price | currency: 'BRL' }}</s>
+              <span class="detail__discount">-{{ percent }}%</span>
             }
           </p>
           <p class="detail__installment">
             em até 6x de {{ installment() | currency: 'BRL' }} sem juros
           </p>
 
-          <p class="detail__description">{{ item.description }}</p>
+          <app-variant-picker [product]="item" [(kind)]="kind" [(variant)]="variant" />
 
-          <div class="detail__specs">
-            @if (item.family) {
-              <div class="spec-card">
-                <mat-icon>spa</mat-icon>
-                <div>
-                  <span>Família olfativa</span>
-                  <strong>{{ item.family }}</strong>
-                </div>
-              </div>
-            }
-            @if (item.volume) {
-              <div class="spec-card">
-                <mat-icon>science</mat-icon>
-                <div>
-                  <span>Volume</span>
-                  <strong>{{ item.volume }}</strong>
-                </div>
-              </div>
-            }
-          </div>
+          <p class="detail__description">{{ item.description }}</p>
 
           <div class="detail__actions">
             <button
               matButton="filled"
               class="ui-cta"
-              [disabled]="!item.active || item.stock <= 0"
+              [disabled]="!inStock()"
               (click)="buyNow(item)"
             >
               Comprar agora
@@ -69,8 +54,8 @@
             <button
               matButton="outlined"
               class="ui-cta"
-              [disabled]="!item.active || item.stock <= 0"
-              (click)="addToCart(item)"
+              [disabled]="!inStock()"
+              (click)="addSelected(item)"
             >
               <mat-icon>shopping_bag</mat-icon>
               Adicionar ao carrinho
@@ -97,28 +82,11 @@
         </div>
       </div>
 
-      @if (item.notes; as notes) {
-        <section class="pyramid">
-          <header class="ui-section-head">
-            <span class="ui-eyebrow">Pirâmide olfativa</span>
-            <h2>Como a fragrância se revela</h2>
-          </header>
-          <div class="pyramid__grid">
-            <div class="pyramid__col">
-              <span class="ui-eyebrow">Saída</span>
-              <p>{{ notes[0] }}</p>
-            </div>
-            <div class="pyramid__col">
-              <span class="ui-eyebrow">Coração</span>
-              <p>{{ notes[1] }}</p>
-            </div>
-            <div class="pyramid__col">
-              <span class="ui-eyebrow">Fundo</span>
-              <p>{{ notes[2] }}</p>
-            </div>
-          </div>
-        </section>
-      }
+      <app-notes-grid
+        [notes]="item.notes"
+        [families]="item.families"
+        [occasions]="item.occasions ?? []"
+      />
 
       @if (related().length) {
         <section class="related">

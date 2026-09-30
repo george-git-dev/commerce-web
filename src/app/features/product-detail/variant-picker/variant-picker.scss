@@ -1,0 +1,142 @@
+:host {
+  display: block;
+  margin-bottom: 22px;
+}
+
+// Tipo (Frasco/Decant): dois botões lado a lado, largura total no celular.
+// Cores e forma pelos tokens do Material, sem sobrescrever classes internas.
+.kind {
+  --mat-button-toggle-shape: var(--radius);
+  --mat-button-toggle-divider-color: var(--border);
+  --mat-button-toggle-text-color: var(--foreground);
+  --mat-button-toggle-selected-state-background-color: var(--primary);
+  --mat-button-toggle-selected-state-text-color: var(--primary-foreground);
+  --mat-button-toggle-height: 56px;
+
+  display: flex;
+  width: 100%;
+  margin-bottom: 16px;
+  border-color: var(--border);
+
+  mat-button-toggle {
+    flex: 1;
+  }
+}
+
+// Duas linhas dentro de um botão de 56px.
+.kind__label,
+.kind__from {
+  display: block;
+  line-height: 1.3;
+}
+
+.kind__label {
+  font-family: var(--font-ui);
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.kind__from {
+  font-size: 0.6875rem;
+  opacity: 0.8;
+}
+
+.sizes__title {
+  display: block;
+  margin-bottom: 8px;
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+
+// Tamanhos: botões de toque (mín. 44px) que quebram linha no celular.
+.sizes__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.size {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  min-width: 96px;
+  min-height: 44px;
+  padding: 8px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+  color: var(--foreground);
+  font-family: var(--font-ui);
+  cursor: pointer;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+
+  &:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 2px;
+  }
+
+  &--active {
+    border-color: var(--foreground);
+    box-shadow: inset 0 0 0 1px var(--foreground);
+  }
+
+  &--out {
+    cursor: not-allowed;
+    opacity: 0.55;
+
+    .size__volume {
+      text-decoration: line-through;
+    }
+  }
+}
+
+.size__volume {
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+
+.size__price {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+
+// Frasco: linha informativa no lugar dos tamanhos.
+.bottle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+  font-family: var(--font-ui);
+  font-size: 0.9375rem;
+  font-weight: 500;
+}
+
+.bottle__icon {
+  flex: none;
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  color: var(--gold);
+}
+
+.stock-note {
+  margin: 10px 0 0;
+  font-size: 0.8125rem;
+  color: var(--muted-foreground);
+
+  &--low {
+    color: var(--wine);
+    font-weight: 500;
+  }
+}

@@ -10,6 +10,7 @@ export const CATALOG_QUERY_PARAMS = {
   search: 'busca',
   deal: 'oferta',
   launch: 'lancamento',
+  kind: 'tipo',
   sort: 'ordenar',
 } as const;
 

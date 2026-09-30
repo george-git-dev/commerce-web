@@ -1,0 +1,65 @@
+@if (kinds().length > 1) {
+  <mat-button-toggle-group
+    class="kind"
+    aria-label="Tipo"
+    hideSingleSelectionIndicator
+    [value]="kind()"
+    (change)="kind.set($event.value)"
+  >
+    @for (option of kinds(); track option) {
+      <mat-button-toggle [value]="option">
+        <span class="kind__label">{{ kindLabels[option] }}</span>
+        <span class="kind__from">
+          @if (hasPriceRange(product(), option)) {
+            a partir de
+          }
+          {{ lowestPrice(product(), option) | currency: 'BRL' }}
+        </span>
+      </mat-button-toggle>
+    }
+  </mat-button-toggle-group>
+}
+
+@if (kind() === 'frasco') {
+  <!-- Frasco: é um só (o original lacrado), não há tamanho para escolher. -->
+  @if (variant(); as bottle) {
+    <p class="bottle">
+      <mat-icon class="bottle__icon" aria-hidden="true">verified</mat-icon>
+      Frasco original lacrado · {{ bottle.volumeMl }} ml
+    </p>
+  }
+} @else {
+  <div class="sizes" role="group" aria-labelledby="sizes-title">
+    <span id="sizes-title" class="sizes__title">Tamanho</span>
+    <div class="sizes__list">
+      @for (size of sizes(); track size.id) {
+        <button
+          type="button"
+          class="size"
+          [class.size--active]="size.id === variant()?.id"
+          [class.size--out]="size.stock <= 0"
+          [attr.aria-pressed]="size.id === variant()?.id"
+          [disabled]="size.stock <= 0"
+          (click)="variant.set(size)"
+        >
+          <span class="size__volume">{{ size.volumeMl }} ml</span>
+          <span class="size__price">
+            @if (size.stock > 0) {
+              {{ effectivePrice(size) | currency: 'BRL' }}
+            } @else {
+              Esgotado
+            }
+          </span>
+        </button>
+      }
+    </div>
+  </div>
+}
+
+@if (variant(); as selected) {
+  @if (selected.stock > 0 && selected.stock <= lowStock) {
+    <p class="stock-note stock-note--low">Últimas {{ selected.stock }} unidades</p>
+  } @else if (selected.stock <= 0) {
+    <p class="stock-note">Esgotado</p>
+  }
+}

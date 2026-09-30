@@ -4,12 +4,24 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { RouterLink } from '@angular/router';
 import { IMAGERY } from '../../core/config/imagery';
-import { Product } from '../../core/models/product';
+import { Product, ProductSelection } from '../../core/models/product';
+import {
+  defaultVariant,
+  discountPercent,
+  effectivePrice,
+  hasDeal,
+  hasPriceRange,
+  isAvailable,
+  primaryKind,
+} from '../../core/utils/product-pricing';
 import { StarRating } from '../star-rating/star-rating';
 
 /**
  * Componente de apresentação: não conhece carrinho, favoritos nem snackbar —
  * só emite a intenção para quem o hospeda decidir o efeito.
+ *
+ * O card mostra o frasco mais barato disponível ("a partir de" quando há
+ * preços diferentes) e é esse tamanho que o botão "Adicionar" envia.
  */
 @Component({
   selector: 'app-product-card',
@@ -22,14 +34,29 @@ export class ProductCard {
   readonly product = input.required<Product>();
   readonly favorite = input(false);
 
-  readonly addToCart = output<Product>();
+  readonly addToCart = output<ProductSelection>();
   readonly toggleFavorite = output<Product>();
 
-  /** A API ainda não retorna imagem por produto — todo card usa a mesma foto de coleção. */
+  /** Reserva para produto sem foto. */
   protected readonly placeholderImage = IMAGERY.productPlaceholder;
 
-  protected readonly discount = computed(() => {
-    const item = this.product();
-    return item.oldPrice ? Math.round((1 - item.finalPrice / item.oldPrice) * 100) : null;
+  /** Tipo exibido no card: frasco, se houver (ver `primaryKind`). */
+  private readonly kind = computed(() => primaryKind(this.product()));
+  protected readonly variant = computed(() => defaultVariant(this.product(), this.kind()));
+  protected readonly price = computed(() => {
+    const variant = this.variant();
+    return variant ? effectivePrice(variant) : 0;
   });
+  protected readonly fromPrice = computed(() => hasPriceRange(this.product(), this.kind()));
+  protected readonly available = computed(() => isAvailable(this.product()));
+  protected readonly deal = computed(() => hasDeal(this.product()));
+  protected readonly discount = computed(() => {
+    const variant = this.variant();
+    return variant ? discountPercent(variant) : null;
+  });
+
+  protected add(): void {
+    const variant = this.variant();
+    if (variant) this.addToCart.emit({ product: this.product(), variant });
+  }
 }
