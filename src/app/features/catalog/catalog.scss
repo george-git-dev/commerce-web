@@ -5,6 +5,12 @@
 .catalog {
   background: var(--background);
 
+  // Página que começa logo abaixo do header: topo mais curto que o de uma
+  // seção comum (a partir de 900px, ver media query no fim do arquivo).
+  &.ui-section {
+    padding-top: 20px;
+  }
+
   &__head {
     max-width: 60ch;
     margin-bottom: 28px;
@@ -276,5 +282,11 @@
 @media (min-width: 1280px) {
   .catalog__grid {
     grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 900px) {
+  .catalog.ui-section {
+    padding-top: 40px;
   }
 }
