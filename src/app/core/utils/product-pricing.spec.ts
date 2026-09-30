@@ -23,6 +23,7 @@ const variant = (overrides: Partial<ProductVariant>): ProductVariant => ({
 const product = (variants: ProductVariant[]): Product => ({
   id: 1,
   slug: 'teste',
+  line: 'Teste',
   name: 'Teste',
   description: '',
   brandId: 1,

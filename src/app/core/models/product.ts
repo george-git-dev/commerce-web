@@ -47,8 +47,13 @@ export interface OlfactoryNotes {
  */
 export interface Product {
   id: number;
-  /** Identificador legível da URL: `/produtos/oud-real`. */
+  /** Identificador legível da URL: `/produtos/lattafa-asad`. */
   slug: string;
+  /** Linha do perfume (ex.: "Asad"). Agrupa as versões de uma mesma linha. */
+  line: string;
+  /** Versão dentro da linha (ex.: "Bourbon", "Elixir"). Opcional: o original não tem. */
+  subtitle?: string;
+  /** Nome exibido, já montado pelo back: linha + subtítulo (ex.: "Asad Bourbon"). */
   name: string;
   description: string;
   brandId: number;
