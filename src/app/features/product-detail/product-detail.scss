@@ -233,7 +233,8 @@
 
 @media (min-width: 900px) {
   .detail.ui-section {
-    padding-block: clamp(48px, 6vw, 96px);
+    // Topo curto: o breadcrumb já separa o conteúdo do header.
+    padding-block: 24px clamp(48px, 6vw, 96px);
   }
 
   .breadcrumb {

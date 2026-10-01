@@ -64,6 +64,16 @@ export class ProductDetail {
     this.catalog.findBySlug(this.paramMap().get('slug')),
   );
 
+  /** Breadcrumb: categoria do produto ("Perfumes", "Hidratantes"…), linkando o catálogo filtrado. */
+  protected readonly categoryCrumb = computed(() => {
+    const product = this.product();
+    if (!product) return null;
+    return {
+      label: CATEGORY_LABELS[product.category].plural,
+      queryParams: { [CATALOG_QUERY_PARAMS.category]: product.category },
+    };
+  });
+
   /**
    * Linha abaixo do nome: concentração (perfume) ou categoria + gênero —
    * ex.: "Eau de Toilette · Masculino", "Hidratante · Feminino".

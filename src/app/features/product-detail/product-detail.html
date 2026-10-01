@@ -4,7 +4,9 @@
       <nav class="breadcrumb" aria-label="Trilha de navegação">
         <a routerLink="/">Início</a>
         <mat-icon aria-hidden="true">chevron_right</mat-icon>
-        <a routerLink="/produtos">Perfumes</a>
+        @if (categoryCrumb(); as crumb) {
+          <a routerLink="/produtos" [queryParams]="crumb.queryParams">{{ crumb.label }}</a>
+        }
         <mat-icon aria-hidden="true">chevron_right</mat-icon>
         <span aria-current="page">{{ item.name }}</span>
       </nav>
