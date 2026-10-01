@@ -5,7 +5,8 @@
       <button
         type="button"
         class="chip"
-        [class.chip--active]="!category()"
+        [class.chip--active]="selectedCategories().length === 0"
+        [attr.aria-pressed]="selectedCategories().length === 0"
         (click)="setFilter(params.category, null)"
       >
         Todas
@@ -14,8 +15,9 @@
         <button
           type="button"
           class="chip"
-          [class.chip--active]="category() === option.id"
-          (click)="setFilter(params.category, option.id)"
+          [class.chip--active]="selectedCategories().includes(option.id)"
+          [attr.aria-pressed]="selectedCategories().includes(option.id)"
+          (click)="toggleCategory(option.id)"
         >
           {{ option.plural }}
         </button>

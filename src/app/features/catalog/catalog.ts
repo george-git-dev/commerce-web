@@ -7,14 +7,15 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CATALOG_QUERY_PARAMS } from '../../core/config/navigation';
 import {
-  CATEGORY_LABELS,
-  isProductCategory,
+  categoriesTitle,
+  formatCategories,
+  parseCategories,
   PRODUCT_CATEGORIES,
 } from '../../core/config/product-categories';
 import { CartStore } from '../../core/services/cart-store';
 import { CatalogService } from '../../core/services/catalog-service';
 import { FavoritesStore } from '../../core/services/favorites-store';
-import { Product, ProductSelection, VariantKind } from '../../core/models/product';
+import { Product, ProductCategory, ProductSelection, VariantKind } from '../../core/models/product';
 import {
   effectivePrice,
   hasDeal,
@@ -71,16 +72,15 @@ export class Catalog {
     [...new Set(this.catalog.products().map((product) => product.brandName))].sort(),
   );
 
-  /** `?categoria=kit`. Sem categoria = tudo (perfumes, kits, hidratantes, body splash). */
-  protected readonly category = computed(() => {
-    const value = this.queryParamMap().get(this.params.category);
-    return isProductCategory(value) ? value : null;
-  });
-  /** Título da página: "Todos os produtos" ou o nome da categoria escolhida. */
-  protected readonly title = computed(() => {
-    const category = this.category();
-    return category ? CATEGORY_LABELS[category].plural : 'Todos os produtos';
-  });
+  /**
+   * `?categoria=kit` ou `?categoria=hidratante,body-splash` (link "Corpo e banho").
+   * Lista vazia = tudo (perfumes, kits, hidratantes, body splash).
+   */
+  protected readonly selectedCategories = computed(() =>
+    parseCategories(this.queryParamMap().get(this.params.category)),
+  );
+  /** Título: "Todos os produtos", o nome da categoria ou do grupo ("Corpo e banho"). */
+  protected readonly title = computed(() => categoriesTitle(this.selectedCategories()));
   protected readonly gender = computed(() => this.queryParamMap().get(this.params.gender));
   protected readonly brand = computed(() => this.queryParamMap().get(this.params.brand));
   protected readonly priceMin = computed(() =>
@@ -107,7 +107,7 @@ export class Catalog {
 
   protected readonly hasActiveFilters = computed(
     () =>
-      !!this.category() ||
+      this.selectedCategories().length > 0 ||
       !!this.gender() ||
       !!this.brand() ||
       this.priceMin() !== null ||
@@ -119,7 +119,7 @@ export class Catalog {
   );
 
   protected readonly products = computed<readonly Product[]>(() => {
-    const category = this.category();
+    const categories = this.selectedCategories();
     const gender = this.gender();
     const brand = this.brand();
     const min = this.priceMin();
@@ -130,7 +130,7 @@ export class Catalog {
     const kind = this.kind();
 
     let list = this.catalog.products().filter((product) => {
-      if (category && product.category !== category) return false;
+      if (categories.length && !categories.includes(product.category)) return false;
       if (gender && product.gender !== gender) return false;
       if (brand && product.brandName !== brand) return false;
       // Preço: o produto entra se algum tamanho estiver dentro da faixa.
@@ -182,6 +182,15 @@ export class Catalog {
       queryParamsHandling: 'merge',
       replaceUrl: true,
     });
+  }
+
+  /** Chip de categoria: marca/desmarca, permitindo combinar (ex.: hidratantes + body splash). */
+  protected toggleCategory(category: ProductCategory): void {
+    const current = this.selectedCategories();
+    const next = current.includes(category)
+      ? current.filter((id) => id !== category)
+      : [...current, category];
+    this.setFilter(this.params.category, formatCategories(next));
   }
 
   /** Remove, enquanto o usuário digita, tudo que não for dígito, e limita o tamanho. */

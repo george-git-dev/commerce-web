@@ -19,7 +19,7 @@ export class Footer {
 
   // Categorias reaproveita o mesmo contrato de filtro do header — um único lugar
   // decide o que cada rótulo filtra em `/produtos`.
-  protected readonly categoryLinks = NAV_LINKS.filter((link) => link.label !== 'Início');
+  protected readonly categoryLinks = NAV_LINKS.filter((link) => link.path !== '/');
 
   protected readonly payments = ['Visa', 'Mastercard', 'Elo', 'Pix', 'Boleto'];
 }

@@ -1,5 +1,6 @@
 import { Category } from '../models/category';
 import { NavLink } from '../models/nav-link';
+import { BODY_CARE_CATEGORIES, CATEGORY_SEPARATOR } from './product-categories';
 
 /** Nomes de query params aceitos por `/produtos` — único ponto de verdade do contrato de filtro. */
 export const CATALOG_QUERY_PARAMS = {
@@ -21,7 +22,7 @@ export const HOME_SECTION_IDS = {
 } as const;
 
 export const NAV_LINKS: readonly NavLink[] = [
-  { label: 'Início', path: '/' },
+  // "Início" saiu do menu (30/09): o logo já leva para a home.
   { label: 'Ver tudo', path: '/produtos' },
   {
     label: 'Masculinos',
@@ -42,6 +43,13 @@ export const NAV_LINKS: readonly NavLink[] = [
     label: 'Kits',
     path: '/produtos',
     queryParams: { [CATALOG_QUERY_PARAMS.category]: 'kit' },
+  },
+  {
+    label: 'Corpo e banho',
+    path: '/produtos',
+    queryParams: {
+      [CATALOG_QUERY_PARAMS.category]: BODY_CARE_CATEGORIES.join(CATEGORY_SEPARATOR),
+    },
   },
   {
     label: 'Lançamentos',
