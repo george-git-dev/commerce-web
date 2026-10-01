@@ -58,7 +58,7 @@
   &__grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
+    gap: 12px;
   }
 }
 
@@ -69,7 +69,7 @@
   isolation: isolate;
   display: flex;
   flex-direction: column;
-  padding: 26px 22px;
+  padding: 16px 14px;
   border: 1px solid color-mix(in oklch, var(--primary-foreground) 14%, transparent);
   border-radius: var(--radius);
   background: color-mix(in oklch, var(--primary-foreground) 5%, transparent);
@@ -80,22 +80,24 @@
 
   &__icon {
     color: var(--gold);
-    font-size: 30px;
-    width: 30px;
-    height: 30px;
-    margin-bottom: 16px;
+    font-size: 22px;
+    width: 22px;
+    height: 22px;
+    margin-bottom: 10px;
   }
 
   &__name {
     font-family: var(--font-display);
-    font-size: 1.375rem;
+    font-size: 1.125rem;
     font-weight: 400;
+    line-height: 1.2;
     color: var(--primary-foreground);
   }
 
   &__text {
-    margin-top: 6px;
-    font-size: 0.8125rem;
+    margin-top: 4px;
+    font-size: 0.75rem;
+    line-height: 1.4;
     color: color-mix(in oklch, var(--primary-foreground) 62%, transparent);
   }
 
@@ -103,7 +105,8 @@
     display: inline-flex;
     align-items: center;
     gap: 7px;
-    margin-top: 18px;
+    margin-top: auto;
+    padding-top: 10px;
     font-family: var(--font-ui);
     font-size: 0.8125rem;
     color: color-mix(in oklch, var(--primary-foreground) 80%, transparent);
@@ -152,10 +155,35 @@
   transform: scale(1.04);
 }
 
-// 8 tiles: 2 colunas no celular, 4 a partir do tablet.
+// 8 tiles: 2 colunas no celular (compactos), 4 a partir do tablet.
 @media (min-width: 640px) {
   .categories__grid {
     grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+  }
+
+  .tile {
+    padding: 26px 22px;
+  }
+
+  .tile__icon {
+    font-size: 30px;
+    width: 30px;
+    height: 30px;
+    margin-bottom: 16px;
+  }
+
+  .tile__name {
+    font-size: 1.375rem;
+  }
+
+  .tile__text {
+    margin-top: 6px;
+    font-size: 0.8125rem;
+  }
+
+  .tile__link {
+    padding-top: 18px;
   }
 }
 
