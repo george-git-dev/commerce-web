@@ -51,10 +51,15 @@ export class ProductCard {
   protected readonly fromPrice = computed(() => hasPriceRange(this.product(), this.kind()));
   protected readonly available = computed(() => isAvailable(this.product()));
   protected readonly deal = computed(() => hasDeal(this.product()));
-  /** Etiqueta do card: a categoria (fora perfume) ou a família principal do perfume. */
+  /**
+   * Etiqueta do card: o que é (família principal do perfume ou a categoria)
+   * + para quem — ex.: "Oriental · Masculino", "Hidratante · Feminino".
+   */
   protected readonly tag = computed(() => {
     const item = this.product();
-    return item.category === 'perfume' ? item.families[0] : CATEGORY_LABELS[item.category].label;
+    const kind =
+      item.category === 'perfume' ? item.families[0] : CATEGORY_LABELS[item.category].label;
+    return [kind, item.gender].filter(Boolean).join(' · ');
   });
   protected readonly discount = computed(() => {
     const variant = this.variant();

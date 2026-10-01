@@ -15,9 +15,7 @@
         <div class="detail__info">
           <p class="detail__brand">{{ item.brandName }}</p>
           <h1>{{ item.name }}</h1>
-          @if (item.concentration) {
-            <p class="detail__concentration">{{ item.concentration }}</p>
-          }
+          <p class="detail__concentration">{{ typeLine() }}</p>
 
           @if (item.rating) {
             <app-star-rating

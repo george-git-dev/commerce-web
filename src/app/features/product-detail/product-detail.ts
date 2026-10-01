@@ -6,6 +6,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CATALOG_QUERY_PARAMS } from '../../core/config/navigation';
+import { CATEGORY_LABELS } from '../../core/config/product-categories';
 import { Product, ProductSelection, ProductVariant, VariantKind } from '../../core/models/product';
 import { CartStore } from '../../core/services/cart-store';
 import { CatalogService } from '../../core/services/catalog-service';
@@ -62,6 +63,20 @@ export class ProductDetail {
   protected readonly product = computed<Product | undefined>(() =>
     this.catalog.findBySlug(this.paramMap().get('slug')),
   );
+
+  /**
+   * Linha abaixo do nome: concentração (perfume) ou categoria + gênero —
+   * ex.: "Eau de Toilette · Masculino", "Hidratante · Feminino".
+   */
+  protected readonly typeLine = computed(() => {
+    const product = this.product();
+    if (!product) return '';
+    const type =
+      product.category === 'perfume'
+        ? product.concentration
+        : CATEGORY_LABELS[product.category].label;
+    return [type, product.gender].filter(Boolean).join(' · ');
+  });
 
   /** Tipo escolhido. Padrão: o da URL (`?tipo=decant`), senão o primeiro (frasco). */
   protected readonly kind = linkedSignal<VariantKind | undefined>(() => {
