@@ -8,6 +8,9 @@ export interface Category {
   icon: string;
   image?: string;
   genderFilter?: 'Masculino' | 'Feminino' | 'Unissex';
-  /** Tile que leva a uma categoria de produto (ex.: Kits → `?categoria=kit`). */
-  categoryFilter?: ProductCategory;
+  /**
+   * Tile que leva a uma ou mais categorias de produto
+   * (Kits → `?categoria=kit`; Corpo e banho → `?categoria=hidratante,body-splash`).
+   */
+  categoryFilter?: readonly ProductCategory[];
 }

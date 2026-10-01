@@ -25,6 +25,31 @@
     </div>
   </div>
 
+  <!-- Situações do produto (não são categorias): combinam com qualquer filtro. -->
+  <div class="filter-group">
+    <h3>Destaques</h3>
+    <div class="filter-group__options">
+      <button
+        type="button"
+        class="chip"
+        [class.chip--active]="launchOnly()"
+        [attr.aria-pressed]="launchOnly()"
+        (click)="setFilter(params.launch, launchOnly() ? null : 'true')"
+      >
+        Lançamentos
+      </button>
+      <button
+        type="button"
+        class="chip"
+        [class.chip--active]="dealOnly()"
+        [attr.aria-pressed]="dealOnly()"
+        (click)="setFilter(params.deal, dealOnly() ? null : 'true')"
+      >
+        Ofertas
+      </button>
+    </div>
+  </div>
+
   <div class="filter-group">
     <h3>Gênero</h3>
     <div class="filter-group__options">
@@ -206,7 +231,7 @@
         } @else {
           <app-empty-state
             icon="search_off"
-            title="Nenhum perfume encontrado"
+            title="Nenhum produto encontrado"
             message="Tente ajustar os filtros ou buscar por outro termo."
             ctaLabel="Limpar filtros"
             (ctaClick)="clearFilters()"

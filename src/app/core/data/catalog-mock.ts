@@ -1,3 +1,4 @@
+import { BODY_CARE_CATEGORIES } from '../config/product-categories';
 import { Category } from '../models/category';
 import { Highlight } from '../models/highlight';
 
@@ -56,11 +57,19 @@ export const CATEGORIES_MOCK: readonly Category[] = [
   },
   {
     id: 'kits',
-    name: 'Kits',
+    name: 'Kits e presentes',
     text: 'Conjuntos para presentear',
     icon: 'redeem',
     image: 'img/categorias/kits.webp',
-    categoryFilter: 'kit',
+    categoryFilter: ['kit'],
+  },
+  {
+    id: 'corpo-e-banho',
+    name: 'Corpo e banho',
+    text: 'Hidratantes e body splash',
+    icon: 'spa',
+    // Sem foto por enquanto (gerar no ChatGPT, como as outras).
+    categoryFilter: BODY_CARE_CATEGORIES,
   },
   {
     id: 'lancamentos',
@@ -75,5 +84,12 @@ export const CATEGORIES_MOCK: readonly Category[] = [
     text: 'Seleção com até 40% off',
     icon: 'sell',
     image: 'img/categorias/ofertas.webp',
+  },
+  {
+    // Fecha a grade em 8 (2×4 no celular, 4×2 a partir do tablet).
+    id: 'ver-tudo',
+    name: 'Ver tudo',
+    text: 'O catálogo completo',
+    icon: 'grid_view',
   },
 ];

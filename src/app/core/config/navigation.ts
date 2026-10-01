@@ -61,14 +61,17 @@ export const NAV_LINKS: readonly NavLink[] = [
 
 /** Query params de `/produtos` para o tile de uma categoria da home. */
 export function categoryQueryParams(category: Category): Record<string, string> {
-  if (category.categoryFilter) {
-    return { [CATALOG_QUERY_PARAMS.category]: category.categoryFilter };
+  if (category.categoryFilter?.length) {
+    return { [CATALOG_QUERY_PARAMS.category]: category.categoryFilter.join(CATEGORY_SEPARATOR) };
   }
   if (category.genderFilter) {
     return { [CATALOG_QUERY_PARAMS.gender]: category.genderFilter };
   }
   if (category.id === 'ofertas') {
     return { [CATALOG_QUERY_PARAMS.deal]: 'true' };
+  }
+  if (category.id === 'ver-tudo') {
+    return {};
   }
   if (category.id === 'lancamentos') {
     return { [CATALOG_QUERY_PARAMS.launch]: 'true' };

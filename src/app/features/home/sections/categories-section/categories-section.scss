@@ -152,19 +152,15 @@
   transform: scale(1.04);
 }
 
+// 8 tiles: 2 colunas no celular, 4 a partir do tablet.
 @media (min-width: 640px) {
   .categories__grid {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
   }
 }
 
 @media (min-width: 1024px) {
   .categories__grid {
-    grid-template-columns: repeat(6, 1fr);
     gap: 18px;
-  }
-
-  .tile {
-    padding: 24px 18px;
   }
 }

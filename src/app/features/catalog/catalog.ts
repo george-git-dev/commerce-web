@@ -79,8 +79,20 @@ export class Catalog {
   protected readonly selectedCategories = computed(() =>
     parseCategories(this.queryParamMap().get(this.params.category)),
   );
-  /** Título: "Todos os produtos", o nome da categoria ou do grupo ("Corpo e banho"). */
-  protected readonly title = computed(() => categoriesTitle(this.selectedCategories()));
+  /**
+   * Título: o da categoria/grupo ("Hidratantes", "Corpo e banho"); sem categoria,
+   * o destaque ativo ("Lançamentos", "Ofertas"); senão "Todos os produtos".
+   */
+  protected readonly title = computed(() => {
+    const categories = this.selectedCategories();
+    if (categories.length) return categoriesTitle(categories);
+    const launch = this.launchOnly();
+    const deal = this.dealOnly();
+    if (launch && deal) return 'Lançamentos e ofertas';
+    if (launch) return 'Lançamentos';
+    if (deal) return 'Ofertas';
+    return categoriesTitle([]);
+  });
   protected readonly gender = computed(() => this.queryParamMap().get(this.params.gender));
   protected readonly brand = computed(() => this.queryParamMap().get(this.params.brand));
   protected readonly priceMin = computed(() =>
@@ -143,8 +155,14 @@ export class Catalog {
       ) {
         return false;
       }
-      if (dealOnly && !hasDeal(product)) return false;
-      if (launchOnly && !product.launch) return false;
+      // Destaques: dentro do grupo vale "ou" (como nas categorias) —
+      // Lançamentos + Ofertas mostra os dois, não só quem é as duas coisas.
+      if (
+        (dealOnly || launchOnly) &&
+        !((dealOnly && hasDeal(product)) || (launchOnly && product.launch))
+      ) {
+        return false;
+      }
       if (kind && !hasKind(product, kind)) return false;
       if (
         search &&
