@@ -44,6 +44,7 @@ export const MOCK_PRODUCTS: readonly Product[] = [
     badge: 'Mais vendido',
     rating: 4.8,
     reviews: 214,
+    soldCount: 1456,
     images: [
       'img/produtos/garrafa-preta.webp',
       'img/produtos/notas-ambar.webp',
@@ -78,6 +79,7 @@ export const MOCK_PRODUCTS: readonly Product[] = [
     status: 'publicado',
     rating: 4.7,
     reviews: 189,
+    soldCount: 756,
     images: [
       'img/produtos/garrafa-cristal.webp',
       'img/produtos/notas-flores.webp',
@@ -118,6 +120,7 @@ export const MOCK_PRODUCTS: readonly Product[] = [
     badge: 'Mais vendido',
     rating: 4.8,
     reviews: 132,
+    soldCount: 1128,
     images: [
       'img/produtos/cena-oferta.webp',
       'img/produtos/notas-ambar.webp',
@@ -151,6 +154,7 @@ export const MOCK_PRODUCTS: readonly Product[] = [
     status: 'publicado',
     rating: 4.5,
     reviews: 88,
+    soldCount: 352,
     images: [
       'img/produtos/garrafa-preta.webp',
       'img/produtos/notas-citricas.webp',
@@ -185,6 +189,7 @@ export const MOCK_PRODUCTS: readonly Product[] = [
     launch: true,
     rating: 4.6,
     reviews: 74,
+    soldCount: 296,
     images: [
       'img/produtos/cena-noturna-1.webp',
       'img/produtos/notas-oud.webp',
@@ -224,6 +229,7 @@ export const MOCK_PRODUCTS: readonly Product[] = [
     status: 'publicado',
     rating: 4.6,
     reviews: 158,
+    soldCount: 632,
     images: [
       'img/produtos/garrafa-verde.webp',
       'img/produtos/notas-oud.webp',
@@ -263,6 +269,7 @@ export const MOCK_PRODUCTS: readonly Product[] = [
     status: 'publicado',
     rating: 4.4,
     reviews: 51,
+    soldCount: 204,
     images: [
       'img/produtos/garrafa-vinho.webp',
       'img/produtos/notas-flores.webp',
@@ -295,6 +302,7 @@ export const MOCK_PRODUCTS: readonly Product[] = [
     badge: 'Mais vendido',
     rating: 4.7,
     reviews: 203,
+    soldCount: 1412,
     images: [
       'img/produtos/cena-noturna-1.webp',
       'img/produtos/notas-ambar.webp',
@@ -326,6 +334,7 @@ export const MOCK_PRODUCTS: readonly Product[] = [
     status: 'publicado',
     rating: 4.5,
     reviews: 67,
+    soldCount: 268,
     images: [
       'img/produtos/garrafa-verde.webp',
       'img/produtos/notas-citricas.webp',
@@ -365,6 +374,7 @@ export const MOCK_PRODUCTS: readonly Product[] = [
     status: 'publicado',
     rating: 4.6,
     reviews: 81,
+    soldCount: 324,
     images: [
       'img/produtos/garrafa-preta.webp',
       'img/produtos/notas-flores.webp',
@@ -399,6 +409,7 @@ export const MOCK_PRODUCTS: readonly Product[] = [
     launch: true,
     rating: 4.7,
     reviews: 142,
+    soldCount: 568,
     images: [
       'img/produtos/garrafa-verde.webp',
       'img/produtos/notas-citricas.webp',
@@ -433,6 +444,7 @@ export const MOCK_PRODUCTS: readonly Product[] = [
     launch: true,
     rating: 4.5,
     reviews: 38,
+    soldCount: 152,
     images: [
       'img/produtos/garrafa-preta.webp',
       'img/produtos/notas-citricas.webp',
@@ -465,6 +477,7 @@ export const MOCK_PRODUCTS: readonly Product[] = [
     status: 'publicado',
     rating: 4.6,
     reviews: 45,
+    soldCount: 180,
     images: [
       'img/produtos/cena-noturna-2.webp',
       'img/produtos/notas-couro.webp',
@@ -497,6 +510,7 @@ export const MOCK_PRODUCTS: readonly Product[] = [
     status: 'publicado',
     rating: 4.5,
     reviews: 97,
+    soldCount: 388,
     images: [
       'img/produtos/garrafa-ambar.webp',
       'img/produtos/notas-flores.webp',
@@ -535,6 +549,7 @@ export const MOCK_PRODUCTS: readonly Product[] = [
     status: 'publicado',
     rating: 4.4,
     reviews: 59,
+    soldCount: 236,
     images: [
       'img/produtos/garrafa-verde.webp',
       'img/produtos/notas-flores.webp',
@@ -569,6 +584,7 @@ export const MOCK_PRODUCTS: readonly Product[] = [
     launch: true,
     rating: 4.9,
     reviews: 76,
+    soldCount: 304,
     images: [
       'img/produtos/garrafa-branca.webp',
       'img/produtos/notas-ambar.webp',
@@ -607,6 +623,7 @@ export const MOCK_PRODUCTS: readonly Product[] = [
     status: 'publicado',
     rating: 4.3,
     reviews: 64,
+    soldCount: 256,
     images: [
       'img/produtos/garrafa-vinho.webp',
       'img/produtos/notas-flores.webp',
@@ -645,6 +662,7 @@ export const MOCK_PRODUCTS: readonly Product[] = [
     status: 'publicado',
     rating: 4.4,
     reviews: 40,
+    soldCount: 160,
     images: [
       'img/produtos/cena-dourada.webp',
       'img/produtos/notas-ambar.webp',
@@ -682,6 +700,7 @@ export const MOCK_PRODUCTS: readonly Product[] = [
     status: 'publicado',
     rating: 4.3,
     reviews: 58,
+    soldCount: 232,
     images: [
       'img/produtos/garrafa-ambar.webp',
       'img/produtos/notas-ambar.webp',
@@ -714,6 +733,7 @@ export const MOCK_PRODUCTS: readonly Product[] = [
     status: 'publicado',
     rating: 4.2,
     reviews: 35,
+    soldCount: 140,
     images: [
       'img/produtos/cena-noturna-2.webp',
       'img/produtos/notas-oud.webp',
@@ -752,6 +772,7 @@ export const MOCK_PRODUCTS: readonly Product[] = [
     status: 'publicado',
     rating: 4.2,
     reviews: 29,
+    soldCount: 116,
     images: [
       'img/produtos/cena-dourada.webp',
       'img/produtos/notas-flores.webp',
@@ -790,6 +811,7 @@ export const MOCK_PRODUCTS: readonly Product[] = [
     status: 'publicado',
     rating: 4.6,
     reviews: 48,
+    soldCount: 192,
     images: [
       'img/produtos/cena-noturna-1.webp',
       'img/produtos/notas-ambar.webp',
@@ -822,6 +844,7 @@ export const MOCK_PRODUCTS: readonly Product[] = [
     status: 'publicado',
     rating: 4.4,
     reviews: 33,
+    soldCount: 132,
     images: [
       'img/produtos/garrafa-cristal.webp',
       'img/produtos/notas-flores.webp',
@@ -861,6 +884,7 @@ export const MOCK_PRODUCTS: readonly Product[] = [
     status: 'publicado',
     rating: 4.3,
     reviews: 27,
+    soldCount: 108,
     images: [
       'img/produtos/cena-dourada.webp',
       'img/produtos/notas-flores.webp',
@@ -889,6 +913,7 @@ export const MOCK_PRODUCTS: readonly Product[] = [
     status: 'publicado',
     rating: 4.8,
     reviews: 36,
+    soldCount: 144,
     images: [
       'img/categorias/kits.webp',
       'img/produtos/garrafa-preta.webp',
@@ -914,6 +939,7 @@ export const MOCK_PRODUCTS: readonly Product[] = [
     status: 'publicado',
     rating: 4.7,
     reviews: 22,
+    soldCount: 88,
     images: [
       'img/categorias/kits.webp',
       'img/produtos/garrafa-cristal.webp',
@@ -951,6 +977,7 @@ export const MOCK_PRODUCTS: readonly Product[] = [
     status: 'publicado',
     rating: 4.6,
     reviews: 15,
+    soldCount: 60,
     images: [
       'img/categorias/kits.webp',
       'img/produtos/garrafa-verde.webp',
@@ -978,6 +1005,7 @@ export const MOCK_PRODUCTS: readonly Product[] = [
     status: 'publicado',
     rating: 4.6,
     reviews: 58,
+    soldCount: 232,
     images: [
       'img/produtos/garrafa-cristal.webp',
       'img/produtos/notas-flores.webp',
@@ -1006,6 +1034,7 @@ export const MOCK_PRODUCTS: readonly Product[] = [
     status: 'publicado',
     rating: 4.5,
     reviews: 31,
+    soldCount: 124,
     images: [
       'img/produtos/garrafa-ambar.webp',
       'img/produtos/notas-flores.webp',
@@ -1040,6 +1069,7 @@ export const MOCK_PRODUCTS: readonly Product[] = [
     status: 'publicado',
     rating: 4.3,
     reviews: 27,
+    soldCount: 108,
     images: [
       'img/produtos/garrafa-vinho.webp',
       'img/produtos/notas-flores.webp',
@@ -1073,6 +1103,7 @@ export const MOCK_PRODUCTS: readonly Product[] = [
     status: 'publicado',
     rating: 4.6,
     reviews: 19,
+    soldCount: 76,
     images: [
       'img/produtos/cena-oferta.webp',
       'img/produtos/notas-ambar.webp',
@@ -1106,6 +1137,7 @@ export const MOCK_PRODUCTS: readonly Product[] = [
     status: 'publicado',
     rating: 4.5,
     reviews: 12,
+    soldCount: 48,
     images: [
       'img/produtos/garrafa-cristal.webp',
       'img/produtos/notas-flores.webp',
@@ -1140,6 +1172,7 @@ export const MOCK_PRODUCTS: readonly Product[] = [
     status: 'publicado',
     rating: 4.2,
     reviews: 9,
+    soldCount: 36,
     images: [
       'img/produtos/garrafa-vinho.webp',
       'img/produtos/notas-flores.webp',

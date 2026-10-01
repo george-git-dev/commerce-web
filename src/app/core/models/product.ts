@@ -86,6 +86,11 @@ export interface Product {
   rating?: number;
   reviews?: number;
   /**
+   * Unidades vendidas (todas as variantes). Calculado pelo back a partir dos
+   * pedidos pagos — nunca digitado no cadastro. Usado em "Mais vendidos".
+   */
+  soldCount?: number;
+  /**
    * Fotos do produto, na ordem da galeria; a primeira é a principal.
    * Caminhos relativos a `public/` (ex.: 'img/produtos/garrafa-preta.webp').
    */

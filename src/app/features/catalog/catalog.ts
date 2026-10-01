@@ -26,7 +26,7 @@ import {
 import { EmptyState } from '../../shared/empty-state/empty-state';
 import { ProductCard } from '../../shared/product-card/product-card';
 
-type SortOption = 'relevancia' | 'menor-preco' | 'maior-preco' | 'avaliacao';
+type SortOption = 'relevancia' | 'mais-vendidos' | 'menor-preco' | 'maior-preco' | 'avaliacao';
 
 const MAX_PRICE_DIGITS = 5; // até R$ 99.999
 
@@ -159,6 +159,9 @@ export class Catalog {
 
     list = [...list];
     switch (this.sort()) {
+      case 'mais-vendidos':
+        list.sort((a, b) => (b.soldCount ?? 0) - (a.soldCount ?? 0));
+        break;
       case 'menor-preco':
         list.sort((a, b) => lowestPrice(a) - lowestPrice(b));
         break;

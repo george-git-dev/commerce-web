@@ -177,6 +177,7 @@
           <span>Ordenar por</span>
           <select [value]="sort()" (change)="setFilter(params.sort, $any($event.target).value)">
             <option value="relevancia">Relevância</option>
+            <option value="mais-vendidos">Mais vendidos</option>
             <option value="menor-preco">Menor preço</option>
             <option value="maior-preco">Maior preço</option>
             <option value="avaliacao">Melhor avaliados</option>
