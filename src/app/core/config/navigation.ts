@@ -10,6 +10,7 @@ export const CATALOG_QUERY_PARAMS = {
   search: 'busca',
   deal: 'oferta',
   launch: 'lancamento',
+  category: 'categoria',
   kind: 'tipo',
   sort: 'ordenar',
 } as const;
@@ -40,7 +41,7 @@ export const NAV_LINKS: readonly NavLink[] = [
   {
     label: 'Kits',
     path: '/produtos',
-    queryParams: { [CATALOG_QUERY_PARAMS.gender]: 'Kits' },
+    queryParams: { [CATALOG_QUERY_PARAMS.category]: 'kit' },
   },
   {
     label: 'Lançamentos',
@@ -52,6 +53,9 @@ export const NAV_LINKS: readonly NavLink[] = [
 
 /** Query params de `/produtos` para o tile de uma categoria da home. */
 export function categoryQueryParams(category: Category): Record<string, string> {
+  if (category.categoryFilter) {
+    return { [CATALOG_QUERY_PARAMS.category]: category.categoryFilter };
+  }
   if (category.genderFilter) {
     return { [CATALOG_QUERY_PARAMS.gender]: category.genderFilter };
   }
@@ -61,6 +65,6 @@ export function categoryQueryParams(category: Category): Record<string, string> 
   if (category.id === 'lancamentos') {
     return { [CATALOG_QUERY_PARAMS.launch]: 'true' };
   }
-  // Kits e demais categorias sem filtro estruturado caem de volta na busca textual.
+  // Tiles sem filtro estruturado caem de volta na busca textual.
   return { [CATALOG_QUERY_PARAMS.search]: category.name };
 }

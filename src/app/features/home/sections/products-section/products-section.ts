@@ -34,7 +34,7 @@ export class ProductsSection {
   protected onAddToCart({ product, variant }: ProductSelection): void {
     this.cart.add(product, variant);
     this.snackBar.open(
-      `${product.name} (${variantLabel(variant)}) foi adicionado ao carrinho.`,
+      `${product.name} (${variantLabel(product, variant)}) foi adicionado ao carrinho.`,
       'Fechar',
       { duration: 3000 },
     );

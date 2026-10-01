@@ -6,6 +6,11 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CATALOG_QUERY_PARAMS } from '../../core/config/navigation';
+import {
+  CATEGORY_LABELS,
+  isProductCategory,
+  PRODUCT_CATEGORIES,
+} from '../../core/config/product-categories';
 import { CartStore } from '../../core/services/cart-store';
 import { CatalogService } from '../../core/services/catalog-service';
 import { FavoritesStore } from '../../core/services/favorites-store';
@@ -57,6 +62,7 @@ export class Catalog {
   private readonly catalog = inject(CatalogService);
 
   protected readonly params = CATALOG_QUERY_PARAMS;
+  protected readonly categories = PRODUCT_CATEGORIES;
   private readonly queryParamMap = toSignal(this.route.queryParamMap, { requireSync: true });
 
   protected readonly filtersOpen = signal(false);
@@ -65,6 +71,16 @@ export class Catalog {
     [...new Set(this.catalog.products().map((product) => product.brandName))].sort(),
   );
 
+  /** `?categoria=kit`. Sem categoria = tudo (perfumes, kits, hidratantes, body splash). */
+  protected readonly category = computed(() => {
+    const value = this.queryParamMap().get(this.params.category);
+    return isProductCategory(value) ? value : null;
+  });
+  /** Título da página: "Todos os produtos" ou o nome da categoria escolhida. */
+  protected readonly title = computed(() => {
+    const category = this.category();
+    return category ? CATEGORY_LABELS[category].plural : 'Todos os produtos';
+  });
   protected readonly gender = computed(() => this.queryParamMap().get(this.params.gender));
   protected readonly brand = computed(() => this.queryParamMap().get(this.params.brand));
   protected readonly priceMin = computed(() =>
@@ -91,6 +107,7 @@ export class Catalog {
 
   protected readonly hasActiveFilters = computed(
     () =>
+      !!this.category() ||
       !!this.gender() ||
       !!this.brand() ||
       this.priceMin() !== null ||
@@ -102,6 +119,7 @@ export class Catalog {
   );
 
   protected readonly products = computed<readonly Product[]>(() => {
+    const category = this.category();
     const gender = this.gender();
     const brand = this.brand();
     const min = this.priceMin();
@@ -112,6 +130,7 @@ export class Catalog {
     const kind = this.kind();
 
     let list = this.catalog.products().filter((product) => {
+      if (category && product.category !== category) return false;
       if (gender && product.gender !== gender) return false;
       if (brand && product.brandName !== brand) return false;
       // Preço: o produto entra se algum tamanho estiver dentro da faixa.
@@ -179,7 +198,7 @@ export class Catalog {
   protected onAddToCart({ product, variant }: ProductSelection): void {
     this.cart.add(product, variant);
     this.snackBar.open(
-      `${product.name} (${variantLabel(variant)}) foi adicionado ao carrinho.`,
+      `${product.name} (${variantLabel(product, variant)}) foi adicionado ao carrinho.`,
       'Fechar',
       { duration: 3000 },
     );

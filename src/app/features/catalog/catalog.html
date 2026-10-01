@@ -1,5 +1,29 @@
 <ng-template #filterControls>
   <div class="filter-group">
+    <h3>Categoria</h3>
+    <div class="filter-group__options">
+      <button
+        type="button"
+        class="chip"
+        [class.chip--active]="!category()"
+        (click)="setFilter(params.category, null)"
+      >
+        Todas
+      </button>
+      @for (option of categories; track option.id) {
+        <button
+          type="button"
+          class="chip"
+          [class.chip--active]="category() === option.id"
+          (click)="setFilter(params.category, option.id)"
+        >
+          {{ option.plural }}
+        </button>
+      }
+    </div>
+  </div>
+
+  <div class="filter-group">
     <h3>Gênero</h3>
     <div class="filter-group__options">
       <button
@@ -129,12 +153,12 @@
   <div class="ui-container">
     <header class="catalog__head">
       <span class="ui-eyebrow">Catálogo</span>
-      <h1>Todos os perfumes</h1>
-      <p>Explore nossa seleção completa de eau de parfum masculinos, femininos e unissex.</p>
+      <h1>{{ title() }}</h1>
+      <p>Perfumes árabes, kits para presentear, hidratantes e body splash.</p>
     </header>
 
     <div class="catalog__toolbar">
-      <span class="catalog__count">{{ products().length }} perfume(s) encontrado(s)</span>
+      <span class="catalog__count">{{ products().length }} produto(s) encontrado(s)</span>
 
       <div class="catalog__toolbar-actions">
         <button

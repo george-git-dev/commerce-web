@@ -8,6 +8,7 @@ import {
   effectivePrice,
   hasPriceRange,
   lowestPrice,
+  sealedLabel,
   variantKinds,
   variantsOfKind,
 } from '../../../core/utils/product-pricing';
@@ -40,6 +41,7 @@ export class VariantPicker {
   protected readonly effectivePrice = effectivePrice;
   protected readonly lowestPrice = lowestPrice;
   protected readonly hasPriceRange = hasPriceRange;
+  protected readonly sealedLabel = sealedLabel;
 
   /** Os botões Frasco/Decant só aparecem quando o produto tem os dois tipos. */
   protected readonly kinds = computed(() => variantKinds(this.product()));

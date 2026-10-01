@@ -21,11 +21,11 @@
 }
 
 @if (kind() === 'frasco') {
-  <!-- Frasco: é um só (o original lacrado), não há tamanho para escolher. -->
+  <!-- Frasco (ou kit): é um só, o original lacrado; não há tamanho para escolher. -->
   @if (variant(); as bottle) {
     <p class="bottle">
       <mat-icon class="bottle__icon" aria-hidden="true">verified</mat-icon>
-      Frasco original lacrado · {{ bottle.volumeMl }} ml
+      {{ sealedLabel(product(), bottle) }}
     </p>
   }
 } @else {

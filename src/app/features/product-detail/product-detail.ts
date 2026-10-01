@@ -59,7 +59,6 @@ export class ProductDetail {
   private readonly paramMap = toSignal(this.route.paramMap, { requireSync: true });
   private readonly queryParamMap = toSignal(this.route.queryParamMap, { requireSync: true });
 
-
   protected readonly product = computed<Product | undefined>(() =>
     this.catalog.findBySlug(this.paramMap().get('slug')),
   );
@@ -116,7 +115,7 @@ export class ProductDetail {
   protected addToCart({ product, variant }: ProductSelection): void {
     this.cart.add(product, variant);
     this.snackBar.open(
-      `${product.name} (${variantLabel(variant)}) foi adicionado ao carrinho.`,
+      `${product.name} (${variantLabel(product, variant)}) foi adicionado ao carrinho.`,
       'Fechar',
       { duration: 3000 },
     );

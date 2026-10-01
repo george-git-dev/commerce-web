@@ -16,6 +16,12 @@ export type Occasion = 'dia' | 'noite';
 export type ProductStatus = 'rascunho' | 'publicado';
 
 /**
+ * Categoria do produto. O foco é perfume, mas a loja vende também kits,
+ * hidratantes e body splash. Rótulos em `core/config/product-categories.ts`.
+ */
+export type ProductCategory = 'perfume' | 'kit' | 'hidratante' | 'body-splash';
+
+/**
  * O que o cliente compra: um tamanho de um perfume, com preço e estoque próprios.
  * É a variante (não o produto) que vai para o carrinho e para o pedido.
  */
@@ -23,7 +29,8 @@ export interface ProductVariant {
   /** SKU — identificador único da variante. */
   id: string;
   kind: VariantKind;
-  volumeMl: number;
+  /** Volume em ml. Opcional porque o kit não tem um volume único. */
+  volumeMl?: number;
   /** Preço cheio, em reais. */
   price: number;
   /** Preço promocional; quando existe, é o que o cliente paga e `price` aparece riscado. */
@@ -58,12 +65,17 @@ export interface Product {
   description: string;
   brandId: number;
   brandName: string;
-  categoryId: number;
-  categoryName: string;
+  category: ProductCategory;
+  /** Vale para todas as categorias (um body splash pode ser feminino, um kit masculino). */
   gender: Gender;
+  /** Só perfume. */
   concentration?: Concentration;
+  /** Pode ser vazio (ex.: kit, hidratante sem fragrância definida). */
   families: readonly OlfactoryFamily[];
-  notes: OlfactoryNotes;
+  /** Opcional: sem notas, a página não mostra a pirâmide olfativa. */
+  notes?: OlfactoryNotes;
+  /** Só kit: o que vem na caixa (ex.: "Asad Eau de Parfum 100 ml"). */
+  kitItems?: readonly string[];
   occasions?: readonly Occasion[];
   /** Só produtos publicados aparecem na loja. */
   status: ProductStatus;

@@ -22,7 +22,7 @@ export class CartLineItem {
   protected readonly placeholderImage = IMAGERY.productPlaceholder;
 
   /** "Frasco 100 ml". */
-  protected readonly label = computed(() => variantLabel(this.line().variant));
+  protected readonly label = computed(() => variantLabel(this.line().product, this.line().variant));
   protected readonly subtotal = computed(
     () => effectivePrice(this.line().variant) * this.line().quantity,
   );

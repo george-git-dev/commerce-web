@@ -32,8 +32,8 @@
   <div class="card__body">
     <p class="card__subtitle">{{ item.brandName }}</p>
 
-    @if (item.families[0]; as family) {
-      <span class="card__family">{{ family }}</span>
+    @if (tag(); as label) {
+      <span class="card__family">{{ label }}</span>
     }
 
     <h3 class="card__name">

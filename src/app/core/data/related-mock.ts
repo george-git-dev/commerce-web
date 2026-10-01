@@ -3,7 +3,8 @@
  * perfume, os slugs sugeridos em "Você também pode gostar", na ordem.
  *
  * Gerado offline com a regra que o back vai implementar (ver roadmap, B3):
- * gênero compatível, só produtos com estoque, +3 por família em comum, +1 por
+ * gênero compatível, só produtos com estoque, +5 se for da mesma categoria,
+ * +3 por família em comum, +1 por
  * nota em comum (+1 extra se for de fundo) e +2 por ocasião em comum. O front
  * não calcula nada — só mostra o que o back devolver.
  */
@@ -146,5 +147,59 @@ export const RELATED_MOCK: Readonly<Record<string, readonly string[]>> = {
     'ard-al-zaafaran-dirham',
     'ard-al-zaafaran-shams-al-emarat',
     'lattafa-yara',
+  ],
+  'lattafa-asad-kit-presente': [
+    'armaf-club-de-nuit-intense-man-kit-presente',
+    'lattafa-asad',
+    'afnan-9pm',
+    'armaf-club-de-nuit-intense-man',
+  ],
+  'lattafa-yara-kit-presente': [
+    'lattafa-yara',
+    'lattafa-yara-body-mist',
+    'maison-alhambra-delilah',
+    'maison-alhambra-delilah-body-mist',
+  ],
+  'armaf-club-de-nuit-intense-man-kit-presente': [
+    'lattafa-asad-kit-presente',
+    'lattafa-asad',
+    'afnan-9pm',
+    'rasasi-hawas-for-him',
+  ],
+  'lattafa-yara-body-mist': [
+    'lattafa-yara',
+    'maison-alhambra-delilah-body-mist',
+    'al-wataniah-sabah-al-ward-body-spray',
+    'al-wataniah-sabah-al-ward',
+  ],
+  'maison-alhambra-delilah-body-mist': [
+    'lattafa-yara-body-mist',
+    'maison-alhambra-delilah',
+    'al-wataniah-sabah-al-ward',
+    'al-wataniah-sabah-al-ward-body-spray',
+  ],
+  'al-wataniah-sabah-al-ward-body-spray': [
+    'lattafa-yara-body-mist',
+    'maison-alhambra-delilah-body-mist',
+    'al-wataniah-sabah-al-ward',
+    'lattafa-yara',
+  ],
+  'lattafa-khamrah-locao-hidratante': [
+    'lattafa-khamrah',
+    'al-wataniah-attar-al-wesal',
+    'lattafa-yara',
+    'afnan-9pm',
+  ],
+  'lattafa-yara-locao-hidratante': [
+    'lattafa-yara',
+    'lattafa-yara-body-mist',
+    'al-wataniah-sabah-al-ward-creme-hidratante',
+    'al-wataniah-sabah-al-ward',
+  ],
+  'al-wataniah-sabah-al-ward-creme-hidratante': [
+    'maison-alhambra-delilah',
+    'maison-alhambra-delilah-body-mist',
+    'al-wataniah-sabah-al-ward',
+    'al-wataniah-sabah-al-ward-body-spray',
   ],
 };

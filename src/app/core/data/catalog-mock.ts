@@ -60,6 +60,7 @@ export const CATEGORIES_MOCK: readonly Category[] = [
     text: 'Conjuntos para presentear',
     icon: 'redeem',
     image: 'img/categorias/kits.webp',
+    categoryFilter: 'kit',
   },
   {
     id: 'lancamentos',

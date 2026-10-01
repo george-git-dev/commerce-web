@@ -42,6 +42,17 @@
 
           <p class="detail__description">{{ item.description }}</p>
 
+          @if (item.kitItems?.length) {
+            <div class="kit">
+              <h2 class="kit__title">O que vem no kit</h2>
+              <ul class="kit__list">
+                @for (kitItem of item.kitItems; track kitItem) {
+                  <li><mat-icon aria-hidden="true">check</mat-icon>{{ kitItem }}</li>
+                }
+              </ul>
+            </div>
+          }
+
           <div class="detail__actions">
             <button
               matButton="filled"
@@ -82,11 +93,13 @@
         </div>
       </div>
 
-      <app-notes-grid
-        [notes]="item.notes"
-        [families]="item.families"
-        [occasions]="item.occasions ?? []"
-      />
+      @if (item.notes; as notes) {
+        <app-notes-grid
+          [notes]="notes"
+          [families]="item.families"
+          [occasions]="item.occasions ?? []"
+        />
+      }
 
       <!-- Só carrega (e busca as sugestões) quando o cliente rola até aqui. -->
       @defer (on viewport) {

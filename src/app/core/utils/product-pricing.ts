@@ -38,7 +38,7 @@ export function variantKinds(product: Product): VariantKind[] {
 export function variantsOfKind(product: Product, kind: VariantKind): ProductVariant[] {
   return product.variants
     .filter((variant) => variant.kind === kind)
-    .sort((a, b) => a.volumeMl - b.volumeMl);
+    .sort((a, b) => (a.volumeMl ?? 0) - (b.volumeMl ?? 0));
 }
 
 /**
@@ -87,7 +87,16 @@ export function discountPercent(variant: ProductVariant): number | null {
     : null;
 }
 
-/** "Frasco 100 ml", "Decant 5 ml". */
-export function variantLabel(variant: ProductVariant): string {
-  return `${VARIANT_KIND_LABELS[variant.kind]} ${variant.volumeMl} ml`;
+/** "Frasco 100 ml", "Decant 5 ml", "Kit". */
+export function variantLabel(product: Product, variant: ProductVariant): string {
+  if (variant.kind === 'frasco' && product.category === 'kit') return 'Kit';
+  const volume = variant.volumeMl ? ` ${variant.volumeMl} ml` : '';
+  return `${VARIANT_KIND_LABELS[variant.kind]}${volume}`;
+}
+
+/** Linha da página de produto: "Frasco original lacrado · 100 ml", "Kit original lacrado". */
+export function sealedLabel(product: Product, variant: ProductVariant): string {
+  if (product.category === 'kit') return 'Kit original lacrado';
+  const volume = variant.volumeMl ? ` · ${variant.volumeMl} ml` : '';
+  return `Frasco original lacrado${volume}`;
 }

@@ -110,6 +110,43 @@
   color: var(--muted-foreground);
 }
 
+// Kit: lista do que vem na caixa.
+.kit {
+  margin: 16px 0 20px;
+}
+
+.kit__title {
+  margin: 0 0 8px;
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+
+.kit__list {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.9375rem;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    color: var(--gold);
+  }
+}
+
 .detail__actions {
   display: flex;
   flex-wrap: wrap;

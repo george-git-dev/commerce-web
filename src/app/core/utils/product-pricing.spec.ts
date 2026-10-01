@@ -28,8 +28,7 @@ const product = (variants: ProductVariant[]): Product => ({
   description: '',
   brandId: 1,
   brandName: 'Marca',
-  categoryId: 1,
-  categoryName: 'Categoria',
+  category: 'perfume',
   gender: 'Unissex',
   families: [],
   notes: { top: [], heart: [], base: [] },
@@ -79,7 +78,9 @@ describe('product-pricing', () => {
     expect(hasPriceRange(product([variant({ price: 100 })]))).toBe(false);
   });
 
-  it('monta o rótulo da variante', () => {
-    expect(variantLabel(variant({ kind: 'decant', volumeMl: 5 }))).toBe('Decant 5 ml');
+  it('monta o rótulo da variante conforme a categoria', () => {
+    expect(variantLabel(product([]), variant({ kind: 'decant', volumeMl: 5 }))).toBe('Decant 5 ml');
+    expect(variantLabel(product([]), variant({ volumeMl: 100 }))).toBe('Frasco 100 ml');
+    expect(variantLabel({ ...product([]), category: 'kit' }, variant({}))).toBe('Kit');
   });
 });
