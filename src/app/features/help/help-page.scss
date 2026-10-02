@@ -1,0 +1,115 @@
+// Leitura confortável no celular: coluna única e linha curta também no desktop.
+.help.ui-section {
+  padding-block: 16px 40px;
+}
+
+.help__inner {
+  max-width: 760px;
+}
+
+.help__crumb {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 16px;
+  font-size: 0.8125rem;
+  color: var(--muted-foreground);
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+  }
+}
+
+.help__head {
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+
+  h1 {
+    font-size: clamp(1.75rem, 1.3rem + 2vw, 2.5rem);
+  }
+}
+
+.help__summary {
+  margin: 8px 0 0;
+  color: var(--muted-foreground);
+}
+
+.help__updated {
+  margin: 8px 0 0;
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+
+.help__section {
+  margin-bottom: 24px;
+
+  h2 {
+    margin-bottom: 8px;
+    font-family: var(--font-ui);
+    font-size: 1.0625rem;
+    font-weight: 600;
+  }
+
+  p,
+  li {
+    line-height: 1.65;
+  }
+
+  p {
+    margin: 0 0 8px;
+  }
+
+  ul {
+    margin: 0;
+    padding-left: 20px;
+  }
+}
+
+.help__faq {
+  border-bottom: 1px solid var(--border);
+  padding-block: 14px;
+
+  summary {
+    cursor: pointer;
+    font-weight: 500;
+  }
+
+  p {
+    margin: 10px 0 0;
+    line-height: 1.65;
+    color: var(--muted-foreground);
+  }
+}
+
+.help__contact {
+  margin-top: 32px;
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+
+  h2 {
+    font-size: 1.25rem;
+  }
+
+  p {
+    margin: 6px 0 16px;
+    font-size: 0.875rem;
+    color: var(--muted-foreground);
+  }
+}
+
+.help__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+@media (min-width: 900px) {
+  .help.ui-section {
+    padding-block: 24px 72px;
+  }
+}

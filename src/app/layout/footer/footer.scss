@@ -4,7 +4,7 @@
   font-size: 0.875rem;
 
   h4 {
-    margin: 0 0 12px;
+    margin: 0;
     color: var(--primary-foreground);
     font-family: var(--font-ui);
     font-size: 0.8125rem;
@@ -17,17 +17,14 @@
     color: var(--gold);
   }
 
-  // Celular: marca em cima e as colunas de links lado a lado (2 por linha),
-  // com espaços enxutos. O desktop volta aos valores maiores (ver fim do arquivo).
+  // Celular: marca em cima e grupos em acordeão, um embaixo do outro.
   &__grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 28px 20px;
-    padding-block: 36px 28px;
+    padding-block: 36px 12px;
   }
 
-  &__col--brand {
-    grid-column: 1 / -1;
+  &__brand-col {
+    padding-bottom: 20px;
   }
 
   &__brand {
@@ -39,28 +36,12 @@
     display: block;
     height: 120px;
     width: auto;
-    object-fit: contain;
-    //filter: brightness(0) invert(1);
   }
 
   &__about {
     margin: 0;
     max-width: 46ch;
     line-height: 1.75;
-  }
-
-  &__links {
-    margin: 0;
-    padding: 0;
-    list-style: none;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-
-    // Itens sem página própria ainda (ex.: "Trocas e devoluções") ficam como texto simples.
-    span {
-      color: color-mix(in oklch, var(--primary-foreground) 45%, transparent);
-    }
   }
 
   &__socials {
@@ -76,9 +57,6 @@
       border-radius: var(--radius);
       border: 1px solid color-mix(in oklch, var(--primary-foreground) 18%, transparent);
       color: var(--primary-foreground);
-      transition:
-        border-color var(--motion-fast) ease,
-        color var(--motion-fast) ease;
 
       &:hover {
         border-color: var(--gold);
@@ -86,62 +64,89 @@
     }
   }
 
+  &__group {
+    border-top: 1px solid color-mix(in oklch, var(--primary-foreground) 12%, transparent);
+
+    summary {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 48px;
+      cursor: pointer;
+      list-style: none;
+
+      &::-webkit-details-marker {
+        display: none;
+      }
+    }
+
+    &[open] summary mat-icon {
+      transform: rotate(180deg);
+    }
+  }
+
+  &__links {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin: 0;
+    padding: 0 0 16px;
+    list-style: none;
+  }
+
+  &__contact li,
+  &__contact a {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  &__contact mat-icon,
+  &__contact app-brand-icon {
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+    color: var(--gold);
+  }
+
   &__bar {
     border-top: 1px solid color-mix(in oklch, var(--primary-foreground) 12%, transparent);
     font-size: 0.75rem;
     color: color-mix(in oklch, var(--primary-foreground) 50%, transparent);
-  }
 
-  &__bar-inner {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    padding-block: 18px;
-    text-align: center;
-  }
-
-  &__payments {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 8px;
-
-    span {
-      padding: 4px 10px;
-      border: 1px solid color-mix(in oklch, var(--primary-foreground) 14%, transparent);
-      border-radius: var(--radius-sm);
-      font-size: 0.6875rem;
-      letter-spacing: 0.03em;
+    p {
+      margin: 0 auto;
+      padding-block: 18px;
+      text-align: center;
+      line-height: 1.6;
     }
   }
 }
 
-@media (min-width: 1024px) {
-  .footer {
-    h4 {
-      margin-bottom: 18px;
-    }
-  }
-
+// Desktop: grupos sempre abertos, em colunas, sem cara de acordeão.
+@media (min-width: 900px) {
   .footer__grid {
-    grid-template-columns: 1.4fr 1fr 1fr 1fr;
-    gap: 48px;
-    padding-block: 72px 56px;
+    grid-template-columns: 1.3fr repeat(4, 1fr);
+    gap: 40px;
+    padding-block: 64px 40px;
   }
 
   .footer__logo {
-    height: 190px;
+    height: 160px;
   }
 
-  .footer__col--brand {
-    grid-column: auto;
-  }
+  .footer__group {
+    border-top: 0;
 
-  .footer__bar-inner {
-    flex-direction: row;
-    justify-content: space-between;
-    text-align: left;
+    summary {
+      min-height: 0;
+      margin-bottom: 18px;
+      pointer-events: none;
+
+      mat-icon {
+        display: none;
+      }
+    }
   }
 }

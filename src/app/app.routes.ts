@@ -38,6 +38,11 @@ export const routes: Routes = [
     loadComponent: () => import('./features/account/account').then((m) => m.Account),
   },
   {
+    path: 'ajuda/:pagina',
+    title: 'Nani Perfumes | Ajuda',
+    loadComponent: () => import('./features/help/help-page').then((m) => m.HelpPageView),
+  },
+  {
     path: '**',
     title: 'Nani Perfumes | Página não encontrada',
     loadComponent: () => import('./features/not-found/not-found').then((m) => m.NotFound),

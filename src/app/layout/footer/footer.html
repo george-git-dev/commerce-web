@@ -1,6 +1,6 @@
 <footer class="footer">
   <div class="ui-container footer__grid">
-    <div class="footer__col footer__col--brand">
+    <div class="footer__brand-col">
       <a routerLink="/" class="footer__brand" aria-label="Nani Perfumes, página inicial">
         <img
           src="logo-nani-full.webp"
@@ -18,55 +18,55 @@
       <div class="footer__socials">
         @for (social of socials; track social.label) {
           <a [href]="social.url" [attr.aria-label]="social.label" target="_blank" rel="noopener">
-            <mat-icon>{{ social.icon }}</mat-icon>
+            <app-brand-icon [name]="social.brand" />
           </a>
         }
       </div>
     </div>
 
-    <div class="footer__col">
-      <h4>Sobre a loja</h4>
-      <ul class="footer__links">
-        <li><a routerLink="/" [fragment]="sections.story">Nossa história</a></li>
-        <li><a routerLink="/minha-conta">Minha conta</a></li>
-        <li><a routerLink="/favoritos">Favoritos</a></li>
-      </ul>
-    </div>
-<!-- 
-    <div class="footer__col">
-      <h4>Atendimento</h4>
-      <ul class="footer__links">
-        <li><a [href]="store.whatsappHref" target="_blank" rel="noopener">WhatsApp</a></li>
+    @for (group of groups; track group.title) {
+      <details class="footer__group" [open]="wide()">
+        <summary>
+          <h4>{{ group.title }}</h4>
+          <mat-icon aria-hidden="true">expand_more</mat-icon>
+        </summary>
+        <ul class="footer__links">
+          @for (link of group.links; track link.label) {
+            <li>
+              <a [routerLink]="link.path" [fragment]="link.fragment">{{ link.label }}</a>
+            </li>
+          }
+        </ul>
+      </details>
+    }
+
+    <details class="footer__group" [open]="wide()">
+      <summary>
+        <h4>Atendimento</h4>
+        <mat-icon aria-hidden="true">expand_more</mat-icon>
+      </summary>
+      <ul class="footer__links footer__contact">
         <li>
-          <a [href]="store.phoneHref">{{ store.phone }}</a>
+          <a [href]="store.whatsappHref" target="_blank" rel="noopener">
+            <app-brand-icon name="whatsapp" /> {{ store.whatsapp }}
+          </a>
         </li>
-        <li><span>Trocas e devoluções</span></li>
+        <li>
+          <a [href]="store.emailHref">
+            <mat-icon aria-hidden="true">mail</mat-icon> {{ store.email }}
+          </a>
+        </li>
+        <li><mat-icon aria-hidden="true">schedule</mat-icon> {{ store.hours }}</li>
       </ul>
-    </div>
--->
-    <div class="footer__col">
-      <h4>Categorias</h4>
-      <ul class="footer__links">
-        @for (link of categoryLinks; track link.label) {
-          <li>
-            <a [routerLink]="link.path" [queryParams]="link.queryParams ?? null">{{
-              link.label
-            }}</a>
-          </li>
-        }
-      </ul>
-    </div>
+    </details>
   </div>
 
+  <app-footer-trust />
+
   <div class="footer__bar">
-    <div class="ui-container footer__bar-inner">
-      <span>© {{ year }} {{ store.name }} {{ store.tagline }}. Todos os direitos reservados.</span>
-      <div class="footer__payments">
-        @for (payment of payments; track payment) {
-          <span>{{ payment }}</span>
-        }
-      </div>
-      <span>CNPJ {{ store.cnpj }}</span>
-    </div>
+    <p class="ui-container">
+      © {{ year }} {{ store.name }} · {{ store.legalName }} · CNPJ {{ store.cnpj }} ·
+      {{ store.address }}
+    </p>
   </div>
 </footer>

@@ -1,0 +1,69 @@
+@if (page(); as item) {
+  <article class="help ui-section">
+    <div class="ui-container help__inner">
+      <nav class="help__crumb" aria-label="Trilha de navegação">
+        <a routerLink="/">Início</a>
+        <mat-icon aria-hidden="true">chevron_right</mat-icon>
+        <span>{{ groupLabel() }}</span>
+      </nav>
+
+      <header class="help__head">
+        <h1>{{ item.title }}</h1>
+        <p class="help__summary">{{ item.summary }}</p>
+        <p class="help__updated">Atualizado em {{ item.updatedAt | date: 'dd/MM/yyyy' }}</p>
+      </header>
+
+      @for (section of item.sections; track section.heading) {
+        @if (item.faq) {
+          <details class="help__faq">
+            <summary>{{ section.heading }}</summary>
+            @for (paragraph of section.paragraphs; track $index) {
+              <p>{{ paragraph }}</p>
+            }
+          </details>
+        } @else {
+          <section class="help__section">
+            <h2>{{ section.heading }}</h2>
+            @for (paragraph of section.paragraphs; track $index) {
+              <p>{{ paragraph }}</p>
+            }
+            @if (section.items?.length) {
+              <ul>
+                @for (entry of section.items; track $index) {
+                  <li>{{ entry }}</li>
+                }
+              </ul>
+            }
+          </section>
+        }
+      }
+
+      @if (item.slug !== 'contato') {
+        <aside class="help__contact">
+          <h2>Ainda com dúvidas?</h2>
+          <p>{{ store.hours }}</p>
+          <div class="help__actions">
+            <a
+              matButton="filled"
+              class="ui-cta"
+              [href]="store.whatsappHref"
+              target="_blank"
+              rel="noopener"
+            >
+              Falar no WhatsApp
+            </a>
+            <a matButton="outlined" class="ui-cta" [href]="store.emailHref">Enviar e-mail</a>
+          </div>
+        </aside>
+      }
+    </div>
+  </article>
+} @else {
+  <section class="ui-section">
+    <div class="ui-container help__inner">
+      <h1>Página não encontrada</h1>
+      <p>Esse conteúdo não existe ou mudou de endereço.</p>
+      <a matButton="filled" class="ui-cta" routerLink="/">Voltar para o início</a>
+    </div>
+  </section>
+}
