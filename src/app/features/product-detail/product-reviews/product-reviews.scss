@@ -1,0 +1,203 @@
+:host {
+  display: block;
+}
+
+.reviews {
+  padding-block: 32px;
+  border-top: 1px solid var(--border);
+}
+
+.reviews__empty {
+  max-width: 420px;
+  margin: 0 auto;
+  text-align: center;
+  color: var(--muted-foreground);
+  font-size: 0.875rem;
+
+  mat-icon {
+    font-size: 32px;
+    width: 32px;
+    height: 32px;
+    color: var(--gold);
+  }
+
+  p {
+    margin: 6px 0 0;
+  }
+
+  strong {
+    color: var(--foreground);
+    font-weight: 500;
+  }
+}
+
+.reviews__layout {
+  display: grid;
+  gap: 24px;
+}
+
+// Resumo: média grande, estrelas, total e barras por nota.
+.summary {
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+  text-align: center;
+
+  &__average {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 2.75rem;
+    line-height: 1;
+  }
+
+  &__count {
+    margin: 6px 0 16px;
+    font-size: 0.8125rem;
+    color: var(--muted-foreground);
+  }
+
+  &__bars {
+    display: grid;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+
+    li {
+      display: grid;
+      grid-template-columns: 34px 1fr 28px;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.8125rem;
+    }
+  }
+
+  &__label {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+
+    mat-icon {
+      font-size: 14px;
+      width: 14px;
+      height: 14px;
+      color: var(--gold);
+    }
+  }
+
+  &__track {
+    height: 6px;
+    border-radius: 999px;
+    background: var(--muted);
+    overflow: hidden;
+  }
+
+  &__fill {
+    display: block;
+    height: 100%;
+    background: var(--gold);
+  }
+
+  &__total {
+    text-align: right;
+    color: var(--muted-foreground);
+  }
+
+  &__note {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin: 16px 0 0;
+    font-size: 0.75rem;
+    color: var(--muted-foreground);
+
+    mat-icon {
+      // Sem isto o flex encolhe o ícone quando o texto quebra em 2 linhas.
+      flex-shrink: 0;
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
+      color: var(--earth);
+    }
+  }
+}
+
+.review {
+  padding-block: 16px;
+  border-bottom: 1px solid var(--border);
+
+  &:first-child {
+    padding-top: 0;
+  }
+
+  &__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  &__date {
+    font-size: 0.75rem;
+    color: var(--muted-foreground);
+  }
+
+  &__comment {
+    margin: 8px 0;
+    font-size: 0.9375rem;
+    line-height: 1.5;
+  }
+
+  &__author {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 10px;
+    margin: 0;
+    font-size: 0.8125rem;
+    font-weight: 500;
+  }
+
+  &__verified {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-weight: 400;
+    color: var(--earth);
+
+    mat-icon {
+      flex-shrink: 0;
+      font-size: 15px;
+      width: 15px;
+      height: 15px;
+    }
+  }
+}
+
+.reviews__more {
+  width: 100%;
+  margin-top: 16px;
+}
+
+@media (min-width: 900px) {
+  .reviews {
+    padding-block: 48px;
+  }
+
+  .reviews__layout {
+    grid-template-columns: 300px 1fr;
+    align-items: start;
+    gap: 48px;
+  }
+
+  .summary {
+    position: sticky;
+    top: 120px;
+  }
+
+  .reviews__more {
+    width: auto;
+  }
+}

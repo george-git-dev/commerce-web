@@ -59,7 +59,21 @@
 }
 
 .detail__rating {
+  display: block;
   margin-top: 12px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+// Compensa o header fixo ao rolar até as avaliações.
+.reviews-anchor {
+  scroll-margin-top: 96px;
+}
+
+.reviews__placeholder {
+  min-height: 360px;
 }
 
 .detail__price {

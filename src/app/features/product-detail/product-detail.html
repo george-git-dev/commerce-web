@@ -20,11 +20,14 @@
           <p class="detail__concentration">{{ typeLine() }}</p>
 
           @if (item.rating) {
-            <app-star-rating
+            <button
+              type="button"
               class="detail__rating"
-              [rating]="item.rating"
-              [reviews]="item.reviews"
-            />
+              aria-label="Ver avaliações"
+              (click)="scrollToReviews()"
+            >
+              <app-star-rating [rating]="item.rating" [reviews]="item.reviewCount" />
+            </button>
           }
 
           <p class="detail__price">
@@ -100,6 +103,15 @@
           [occasions]="item.occasions ?? []"
         />
       }
+
+      <!-- Âncora fora do @defer: o clique nas estrelas rola até aqui mesmo antes de carregar. -->
+      <div id="avaliacoes" class="reviews-anchor">
+        @defer (on viewport) {
+          <app-product-reviews [product]="item" />
+        } @placeholder {
+          <div class="reviews__placeholder" aria-hidden="true"></div>
+        }
+      </div>
 
       <!-- Só carrega (e busca as sugestões) quando o cliente rola até aqui. -->
       @defer (on viewport) {

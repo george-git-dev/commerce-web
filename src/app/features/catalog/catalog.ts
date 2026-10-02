@@ -187,7 +187,11 @@ export class Catalog {
         list.sort((a, b) => lowestPrice(b) - lowestPrice(a));
         break;
       case 'avaliacao':
-        list.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
+        // Empate na média: quem tem mais avaliações vem antes.
+        list.sort(
+          (a, b) =>
+            (b.rating ?? 0) - (a.rating ?? 0) || (b.reviewCount ?? 0) - (a.reviewCount ?? 0),
+        );
         break;
     }
     return list;

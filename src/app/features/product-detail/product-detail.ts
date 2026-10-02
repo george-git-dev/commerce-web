@@ -1,4 +1,4 @@
-import { CurrencyPipe } from '@angular/common';
+import { CurrencyPipe, DOCUMENT } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, linkedSignal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
@@ -22,6 +22,7 @@ import { ProductCard } from '../../shared/product-card/product-card';
 import { StarRating } from '../../shared/star-rating/star-rating';
 import { NotesGrid } from './notes-grid/notes-grid';
 import { ProductGallery } from './product-gallery/product-gallery';
+import { ProductReviews } from './product-reviews/product-reviews';
 import { VariantPicker } from './variant-picker/variant-picker';
 
 /**
@@ -42,6 +43,7 @@ import { VariantPicker } from './variant-picker/variant-picker';
     ProductCard,
     StarRating,
     NotesGrid,
+    ProductReviews,
     ProductGallery,
     VariantPicker,
   ],
@@ -56,6 +58,7 @@ export class ProductDetail {
   private readonly cart = inject(CartStore);
   private readonly favorites = inject(FavoritesStore);
   private readonly snackBar = inject(MatSnackBar);
+  private readonly document = inject(DOCUMENT);
 
   private readonly paramMap = toSignal(this.route.paramMap, { requireSync: true });
   private readonly queryParamMap = toSignal(this.route.queryParamMap, { requireSync: true });
@@ -124,6 +127,11 @@ export class ProductDetail {
     this.favorites.isFavorite(product.id);
 
   /** Adiciona o tamanho escolhido na página. */
+  /** Clique nas estrelas do topo: rola até a seção de avaliações. */
+  protected scrollToReviews(): void {
+    this.document.getElementById('avaliacoes')?.scrollIntoView({ behavior: 'smooth' });
+  }
+
   protected addSelected(product: Product): void {
     const variant = this.variant();
     if (variant) this.addToCart({ product, variant });

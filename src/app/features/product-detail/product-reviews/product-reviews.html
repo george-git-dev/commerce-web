@@ -1,0 +1,71 @@
+<section class="reviews" aria-labelledby="reviews-title">
+  <header class="ui-section-head">
+    <span class="ui-eyebrow">Avaliações</span>
+    <h2 id="reviews-title">O que dizem os clientes</h2>
+  </header>
+
+  @if (summary().count === 0) {
+    <div class="reviews__empty">
+      <mat-icon aria-hidden="true">rate_review</mat-icon>
+      <p><strong>Este produto ainda não tem avaliações.</strong></p>
+      <p>Só quem comprou e recebeu o produto pode avaliar, em Minha conta → Pedidos.</p>
+    </div>
+  } @else {
+    <div class="reviews__layout">
+      <div class="summary">
+        <p class="summary__average">{{ summary().average | number: '1.1-1' }}</p>
+        <app-star-rating [rating]="summary().average" />
+        <p class="summary__count">
+          {{ summary().count }} {{ summary().count === 1 ? 'avaliação' : 'avaliações' }}
+        </p>
+
+        <ul class="summary__bars">
+          @for (bar of bars(); track bar.stars) {
+            <li [attr.aria-label]="bar.stars + ' estrelas: ' + bar.total">
+              <span class="summary__label">
+                {{ bar.stars }}
+                <mat-icon aria-hidden="true">star</mat-icon>
+              </span>
+              <span class="summary__track" aria-hidden="true">
+                <span class="summary__fill" [style.width.%]="bar.percent"></span>
+              </span>
+              <span class="summary__total" aria-hidden="true">{{ bar.total }}</span>
+            </li>
+          }
+        </ul>
+
+        <p class="summary__note">
+          <mat-icon aria-hidden="true">verified</mat-icon>
+          Só clientes com compra verificada podem avaliar.
+        </p>
+      </div>
+
+      <div class="reviews__list">
+        @for (review of reviews(); track review.id) {
+          <article class="review">
+            <header class="review__head">
+              <app-star-rating [rating]="review.rating" />
+              <time class="review__date" [attr.datetime]="review.createdAt">
+                {{ review.createdAt | date: 'dd/MM/yyyy' }}
+              </time>
+            </header>
+            <p class="review__comment">{{ review.comment }}</p>
+            <p class="review__author">
+              {{ review.authorName }}
+              <span class="review__verified">
+                <mat-icon aria-hidden="true">verified</mat-icon>
+                Compra verificada
+              </span>
+            </p>
+          </article>
+        }
+
+        @if (hasMore()) {
+          <button matButton="outlined" class="reviews__more" (click)="loadMore()">
+            Ver mais avaliações
+          </button>
+        }
+      </div>
+    </div>
+  }
+</section>

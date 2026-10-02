@@ -25,4 +25,29 @@ describe('CatalogService', () => {
     ]);
     expect(related).not.toContain('lattafa-asad');
   });
+
+  it('pagina as avaliações e o resumo bate com o produto', () => {
+    const khamrah = service.findBySlug('lattafa-khamrah')!;
+    const first = service.reviews(khamrah, 0, 5);
+    expect(first.items.length).toBe(5);
+    expect(first.hasMore).toBe(true);
+    expect(first.summary.count).toBe(khamrah.reviewCount);
+    expect(first.summary.average).toBe(khamrah.rating);
+    expect(first.summary.distribution.reduce((sum, total) => sum + total, 0)).toBe(
+      khamrah.reviewCount,
+    );
+
+    const last = service.reviews(khamrah, 2, 5);
+    expect(last.hasMore).toBe(false);
+    // Mais recentes primeiro.
+    const dates = first.items.map((review) => review.createdAt);
+    expect([...dates].sort().reverse()).toEqual(dates);
+  });
+
+  it('produto sem avaliações devolve resumo zerado', () => {
+    const page = service.reviews(service.findBySlug('lattafa-bade-e-al-oud-oud-for-glory')!);
+    expect(page.summary.count).toBe(0);
+    expect(page.items).toEqual([]);
+    expect(page.hasMore).toBe(false);
+  });
 });

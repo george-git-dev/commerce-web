@@ -83,8 +83,10 @@ export interface Product {
   /** Selo manual (ex.: "Mais vendido"). */
   badge?: string;
   // Avaliações: decisão pendente no roadmap (não exibir nota inventada).
+  /** Média das avaliações aprovadas (calculada pelo back). Ausente = sem avaliações. */
   rating?: number;
-  reviews?: number;
+  /** Total de avaliações aprovadas (calculado pelo back). */
+  reviewCount?: number;
   /**
    * Unidades vendidas (todas as variantes). Calculado pelo back a partir dos
    * pedidos pagos — nunca digitado no cadastro. Usado em "Mais vendidos".

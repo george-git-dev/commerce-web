@@ -14,6 +14,7 @@ import { Product } from '../models/product';
  *   No MVP real não haverá decants.
  * - Em promoção: Lattafa Yara, Afnan Turathi Blue, Maison Alhambra Delilah,
  *   Al Wataniah Sabah Al Ward, Swiss Arabian Casablanca.
+ * - Lattafa Bade'e Al Oud Oud for Glory (lançamento): sem avaliações (estado vazio).
  * - Afnan 9PM: só 2 unidades ("Últimas unidades").
  * - Armaf Club de Nuit Women: esgotado → card "Indisponível".
  * - Lattafa Khamrah: 3, 4 e 5 notas por camada (grade de notas cheia).
@@ -42,8 +43,8 @@ export const MOCK_PRODUCTS: readonly Product[] = [
     occasions: ['noite'],
     status: 'publicado',
     badge: 'Mais vendido',
-    rating: 4.8,
-    reviews: 214,
+    rating: 4.2,
+    reviewCount: 9,
     soldCount: 1456,
     images: [
       'img/produtos/garrafa-preta.webp',
@@ -77,8 +78,8 @@ export const MOCK_PRODUCTS: readonly Product[] = [
     },
     occasions: ['dia', 'noite'],
     status: 'publicado',
-    rating: 4.7,
-    reviews: 189,
+    rating: 4.2,
+    reviewCount: 11,
     soldCount: 756,
     images: [
       'img/produtos/garrafa-cristal.webp',
@@ -118,8 +119,8 @@ export const MOCK_PRODUCTS: readonly Product[] = [
     occasions: ['noite'],
     status: 'publicado',
     badge: 'Mais vendido',
-    rating: 4.8,
-    reviews: 132,
+    rating: 4.4,
+    reviewCount: 12,
     soldCount: 1128,
     images: [
       'img/produtos/cena-oferta.webp',
@@ -152,8 +153,8 @@ export const MOCK_PRODUCTS: readonly Product[] = [
     },
     occasions: ['dia', 'noite'],
     status: 'publicado',
-    rating: 4.5,
-    reviews: 88,
+    rating: 4.8,
+    reviewCount: 9,
     soldCount: 352,
     images: [
       'img/produtos/garrafa-preta.webp',
@@ -187,8 +188,6 @@ export const MOCK_PRODUCTS: readonly Product[] = [
     occasions: ['noite'],
     status: 'publicado',
     launch: true,
-    rating: 4.6,
-    reviews: 74,
     soldCount: 296,
     images: [
       'img/produtos/cena-noturna-1.webp',
@@ -227,8 +226,8 @@ export const MOCK_PRODUCTS: readonly Product[] = [
     },
     occasions: ['dia', 'noite'],
     status: 'publicado',
-    rating: 4.6,
-    reviews: 158,
+    rating: 4.0,
+    reviewCount: 10,
     soldCount: 632,
     images: [
       'img/produtos/garrafa-verde.webp',
@@ -267,8 +266,8 @@ export const MOCK_PRODUCTS: readonly Product[] = [
     },
     occasions: ['dia', 'noite'],
     status: 'publicado',
-    rating: 4.4,
-    reviews: 51,
+    rating: 4.5,
+    reviewCount: 4,
     soldCount: 204,
     images: [
       'img/produtos/garrafa-vinho.webp',
@@ -300,8 +299,8 @@ export const MOCK_PRODUCTS: readonly Product[] = [
     occasions: ['noite'],
     status: 'publicado',
     badge: 'Mais vendido',
-    rating: 4.7,
-    reviews: 203,
+    rating: 4.2,
+    reviewCount: 10,
     soldCount: 1412,
     images: [
       'img/produtos/cena-noturna-1.webp',
@@ -332,8 +331,8 @@ export const MOCK_PRODUCTS: readonly Product[] = [
     },
     occasions: ['dia'],
     status: 'publicado',
-    rating: 4.5,
-    reviews: 67,
+    rating: 4.7,
+    reviewCount: 14,
     soldCount: 268,
     images: [
       'img/produtos/garrafa-verde.webp',
@@ -372,8 +371,8 @@ export const MOCK_PRODUCTS: readonly Product[] = [
     },
     occasions: ['dia', 'noite'],
     status: 'publicado',
-    rating: 4.6,
-    reviews: 81,
+    rating: 4.5,
+    reviewCount: 13,
     soldCount: 324,
     images: [
       'img/produtos/garrafa-preta.webp',
@@ -407,8 +406,8 @@ export const MOCK_PRODUCTS: readonly Product[] = [
     occasions: ['dia'],
     status: 'publicado',
     launch: true,
-    rating: 4.7,
-    reviews: 142,
+    rating: 4.5,
+    reviewCount: 11,
     soldCount: 568,
     images: [
       'img/produtos/garrafa-verde.webp',
@@ -442,8 +441,8 @@ export const MOCK_PRODUCTS: readonly Product[] = [
     occasions: ['noite'],
     status: 'publicado',
     launch: true,
-    rating: 4.5,
-    reviews: 38,
+    rating: 4.7,
+    reviewCount: 7,
     soldCount: 152,
     images: [
       'img/produtos/garrafa-preta.webp',
@@ -475,8 +474,8 @@ export const MOCK_PRODUCTS: readonly Product[] = [
     },
     occasions: ['noite'],
     status: 'publicado',
-    rating: 4.6,
-    reviews: 45,
+    rating: 4.2,
+    reviewCount: 14,
     soldCount: 180,
     images: [
       'img/produtos/cena-noturna-2.webp',
@@ -508,8 +507,8 @@ export const MOCK_PRODUCTS: readonly Product[] = [
     },
     occasions: ['dia'],
     status: 'publicado',
-    rating: 4.5,
-    reviews: 97,
+    rating: 4.3,
+    reviewCount: 10,
     soldCount: 388,
     images: [
       'img/produtos/garrafa-ambar.webp',
@@ -547,8 +546,8 @@ export const MOCK_PRODUCTS: readonly Product[] = [
     },
     occasions: ['dia', 'noite'],
     status: 'publicado',
-    rating: 4.4,
-    reviews: 59,
+    rating: 4.6,
+    reviewCount: 14,
     soldCount: 236,
     images: [
       'img/produtos/garrafa-verde.webp',
@@ -582,8 +581,8 @@ export const MOCK_PRODUCTS: readonly Product[] = [
     occasions: ['dia', 'noite'],
     status: 'publicado',
     launch: true,
-    rating: 4.9,
-    reviews: 76,
+    rating: 4.6,
+    reviewCount: 12,
     soldCount: 304,
     images: [
       'img/produtos/garrafa-branca.webp',
@@ -621,8 +620,8 @@ export const MOCK_PRODUCTS: readonly Product[] = [
     },
     occasions: ['dia'],
     status: 'publicado',
-    rating: 4.3,
-    reviews: 64,
+    rating: 4.5,
+    reviewCount: 6,
     soldCount: 256,
     images: [
       'img/produtos/garrafa-vinho.webp',
@@ -660,8 +659,8 @@ export const MOCK_PRODUCTS: readonly Product[] = [
     },
     occasions: ['noite'],
     status: 'publicado',
-    rating: 4.4,
-    reviews: 40,
+    rating: 4.5,
+    reviewCount: 11,
     soldCount: 160,
     images: [
       'img/produtos/cena-dourada.webp',
@@ -698,8 +697,8 @@ export const MOCK_PRODUCTS: readonly Product[] = [
     },
     occasions: ['dia', 'noite'],
     status: 'publicado',
-    rating: 4.3,
-    reviews: 58,
+    rating: 4.9,
+    reviewCount: 8,
     soldCount: 232,
     images: [
       'img/produtos/garrafa-ambar.webp',
@@ -731,8 +730,8 @@ export const MOCK_PRODUCTS: readonly Product[] = [
     },
     occasions: ['noite'],
     status: 'publicado',
-    rating: 4.2,
-    reviews: 35,
+    rating: 4.6,
+    reviewCount: 14,
     soldCount: 140,
     images: [
       'img/produtos/cena-noturna-2.webp',
@@ -770,8 +769,8 @@ export const MOCK_PRODUCTS: readonly Product[] = [
     },
     occasions: ['dia', 'noite'],
     status: 'publicado',
-    rating: 4.2,
-    reviews: 29,
+    rating: 4.5,
+    reviewCount: 4,
     soldCount: 116,
     images: [
       'img/produtos/cena-dourada.webp',
@@ -809,8 +808,8 @@ export const MOCK_PRODUCTS: readonly Product[] = [
     },
     occasions: ['noite'],
     status: 'publicado',
-    rating: 4.6,
-    reviews: 48,
+    rating: 4.2,
+    reviewCount: 4,
     soldCount: 192,
     images: [
       'img/produtos/cena-noturna-1.webp',
@@ -842,8 +841,8 @@ export const MOCK_PRODUCTS: readonly Product[] = [
     },
     occasions: ['dia', 'noite'],
     status: 'publicado',
-    rating: 4.4,
-    reviews: 33,
+    rating: 3.6,
+    reviewCount: 7,
     soldCount: 132,
     images: [
       'img/produtos/garrafa-cristal.webp',
@@ -883,7 +882,7 @@ export const MOCK_PRODUCTS: readonly Product[] = [
     occasions: ['noite'],
     status: 'publicado',
     rating: 4.3,
-    reviews: 27,
+    reviewCount: 11,
     soldCount: 108,
     images: [
       'img/produtos/cena-dourada.webp',
@@ -911,8 +910,8 @@ export const MOCK_PRODUCTS: readonly Product[] = [
     kitItems: ['Asad Eau de Parfum 100 ml', 'Body spray Asad 250 ml', 'Caixa presente'],
     occasions: ['noite'],
     status: 'publicado',
-    rating: 4.8,
-    reviews: 36,
+    rating: 4.7,
+    reviewCount: 3,
     soldCount: 144,
     images: [
       'img/categorias/kits.webp',
@@ -937,8 +936,8 @@ export const MOCK_PRODUCTS: readonly Product[] = [
     kitItems: ['Yara Eau de Parfum 100 ml', 'Body mist Yara 250 ml', 'Caixa presente'],
     occasions: ['dia', 'noite'],
     status: 'publicado',
-    rating: 4.7,
-    reviews: 22,
+    rating: 4.0,
+    reviewCount: 4,
     soldCount: 88,
     images: [
       'img/categorias/kits.webp',
@@ -975,8 +974,8 @@ export const MOCK_PRODUCTS: readonly Product[] = [
     ],
     occasions: ['dia', 'noite'],
     status: 'publicado',
-    rating: 4.6,
-    reviews: 15,
+    rating: 4.0,
+    reviewCount: 1,
     soldCount: 60,
     images: [
       'img/categorias/kits.webp',
@@ -1003,8 +1002,8 @@ export const MOCK_PRODUCTS: readonly Product[] = [
     notes: { top: ['Laranja'], heart: ['Pêssego'], base: ['Baunilha', 'Almíscar'] },
     occasions: ['dia'],
     status: 'publicado',
-    rating: 4.6,
-    reviews: 58,
+    rating: 4.0,
+    reviewCount: 3,
     soldCount: 232,
     images: [
       'img/produtos/garrafa-cristal.webp',
@@ -1032,8 +1031,8 @@ export const MOCK_PRODUCTS: readonly Product[] = [
     notes: { top: ['Framboesa'], heart: ['Rosa'], base: ['Baunilha', 'Almíscar'] },
     occasions: ['dia'],
     status: 'publicado',
-    rating: 4.5,
-    reviews: 31,
+    rating: 4.2,
+    reviewCount: 6,
     soldCount: 124,
     images: [
       'img/produtos/garrafa-ambar.webp',
@@ -1067,8 +1066,8 @@ export const MOCK_PRODUCTS: readonly Product[] = [
     notes: { top: ['Pêssego'], heart: ['Rosa', 'Jasmim'], base: ['Almíscar'] },
     occasions: ['dia'],
     status: 'publicado',
-    rating: 4.3,
-    reviews: 27,
+    rating: 5.0,
+    reviewCount: 3,
     soldCount: 108,
     images: [
       'img/produtos/garrafa-vinho.webp',
@@ -1101,8 +1100,8 @@ export const MOCK_PRODUCTS: readonly Product[] = [
     notes: { top: [], heart: ['Canela'], base: ['Baunilha', 'Âmbar'] },
     occasions: ['noite'],
     status: 'publicado',
-    rating: 4.6,
-    reviews: 19,
+    rating: 4.2,
+    reviewCount: 5,
     soldCount: 76,
     images: [
       'img/produtos/cena-oferta.webp',
@@ -1136,7 +1135,7 @@ export const MOCK_PRODUCTS: readonly Product[] = [
     occasions: ['dia'],
     status: 'publicado',
     rating: 4.5,
-    reviews: 12,
+    reviewCount: 4,
     soldCount: 48,
     images: [
       'img/produtos/garrafa-cristal.webp',
@@ -1170,8 +1169,8 @@ export const MOCK_PRODUCTS: readonly Product[] = [
     notes: { top: [], heart: ['Rosa'], base: ['Almíscar'] },
     occasions: ['dia'],
     status: 'publicado',
-    rating: 4.2,
-    reviews: 9,
+    rating: 4.8,
+    reviewCount: 6,
     soldCount: 36,
     images: [
       'img/produtos/garrafa-vinho.webp',
