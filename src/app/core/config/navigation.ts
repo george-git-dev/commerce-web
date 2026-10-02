@@ -12,6 +12,10 @@ export const CATALOG_QUERY_PARAMS = {
   deal: 'oferta',
   launch: 'lancamento',
   category: 'categoria',
+  family: 'familia',
+  occasion: 'ocasiao',
+  minRating: 'nota',
+  inStock: 'estoque',
   kind: 'tipo',
   sort: 'ordenar',
 } as const;

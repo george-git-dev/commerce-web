@@ -5,6 +5,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router } from '@angular/router';
+import { OCCASION_LABELS, OLFACTORY_FAMILIES, OlfactoryFamily } from '../../core/config/fragrance';
 import { CATALOG_QUERY_PARAMS } from '../../core/config/navigation';
 import {
   categoriesTitle,
@@ -15,11 +16,18 @@ import {
 import { CartStore } from '../../core/services/cart-store';
 import { CatalogService } from '../../core/services/catalog-service';
 import { FavoritesStore } from '../../core/services/favorites-store';
-import { Product, ProductCategory, ProductSelection, VariantKind } from '../../core/models/product';
+import {
+  Occasion,
+  Product,
+  ProductCategory,
+  ProductSelection,
+  VariantKind,
+} from '../../core/models/product';
 import {
   effectivePrice,
   hasDeal,
   hasKind,
+  isAvailable,
   lowestPrice,
   variantLabel,
 } from '../../core/utils/product-pricing';
@@ -68,6 +76,14 @@ export class Catalog {
 
   protected readonly filtersOpen = signal(false);
 
+  /** Famílias presentes no catálogo, na ordem da lista oficial. */
+  protected readonly familyOptions = computed(() => {
+    const present = new Set(this.catalog.products().flatMap((product) => product.families));
+    return OLFACTORY_FAMILIES.filter((family) => present.has(family));
+  });
+  protected readonly ratingOptions = [4, 3] as const;
+  protected readonly occasionOptions = Object.entries(OCCASION_LABELS) as [Occasion, string][];
+
   protected readonly brands = computed(() =>
     [...new Set(this.catalog.products().map((product) => product.brandName))].sort(),
   );
@@ -93,6 +109,25 @@ export class Catalog {
     if (deal) return 'Ofertas';
     return categoriesTitle([]);
   });
+  /** `?familia=Oriental,Floral` — várias valem como "ou". */
+  protected readonly families = computed(() => {
+    const value = this.queryParamMap().get(this.params.family);
+    const ids = new Set((value ?? '').split(',').map((family) => family.trim()));
+    return this.familyOptions().filter((family) => ids.has(family));
+  });
+  /** `?ocasiao=dia,noite` — várias valem como "ou". */
+  protected readonly occasions = computed<readonly Occasion[]>(() => {
+    const ids = (this.queryParamMap().get(this.params.occasion) ?? '').split(',');
+    return this.occasionOptions.map(([id]) => id).filter((id) => ids.includes(id));
+  });
+  /** `?nota=4` — média mínima de avaliação (4 ou 3). */
+  protected readonly minRating = computed(() => {
+    const value = Number(this.queryParamMap().get(this.params.minRating));
+    return this.ratingOptions.find((option) => option === value) ?? null;
+  });
+  protected readonly inStockOnly = computed(
+    () => this.queryParamMap().get(this.params.inStock) === 'true',
+  );
   protected readonly gender = computed(() => this.queryParamMap().get(this.params.gender));
   protected readonly brand = computed(() => this.queryParamMap().get(this.params.brand));
   protected readonly priceMin = computed(() =>
@@ -120,6 +155,10 @@ export class Catalog {
   protected readonly hasActiveFilters = computed(
     () =>
       this.selectedCategories().length > 0 ||
+      this.families().length > 0 ||
+      this.occasions().length > 0 ||
+      this.minRating() !== null ||
+      this.inStockOnly() ||
       !!this.gender() ||
       !!this.brand() ||
       this.priceMin() !== null ||
@@ -132,6 +171,10 @@ export class Catalog {
 
   protected readonly products = computed<readonly Product[]>(() => {
     const categories = this.selectedCategories();
+    const families = this.families();
+    const occasions = this.occasions();
+    const minRating = this.minRating();
+    const inStockOnly = this.inStockOnly();
     const gender = this.gender();
     const brand = this.brand();
     const min = this.priceMin();
@@ -143,6 +186,18 @@ export class Catalog {
 
     let list = this.catalog.products().filter((product) => {
       if (categories.length && !categories.includes(product.category)) return false;
+      if (families.length && !families.some((family) => product.families.includes(family))) {
+        return false;
+      }
+      // Produto sem ocasião cadastrada não entra quando o filtro está ativo.
+      if (
+        occasions.length &&
+        !occasions.some((occasion) => product.occasions?.includes(occasion))
+      ) {
+        return false;
+      }
+      if (minRating !== null && (product.rating ?? 0) < minRating) return false;
+      if (inStockOnly && !isAvailable(product)) return false;
       if (gender && product.gender !== gender) return false;
       if (brand && product.brandName !== brand) return false;
       // Preço: o produto entra se algum tamanho estiver dentro da faixa.
@@ -216,6 +271,24 @@ export class Catalog {
       ? current.filter((id) => id !== category)
       : [...current, category];
     this.setFilter(this.params.category, formatCategories(next));
+  }
+
+  /** Checkbox de família: marca/desmarca, mantendo as outras. */
+  protected toggleFamily(family: OlfactoryFamily): void {
+    const current = this.families();
+    const next = current.includes(family)
+      ? current.filter((item) => item !== family)
+      : [...current, family];
+    this.setFilter(this.params.family, next.join(',') || null);
+  }
+
+  /** Checkbox de ocasião: marca/desmarca, mantendo a outra. */
+  protected toggleOccasion(occasion: Occasion): void {
+    const current = this.occasions();
+    const next = current.includes(occasion)
+      ? current.filter((item) => item !== occasion)
+      : [...current, occasion];
+    this.setFilter(this.params.occasion, next.join(',') || null);
   }
 
   /** Remove, enquanto o usuário digita, tudo que não for dígito, e limita o tamanho. */

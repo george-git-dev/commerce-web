@@ -132,39 +132,66 @@
     </div>
   </div>
 
-  <!-- Acordeões visuais — sem lógica de filtro nesta fase. -->
-  <details class="filter-accordion">
+  <!-- Filtros secundários: fechados por padrão, abertos quando há algo marcado. -->
+  <details class="filter-accordion" [open]="families().length > 0">
     <summary>Família olfativa</summary>
     <div class="filter-accordion__body">
-      @for (family of ['Amadeirado', 'Floral', 'Oriental', 'Cítrico', 'Aromático']; track family) {
-        <label class="checkbox"><input type="checkbox" />{{ family }}</label>
+      @for (family of familyOptions(); track family) {
+        <label class="checkbox">
+          <input
+            type="checkbox"
+            [checked]="families().includes(family)"
+            (change)="toggleFamily(family)"
+          />
+          {{ family }}
+        </label>
       }
     </div>
   </details>
 
-  <details class="filter-accordion">
-    <summary>Volume</summary>
+  <details class="filter-accordion" [open]="occasions().length > 0">
+    <summary>Ocasião</summary>
     <div class="filter-accordion__body">
-      @for (volume of ['50 ml', '75 ml', '90 ml', '100 ml']; track volume) {
-        <label class="checkbox"><input type="checkbox" />{{ volume }}</label>
+      @for (option of occasionOptions; track option[0]) {
+        <label class="checkbox">
+          <input
+            type="checkbox"
+            [checked]="occasions().includes(option[0])"
+            (change)="toggleOccasion(option[0])"
+          />
+          {{ option[1] }}
+        </label>
       }
     </div>
   </details>
 
-  <details class="filter-accordion">
+  <details class="filter-accordion" [open]="minRating() !== null">
     <summary>Avaliação</summary>
     <div class="filter-accordion__body">
-      @for (stars of [4, 3, 2]; track stars) {
-        <label class="checkbox"><input type="checkbox" />{{ stars }} estrelas ou mais</label>
+      @for (stars of ratingOptions; track stars) {
+        <label class="checkbox">
+          <input
+            type="checkbox"
+            [checked]="minRating() === stars"
+            (change)="setFilter(params.minRating, minRating() === stars ? null : '' + stars)"
+          />
+          {{ stars }} estrelas ou mais
+        </label>
       }
     </div>
   </details>
 
-  <details class="filter-accordion">
+  <details class="filter-accordion" [open]="inStockOnly()">
     <summary>Disponibilidade</summary>
     <div class="filter-accordion__body">
-      <label class="checkbox"><input type="checkbox" />Em estoque</label>
-      <label class="checkbox"><input type="checkbox" />Frete grátis</label>
+      <label class="checkbox">
+        <input
+          type="checkbox"
+          [checked]="inStockOnly()"
+          (change)="setFilter(params.inStock, inStockOnly() ? null : 'true')"
+        />
+        Só em estoque
+      </label>
     </div>
   </details>
 

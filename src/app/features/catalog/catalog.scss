@@ -267,6 +267,10 @@
     display: block;
     position: sticky;
     top: 132px;
+    // Mais alta que a tela, a parte de baixo só aparecia no fim da lista:
+    // limita à altura visível e rola por dentro.
+    max-height: calc(100vh - 148px);
+    overflow-y: auto;
   }
 
   .catalog__grid {
