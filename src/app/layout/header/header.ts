@@ -6,6 +6,7 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { Router, RouterLink } from '@angular/router';
 import { CATALOG_QUERY_PARAMS, NAV_LINKS } from '../../core/config/navigation';
 import { ANNOUNCEMENTS } from '../../core/config/store-config';
+import { AuthService } from '../../core/services/auth-service';
 import { CartStore } from '../../core/services/cart-store';
 import { FavoritesStore } from '../../core/services/favorites-store';
 import { AmbientSoundService } from '../../core/services/ambient-sound-service';
@@ -22,6 +23,7 @@ export class Header {
   // (inclusive monitores ultrawide); senão sobra espaço vazio à direita durante o loop.
   protected readonly announcements = Array.from({ length: 4 }, () => ANNOUNCEMENTS).flat();
   protected readonly navLinks = NAV_LINKS;
+  protected readonly auth = inject(AuthService);
   protected readonly cart = inject(CartStore);
   protected readonly favorites = inject(FavoritesStore);
   protected readonly ambientSound = inject(AmbientSoundService);
@@ -57,4 +59,3 @@ export class Header {
     });
   }
 }
-

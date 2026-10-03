@@ -25,6 +25,12 @@
       </div>
 
       <h1>{{ mode() === 'entrar' ? 'Bem-vindo de volta' : 'Crie sua conta' }}</h1>
+      @if (fromCheckout) {
+        <p class="auth__notice">
+          <mat-icon aria-hidden="true">lock</mat-icon>
+          Entre ou crie sua conta para finalizar a compra. Sua sacola continua salva.
+        </p>
+      }
       <p class="auth__subtitle">
         {{
           mode() === 'entrar'
@@ -33,18 +39,29 @@
         }}
       </p>
 
-      <!-- Formulário só visual/demo — sem autenticação real nesta fase. -->
-      <form class="auth__form" (submit)="$event.preventDefault(); submit()">
+      <!-- Na Fase 2 este botão é desenhado pelo Google Identity Services (padrão oficial). -->
+      <button type="button" class="auth__google" (click)="continueWithGoogle()">
+        <app-brand-icon name="google" [colored]="true" />
+        Continuar com Google
+      </button>
+
+      <p class="auth__divider"><span>ou com e-mail</span></p>
+
+      <!-- Autenticação simulada (AuthService) até a integração com o back. -->
+      <form class="auth__form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
         @if (mode() === 'cadastro') {
           <label>
             <span>Nome</span>
             <input
               type="text"
-              name="name"
+              formControlName="name"
               placeholder="Seu nome completo"
               autocomplete="name"
-              required
+              [attr.aria-invalid]="invalid('name') || null"
             />
+            @if (invalid('name')) {
+              <small class="auth__error">Informe seu nome.</small>
+            }
           </label>
         }
 
@@ -52,23 +69,47 @@
           <span>E-mail</span>
           <input
             type="email"
-            name="email"
+            formControlName="email"
             placeholder="seu@email.com"
             autocomplete="email"
-            required
+            inputmode="email"
+            autocapitalize="off"
+            [attr.aria-invalid]="invalid('email') || null"
           />
+          @if (invalid('email')) {
+            <small class="auth__error">Informe um e-mail válido.</small>
+          }
         </label>
 
         <label>
           <span>Senha</span>
-          <input
-            type="password"
-            name="password"
-            placeholder="••••••••"
-            autocomplete="current-password"
-            required
-          />
+          <span class="auth__password">
+            <input
+              [type]="showPassword() ? 'text' : 'password'"
+              formControlName="password"
+              placeholder="••••••••"
+              [attr.autocomplete]="mode() === 'entrar' ? 'current-password' : 'new-password'"
+              [attr.aria-invalid]="invalid('password') || null"
+            />
+            <button
+              type="button"
+              class="auth__eye"
+              [attr.aria-label]="showPassword() ? 'Ocultar senha' : 'Mostrar senha'"
+              (click)="showPassword.set(!showPassword())"
+            >
+              <mat-icon>{{ showPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+            </button>
+          </span>
+          @if (invalid('password')) {
+            <small class="auth__error">
+              A senha precisa ter pelo menos {{ minPassword }} caracteres.
+            </small>
+          }
         </label>
+
+        @if (error()) {
+          <p class="auth__error auth__error--form" role="alert">{{ error() }}</p>
+        }
 
         <button matButton="filled" class="ui-cta auth__submit" type="submit">
           {{ mode() === 'entrar' ? 'Entrar' : 'Criar conta' }}

@@ -1,6 +1,8 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
+import { AuthService } from '../../core/services/auth-service';
 
 interface AccountCard {
   icon: string;
@@ -15,12 +17,20 @@ interface AccountCard {
  */
 @Component({
   selector: 'app-account',
-  imports: [MatIconModule, RouterLink],
+  imports: [MatButtonModule, MatIconModule, RouterLink],
   templateUrl: './account.html',
   styleUrl: './account.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Account {
+  private readonly router = inject(Router);
+  protected readonly auth = inject(AuthService);
+
+  protected logout(): void {
+    this.auth.logout();
+    this.router.navigateByUrl('/');
+  }
+
   protected readonly cards: readonly AccountCard[] = [
     {
       icon: 'local_shipping',

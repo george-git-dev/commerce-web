@@ -84,6 +84,95 @@
     }
   }
 
+  &__google {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    height: 48px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--card);
+    color: var(--foreground);
+    font-family: var(--font-ui);
+    font-size: 0.9375rem;
+    font-weight: 500;
+    cursor: pointer;
+
+    &:hover {
+      border-color: var(--gold);
+    }
+  }
+
+  // "──── ou com e-mail ────"
+  &__divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 20px 0;
+    font-size: 0.75rem;
+    color: var(--muted-foreground);
+
+    &::before,
+    &::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+  }
+
+  &__password {
+    position: relative;
+    display: flex;
+
+    input {
+      flex: 1;
+      padding-right: 48px;
+    }
+  }
+
+  &__eye {
+    position: absolute;
+    inset: 0 0 0 auto;
+    width: 48px;
+    border: 0;
+    background: none;
+    color: var(--muted-foreground);
+    cursor: pointer;
+  }
+
+  &__error {
+    color: var(--wine);
+    font-size: 0.75rem;
+
+    &--form {
+      margin: 0;
+      font-size: 0.875rem;
+    }
+  }
+
+  &__form input[aria-invalid='true'] {
+    border-color: var(--wine);
+  }
+
+  &__notice {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 16px;
+    padding: 10px 12px;
+    border-radius: var(--radius-sm);
+    background: var(--muted);
+    font-size: 0.8125rem;
+
+    mat-icon {
+      flex-shrink: 0;
+      color: var(--gold);
+    }
+  }
+
   &__submit {
     width: 100%;
     margin-top: 6px;

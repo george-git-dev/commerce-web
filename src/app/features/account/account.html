@@ -1,8 +1,9 @@
 <section class="account ui-section">
   <div class="ui-container">
     <header class="account__head">
-      <h1>Minha conta</h1>
+      <h1>Olá, {{ auth.user()?.name }}</h1>
       <p>Gerencie pedidos, favoritos e seus dados em um só lugar.</p>
+      <p class="account__email">{{ auth.user()?.email }}</p>
     </header>
 
     <div class="account__grid">
@@ -24,5 +25,10 @@
         }
       }
     </div>
+
+    <button matButton="outlined" class="account__logout" type="button" (click)="logout()">
+      <mat-icon>logout</mat-icon>
+      Sair da conta
+    </button>
   </div>
 </section>

@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { authGuard } from './core/guards/auth-guard';
 
 export const routes: Routes = [
   {
@@ -35,6 +36,7 @@ export const routes: Routes = [
   {
     path: 'minha-conta',
     title: 'Nani Perfumes | Minha conta',
+    canActivate: [authGuard],
     loadComponent: () => import('./features/account/account').then((m) => m.Account),
   },
   {

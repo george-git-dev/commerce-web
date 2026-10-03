@@ -60,8 +60,15 @@
         <mat-icon>search</mat-icon>
       </button>
 
-      <a routerLink="/minha-conta" matIconButton class="bar__account" aria-label="Minha conta">
-        <mat-icon>person</mat-icon>
+      <a
+        routerLink="/minha-conta"
+        matIconButton
+        class="bar__account"
+        [attr.aria-label]="
+          auth.user() ? 'Minha conta de ' + auth.user()?.name : 'Entrar ou criar conta'
+        "
+      >
+        <mat-icon>{{ auth.isLoggedIn() ? 'account_circle' : 'person' }}</mat-icon>
       </a>
       <a routerLink="/favoritos" matIconButton aria-label="Favoritos">
         <mat-icon
@@ -109,8 +116,8 @@
 
 <div id="mobile-menu" class="mobile-menu" [class.mobile-menu--open]="menuOpen()">
   <a routerLink="/minha-conta" class="mobile-menu__account" (click)="closeMenu()">
-    <mat-icon>person</mat-icon>
-    Minha conta
+    <mat-icon>{{ auth.isLoggedIn() ? 'account_circle' : 'person' }}</mat-icon>
+    {{ auth.user() ? 'Olá, ' + auth.user()?.name : 'Entrar ou criar conta' }}
   </a>
   <nav aria-label="Navegação principal (mobile)">
     @for (link of navLinks; track link.label) {
