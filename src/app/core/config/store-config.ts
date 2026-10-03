@@ -28,6 +28,8 @@ export interface StoreConfig {
   emailHref: string;
   hours: string;
   delivery: string;
+  /** Pedido a partir deste valor (R$) tem o frete econômico grátis. */
+  freeShippingMin: number;
 }
 
 /**
@@ -49,6 +51,7 @@ export const STORE_CONFIG: StoreConfig = {
   emailHref: 'mailto:atendimento@naniperfumes.com.br',
   hours: 'Segunda a sexta, das 9h às 18h',
   delivery: '2 - 5 dias úteis',
+  freeShippingMin: 599,
 };
 
 /** Perfis da loja, na ordem de exibição (URLs fictícias até o lançamento). */

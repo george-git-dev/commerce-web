@@ -39,6 +39,19 @@
     font-size: 0.9375rem;
     color: var(--muted-foreground);
 
+    &--shipping,
+    &--discount {
+      margin-top: 16px;
+    }
+
+    &--discount + &--shipping {
+      margin-top: 8px;
+    }
+
+    &--discount span:last-child {
+      color: var(--earth);
+    }
+
     &--total {
       margin-top: 16px;
       padding-top: 16px;
@@ -56,11 +69,42 @@
     color: var(--muted-foreground);
   }
 
+  &__coupon-error {
+    margin: 6px 0 0;
+    font-size: 0.75rem;
+    color: var(--wine);
+  }
+
+  // Cupom aplicado: selo com o código, a regra e o botão de remover.
+  &__coupon-applied {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 4px 6px 12px;
+    border: 1px dashed var(--gold);
+    border-radius: var(--radius-sm);
+    font-size: 0.8125rem;
+
+    > mat-icon {
+      flex-shrink: 0;
+      color: var(--gold);
+    }
+
+    span {
+      flex: 1;
+    }
+
+    &--warn {
+      border-color: var(--wine);
+      color: var(--wine);
+    }
+  }
+
   &__coupon {
     display: block;
     margin-bottom: 8px;
 
-    span {
+    label {
       display: block;
       margin-bottom: 8px;
       font-size: 0.8125rem;
