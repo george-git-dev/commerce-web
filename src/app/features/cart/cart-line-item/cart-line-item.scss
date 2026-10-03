@@ -4,12 +4,12 @@
 
 .line {
   display: grid;
-  grid-template-columns: 88px 1fr;
+  // Celular: tudo ao lado da foto — valor no alto à direita, quantidade embaixo.
+  grid-template-columns: 72px minmax(0, 1fr) auto;
   grid-template-areas:
-    'media info'
-    'media quantity'
-    'media subtotal';
-  gap: 6px 16px;
+    'media info subtotal'
+    'media info quantity';
+  gap: 8px 12px;
   padding-block: 20px;
   border-bottom: 1px solid var(--border);
 
@@ -19,8 +19,8 @@
     align-self: start;
 
     img {
-      width: 88px;
-      height: 88px;
+      width: 72px;
+      height: 72px;
       object-fit: cover;
       border-radius: var(--radius-sm);
       background: var(--muted);
@@ -30,6 +30,7 @@
   &__info {
     grid-area: info;
     min-width: 0;
+    align-self: start;
   }
 
   &__brand {
@@ -85,8 +86,18 @@
     grid-area: quantity;
     display: flex;
     align-items: center;
-    gap: 6px;
-    align-self: center;
+    gap: 2px;
+    align-self: end;
+    justify-self: end;
+    margin-right: -6px;
+
+    // Botões mais compactos no celular para sobrar espaço ao nome.
+    button {
+      --mat-icon-button-state-layer-size: 34px;
+      width: 34px;
+      height: 34px;
+      padding: 5px;
+    }
 
     span {
       min-width: 24px;
@@ -97,23 +108,54 @@
 
   &__subtotal {
     grid-area: subtotal;
-    align-self: end;
+    align-self: start;
     margin: 0;
+    text-align: right;
+    white-space: nowrap;
     font-family: var(--font-ui);
     font-weight: 600;
   }
 }
 
+// Celulares maiores: foto um pouco maior.
+@media (min-width: 400px) {
+  .line {
+    grid-template-columns: 88px minmax(0, 1fr) auto;
+  }
+
+  .line__media img {
+    width: 88px;
+    height: 88px;
+  }
+}
+
 @media (min-width: 560px) {
   .line {
-    grid-template-columns: 96px 1fr auto auto;
+    grid-template-columns: 96px minmax(0, 1fr) auto auto;
     grid-template-areas: 'media info quantity subtotal';
     align-items: center;
     gap: 20px;
   }
 
+  .line__info,
+  .line__subtotal {
+    align-self: center;
+  }
+
+  .line__quantity {
+    align-self: center;
+    margin-right: 0;
+    gap: 6px;
+
+    button {
+      --mat-icon-button-state-layer-size: 40px;
+      width: 40px;
+      height: 40px;
+      padding: 8px;
+    }
+  }
+
   .line__subtotal {
     min-width: 90px;
-    text-align: right;
   }
 }

@@ -16,6 +16,7 @@
 
   input {
     flex: 1;
+    width: 0; // não deixa o tamanho padrão do campo alargar a linha
     min-width: 0;
     height: 44px;
     padding-inline: 12px;
