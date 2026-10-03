@@ -25,10 +25,10 @@
       </div>
 
       <h1>{{ mode() === 'entrar' ? 'Bem-vindo de volta' : 'Crie sua conta' }}</h1>
-      @if (fromCheckout) {
+      @if (notice) {
         <p class="auth__notice">
           <mat-icon aria-hidden="true">lock</mat-icon>
-          Entre ou crie sua conta para finalizar a compra. Sua sacola continua salva.
+          {{ notice }}
         </p>
       }
       <p class="auth__subtitle">

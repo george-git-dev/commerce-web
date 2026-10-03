@@ -16,6 +16,7 @@ import {
 import { CartStore } from '../../core/services/cart-store';
 import { CatalogService } from '../../core/services/catalog-service';
 import { FavoritesStore } from '../../core/services/favorites-store';
+import { FavoriteAction } from '../../core/services/favorite-action';
 import {
   Occasion,
   Product,
@@ -67,6 +68,7 @@ export class Catalog {
   private readonly router = inject(Router);
   private readonly cart = inject(CartStore);
   private readonly favorites = inject(FavoritesStore);
+  private readonly favoriteAction = inject(FavoriteAction);
   private readonly snackBar = inject(MatSnackBar);
   private readonly catalog = inject(CatalogService);
 
@@ -312,6 +314,6 @@ export class Catalog {
   }
 
   protected onToggleFavorite(product: Product): void {
-    this.favorites.toggle(product);
+    this.favoriteAction.toggle(product);
   }
 }

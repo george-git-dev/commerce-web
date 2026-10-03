@@ -4,6 +4,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { ActivatedRoute, Router } from '@angular/router';
 import { RETURN_URL_PARAM, safeReturnUrl } from '../../core/guards/auth-guard';
+import { LOGIN_REASON_PARAM } from '../../core/services/favorite-action';
 import { BrandIcon } from '../../shared/brand-icon/brand-icon';
 import { AuthService, MIN_PASSWORD_LENGTH } from '../../core/services/auth-service';
 
@@ -29,10 +30,8 @@ export class Login {
   protected readonly mode = signal<AuthMode>('entrar');
   protected readonly error = signal('');
   protected readonly showPassword = signal(false);
-  /** Veio do checkout (ou outra rota protegida)? Mostra o aviso no topo. */
-  protected readonly fromCheckout =
-    this.route.snapshot.queryParamMap.get(RETURN_URL_PARAM)?.startsWith('/finalizar-compra') ??
-    false;
+  /** Aviso no topo quando o login foi pedido no meio de uma ação. */
+  protected readonly notice = this.loginNotice();
 
   protected readonly form = inject(NonNullableFormBuilder).group({
     name: [''],
@@ -75,6 +74,17 @@ export class Login {
   protected continueWithGoogle(): void {
     this.auth.loginWithGoogle();
     this.goBack();
+  }
+
+  private loginNotice(): string | null {
+    const params = this.route.snapshot.queryParamMap;
+    if (params.get(LOGIN_REASON_PARAM) === 'favoritos') {
+      return 'Entre ou crie sua conta para salvar seus favoritos.';
+    }
+    if (params.get(RETURN_URL_PARAM)?.startsWith('/finalizar-compra')) {
+      return 'Entre ou crie sua conta para finalizar a compra. Sua sacola continua salva.';
+    }
+    return null;
   }
 
   /** Volta para a página de origem (`?retorno=`) ou para Minha conta. */

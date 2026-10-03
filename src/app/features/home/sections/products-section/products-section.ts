@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { CartStore } from '../../../../core/services/cart-store';
 import { FavoritesStore } from '../../../../core/services/favorites-store';
+import { FavoriteAction } from '../../../../core/services/favorite-action';
 import { Product, ProductSelection } from '../../../../core/models/product';
 import { variantLabel } from '../../../../core/utils/product-pricing';
 import { ProductCard } from '../../../../shared/product-card/product-card';
@@ -20,6 +21,7 @@ import { ProductCard } from '../../../../shared/product-card/product-card';
 export class ProductsSection {
   private readonly cart = inject(CartStore);
   private readonly favorites = inject(FavoritesStore);
+  private readonly favoriteAction = inject(FavoriteAction);
   private readonly snackBar = inject(MatSnackBar);
 
   readonly sectionId = input<string>();
@@ -41,6 +43,6 @@ export class ProductsSection {
   }
 
   protected onToggleFavorite(product: Product): void {
-    this.favorites.toggle(product);
+    this.favoriteAction.toggle(product);
   }
 }

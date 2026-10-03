@@ -26,6 +26,7 @@ export const routes: Routes = [
   {
     path: 'favoritos',
     title: 'Nani Perfumes | Favoritos',
+    canActivate: [authGuard],
     loadComponent: () => import('./features/favorites/favorites').then((m) => m.Favorites),
   },
   {
