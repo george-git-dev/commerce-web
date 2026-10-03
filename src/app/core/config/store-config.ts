@@ -30,6 +30,12 @@ export interface StoreConfig {
   delivery: string;
   /** Pedido a partir deste valor (R$) tem o frete econômico grátis. */
   freeShippingMin: number;
+  /** Desconto no Pix (%). 0 = desligado (decisão de 02/10). */
+  pixDiscountPercent: number;
+  /** Parcelas sem juros no cartão. */
+  maxInstallments: number;
+  /** Valor mínimo de cada parcela (R$) — depende do gateway (decisão pendente). */
+  minInstallmentValue: number;
 }
 
 /**
@@ -52,6 +58,9 @@ export const STORE_CONFIG: StoreConfig = {
   hours: 'Segunda a sexta, das 9h às 18h',
   delivery: '2 - 5 dias úteis',
   freeShippingMin: 599,
+  pixDiscountPercent: 0,
+  maxInstallments: 6,
+  minInstallmentValue: 20,
 };
 
 /** Perfis da loja, na ordem de exibição (URLs fictícias até o lançamento). */

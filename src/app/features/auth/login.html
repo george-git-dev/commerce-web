@@ -63,6 +63,23 @@
               <small class="auth__error">Informe seu nome.</small>
             }
           </label>
+
+          <label>
+            <span>CPF</span>
+            <input
+              type="text"
+              formControlName="cpf"
+              appMask="cpf"
+              inputmode="numeric"
+              placeholder="000.000.000-00"
+              [attr.aria-invalid]="invalid('cpf') || null"
+            />
+            @if (invalid('cpf')) {
+              <small class="auth__error">CPF inválido.</small>
+            } @else {
+              <small class="auth__hint">Usado na nota fiscal das suas compras.</small>
+            }
+          </label>
         }
 
         <label>

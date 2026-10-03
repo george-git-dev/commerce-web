@@ -1,0 +1,82 @@
+@use '../form';
+
+@include form.styles;
+
+.pay__methods {
+  display: grid;
+  gap: 8px;
+}
+
+.pay__method {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+
+  &--active {
+    border-color: var(--gold);
+    background: var(--background);
+  }
+
+  input {
+    flex-shrink: 0;
+    margin: 0;
+    accent-color: var(--primary);
+  }
+
+  mat-icon {
+    flex-shrink: 0;
+    color: var(--gold);
+  }
+
+  span {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-size: 0.875rem;
+  }
+
+  small {
+    color: var(--muted-foreground);
+    font-size: 0.75rem;
+  }
+}
+
+.pay__badge {
+  color: var(--earth) !important;
+  font-weight: 600;
+}
+
+.pay__card {
+  margin-top: 16px;
+}
+
+.pay__label {
+  display: flex;
+  justify-content: space-between;
+
+  strong {
+    color: var(--foreground);
+  }
+}
+
+.pay__secure {
+  display: flex;
+  grid-column: span 6;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+
+  mat-icon {
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+    font-size: 16px;
+    color: var(--gold);
+  }
+}

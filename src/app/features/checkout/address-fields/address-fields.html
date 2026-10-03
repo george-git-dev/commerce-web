@@ -1,0 +1,100 @@
+@let form = group();
+@let id = idPrefix();
+
+<div class="f-grid" [formGroup]="form">
+  <label class="f-field f-field--half" [for]="id + '-cep'">
+    CEP
+    <input
+      [id]="id + '-cep'"
+      formControlName="cep"
+      appMask="cep"
+      inputmode="numeric"
+      autocomplete="postal-code"
+      placeholder="00000-000"
+      [attr.aria-invalid]="invalid('cep') || null"
+      (input)="onCepInput()"
+    />
+    @if (invalid('cep')) {
+      <small class="f-error">CEP inválido.</small>
+    }
+  </label>
+  <a
+    class="addr__cep-help"
+    href="https://buscacepinter.correios.com.br/app/endereco/index.php"
+    target="_blank"
+    rel="noopener"
+  >
+    Não sei meu CEP
+  </a>
+
+  <label class="f-field">
+    Rua
+    <input
+      formControlName="street"
+      autocomplete="address-line1"
+      [attr.aria-invalid]="invalid('street') || null"
+    />
+    @if (invalid('street')) {
+      <small class="f-error">Informe a rua.</small>
+    }
+  </label>
+
+  <div class="f-field f-field--half">
+    <label [for]="id + '-number'">Número</label>
+    <div class="addr__number">
+      <input
+        [id]="id + '-number'"
+        formControlName="number"
+        inputmode="numeric"
+        [attr.aria-invalid]="invalid('number') || null"
+      />
+      <label class="addr__no-number">
+        <input
+          type="checkbox"
+          formControlName="noNumber"
+          (change)="toggleNoNumber($any($event.target).checked)"
+        />
+        Sem número
+      </label>
+    </div>
+    @if (invalid('number')) {
+      <small class="f-error">Informe o número.</small>
+    }
+  </div>
+
+  <label class="f-field f-field--half">
+    Complemento
+    <input
+      formControlName="complement"
+      autocomplete="address-line2"
+      placeholder="Apto, bloco… (opcional)"
+    />
+  </label>
+
+  <label class="f-field">
+    Bairro
+    <input formControlName="district" [attr.aria-invalid]="invalid('district') || null" />
+    @if (invalid('district')) {
+      <small class="f-error">Informe o bairro.</small>
+    }
+  </label>
+
+  <label class="f-field f-field--two-thirds">
+    Cidade
+    <input
+      formControlName="city"
+      autocomplete="address-level2"
+      [attr.aria-invalid]="invalid('city') || null"
+    />
+  </label>
+
+  <label class="f-field f-field--third">
+    UF
+    <input
+      formControlName="state"
+      autocomplete="address-level1"
+      maxlength="2"
+      [attr.aria-invalid]="invalid('state') || null"
+    />
+  </label>
+</div>

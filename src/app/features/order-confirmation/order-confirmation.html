@@ -1,0 +1,90 @@
+@if (order(); as item) {
+  <section class="done ui-section">
+    <div class="ui-container done__inner">
+      <mat-icon class="done__icon" aria-hidden="true">check_circle</mat-icon>
+      <h1>Pedido recebido!</h1>
+      <p class="done__number">
+        Número do pedido: <strong>{{ item.number }}</strong>
+      </p>
+
+      @switch (item.payment.method) {
+        @case ('pix') {
+          <div class="done__box">
+            <h2>Pague com Pix para confirmar</h2>
+            <p>Abra o app do seu banco, escolha Pix "copia e cola" e cole o código abaixo.</p>
+            <div class="done__qr" aria-hidden="true"><mat-icon>qr_code_2</mat-icon></div>
+            <code class="done__code">{{ pixCode }}</code>
+            <button matButton="filled" class="ui-cta" type="button" (click)="copyPix()">
+              <mat-icon>{{ copied() ? 'check' : 'content_copy' }}</mat-icon>
+              {{ copied() ? 'Código copiado' : 'Copiar código Pix' }}
+            </button>
+            <p class="done__note">
+              Código fictício (ambiente de demonstração). Vale por 30 minutos.
+            </p>
+          </div>
+        }
+        @case ('boleto') {
+          <div class="done__box">
+            <h2>Boleto gerado</h2>
+            <p>O boleto vence em 3 dias úteis. O pedido é separado após a compensação.</p>
+            <button matButton="filled" class="ui-cta" type="button" disabled>
+              <mat-icon>download</mat-icon>
+              Baixar boleto (em breve)
+            </button>
+          </div>
+        }
+        @default {
+          <div class="done__box">
+            <h2>Pagamento aprovado</h2>
+            <p>
+              {{ item.payment.cardBrand ?? 'Cartão' }} final {{ item.payment.cardLast4 }} ·
+              {{ item.payment.installments }}x de
+              {{ item.total / (item.payment.installments ?? 1) | currency: 'BRL' }}
+            </p>
+          </div>
+        }
+      }
+
+      <dl class="done__facts">
+        <div>
+          <dt>Total</dt>
+          <dd>{{ item.total | currency: 'BRL' }}</dd>
+        </div>
+        <div>
+          <dt>Pagamento</dt>
+          <dd>{{ methodLabels[item.payment.method] }}</dd>
+        </div>
+        <div>
+          <dt>Entrega</dt>
+          <dd>
+            {{ item.shipping.label }} · {{ item.shipping.minDays }} a
+            {{ item.shipping.maxDays }} dias úteis após a aprovação
+          </dd>
+        </div>
+        <div>
+          <dt>Endereço</dt>
+          <dd>
+            {{ item.address.street }}, {{ item.address.number }} — {{ item.address.city }}/{{
+              item.address.state
+            }}
+          </dd>
+        </div>
+      </dl>
+
+      <p class="done__mail">Enviamos os detalhes do pedido para o seu e-mail.</p>
+
+      <div class="done__actions">
+        <a matButton="outlined" class="ui-cta" routerLink="/minha-conta">Minha conta</a>
+        <a matButton="filled" class="ui-cta" routerLink="/produtos">Continuar comprando</a>
+      </div>
+    </div>
+  </section>
+} @else {
+  <section class="ui-section">
+    <div class="ui-container done__inner">
+      <h1>Pedido não encontrado</h1>
+      <p>Confira seus pedidos em Minha conta.</p>
+      <a matButton="filled" class="ui-cta" routerLink="/minha-conta">Minha conta</a>
+    </div>
+  </section>
+}

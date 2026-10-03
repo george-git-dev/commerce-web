@@ -1,0 +1,86 @@
+.co.ui-section {
+  padding-block: 16px 40px;
+}
+
+.co__title {
+  font-size: clamp(1.75rem, 1.3rem + 2vw, 2.25rem);
+}
+
+// Indicador de passos: 1 Entrega — 2 Pagamento — 3 Revisão.
+.co__steps {
+  display: flex;
+  gap: 8px;
+  margin: 16px 0 20px;
+  padding: 0;
+  list-style: none;
+}
+
+.co__step {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 6px;
+  padding-top: 8px;
+  border-top: 3px solid var(--border);
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+
+  &--active,
+  &--done {
+    border-color: var(--gold);
+    color: var(--foreground);
+    font-weight: 600;
+  }
+}
+
+.co__dot {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--muted);
+  font-size: 0.75rem;
+
+  .co__step--active &,
+  .co__step--done & {
+    background: var(--primary);
+    color: var(--primary-foreground);
+  }
+
+  mat-icon {
+    width: 14px;
+    height: 14px;
+    font-size: 14px;
+  }
+}
+
+.co__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+}
+
+@media (min-width: 900px) {
+  .co.ui-section {
+    padding-block: 24px 72px;
+  }
+
+  .co__layout {
+    grid-template-columns: minmax(0, 1fr) 360px;
+    grid-template-areas: 'main summary';
+    align-items: start;
+    gap: 40px;
+  }
+
+  .co__main {
+    grid-area: main;
+  }
+
+  .co__summary {
+    grid-area: summary;
+    position: sticky;
+    top: 132px;
+  }
+}

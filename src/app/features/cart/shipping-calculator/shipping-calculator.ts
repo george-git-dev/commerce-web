@@ -1,4 +1,3 @@
-import { CurrencyPipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -10,6 +9,7 @@ import {
 } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { ShippingOption } from '../../../core/models/shipping';
+import { ShippingOptions } from '../../../shared/shipping-options/shipping-options';
 import {
   formatCep,
   isValidCep,
@@ -23,7 +23,7 @@ import {
  */
 @Component({
   selector: 'app-shipping-calculator',
-  imports: [CurrencyPipe, MatButtonModule],
+  imports: [MatButtonModule, ShippingOptions],
   templateUrl: './shipping-calculator.html',
   styleUrl: './shipping-calculator.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -33,6 +33,7 @@ export class ShippingCalculator {
 
   readonly options = input.required<readonly ShippingOption[]>();
   readonly selected = model<ShippingOption['id'] | null>(null);
+  readonly allFree = input(false);
 
   /** Texto do campo (com máscara); começa com o CEP já consultado na sessão. */
   protected readonly draft = linkedSignal(() => formatCep(this.shipping.cep()));

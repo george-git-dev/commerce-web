@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth-guard';
+import { cartNotEmptyGuard } from './core/guards/cart-guard';
 
 export const routes: Routes = [
   {
@@ -39,6 +40,19 @@ export const routes: Routes = [
     title: 'Nani Perfumes | Minha conta',
     canActivate: [authGuard],
     loadComponent: () => import('./features/account/account').then((m) => m.Account),
+  },
+  {
+    path: 'finalizar-compra',
+    title: 'Nani Perfumes | Finalizar compra',
+    canActivate: [authGuard, cartNotEmptyGuard],
+    loadComponent: () => import('./features/checkout/checkout').then((m) => m.Checkout),
+  },
+  {
+    path: 'pedido/:numero',
+    title: 'Nani Perfumes | Pedido recebido',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/order-confirmation/order-confirmation').then((m) => m.OrderConfirmation),
   },
   {
     path: 'ajuda/:pagina',

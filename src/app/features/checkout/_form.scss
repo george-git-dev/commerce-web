@@ -1,0 +1,78 @@
+// Estilos de formulário compartilhados pelos passos do checkout.
+// Uso: `@use '../form'; @include form.styles;`
+@mixin styles {
+  .f-card {
+    margin-bottom: 16px;
+    padding: 20px 16px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--card);
+
+    > h2 {
+      margin-bottom: 16px;
+      font-size: 1.125rem;
+    }
+  }
+
+  // Grade de 6 colunas: campos inteiros, metade, terço…
+  .f-grid {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 14px 12px;
+  }
+
+  .f-field {
+    display: flex;
+    grid-column: span 6;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+    font-size: 0.8125rem;
+    color: var(--muted-foreground);
+
+    &--half {
+      grid-column: span 3;
+    }
+
+    &--third {
+      grid-column: span 2;
+    }
+
+    &--two-thirds {
+      grid-column: span 4;
+    }
+
+    input,
+    select {
+      width: 100%;
+      height: 48px;
+      padding-inline: 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--background);
+      color: var(--foreground);
+      // 16px evita o zoom automático do iPhone ao focar o campo.
+      font-size: 1rem;
+
+      &[aria-invalid='true'] {
+        border-color: var(--wine);
+      }
+    }
+  }
+
+  .f-error {
+    color: var(--wine);
+    font-size: 0.75rem;
+  }
+
+  .f-actions {
+    display: flex;
+    flex-wrap: wrap-reverse;
+    gap: 12px;
+    margin-top: 8px;
+
+    .ui-cta {
+      flex: 1 1 200px;
+    }
+  }
+}

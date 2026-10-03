@@ -1,0 +1,56 @@
+@use '../form';
+
+@include form.styles;
+
+:host {
+  display: block;
+}
+
+.addr__cep-help {
+  grid-column: span 3;
+  align-self: center;
+  margin-top: 18px;
+  color: var(--earth);
+  font-size: 0.8125rem;
+  text-decoration: underline;
+}
+
+// "Número" + "Sem número": no celular a caixinha fica embaixo do campo;
+// a partir de 600px, dentro dele (como no The King of Parfums).
+.addr__number > input:disabled {
+  color: var(--muted-foreground);
+}
+
+.addr__no-number {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+  cursor: pointer;
+
+  input {
+    width: auto;
+    height: auto;
+    margin: 0;
+    padding: 0;
+    accent-color: var(--primary);
+  }
+}
+
+@media (min-width: 600px) {
+  .addr__number {
+    position: relative;
+
+    > input {
+      padding-right: 112px;
+    }
+  }
+
+  .addr__no-number {
+    position: absolute;
+    inset: 0 10px 0 auto;
+    margin-top: 0;
+  }
+}

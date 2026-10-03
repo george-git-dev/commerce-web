@@ -1,5 +1,6 @@
 import { computed, Injectable, signal } from '@angular/core';
 import { AuthResult, AuthUser } from '../models/auth';
+import { isValidCpf } from '../utils/br-format';
 
 const STORAGE_KEY = 'nani.auth.mock';
 export const MIN_PASSWORD_LENGTH = 8;
@@ -15,10 +16,15 @@ function readStoredUser(): AuthUser | null {
   }
 }
 
+/** Guarda só nome e e-mail — CPF e senha nunca vão para o navegador. */
 function storeUser(user: AuthUser | null): void {
   try {
-    if (user) globalThis.localStorage?.setItem(STORAGE_KEY, JSON.stringify(user));
-    else globalThis.localStorage?.removeItem(STORAGE_KEY);
+    if (!user) {
+      globalThis.localStorage?.removeItem(STORAGE_KEY);
+      return;
+    }
+    const stored = { name: user.name, email: user.email };
+    globalThis.localStorage?.setItem(STORAGE_KEY, JSON.stringify(stored));
   } catch {
     // Sem storage disponível: a sessão vale só até recarregar a página.
   }
@@ -50,11 +56,23 @@ export class AuthService {
     return this.start({ name: nameFromEmail(email.trim()), email: email.trim().toLowerCase() });
   }
 
-  register(name: string, email: string, password: string): AuthResult {
+  register(name: string, email: string, cpf: string, password: string): AuthResult {
     if (name.trim().length < 2) return { ok: false, message: 'Informe seu nome.' };
+    if (!isValidCpf(cpf)) return { ok: false, message: 'Informe um CPF válido.' };
     const problem = this.credentialsProblem(email, password);
     if (problem) return { ok: false, message: problem };
-    return this.start({ name: name.trim(), email: email.trim().toLowerCase() });
+    return this.start({ name: name.trim(), email: email.trim().toLowerCase(), cpf });
+  }
+
+  /**
+   * Completa o cadastro de quem ainda não tem CPF (conta antiga ou Google).
+   * Fase 2: `PATCH /me` — o CPF fica só no back; o front recebe mascarado.
+   */
+  completeCpf(cpf: string): AuthResult {
+    const user = this.state();
+    if (!user) return { ok: false, message: 'Entre na sua conta.' };
+    if (!isValidCpf(cpf)) return { ok: false, message: 'Informe um CPF válido.' };
+    return this.start({ ...user, cpf });
   }
 
   /**

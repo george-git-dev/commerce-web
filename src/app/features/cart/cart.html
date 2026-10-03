@@ -70,7 +70,11 @@
             </form>
           }
 
-          <app-shipping-calculator [options]="shippingOptions()" [(selected)]="shippingId" />
+          <app-shipping-calculator
+            [options]="shippingOptions()"
+            [(selected)]="shippingId"
+            [allFree]="freeShippingByCoupon()"
+          />
 
           @if (discount()) {
             <div class="cart__row cart__row--discount">
@@ -94,11 +98,11 @@
             <span>{{ total() | currency: 'BRL' }}</span>
           </div>
 
-          <button matButton="filled" class="ui-cta cart__checkout" type="button" disabled>
+          <a matButton="filled" class="ui-cta cart__checkout" routerLink="/finalizar-compra">
             <mat-icon>lock</mat-icon>
             Continuar compra
-          </button>
-          <p class="cart__checkout-note">Finalização da compra em breve — próxima etapa.</p>
+          </a>
+          <p class="cart__checkout-note">Você revisa tudo antes de confirmar.</p>
         </aside>
       </div>
     } @else {

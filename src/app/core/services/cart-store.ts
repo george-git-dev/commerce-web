@@ -57,6 +57,11 @@ export class CartStore {
     );
   }
 
+  /** Esvazia depois que o pedido é criado. */
+  clear(): void {
+    this.lines.set([]);
+  }
+
   remove(variantId: string): void {
     this.lines.update((lines) => lines.filter((line) => line.variant.id !== variantId));
   }

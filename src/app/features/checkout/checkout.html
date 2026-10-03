@@ -1,0 +1,43 @@
+<section class="co ui-section">
+  <div class="ui-container">
+    <h1 class="co__title">Finalizar compra</h1>
+
+    <ol class="co__steps">
+      @for (item of steps; track item.id) {
+        <li
+          class="co__step"
+          [class.co__step--active]="state.step() === item.id"
+          [class.co__step--done]="state.step() > item.id"
+          [attr.aria-current]="state.step() === item.id ? 'step' : null"
+        >
+          <span class="co__dot">
+            @if (state.step() > item.id) {
+              <mat-icon aria-hidden="true">check</mat-icon>
+            } @else {
+              {{ item.id }}
+            }
+          </span>
+          {{ item.label }}
+        </li>
+      }
+    </ol>
+
+    <div class="co__layout">
+      <app-checkout-summary class="co__summary" />
+
+      <div class="co__main">
+        @switch (state.step()) {
+          @case (1) {
+            <app-delivery-step />
+          }
+          @case (2) {
+            <app-payment-step />
+          }
+          @case (3) {
+            <app-review-step />
+          }
+        }
+      </div>
+    </div>
+  </div>
+</section>

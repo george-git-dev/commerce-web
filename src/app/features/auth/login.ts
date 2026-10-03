@@ -5,7 +5,9 @@ import { MatIconModule } from '@angular/material/icon';
 import { ActivatedRoute, Router } from '@angular/router';
 import { RETURN_URL_PARAM, safeReturnUrl } from '../../core/guards/auth-guard';
 import { LOGIN_REASON_PARAM } from '../../core/services/favorite-action';
+import { cpfValidator } from '../../core/utils/br-validators';
 import { BrandIcon } from '../../shared/brand-icon/brand-icon';
+import { InputMask } from '../../shared/input-mask/input-mask';
 import { AuthService, MIN_PASSWORD_LENGTH } from '../../core/services/auth-service';
 
 type AuthMode = 'entrar' | 'cadastro';
@@ -16,7 +18,7 @@ type AuthMode = 'entrar' | 'cadastro';
  */
 @Component({
   selector: 'app-login',
-  imports: [BrandIcon, MatButtonModule, MatIconModule, ReactiveFormsModule],
+  imports: [BrandIcon, InputMask, MatButtonModule, MatIconModule, ReactiveFormsModule],
   templateUrl: './login.html',
   styleUrl: './login.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -35,6 +37,7 @@ export class Login {
 
   protected readonly form = inject(NonNullableFormBuilder).group({
     name: [''],
+    cpf: [''],
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required, Validators.minLength(MIN_PASSWORD_LENGTH)]],
   });
@@ -42,13 +45,16 @@ export class Login {
   protected setMode(mode: AuthMode): void {
     this.mode.set(mode);
     this.error.set('');
-    const name = this.form.controls.name;
-    name.setValidators(mode === 'cadastro' ? [Validators.required, Validators.minLength(2)] : []);
+    const { name, cpf } = this.form.controls;
+    const signup = mode === 'cadastro';
+    name.setValidators(signup ? [Validators.required, Validators.minLength(2)] : []);
+    cpf.setValidators(signup ? [Validators.required, cpfValidator] : []);
     name.updateValueAndValidity();
+    cpf.updateValueAndValidity();
   }
 
   /** Erro do campo só depois que o cliente mexeu nele (ou tentou enviar). */
-  protected invalid(field: 'name' | 'email' | 'password'): boolean {
+  protected invalid(field: 'name' | 'cpf' | 'email' | 'password'): boolean {
     const control = this.form.controls[field];
     return control.invalid && (control.touched || control.dirty);
   }
@@ -59,11 +65,11 @@ export class Login {
       this.form.markAllAsTouched();
       return;
     }
-    const { name, email, password } = this.form.getRawValue();
+    const { name, cpf, email, password } = this.form.getRawValue();
     const result =
       this.mode() === 'entrar'
         ? this.auth.login(email, password)
-        : this.auth.register(name, email, password);
+        : this.auth.register(name, email, cpf, password);
     if (!result.ok) {
       this.error.set(result.message);
       return;

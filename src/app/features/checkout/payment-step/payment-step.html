@@ -1,0 +1,103 @@
+<form [formGroup]="form" (ngSubmit)="next()" novalidate>
+  <section class="f-card">
+    <h2>Forma de pagamento</h2>
+
+    <div class="pay__methods" role="radiogroup" aria-label="Forma de pagamento">
+      @for (option of methods; track option.id) {
+        <label class="pay__method" [class.pay__method--active]="method() === option.id">
+          <input type="radio" formControlName="method" [value]="option.id" />
+          <mat-icon aria-hidden="true">{{ option.icon }}</mat-icon>
+          <span>
+            <strong>{{ option.title }}</strong>
+            <small>{{ option.text }}</small>
+            @if (option.id === 'pix' && config.pixDiscountPercent) {
+              <small class="pay__badge">{{ config.pixDiscountPercent }}% de desconto</small>
+            }
+          </span>
+        </label>
+      }
+    </div>
+
+    @if (method() === 'cartao') {
+      <div class="f-grid pay__card">
+        <label class="f-field">
+          <span class="pay__label">
+            Número do cartão
+            @if (brand(); as name) {
+              <strong>{{ name }}</strong>
+            }
+          </span>
+          <input
+            formControlName="cardNumber"
+            appMask="card"
+            inputmode="numeric"
+            autocomplete="cc-number"
+            placeholder="0000 0000 0000 0000"
+            [attr.aria-invalid]="invalid('cardNumber') || null"
+          />
+          @if (invalid('cardNumber')) {
+            <small class="f-error">Número do cartão inválido.</small>
+          }
+        </label>
+
+        <label class="f-field">
+          Nome impresso no cartão
+          <input
+            formControlName="cardName"
+            autocomplete="cc-name"
+            autocapitalize="characters"
+            [attr.aria-invalid]="invalid('cardName') || null"
+          />
+        </label>
+
+        <label class="f-field f-field--half">
+          Validade
+          <input
+            formControlName="cardExpiry"
+            appMask="expiry"
+            inputmode="numeric"
+            autocomplete="cc-exp"
+            placeholder="MM/AA"
+            [attr.aria-invalid]="invalid('cardExpiry') || null"
+          />
+          @if (invalid('cardExpiry')) {
+            <small class="f-error">Validade inválida.</small>
+          }
+        </label>
+
+        <label class="f-field f-field--half">
+          CVV
+          <input
+            formControlName="cardCvv"
+            appMask="cvv"
+            inputmode="numeric"
+            autocomplete="cc-csc"
+            placeholder="123"
+            [attr.aria-invalid]="invalid('cardCvv') || null"
+          />
+        </label>
+
+        <label class="f-field">
+          Parcelas
+          <select formControlName="installments">
+            @for (option of installments(); track option.count) {
+              <option [ngValue]="option.count">
+                {{ option.count }}x de {{ option.value | currency: 'BRL' }} sem juros
+              </option>
+            }
+          </select>
+        </label>
+
+        <p class="pay__secure">
+          <mat-icon aria-hidden="true">lock</mat-icon>
+          Os dados do cartão vão direto para o processador de pagamentos e não ficam salvos na loja.
+        </p>
+      </div>
+    }
+  </section>
+
+  <div class="f-actions">
+    <button matButton="outlined" class="ui-cta" type="button" (click)="back()">Voltar</button>
+    <button matButton="filled" class="ui-cta" type="submit">Revisar pedido</button>
+  </div>
+</form>

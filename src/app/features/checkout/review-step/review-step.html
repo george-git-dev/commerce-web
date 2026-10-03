@@ -1,0 +1,80 @@
+<section class="f-card">
+  <header class="rev__head">
+    <h2>Entrega</h2>
+    <button type="button" class="rev__edit" (click)="state.goTo(1)">Alterar</button>
+  </header>
+  <p class="rev__text">
+    <strong class="rev__name">{{ recipient }}</strong>
+    {{ address.street }}, {{ address.number }}
+    @if (address.complement) {
+      — {{ address.complement }}
+    }
+    <br />
+    {{ address.district }} · {{ address.city }}/{{ address.state.toUpperCase() }} · CEP
+    {{ address.cep }}
+  </p>
+  <p class="rev__text rev__muted">
+    Nota fiscal:
+    {{
+      billing.sameAsDelivery
+        ? 'mesmos dados da entrega'
+        : billing.name + ' · ' + billing.address.city
+    }}
+  </p>
+  @if (summary.selectedShipping(); as option) {
+    <p class="rev__text rev__muted">
+      {{ option.label }} · {{ option.minDays }} a {{ option.maxDays }} dias úteis ·
+      {{ summary.shippingPrice() ? (summary.shippingPrice() | currency: 'BRL') : 'Grátis' }}
+    </p>
+  }
+</section>
+
+<section class="f-card">
+  <header class="rev__head">
+    <h2>Pagamento</h2>
+    <button type="button" class="rev__edit" (click)="state.goTo(2)">Alterar</button>
+  </header>
+  <p class="rev__text">
+    <strong>{{ methodLabel }}</strong>
+    @if (payment.method === 'cartao') {
+      <br />
+      Final {{ cardLast4 }} · {{ payment.installments }}x de
+      {{ summary.total() / payment.installments | currency: 'BRL' }} sem juros
+    }
+  </p>
+</section>
+
+<section class="f-card">
+  <header class="rev__head">
+    <h2>Itens</h2>
+    <a class="rev__edit" routerLink="/carrinho">Alterar</a>
+  </header>
+  <ul class="rev__items">
+    @for (line of cart.items(); track line.variant.id) {
+      <li>
+        <span>
+          {{ line.quantity }}× {{ line.product.name }}
+          <small>{{ variantLabel(line.product, line.variant) }}</small>
+        </span>
+        <span>{{ effectivePrice(line.variant) * line.quantity | currency: 'BRL' }}</span>
+      </li>
+    }
+  </ul>
+  <p class="rev__total">
+    <span>Total</span>
+    <strong>{{ summary.total() | currency: 'BRL' }}</strong>
+  </p>
+</section>
+
+<p class="rev__terms">
+  Ao confirmar, você concorda com os
+  <a routerLink="/ajuda/termos-de-uso">Termos de uso</a> e a
+  <a routerLink="/ajuda/privacidade">Política de privacidade</a>.
+</p>
+
+<div class="f-actions">
+  <button matButton="outlined" class="ui-cta" type="button" (click)="state.goTo(2)">Voltar</button>
+  <button matButton="filled" class="ui-cta" type="button" (click)="confirm()">
+    Confirmar pedido
+  </button>
+</div>

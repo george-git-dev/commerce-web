@@ -1,0 +1,118 @@
+.sum {
+  padding: 0 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+
+  &[open] {
+    padding-bottom: 16px;
+  }
+}
+
+.sum__toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 52px;
+  cursor: pointer;
+  list-style: none;
+  font-size: 0.9375rem;
+
+  &::-webkit-details-marker {
+    display: none;
+  }
+
+  // Seta do celular; no desktop o resumo fica sempre aberto.
+  span::after {
+    content: ' ▾';
+    color: var(--muted-foreground);
+  }
+}
+
+.sum[open] .sum__toggle span::after {
+  content: ' ▴';
+}
+
+.sum__items {
+  display: grid;
+  gap: 12px;
+  margin: 0 0 16px;
+  padding: 12px 0 0;
+  border-top: 1px solid var(--border);
+  list-style: none;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.875rem;
+  }
+
+  img {
+    flex-shrink: 0;
+    width: 56px;
+    height: 56px;
+    border-radius: var(--radius-sm);
+    object-fit: cover;
+  }
+}
+
+.sum__name {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+
+  small {
+    color: var(--muted-foreground);
+    font-size: 0.75rem;
+  }
+}
+
+.sum__rows {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+
+  div {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.875rem;
+    color: var(--muted-foreground);
+  }
+
+  dd {
+    margin: 0;
+  }
+}
+
+.sum__off dd {
+  color: var(--earth);
+}
+
+.sum__rows .sum__total {
+  margin-top: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  color: var(--foreground);
+  font-size: 1.0625rem;
+  font-weight: 600;
+}
+
+@media (min-width: 900px) {
+  .sum {
+    padding: 0 20px;
+  }
+
+  .sum__toggle {
+    pointer-events: none;
+
+    span::after {
+      content: none !important;
+    }
+
+    strong {
+      display: none;
+    }
+  }
+}

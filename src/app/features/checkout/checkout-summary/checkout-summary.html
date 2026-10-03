@@ -1,0 +1,52 @@
+<details class="sum" [open]="wide()">
+  <summary class="sum__toggle">
+    <span>Resumo do pedido</span>
+    <strong>{{ summary.total() | currency: 'BRL' }}</strong>
+  </summary>
+
+  <ul class="sum__items">
+    @for (line of cart.items(); track line.variant.id) {
+      <li>
+        <img [src]="line.product.images[0]" [alt]="line.product.name" width="56" height="56" />
+        <span class="sum__name">
+          {{ line.product.name }}
+          <small>{{ variantLabel(line.product, line.variant) }} · {{ line.quantity }} un.</small>
+        </span>
+        <span>{{ lineTotal(line) | currency: 'BRL' }}</span>
+      </li>
+    }
+  </ul>
+
+  <dl class="sum__rows">
+    <div>
+      <dt>Subtotal</dt>
+      <dd>{{ summary.subtotal() | currency: 'BRL' }}</dd>
+    </div>
+    @if (summary.discount()) {
+      <div class="sum__off">
+        <dt>Desconto ({{ summary.coupon()?.code }})</dt>
+        <dd>− {{ summary.discount() | currency: 'BRL' }}</dd>
+      </div>
+    }
+    @if (summary.pixDiscount()) {
+      <div class="sum__off">
+        <dt>Desconto no Pix</dt>
+        <dd>− {{ summary.pixDiscount() | currency: 'BRL' }}</dd>
+      </div>
+    }
+    <div>
+      <dt>Frete</dt>
+      <dd>
+        @if (summary.selectedShipping()) {
+          {{ summary.shippingPrice() ? (summary.shippingPrice() | currency: 'BRL') : 'Grátis' }}
+        } @else {
+          A calcular
+        }
+      </dd>
+    </div>
+    <div class="sum__total">
+      <dt>Total</dt>
+      <dd>{{ summary.total() | currency: 'BRL' }}</dd>
+    </div>
+  </dl>
+</details>

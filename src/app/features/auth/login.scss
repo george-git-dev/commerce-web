@@ -143,6 +143,10 @@
     cursor: pointer;
   }
 
+  &__hint {
+    font-size: 0.75rem;
+  }
+
   &__error {
     color: var(--wine);
     font-size: 0.75rem;

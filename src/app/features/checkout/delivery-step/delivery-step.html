@@ -1,0 +1,87 @@
+<!-- Dois grupos (entrega e nota fiscal) no mesmo <form>: sem [formGroup] na raiz,
+     o ngSubmit não existe — então o submit nativo é cancelado aqui. -->
+<form (submit)="$event.preventDefault(); next()" novalidate>
+  <section class="f-card" [formGroup]="form">
+    <h2>Endereço de entrega</h2>
+    <div class="f-grid delivery__recipient">
+      <label class="f-field">
+        Nome de quem vai receber
+        <input
+          formControlName="recipient"
+          autocomplete="name"
+          [attr.aria-invalid]="invalid(form.controls.recipient) || null"
+        />
+        @if (invalid(form.controls.recipient)) {
+          <small class="f-error">Informe o nome completo.</small>
+        }
+      </label>
+    </div>
+    <app-address-fields
+      idPrefix="entrega"
+      [group]="form.controls.address"
+      (cepComplete)="onDeliveryCep($event)"
+    />
+  </section>
+
+  <section class="f-card">
+    <h2>Forma de entrega</h2>
+    @if (summary.shippingOptions().length) {
+      <app-shipping-options
+        [options]="summary.shippingOptions()"
+        [(selected)]="shippingId"
+        [allFree]="summary.freeShippingByCoupon()"
+      />
+    } @else {
+      <p class="delivery__hint">Informe o CEP para ver as opções de entrega.</p>
+    }
+    @if (shippingError() && !summary.selectedShipping()) {
+      <p class="f-error" role="alert">Escolha uma forma de entrega.</p>
+    }
+  </section>
+
+  <section class="f-card" [formGroup]="billing">
+    <h2>Dados para nota fiscal</h2>
+    <div class="f-grid">
+      <label class="f-field">
+        CPF ou CNPJ
+        <input
+          formControlName="document"
+          appMask="document"
+          inputmode="numeric"
+          placeholder="000.000.000-00"
+          [attr.aria-invalid]="invalid(billing.controls.document) || null"
+        />
+        @if (invalid(billing.controls.document)) {
+          <small class="f-error">CPF ou CNPJ inválido.</small>
+        }
+      </label>
+    </div>
+
+    <label class="delivery__same">
+      <input type="checkbox" formControlName="sameAsDelivery" />
+      Usar as mesmas informações da entrega
+    </label>
+
+    @if (!sameAsDelivery()) {
+      <div class="f-grid delivery__billing">
+        <label class="f-field">
+          Nome ou razão social
+          <input
+            formControlName="name"
+            autocomplete="billing name"
+            [attr.aria-invalid]="invalid(billing.controls.name) || null"
+          />
+          @if (invalid(billing.controls.name)) {
+            <small class="f-error">Informe o nome ou a razão social.</small>
+          }
+        </label>
+      </div>
+      <app-address-fields idPrefix="cobranca" [group]="billing.controls.address" />
+    }
+  </section>
+
+  <div class="f-actions">
+    <a matButton="outlined" class="ui-cta" routerLink="/carrinho">Voltar à sacola</a>
+    <button matButton="filled" class="ui-cta" type="submit">Continuar para pagamento</button>
+  </div>
+</form>
