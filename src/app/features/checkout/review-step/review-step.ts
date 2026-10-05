@@ -47,7 +47,9 @@ export class ReviewStep {
     // Mock: o pedido nasce no front. Na Fase 2 vai para `POST /orders` (itens,
     // endereço, frete escolhido, cupom e token do cartão) e o back recalcula tudo.
     const order = this.orders.place({
-      items: this.cart.items().map((line) => ({
+      items: this.cart.items().map((line, index) => ({
+        id: `${line.variant.id}-${index}`,
+        slug: line.product.slug,
         productName: line.product.name,
         variantLabel: variantLabel(line.product, line.variant),
         image: line.product.images[0] ?? '',

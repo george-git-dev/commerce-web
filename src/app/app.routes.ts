@@ -36,6 +36,19 @@ export const routes: Routes = [
     loadComponent: () => import('./features/auth/login').then((m) => m.Login),
   },
   {
+    path: 'minha-conta/pedidos',
+    title: 'Nani Perfumes | Meus pedidos',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/account/orders/orders').then((m) => m.Orders),
+  },
+  {
+    path: 'minha-conta/pedidos/:numero',
+    title: 'Nani Perfumes | Pedido',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/account/order-detail/order-detail').then((m) => m.OrderDetail),
+  },
+  {
     path: 'minha-conta',
     title: 'Nani Perfumes | Minha conta',
     canActivate: [authGuard],

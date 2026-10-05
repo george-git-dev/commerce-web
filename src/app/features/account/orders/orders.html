@@ -1,0 +1,48 @@
+<section class="orders ui-section">
+  <div class="ui-container orders__inner">
+    <nav class="orders__crumb" aria-label="Trilha de navegação">
+      <a routerLink="/minha-conta">Minha conta</a>
+      <mat-icon aria-hidden="true">chevron_right</mat-icon>
+      <span aria-current="page">Pedidos</span>
+    </nav>
+    <h1>Meus pedidos</h1>
+
+    @if (orders().length) {
+      <ul class="orders__list">
+        @for (order of orders(); track order.number) {
+          <li>
+            <a class="order" [routerLink]="['/minha-conta/pedidos', order.number]">
+              <div class="order__head">
+                <span>
+                  <strong>{{ order.number }}</strong>
+                  <small>{{ order.createdAt | date: 'dd/MM/yyyy' }}</small>
+                </span>
+                <app-order-status [status]="order.status" />
+              </div>
+              <div class="order__body">
+                <span class="order__thumbs">
+                  @for (item of order.items; track item.id) {
+                    <img [src]="item.image" [alt]="item.productName" width="48" height="48" />
+                  }
+                </span>
+                <span class="order__total">
+                  {{ order.items.length }} {{ order.items.length === 1 ? 'item' : 'itens' }} ·
+                  <strong>{{ order.total | currency: 'BRL' }}</strong>
+                </span>
+                <mat-icon aria-hidden="true">chevron_right</mat-icon>
+              </div>
+            </a>
+          </li>
+        }
+      </ul>
+    } @else {
+      <app-empty-state
+        icon="receipt_long"
+        title="Você ainda não fez pedidos"
+        message="Quando comprar, seus pedidos aparecem aqui."
+        ctaLabel="Ver catálogo"
+        ctaLink="/produtos"
+      />
+    }
+  </div>
+</section>

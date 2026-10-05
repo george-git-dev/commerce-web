@@ -9,19 +9,7 @@
 
       @switch (item.payment.method) {
         @case ('pix') {
-          <div class="done__box">
-            <h2>Pague com Pix para confirmar</h2>
-            <p>Abra o app do seu banco, escolha Pix "copia e cola" e cole o código abaixo.</p>
-            <div class="done__qr" aria-hidden="true"><mat-icon>qr_code_2</mat-icon></div>
-            <code class="done__code">{{ pixCode }}</code>
-            <button matButton="filled" class="ui-cta" type="button" (click)="copyPix()">
-              <mat-icon>{{ copied() ? 'check' : 'content_copy' }}</mat-icon>
-              {{ copied() ? 'Código copiado' : 'Copiar código Pix' }}
-            </button>
-            <p class="done__note">
-              Código fictício (ambiente de demonstração). Vale por 30 minutos.
-            </p>
-          </div>
+          <app-pix-payment class="done__box" />
         }
         @case ('boleto') {
           <div class="done__box">
@@ -74,7 +62,9 @@
       <p class="done__mail">Enviamos os detalhes do pedido para o seu e-mail.</p>
 
       <div class="done__actions">
-        <a matButton="outlined" class="ui-cta" routerLink="/minha-conta">Minha conta</a>
+        <a matButton="outlined" class="ui-cta" [routerLink]="['/minha-conta/pedidos', item.number]">
+          Ver pedido
+        </a>
         <a matButton="filled" class="ui-cta" routerLink="/produtos">Continuar comprando</a>
       </div>
     </div>

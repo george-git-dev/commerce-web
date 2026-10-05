@@ -1,0 +1,140 @@
+@if (order(); as item) {
+  <section class="od ui-section">
+    <div class="ui-container od__inner">
+      <nav class="od__crumb" aria-label="Trilha de navegação">
+        <a routerLink="/minha-conta/pedidos">Meus pedidos</a>
+        <mat-icon aria-hidden="true">chevron_right</mat-icon>
+        <span aria-current="page">{{ item.number }}</span>
+      </nav>
+
+      <header class="od__head">
+        <h1>Pedido {{ item.number }}</h1>
+        <app-order-status [status]="item.status" />
+      </header>
+      <p class="od__date">Feito em {{ item.createdAt | date: "dd/MM/yyyy 'às' HH:mm" }}</p>
+
+      @if (item.status === 'cancelado') {
+        <p class="od__cancel">Este pedido foi cancelado. Se houve cobrança, o valor é estornado.</p>
+      } @else {
+        <ol class="od__timeline">
+          @for (step of timeline(); track step.status) {
+            <li [class.od__step--done]="step.done">
+              <span class="od__dot" aria-hidden="true"></span>
+              {{ step.label }}
+              @if (step.status === 'enviado' && step.done && item.trackingCode) {
+                <small>Rastreio: {{ item.trackingCode }}</small>
+              }
+            </li>
+          }
+        </ol>
+      }
+
+      @if (item.status === 'aguardando-pagamento' && item.payment.method === 'pix') {
+        <app-pix-payment class="od__card" />
+      }
+
+      <section class="od__card">
+        <h2>Itens</h2>
+        <ul class="od__items">
+          @for (line of item.items; track line.id) {
+            <li>
+              <div class="od__item">
+                <img [src]="line.image" [alt]="line.productName" width="64" height="64" />
+                <span class="od__item-text">
+                  <a [routerLink]="['/produtos', line.slug]">{{ line.productName }}</a>
+                  <small>{{ line.variantLabel }} · {{ line.quantity }} un.</small>
+                </span>
+                <strong>{{ line.unitPrice * line.quantity | currency: 'BRL' }}</strong>
+              </div>
+
+              @if (item.status === 'entregue') {
+                @if (reviews.isReviewed(item.number, line.id)) {
+                  <p class="od__reviewed">
+                    <mat-icon aria-hidden="true">check_circle</mat-icon>
+                    Avaliação enviada — aparece no produto após a moderação.
+                  </p>
+                } @else {
+                  <button matButton="outlined" type="button" (click)="toggleReview(line)">
+                    <mat-icon>rate_review</mat-icon>
+                    {{ reviewing() === line.id ? 'Cancelar' : 'Avaliar' }}
+                  </button>
+                  @if (reviewing() === line.id) {
+                    <app-review-form
+                      [orderNumber]="item.number"
+                      [item]="line"
+                      (sent)="reviewing.set(null)"
+                    />
+                  }
+                }
+              }
+            </li>
+          }
+        </ul>
+      </section>
+
+      <section class="od__card">
+        <h2>Entrega</h2>
+        <p>
+          <strong>{{ item.address.recipient }}</strong
+          ><br />
+          {{ item.address.street }}, {{ item.address.number }}
+          @if (item.address.complement) {
+            — {{ item.address.complement }}
+          }
+          <br />
+          {{ item.address.district }} · {{ item.address.city }}/{{ item.address.state }} · CEP
+          {{ item.address.cep }}
+        </p>
+        <p class="od__muted">
+          {{ item.shipping.label }} · {{ item.shipping.minDays }} a {{ item.shipping.maxDays }} dias
+          úteis após a aprovação
+        </p>
+      </section>
+
+      <section class="od__card">
+        <h2>Pagamento</h2>
+        <p>
+          {{ methodLabels[item.payment.method] }}
+          @if (item.payment.method === 'cartao') {
+            · {{ item.payment.cardBrand }} final {{ item.payment.cardLast4 }} ·
+            {{ item.payment.installments }}x
+          }
+        </p>
+        <dl class="od__totals">
+          <div>
+            <dt>Subtotal</dt>
+            <dd>{{ item.subtotal | currency: 'BRL' }}</dd>
+          </div>
+          @if (item.discount) {
+            <div>
+              <dt>Desconto</dt>
+              <dd>− {{ item.discount | currency: 'BRL' }}</dd>
+            </div>
+          }
+          @if (item.pixDiscount) {
+            <div>
+              <dt>Desconto no Pix</dt>
+              <dd>− {{ item.pixDiscount | currency: 'BRL' }}</dd>
+            </div>
+          }
+          <div>
+            <dt>Frete</dt>
+            <dd>{{ item.shippingPrice ? (item.shippingPrice | currency: 'BRL') : 'Grátis' }}</dd>
+          </div>
+          <div class="od__total">
+            <dt>Total</dt>
+            <dd>{{ item.total | currency: 'BRL' }}</dd>
+          </div>
+        </dl>
+      </section>
+    </div>
+  </section>
+} @else {
+  <section class="ui-section">
+    <div class="ui-container od__inner">
+      <h1>Pedido não encontrado</h1>
+      <p>Confira a lista dos seus pedidos.</p>
+      <a matButton="filled" class="ui-cta" routerLink="/minha-conta/pedidos">Meus pedidos</a>
+    </div>
+  </section>
+}

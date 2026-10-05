@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { MOCK_PRODUCTS } from '../data/mock-products';
+import { AuthService } from './auth-service';
 import { CartStore } from './cart-store';
 import { CouponService } from './coupon-service';
 import { OrderService } from './order-service';
@@ -32,7 +33,9 @@ describe('OrderSummary', () => {
   });
 
   it('cria o pedido com número e status pelo meio de pagamento', () => {
+    const auth = TestBed.inject(AuthService);
     const orders = TestBed.inject(OrderService);
+    auth.login('maria@email.com', '12345678');
     const address = {
       cep: '01310-100',
       street: 'Rua',
@@ -58,5 +61,10 @@ describe('OrderSummary', () => {
     expect(pix.status).toBe('aguardando-pagamento');
     expect(orders.find(pix.number)).toBe(pix);
     expect(orders.place({ ...base, payment: { method: 'cartao' } }).status).toBe('pago');
+
+    // Pedido fica só na conta que comprou.
+    auth.logout();
+    auth.login('outra@email.com', '12345678');
+    expect(orders.find(pix.number)).toBeUndefined();
   });
 });

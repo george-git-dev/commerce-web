@@ -36,6 +36,7 @@ export class Account {
       icon: 'local_shipping',
       title: 'Pedidos',
       description: 'Acompanhe entregas e veja seu histórico de compras.',
+      link: '/minha-conta/pedidos',
     },
     {
       icon: 'favorite_border',

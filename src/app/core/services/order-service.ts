@@ -1,15 +1,28 @@
-import { Injectable, signal } from '@angular/core';
+import { computed, inject, Injectable, signal } from '@angular/core';
+import { sampleOrders } from '../data/orders-mock';
 import { Order } from '../models/order';
+import { AuthService } from './auth-service';
+import { CatalogService } from './catalog-service';
 
 /**
- * Pedidos. Hoje ficam em memória (somem ao recarregar); na Fase 2 viram
- * `POST /orders` (criação, com tudo recalculado no back) e `GET /me/orders`.
+ * Pedidos da conta logada. Hoje: os criados no checkout (em memória — pedido
+ * tem endereço e CPF, então não vai para o navegador) + pedidos de exemplo.
+ * Fase 2: `POST /orders` (o back recalcula tudo) e `GET /me/orders`.
  */
 @Injectable({ providedIn: 'root' })
 export class OrderService {
-  private readonly state = signal<readonly Order[]>([]);
+  private readonly auth = inject(AuthService);
+  private readonly catalog = inject(CatalogService);
+  /** Pedidos criados nesta sessão, por e-mail da conta. */
+  private readonly created = signal<Readonly<Record<string, readonly Order[]>>>({});
 
-  readonly orders = this.state.asReadonly();
+  /** Da conta logada, mais recentes primeiro. */
+  readonly orders = computed<readonly Order[]>(() => {
+    const user = this.auth.user();
+    if (!user) return [];
+    const samples = sampleOrders(user.name, (slug) => this.catalog.findBySlug(slug));
+    return [...(this.created()[user.email] ?? []), ...samples];
+  });
 
   place(draft: Omit<Order, 'number' | 'createdAt' | 'status'>): Order {
     const order: Order = {
@@ -19,11 +32,14 @@ export class OrderService {
       // Cartão aprovado na hora no mock; Pix e boleto aguardam o pagamento.
       status: draft.payment.method === 'cartao' ? 'pago' : 'aguardando-pagamento',
     };
-    this.state.update((orders) => [order, ...orders]);
+    const email = this.auth.user()?.email;
+    if (email) {
+      this.created.update((all) => ({ ...all, [email]: [order, ...(all[email] ?? [])] }));
+    }
     return order;
   }
 
   find(number: string | null): Order | undefined {
-    return this.state().find((order) => order.number === number);
+    return this.orders().find((order) => order.number === number);
   }
 }

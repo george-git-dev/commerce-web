@@ -39,37 +39,6 @@
   }
 }
 
-.done__qr {
-  display: grid;
-  place-items: center;
-  width: 160px;
-  height: 160px;
-  border: 1px dashed var(--border);
-  border-radius: var(--radius-sm);
-  background: #fff;
-
-  mat-icon {
-    width: 120px;
-    height: 120px;
-    font-size: 120px;
-    color: #1a1a1a;
-  }
-}
-
-.done__code {
-  display: block;
-  width: 100%;
-  padding: 8px;
-  border-radius: var(--radius-sm);
-  background: var(--muted);
-  font-size: 0.6875rem;
-  overflow-wrap: anywhere;
-}
-
-.done__note {
-  font-size: 0.75rem !important;
-}
-
 .done__facts {
   display: grid;
   gap: 10px;

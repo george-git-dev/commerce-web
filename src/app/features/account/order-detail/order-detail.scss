@@ -1,0 +1,200 @@
+.od.ui-section {
+  padding-block: 16px 40px;
+}
+
+.od__inner {
+  max-width: 760px;
+}
+
+.od__crumb {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 12px;
+  font-size: 0.8125rem;
+  color: var(--muted-foreground);
+
+  mat-icon {
+    width: 16px;
+    height: 16px;
+    font-size: 16px;
+  }
+}
+
+.od__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+
+  h1 {
+    font-size: clamp(1.5rem, 1.2rem + 1.5vw, 2rem);
+  }
+}
+
+.od__date,
+.od__muted {
+  margin: 4px 0 0;
+  font-size: 0.8125rem;
+  color: var(--muted-foreground);
+}
+
+.od__cancel {
+  margin: 16px 0;
+  color: var(--wine);
+}
+
+// Linha do tempo vertical: bolinha + texto; feitas em dourado.
+.od__timeline {
+  display: grid;
+  gap: 14px;
+  margin: 20px 0;
+  padding: 0 0 0 4px;
+  list-style: none;
+
+  li {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 10px;
+    font-size: 0.875rem;
+    color: var(--muted-foreground);
+  }
+
+  small {
+    flex-basis: 100%;
+    padding-left: 24px;
+    font-size: 0.75rem;
+  }
+}
+
+.od__dot {
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--border);
+  border-radius: 50%;
+  background: var(--background);
+}
+
+.od__step--done {
+  color: var(--foreground) !important;
+  font-weight: 500;
+
+  .od__dot {
+    border-color: var(--gold);
+    background: var(--gold);
+  }
+}
+
+.od__card {
+  margin-bottom: 16px;
+  padding: 20px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+
+  h2 {
+    margin-bottom: 12px;
+    font-size: 1.125rem;
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.9375rem;
+    line-height: 1.6;
+  }
+}
+
+.od__items {
+  display: grid;
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: grid;
+    justify-items: start;
+    gap: 10px;
+  }
+}
+
+.od__item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+
+  img {
+    flex-shrink: 0;
+    width: 64px;
+    height: 64px;
+    border-radius: var(--radius-sm);
+    object-fit: cover;
+  }
+}
+
+.od__item-text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  font-size: 0.9375rem;
+
+  small {
+    font-size: 0.75rem;
+    color: var(--muted-foreground);
+  }
+}
+
+.od__reviewed {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8125rem !important;
+  color: var(--earth);
+
+  mat-icon {
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+  }
+}
+
+.od__totals {
+  display: grid;
+  gap: 6px;
+  margin: 14px 0 0;
+
+  div {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.875rem;
+    color: var(--muted-foreground);
+  }
+
+  dd {
+    margin: 0;
+  }
+}
+
+.od__totals .od__total {
+  margin-top: 6px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+  font-size: 1.0625rem;
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+@media (min-width: 900px) {
+  .od.ui-section {
+    padding-block: 24px 72px;
+  }
+
+  .od__card {
+    padding: 24px;
+  }
+}
