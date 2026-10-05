@@ -2,13 +2,14 @@ import { CurrencyPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { Router, RouterLink } from '@angular/router';
-import { Address, PAYMENT_METHOD_LABELS } from '../../../core/models/order';
+import { PAYMENT_METHOD_LABELS } from '../../../core/models/order';
 import { CartStore } from '../../../core/services/cart-store';
 import { CouponService } from '../../../core/services/coupon-service';
 import { OrderService } from '../../../core/services/order-service';
 import { OrderSummary } from '../../../core/services/order-summary';
 import { cardBrand, onlyDigits } from '../../../core/utils/br-format';
 import { effectivePrice, variantLabel } from '../../../core/utils/product-pricing';
+import { addressFromForm } from '../../../shared/address-fields/address-form';
 import { CheckoutState } from '../checkout-state';
 
 /** Passo 3: revisão de tudo e confirmação do pedido. */
@@ -56,11 +57,11 @@ export class ReviewStep {
         quantity: line.quantity,
         unitPrice: effectivePrice(line.variant),
       })),
-      address: { recipient: this.recipient, ...this.toAddress(this.address) },
+      address: { recipient: this.recipient, ...addressFromForm(this.address) },
       billing: {
         document: this.billing.document,
         name: this.billing.sameAsDelivery ? this.recipient : this.billing.name,
-        address: this.toAddress(this.billing.sameAsDelivery ? this.address : this.billing.address),
+        address: addressFromForm(this.billing.sameAsDelivery ? this.address : this.billing.address),
       },
       shipping,
       payment: {
@@ -79,18 +80,5 @@ export class ReviewStep {
     this.cart.clear();
     this.coupons.remove();
     this.router.navigate(['/pedido', order.number], { replaceUrl: true });
-  }
-
-  /** Sai o controle de tela ("Sem número") e a UF vai em maiúsculas. */
-  private toAddress(form: Address & { noNumber: boolean }): Address {
-    return {
-      cep: form.cep,
-      street: form.street,
-      number: form.number,
-      complement: form.complement,
-      district: form.district,
-      city: form.city,
-      state: form.state.toUpperCase(),
-    };
   }
 }

@@ -1,15 +1,15 @@
 import { ChangeDetectionStrategy, Component, inject, input, output } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
-import { CepLookup } from '../../../core/services/cep-lookup';
-import { isValidCep, onlyCepDigits } from '../../../core/services/shipping-service';
-import { InputMask } from '../../../shared/input-mask/input-mask';
-import { AddressForm } from '../checkout-state';
+import { CepLookup } from '../../core/services/cep-lookup';
+import { isValidCep, onlyCepDigits } from '../../core/services/shipping-service';
+import { InputMask } from '../input-mask/input-mask';
+import { AddressForm, NO_NUMBER } from './address-form';
 
 type AddressField = keyof AddressForm['controls'];
 
 /**
  * Campos de endereço com busca pelo CEP e "Sem número".
- * Reaproveitado na entrega e no endereço da nota fiscal.
+ * Usado na entrega, no endereço da nota fiscal e em Minha conta → Endereços.
  */
 @Component({
   selector: 'app-address-fields',
@@ -44,7 +44,7 @@ export class AddressFields {
   protected toggleNoNumber(checked: boolean): void {
     const number = this.group().controls.number;
     if (checked) {
-      number.setValue('S/N');
+      number.setValue(NO_NUMBER);
       number.disable();
     } else {
       number.setValue('');

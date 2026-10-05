@@ -3,24 +3,78 @@
 <form (submit)="$event.preventDefault(); next()" novalidate>
   <section class="f-card" [formGroup]="form">
     <h2>Endereço de entrega</h2>
-    <div class="f-grid delivery__recipient">
-      <label class="f-field">
-        Nome de quem vai receber
-        <input
-          formControlName="recipient"
-          autocomplete="name"
-          [attr.aria-invalid]="invalid(form.controls.recipient) || null"
-        />
-        @if (invalid(form.controls.recipient)) {
-          <small class="f-error">Informe o nome completo.</small>
+    @let saved = addressBook.addresses();
+    @if (saved.length) {
+      <div class="delivery__saved" role="radiogroup" aria-label="Endereços salvos">
+        @for (address of saved; track address.id) {
+          <label
+            class="delivery__option"
+            [class.delivery__option--on]="addressChoice() === address.id"
+          >
+            <input
+              type="radio"
+              name="endereco"
+              [checked]="addressChoice() === address.id"
+              (change)="chooseAddress(address.id)"
+            />
+            <span class="delivery__option-text">
+              <strong>
+                {{ address.recipient }}
+                @if (address.isDefault) {
+                  <small class="delivery__tag">Principal</small>
+                }
+              </strong>
+              <small>
+                {{ address.street }}, {{ address.number }}
+                @if (address.complement) {
+                  — {{ address.complement }}
+                }
+              </small>
+              <small>
+                {{ address.district }} · {{ address.city }}/{{ address.state }} · CEP
+                {{ address.cep }}
+              </small>
+            </span>
+          </label>
         }
-      </label>
-    </div>
-    <app-address-fields
-      idPrefix="entrega"
-      [group]="form.controls.address"
-      (cepComplete)="onDeliveryCep($event)"
-    />
+        <label class="delivery__option" [class.delivery__option--on]="addressChoice() === null">
+          <input
+            type="radio"
+            name="endereco"
+            [checked]="addressChoice() === null"
+            (change)="chooseAddress(null)"
+          />
+          <span class="delivery__option-text"><strong>Novo endereço</strong></span>
+        </label>
+      </div>
+    }
+
+    @if (addressChoice() === null) {
+      <div class="f-grid delivery__recipient" [class.delivery__new]="saved.length">
+        <label class="f-field">
+          Nome de quem vai receber
+          <input
+            formControlName="recipient"
+            autocomplete="name"
+            [attr.aria-invalid]="invalid(form.controls.recipient) || null"
+          />
+          @if (invalid(form.controls.recipient)) {
+            <small class="f-error">Informe o nome completo.</small>
+          }
+        </label>
+      </div>
+      <app-address-fields
+        idPrefix="entrega"
+        [group]="form.controls.address"
+        (cepComplete)="onDeliveryCep($event)"
+      />
+      @if (!addressBook.isFull()) {
+        <label class="delivery__same">
+          <input type="checkbox" formControlName="saveToAccount" />
+          Salvar na minha conta
+        </label>
+      }
+    }
   </section>
 
   <section class="f-card">

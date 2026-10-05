@@ -1,4 +1,4 @@
-@use '../form';
+@use '../../../shared/forms/form';
 
 @include form.styles;
 
@@ -23,6 +23,59 @@
     margin: 0;
     accent-color: var(--primary);
   }
+}
+
+.delivery__saved {
+  display: grid;
+  gap: 10px;
+}
+
+.delivery__option {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+
+  input {
+    flex-shrink: 0;
+    margin: 3px 0 0;
+    accent-color: var(--primary);
+  }
+
+  &--on {
+    border-color: var(--gold);
+    background: var(--background);
+  }
+}
+
+.delivery__option-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  font-size: 0.9375rem;
+
+  small {
+    font-size: 0.8125rem;
+    color: var(--muted-foreground);
+  }
+}
+
+.delivery__tag {
+  margin-left: 6px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--muted);
+  font-size: 0.6875rem !important;
+  font-weight: 600;
+  color: var(--foreground) !important;
+}
+
+.delivery__new {
+  margin-top: 18px;
 }
 
 .delivery__hint {

@@ -1,6 +1,17 @@
-import { Order } from '../models/order';
+import { Address, Order } from '../models/order';
 import { Product } from '../models/product';
 import { effectivePrice, variantLabel } from '../utils/product-pricing';
+
+/** Endereço FICTÍCIO usado nos pedidos de exemplo e no endereço inicial da conta. */
+export const SAMPLE_ADDRESS: Address = {
+  cep: '05794-340',
+  street: 'Rua das Acácias',
+  number: '120',
+  complement: '',
+  district: 'Centro',
+  city: 'São Paulo',
+  state: 'SP',
+};
 
 const daysAgo = (days: number) => new Date(Date.now() - days * 86_400_000).toISOString();
 
@@ -10,15 +21,7 @@ const daysAgo = (days: number) => new Date(Date.now() - days * 86_400_000).toISO
  * Na Fase 2 somem — a lista vem de `GET /me/orders`.
  */
 export function sampleOrders(name: string, find: (slug: string) => Product | undefined): Order[] {
-  const address = {
-    cep: '05794-340',
-    street: 'Rua das Acácias',
-    number: '120',
-    complement: '',
-    district: 'Centro',
-    city: 'São Paulo',
-    state: 'SP',
-  };
+  const address = SAMPLE_ADDRESS;
   const item = (number: string, index: number, slug: string, quantity = 1) => {
     const product = find(slug)!;
     const variant = product.variants[0];

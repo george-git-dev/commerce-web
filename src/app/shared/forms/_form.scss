@@ -1,5 +1,5 @@
-// Estilos de formulário compartilhados pelos passos do checkout.
-// Uso: `@use '../form'; @include form.styles;`
+// Estilos de formulário compartilhados (checkout, Minha conta).
+// Uso: `@use '<caminho>/shared/forms/form'; @include form.styles;`
 @mixin styles {
   .f-card {
     margin-bottom: 16px;

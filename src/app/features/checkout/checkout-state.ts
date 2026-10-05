@@ -1,45 +1,21 @@
 import { DOCUMENT } from '@angular/common';
 import { inject, Injectable, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { FormControl, FormGroup, NonNullableFormBuilder, Validators } from '@angular/forms';
+import { NonNullableFormBuilder, Validators } from '@angular/forms';
 import { PaymentMethod } from '../../core/models/order';
+import { AddressBook } from '../../core/services/address-book';
 import { AuthService } from '../../core/services/auth-service';
 import { OrderSummary } from '../../core/services/order-summary';
-import { formatCep, ShippingService } from '../../core/services/shipping-service';
+import { formatCep, onlyCepDigits, ShippingService } from '../../core/services/shipping-service';
 import {
   cardNumberValidator,
-  cepValidator,
   cvvValidator,
   documentValidator,
   expiryValidator,
 } from '../../core/utils/br-validators';
+import { addressGroup, fillAddressForm } from '../../shared/address-fields/address-form';
 
 export type CheckoutStep = 1 | 2 | 3;
-
-/** Campos de endereço (entrega e cobrança usam o mesmo formato). */
-export type AddressForm = FormGroup<{
-  cep: FormControl<string>;
-  street: FormControl<string>;
-  number: FormControl<string>;
-  noNumber: FormControl<boolean>;
-  complement: FormControl<string>;
-  district: FormControl<string>;
-  city: FormControl<string>;
-  state: FormControl<string>;
-}>;
-
-function addressGroup(fb: NonNullableFormBuilder, cep = ''): AddressForm {
-  return fb.group({
-    cep: [cep, [Validators.required, cepValidator]],
-    street: ['', Validators.required],
-    number: ['', Validators.required],
-    noNumber: [false],
-    complement: [''],
-    district: ['', Validators.required],
-    city: ['', Validators.required],
-    state: ['', [Validators.required, Validators.pattern(/^[A-Za-z]{2}$/)]],
-  });
-}
 
 /**
  * Estado do checkout (passo atual + formulários), compartilhado pelos passos.
@@ -50,6 +26,8 @@ export class CheckoutState {
   private readonly fb = inject(NonNullableFormBuilder);
   private readonly document = inject(DOCUMENT);
   private readonly summary = inject(OrderSummary);
+  private readonly shipping = inject(ShippingService);
+  private readonly addressBook = inject(AddressBook);
 
   readonly step = signal<CheckoutStep>(1);
 
@@ -57,8 +35,13 @@ export class CheckoutState {
 
   readonly delivery = this.fb.group({
     recipient: [this.user?.name ?? '', [Validators.required, Validators.minLength(3)]],
-    address: addressGroup(this.fb, formatCep(inject(ShippingService).cep())),
+    address: addressGroup(this.fb, formatCep(this.shipping.cep())),
+    /** Endereço novo digitado aqui vai para Minha conta → Endereços. */
+    saveToAccount: [true],
   });
+
+  /** Endereço salvo escolhido na entrega; `null` = "Novo endereço" (formulário). */
+  readonly addressChoice = signal<string | null>(null);
 
   /**
    * Dados para nota fiscal. O CPF vem do cadastro (pode trocar por CNPJ).
@@ -87,6 +70,14 @@ export class CheckoutState {
   });
 
   constructor() {
+    // Começa pelo endereço salvo com o CEP da sacola; senão, pelo principal.
+    const cep = this.shipping.cep();
+    const saved = this.addressBook.addresses();
+    const start =
+      saved.find((address) => onlyCepDigits(address.cep) === cep) ??
+      this.addressBook.defaultAddress();
+    if (start) this.chooseAddress(start.id);
+
     this.billing.controls.address.disable();
     this.billing.controls.sameAsDelivery.valueChanges
       .pipe(takeUntilDestroyed())
@@ -103,6 +94,23 @@ export class CheckoutState {
       this.summary.paymentMethod.set(method);
       this.toggleCardValidators(method === 'cartao');
     });
+  }
+
+  /** Troca o endereço de entrega: preenche o formulário e recalcula o frete. */
+  chooseAddress(id: string | null): void {
+    const saved = id ? this.addressBook.find(id) : undefined;
+    this.addressChoice.set(saved?.id ?? null);
+    const { recipient, address } = this.delivery.controls;
+    if (saved) {
+      recipient.setValue(saved.recipient);
+      fillAddressForm(address, saved);
+      this.shipping.cep.set(onlyCepDigits(saved.cep));
+    } else {
+      recipient.setValue(this.user?.name ?? '');
+      fillAddressForm(address);
+      // Sem CEP, sem frete: evita mostrar o valor do endereço anterior.
+      this.shipping.cep.set('');
+    }
   }
 
   goTo(step: CheckoutStep): void {

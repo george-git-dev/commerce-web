@@ -48,6 +48,7 @@ export class Account {
       icon: 'location_on',
       title: 'Endereços',
       description: 'Gerencie os endereços de entrega da sua conta.',
+      link: '/minha-conta/enderecos',
     },
     {
       icon: 'person',

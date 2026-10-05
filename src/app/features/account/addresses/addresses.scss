@@ -1,0 +1,124 @@
+@use '../../../shared/forms/form';
+
+@include form.styles;
+
+.addresses.ui-section {
+  padding-block: 16px 40px;
+}
+
+.addresses__inner {
+  max-width: 760px;
+}
+
+.addresses__crumb {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 12px;
+  font-size: 0.8125rem;
+  color: var(--muted-foreground);
+
+  mat-icon {
+    width: 16px;
+    height: 16px;
+    font-size: 16px;
+  }
+}
+
+.addresses__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.addresses__hint,
+.addresses__empty {
+  margin: 12px 0 0;
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+}
+
+.addresses__recipient {
+  margin-bottom: 14px;
+}
+
+.addresses__check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 16px 0 8px;
+  font-size: 0.875rem;
+  cursor: pointer;
+
+  input {
+    margin: 0;
+    accent-color: var(--primary);
+  }
+}
+
+.addresses__list {
+  display: grid;
+  gap: 12px;
+  margin: 20px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.address {
+  padding: 16px 16px 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+
+  &--default {
+    border-color: var(--gold);
+  }
+
+  p {
+    margin: 0 0 4px;
+    font-size: 0.9375rem;
+    line-height: 1.5;
+  }
+}
+
+.address__name {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.address__tag {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--muted);
+  font-size: 0.6875rem;
+  font-weight: 600;
+}
+
+// Ações em linha; quebram no celular estreito. Botões com 44px de altura (toque).
+.address__actions {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 4px -12px 0;
+
+  button {
+    min-height: 44px;
+  }
+}
+
+.address__remove {
+  color: var(--wine);
+}
+
+@media (min-width: 900px) {
+  .addresses.ui-section {
+    padding-block: 24px 72px;
+  }
+
+  .f-card {
+    padding: 24px;
+  }
+}

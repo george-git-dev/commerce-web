@@ -14,6 +14,12 @@ export interface DeliveryAddress extends Address {
   recipient: string;
 }
 
+/** Endereço guardado na conta (Minha conta → Endereços). */
+export interface SavedAddress extends DeliveryAddress {
+  id: string;
+  isDefault: boolean;
+}
+
 /** Dados da nota fiscal: CPF/CNPJ, nome e endereço de cobrança. */
 export interface BillingInfo {
   document: string;

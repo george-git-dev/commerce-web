@@ -1,0 +1,110 @@
+<section class="addresses ui-section">
+  <div class="ui-container addresses__inner">
+    <nav class="addresses__crumb" aria-label="Trilha de navegação">
+      <a routerLink="/minha-conta">Minha conta</a>
+      <mat-icon aria-hidden="true">chevron_right</mat-icon>
+      <span aria-current="page">Endereços</span>
+    </nav>
+
+    @if (editing(); as editingId) {
+      <form class="f-card" [formGroup]="form" (ngSubmit)="save()" novalidate>
+        <h2>{{ editingId === 'novo' ? 'Novo endereço' : 'Editar endereço' }}</h2>
+        <div class="f-grid addresses__recipient">
+          <label class="f-field">
+            Nome de quem vai receber
+            <input
+              formControlName="recipient"
+              autocomplete="name"
+              [attr.aria-invalid]="invalid(form.controls.recipient) || null"
+            />
+            @if (invalid(form.controls.recipient)) {
+              <small class="f-error">Informe o nome completo.</small>
+            }
+          </label>
+        </div>
+        <app-address-fields idPrefix="conta" [group]="form.controls.address" />
+
+        <label class="addresses__check">
+          <input type="checkbox" formControlName="makeDefault" />
+          Usar como endereço principal
+        </label>
+
+        <div class="f-actions">
+          <button matButton="outlined" class="ui-cta" type="button" (click)="cancel()">
+            Cancelar
+          </button>
+          <button matButton="filled" class="ui-cta" type="submit">Salvar endereço</button>
+        </div>
+      </form>
+    } @else {
+      <header class="addresses__head">
+        <h1>Meus endereços</h1>
+        <button
+          matButton="filled"
+          class="ui-cta"
+          type="button"
+          [disabled]="book.isFull()"
+          (click)="startNew()"
+        >
+          <mat-icon>add</mat-icon>
+          Adicionar endereço
+        </button>
+      </header>
+      @if (book.isFull()) {
+        <p class="addresses__hint">
+          Você chegou ao limite de {{ max }} endereços. Remova um para cadastrar outro.
+        </p>
+      }
+
+      @if (book.addresses().length) {
+        <ul class="addresses__list">
+          @for (address of book.addresses(); track address.id) {
+            <li class="address" [class.address--default]="address.isDefault">
+              <p class="address__name">
+                <strong>{{ address.recipient }}</strong>
+                @if (address.isDefault) {
+                  <span class="address__tag">Principal</span>
+                }
+              </p>
+              <p>
+                {{ address.street }}, {{ address.number }}
+                @if (address.complement) {
+                  — {{ address.complement }}
+                }
+                <br />
+                {{ address.district }} · {{ address.city }}/{{ address.state }}<br />
+                CEP {{ address.cep }}
+              </p>
+              <div class="address__actions">
+                <button matButton type="button" (click)="startEdit(address)">
+                  <mat-icon>edit</mat-icon>
+                  Editar
+                </button>
+                @if (!address.isDefault) {
+                  <button matButton type="button" (click)="setDefault(address)">
+                    <mat-icon>star_border</mat-icon>
+                    Tornar principal
+                  </button>
+                }
+                <button
+                  matButton
+                  type="button"
+                  class="address__remove"
+                  [attr.aria-label]="'Remover endereço ' + address.street + ', ' + address.number"
+                  (click)="remove(address)"
+                >
+                  <mat-icon>delete_outline</mat-icon>
+                  Remover
+                </button>
+              </div>
+            </li>
+          }
+        </ul>
+      } @else {
+        <p class="addresses__empty">
+          Nenhum endereço salvo. Cadastre um aqui ou salve na hora de finalizar a compra.
+        </p>
+      }
+    }
+  </div>
+</section>
