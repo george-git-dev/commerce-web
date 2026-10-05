@@ -31,12 +31,12 @@ describe('ShippingService', () => {
     expect(service.quote('123', 100)).toEqual([]);
   });
 
-  it('entrega em mãos grátis só para conta liberada', () => {
-    const ids = (inHands: boolean) =>
-      service.quote('01310-100', 100, inHands).map((option) => option.id);
-    expect(ids(false)).toEqual(['economico', 'expresso']);
-    expect(ids(true)).toEqual(['economico', 'expresso', 'em-maos']);
-    expect(service.quote('01310-100', 100, true).at(-1)?.price).toBe(0);
-    expect(service.quote('0131', 100, true)).toEqual([]);
+  it('entrega em mãos só para conta liberada: primeiro, grátis e sem precisar de CEP', () => {
+    const ids = (cep: string, inHands: boolean) =>
+      service.quote(cep, 100, inHands).map((option) => option.id);
+    expect(ids('01310-100', false)).toEqual(['economico', 'expresso']);
+    expect(ids('01310-100', true)).toEqual(['em-maos', 'economico', 'expresso']);
+    expect(ids('', true)).toEqual(['em-maos']);
+    expect(service.quote('', 100, true)[0].price).toBe(0);
   });
 });

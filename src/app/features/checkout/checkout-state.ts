@@ -2,7 +2,7 @@ import { DOCUMENT } from '@angular/common';
 import { inject, Injectable, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NonNullableFormBuilder, Validators } from '@angular/forms';
-import { PaymentMethod } from '../../core/models/order';
+import { PaymentMethod, SavedAddress } from '../../core/models/order';
 import { AddressBook } from '../../core/services/address-book';
 import { AuthService } from '../../core/services/auth-service';
 import { OrderSummary } from '../../core/services/order-summary';
@@ -42,6 +42,13 @@ export class CheckoutState {
 
   /** Endereço salvo escolhido na entrega; `null` = "Novo endereço" (formulário). */
   readonly addressChoice = signal<string | null>(null);
+
+  /** Conta liberada pelo admin para entrega em mãos (aparece a escolha no topo). */
+  readonly canReceiveInHands = this.user?.inHandsDelivery ?? false;
+  /** Escolheu receber em mãos: sem endereço de entrega e sem frete. */
+  readonly inHands = signal(false);
+  /** Na entrega em mãos, a nota usa o endereço principal da conta (se houver). */
+  readonly billingFromSaved = signal<SavedAddress | null>(null);
 
   /**
    * Dados para nota fiscal. O CPF vem do cadastro (pode trocar por CNPJ).
@@ -89,6 +96,8 @@ export class CheckoutState {
         }
       });
 
+    if (this.canReceiveInHands) this.setInHands(true);
+
     this.summary.paymentMethod.set(this.payment.controls.method.value);
     this.payment.controls.method.valueChanges.pipe(takeUntilDestroyed()).subscribe((method) => {
       this.summary.paymentMethod.set(method);
@@ -111,6 +120,37 @@ export class CheckoutState {
       // Sem CEP, sem frete: evita mostrar o valor do endereço anterior.
       this.shipping.cep.set('');
     }
+  }
+
+  /**
+   * Entrega em mãos liga/desliga. Ligada: o endereço de entrega sai da validação
+   * (grupo desabilitado), o frete vira "em mãos" e a nota fiscal usa o endereço
+   * principal da conta; sem endereço salvo, o cliente informa um só para a nota.
+   */
+  setInHands(on: boolean): void {
+    this.inHands.set(on);
+    const { name, address, sameAsDelivery } = this.billing.controls;
+    if (on) {
+      this.delivery.disable();
+      this.summary.shippingId.set('em-maos');
+      const saved = this.addressBook.defaultAddress() ?? null;
+      this.billingFromSaved.set(saved);
+      sameAsDelivery.setValue(false); // liga nome e endereço da nota
+      name.setValue(this.user?.name ?? '');
+      fillAddressForm(address, saved ?? undefined);
+      if (saved) {
+        name.disable();
+        address.disable();
+      }
+      return;
+    }
+    this.delivery.enable();
+    const { number, noNumber } = this.delivery.controls.address.controls;
+    if (noNumber.value) number.disable();
+    this.billingFromSaved.set(null);
+    sameAsDelivery.setValue(true);
+    const home = this.summary.shippingOptions().find((option) => option.id !== 'em-maos');
+    this.summary.shippingId.set(home?.id ?? null);
   }
 
   goTo(step: CheckoutStep): void {

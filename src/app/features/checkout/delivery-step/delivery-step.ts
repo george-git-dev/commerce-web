@@ -1,8 +1,9 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { RouterLink } from '@angular/router';
+import { LOCAL_DELIVERY } from '../../../core/config/store-config';
 import { AddressBook } from '../../../core/services/address-book';
 import { AuthService } from '../../../core/services/auth-service';
 import { CepLookup } from '../../../core/services/cep-lookup';
@@ -50,6 +51,14 @@ export class DeliveryStep {
   protected readonly shippingId = this.summary.shippingId;
   protected readonly shippingError = signal(false);
   protected readonly addressChoice = this.state.addressChoice;
+  protected readonly canReceiveInHands = this.state.canReceiveInHands;
+  protected readonly inHands = this.state.inHands;
+  protected readonly billingFromSaved = this.state.billingFromSaved;
+  protected readonly inHandsNote = LOCAL_DELIVERY.note;
+  /** Fretes para "Receber em casa" (a entrega em mãos é escolhida no topo). */
+  protected readonly homeOptions = computed(() =>
+    this.summary.shippingOptions().filter((option) => option.id !== 'em-maos'),
+  );
 
   constructor() {
     // CEP já veio do carrinho: preenche o endereço sem o cliente digitar de novo.
@@ -62,6 +71,10 @@ export class DeliveryStep {
 
   protected invalid(control: { invalid: boolean; touched: boolean; dirty: boolean }): boolean {
     return control.invalid && (control.touched || control.dirty);
+  }
+
+  protected setInHands(on: boolean): void {
+    this.state.setInHands(on);
   }
 
   protected chooseAddress(id: string | null): void {
@@ -90,7 +103,7 @@ export class DeliveryStep {
   /** Endereço novo com "Salvar na minha conta": vai para a conta e passa a ser o escolhido. */
   private saveNewAddress(): void {
     const { recipient, address, saveToAccount } = this.form.getRawValue();
-    if (this.addressChoice() !== null || !saveToAccount) return;
+    if (this.inHands() || this.addressChoice() !== null || !saveToAccount) return;
     const saved = this.addressBook.add({
       recipient: recipient.trim(),
       ...addressFromForm(address),

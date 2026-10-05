@@ -1,97 +1,131 @@
 <!-- Dois grupos (entrega e nota fiscal) no mesmo <form>: sem [formGroup] na raiz,
      o ngSubmit não existe — então o submit nativo é cancelado aqui. -->
 <form (submit)="$event.preventDefault(); next()" novalidate>
-  <section class="f-card" [formGroup]="form">
-    <h2>Endereço de entrega</h2>
-    @let saved = addressBook.addresses();
-    @if (saved.length) {
-      <div class="delivery__saved" role="radiogroup" aria-label="Endereços salvos">
-        @for (address of saved; track address.id) {
-          <label
-            class="delivery__option"
-            [class.delivery__option--on]="addressChoice() === address.id"
-          >
+  @if (canReceiveInHands) {
+    <section class="f-card">
+      <h2>Como você quer receber?</h2>
+      <div class="delivery__saved" role="radiogroup" aria-label="Como você quer receber">
+        <label class="delivery__option" [class.delivery__option--on]="inHands()">
+          <input
+            type="radio"
+            name="recebimento"
+            [checked]="inHands()"
+            (change)="setInHands(true)"
+          />
+          <span class="delivery__option-text">
+            <strong>Entrega em mãos</strong>
+            <small>{{ inHandsNote }}</small>
+          </span>
+        </label>
+        <label class="delivery__option" [class.delivery__option--on]="!inHands()">
+          <input
+            type="radio"
+            name="recebimento"
+            [checked]="!inHands()"
+            (change)="setInHands(false)"
+          />
+          <span class="delivery__option-text">
+            <strong>Receber em casa</strong>
+            <small>Enviamos para o seu endereço, com frete.</small>
+          </span>
+        </label>
+      </div>
+    </section>
+  }
+
+  @if (!inHands()) {
+    <section class="f-card" [formGroup]="form">
+      <h2>Endereço de entrega</h2>
+      @let saved = addressBook.addresses();
+      @if (saved.length) {
+        <div class="delivery__saved" role="radiogroup" aria-label="Endereços salvos">
+          @for (address of saved; track address.id) {
+            <label
+              class="delivery__option"
+              [class.delivery__option--on]="addressChoice() === address.id"
+            >
+              <input
+                type="radio"
+                name="endereco"
+                [checked]="addressChoice() === address.id"
+                (change)="chooseAddress(address.id)"
+              />
+              <span class="delivery__option-text">
+                <strong>
+                  {{ address.recipient }}
+                  @if (address.isDefault) {
+                    <small class="delivery__tag">Principal</small>
+                  }
+                </strong>
+                <small>
+                  {{ address.street }}, {{ address.number }}
+                  @if (address.complement) {
+                    — {{ address.complement }}
+                  }
+                </small>
+                <small>
+                  {{ address.district }} · {{ address.city }}/{{ address.state }} · CEP
+                  {{ address.cep }}
+                </small>
+              </span>
+            </label>
+          }
+          <label class="delivery__option" [class.delivery__option--on]="addressChoice() === null">
             <input
               type="radio"
               name="endereco"
-              [checked]="addressChoice() === address.id"
-              (change)="chooseAddress(address.id)"
+              [checked]="addressChoice() === null"
+              (change)="chooseAddress(null)"
             />
-            <span class="delivery__option-text">
-              <strong>
-                {{ address.recipient }}
-                @if (address.isDefault) {
-                  <small class="delivery__tag">Principal</small>
-                }
-              </strong>
-              <small>
-                {{ address.street }}, {{ address.number }}
-                @if (address.complement) {
-                  — {{ address.complement }}
-                }
-              </small>
-              <small>
-                {{ address.district }} · {{ address.city }}/{{ address.state }} · CEP
-                {{ address.cep }}
-              </small>
-            </span>
+            <span class="delivery__option-text"><strong>Novo endereço</strong></span>
+          </label>
+        </div>
+      }
+
+      @if (addressChoice() === null) {
+        <div class="f-grid delivery__recipient" [class.delivery__new]="saved.length">
+          <label class="f-field">
+            Nome de quem vai receber
+            <input
+              formControlName="recipient"
+              autocomplete="name"
+              [attr.aria-invalid]="invalid(form.controls.recipient) || null"
+            />
+            @if (invalid(form.controls.recipient)) {
+              <small class="f-error">Informe o nome completo.</small>
+            }
+          </label>
+        </div>
+        <app-address-fields
+          idPrefix="entrega"
+          [group]="form.controls.address"
+          (cepComplete)="onDeliveryCep($event)"
+        />
+        @if (!addressBook.isFull()) {
+          <label class="delivery__same">
+            <input type="checkbox" formControlName="saveToAccount" />
+            Salvar na minha conta
           </label>
         }
-        <label class="delivery__option" [class.delivery__option--on]="addressChoice() === null">
-          <input
-            type="radio"
-            name="endereco"
-            [checked]="addressChoice() === null"
-            (change)="chooseAddress(null)"
-          />
-          <span class="delivery__option-text"><strong>Novo endereço</strong></span>
-        </label>
-      </div>
-    }
-
-    @if (addressChoice() === null) {
-      <div class="f-grid delivery__recipient" [class.delivery__new]="saved.length">
-        <label class="f-field">
-          Nome de quem vai receber
-          <input
-            formControlName="recipient"
-            autocomplete="name"
-            [attr.aria-invalid]="invalid(form.controls.recipient) || null"
-          />
-          @if (invalid(form.controls.recipient)) {
-            <small class="f-error">Informe o nome completo.</small>
-          }
-        </label>
-      </div>
-      <app-address-fields
-        idPrefix="entrega"
-        [group]="form.controls.address"
-        (cepComplete)="onDeliveryCep($event)"
-      />
-      @if (!addressBook.isFull()) {
-        <label class="delivery__same">
-          <input type="checkbox" formControlName="saveToAccount" />
-          Salvar na minha conta
-        </label>
       }
-    }
-  </section>
+    </section>
 
-  <section class="f-card">
-    <h2>Forma de entrega</h2>
-    @if (summary.shippingOptions().length) {
-      <app-shipping-options
-        [options]="summary.shippingOptions()"
-        [(selected)]="shippingId"
-        [allFree]="summary.freeShippingByCoupon()"
-      />
-    } @else {
-      <p class="delivery__hint">Informe o CEP para ver as opções de entrega.</p>
-    }
-    @if (shippingError() && !summary.selectedShipping()) {
-      <p class="f-error" role="alert">Escolha uma forma de entrega.</p>
-    }
-  </section>
+    <section class="f-card">
+      <h2>Forma de entrega</h2>
+      @if (homeOptions().length) {
+        <app-shipping-options
+          [options]="homeOptions()"
+          [(selected)]="shippingId"
+          [allFree]="summary.freeShippingByCoupon()"
+        />
+      } @else {
+        <p class="delivery__hint">Informe o CEP para ver as opções de entrega.</p>
+      }
+      @if (shippingError() && !summary.selectedShipping()) {
+        <p class="f-error" role="alert">Escolha uma forma de entrega.</p>
+      }
+    </section>
+  }
 
   <section class="f-card" [formGroup]="billing">
     <h2>Dados para nota fiscal</h2>
@@ -111,26 +145,53 @@
       </label>
     </div>
 
-    <label class="delivery__same">
-      <input type="checkbox" formControlName="sameAsDelivery" />
-      Usar as mesmas informações da entrega
-    </label>
+    @if (inHands()) {
+      @if (billingFromSaved(); as saved) {
+        <p class="delivery__hint delivery__billing-note">
+          A nota sai no endereço principal da sua conta: {{ saved.street }}, {{ saved.number }} ·
+          {{ saved.city }}/{{ saved.state }}.
+        </p>
+      } @else {
+        <p class="delivery__hint delivery__billing-note">
+          Informe um endereço para a nota fiscal (não é usado para entrega).
+        </p>
+        <div class="f-grid delivery__billing">
+          <label class="f-field">
+            Nome ou razão social
+            <input
+              formControlName="name"
+              autocomplete="billing name"
+              [attr.aria-invalid]="invalid(billing.controls.name) || null"
+            />
+            @if (invalid(billing.controls.name)) {
+              <small class="f-error">Informe o nome ou a razão social.</small>
+            }
+          </label>
+        </div>
+        <app-address-fields idPrefix="cobranca" [group]="billing.controls.address" />
+      }
+    } @else {
+      <label class="delivery__same">
+        <input type="checkbox" formControlName="sameAsDelivery" />
+        Usar as mesmas informações da entrega
+      </label>
 
-    @if (!sameAsDelivery()) {
-      <div class="f-grid delivery__billing">
-        <label class="f-field">
-          Nome ou razão social
-          <input
-            formControlName="name"
-            autocomplete="billing name"
-            [attr.aria-invalid]="invalid(billing.controls.name) || null"
-          />
-          @if (invalid(billing.controls.name)) {
-            <small class="f-error">Informe o nome ou a razão social.</small>
-          }
-        </label>
-      </div>
-      <app-address-fields idPrefix="cobranca" [group]="billing.controls.address" />
+      @if (!sameAsDelivery()) {
+        <div class="f-grid delivery__billing">
+          <label class="f-field">
+            Nome ou razão social
+            <input
+              formControlName="name"
+              autocomplete="billing name"
+              [attr.aria-invalid]="invalid(billing.controls.name) || null"
+            />
+            @if (invalid(billing.controls.name)) {
+              <small class="f-error">Informe o nome ou a razão social.</small>
+            }
+          </label>
+        </div>
+        <app-address-fields idPrefix="cobranca" [group]="billing.controls.address" />
+      }
     }
   </section>
 

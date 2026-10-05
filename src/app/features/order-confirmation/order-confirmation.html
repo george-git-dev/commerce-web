@@ -45,21 +45,24 @@
         <div>
           <dt>Entrega</dt>
           <dd>
-            {{ item.shipping.label }} · {{ item.shipping.minDays }} a
-            {{ item.shipping.maxDays }} dias úteis após a aprovação
+            {{ item.shipping.label }}
+            @if (item.shipping.maxDays) {
+              · {{ item.shipping.minDays }} a {{ item.shipping.maxDays }} dias úteis após a
+              aprovação
+            }
             @if (item.shipping.note) {
               <br />{{ item.shipping.note }}
             }
           </dd>
         </div>
-        <div>
-          <dt>Endereço</dt>
-          <dd>
-            {{ item.address.street }}, {{ item.address.number }} — {{ item.address.city }}/{{
-              item.address.state
-            }}
-          </dd>
-        </div>
+        @if (item.address; as address) {
+          <div>
+            <dt>Endereço</dt>
+            <dd>
+              {{ address.street }}, {{ address.number }} — {{ address.city }}/{{ address.state }}
+            </dd>
+          </div>
+        }
       </dl>
 
       <p class="done__mail">Enviamos os detalhes do pedido para o seu e-mail.</p>

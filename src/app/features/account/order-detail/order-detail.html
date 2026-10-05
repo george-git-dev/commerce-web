@@ -74,21 +74,28 @@
 
       <section class="od__card">
         <h2>Entrega</h2>
-        <p>
-          <strong>{{ item.address.recipient }}</strong
-          ><br />
-          {{ item.address.street }}, {{ item.address.number }}
-          @if (item.address.complement) {
-            — {{ item.address.complement }}
-          }
-          <br />
-          {{ item.address.district }} · {{ item.address.city }}/{{ item.address.state }} · CEP
-          {{ item.address.cep }}
-        </p>
-        <p class="od__muted">
-          {{ item.shipping.label }} · {{ item.shipping.minDays }} a {{ item.shipping.maxDays }} dias
-          úteis após a aprovação
-        </p>
+        @if (item.address; as address) {
+          <p>
+            <strong>{{ address.recipient }}</strong
+            ><br />
+            {{ address.street }}, {{ address.number }}
+            @if (address.complement) {
+              — {{ address.complement }}
+            }
+            <br />
+            {{ address.district }} · {{ address.city }}/{{ address.state }} · CEP
+            {{ address.cep }}
+          </p>
+          <p class="od__muted">
+            {{ item.shipping.label }} · {{ item.shipping.minDays }} a
+            {{ item.shipping.maxDays }} dias úteis após a aprovação
+          </p>
+        } @else {
+          <p>
+            <strong>{{ item.shipping.label }}</strong>
+          </p>
+          <p class="od__muted">Você recebe com a gente, sem frete.</p>
+        }
         @if (
           item.shipping.id === 'em-maos' &&
           item.status !== 'entregue' &&
@@ -97,8 +104,8 @@
           <p class="od__in-hands">
             <mat-icon aria-hidden="true">handshake</mat-icon>
             <span>
-              Vamos te chamar no WhatsApp para combinar o horário da entrega. Se preferir, fale com
-              a gente:
+              Vamos te chamar no WhatsApp para combinar o local e o horário da entrega. Se preferir,
+              fale com a gente:
               <a [href]="store.whatsappHref" target="_blank" rel="noopener">{{ store.whatsapp }}</a>
             </span>
           </p>

@@ -48,8 +48,8 @@ export class OrderDetail {
     const inHands = this.order()?.shipping.id === 'em-maos';
     return ORDER_TIMELINE.map((step, index) => ({
       ...step,
-      // Entrega em mãos não tem transportadora: "Enviado" vira "Saiu para entrega".
-      label: inHands && step.status === 'enviado' ? 'Saiu para entrega' : step.label,
+      // Entrega em mãos não tem transportadora: "Enviado" vira "Pronto para entrega".
+      label: inHands && step.status === 'enviado' ? 'Pronto para entrega' : step.label,
       done: index <= current,
     }));
   });

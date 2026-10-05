@@ -3,16 +3,23 @@
     <h2>Entrega</h2>
     <button type="button" class="rev__edit" (click)="state.goTo(1)">Alterar</button>
   </header>
-  <p class="rev__text">
-    <strong class="rev__name">{{ recipient }}</strong>
-    {{ address.street }}, {{ address.number }}
-    @if (address.complement) {
-      — {{ address.complement }}
-    }
-    <br />
-    {{ address.district }} · {{ address.city }}/{{ address.state.toUpperCase() }} · CEP
-    {{ address.cep }}
-  </p>
+  @if (inHands) {
+    <p class="rev__text">
+      <strong class="rev__name">Entrega em mãos</strong>
+      {{ inHandsNote }}
+    </p>
+  } @else {
+    <p class="rev__text">
+      <strong class="rev__name">{{ recipient }}</strong>
+      {{ address.street }}, {{ address.number }}
+      @if (address.complement) {
+        — {{ address.complement }}
+      }
+      <br />
+      {{ address.district }} · {{ address.city }}/{{ address.state.toUpperCase() }} · CEP
+      {{ address.cep }}
+    </p>
+  }
   <p class="rev__text rev__muted">
     Nota fiscal:
     {{
@@ -22,10 +29,12 @@
     }}
   </p>
   @if (summary.selectedShipping(); as option) {
-    <p class="rev__text rev__muted">
-      {{ option.label }} · {{ option.minDays }} a {{ option.maxDays }} dias úteis ·
-      {{ summary.shippingPrice() ? (summary.shippingPrice() | currency: 'BRL') : 'Grátis' }}
-    </p>
+    @if (option.maxDays) {
+      <p class="rev__text rev__muted">
+        {{ option.label }} · {{ option.minDays }} a {{ option.maxDays }} dias úteis ·
+        {{ summary.shippingPrice() ? (summary.shippingPrice() | currency: 'BRL') : 'Grátis' }}
+      </p>
+    }
   }
 </section>
 

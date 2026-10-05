@@ -78,7 +78,8 @@ export interface Order {
   /** Código de rastreio, quando já foi enviado. */
   trackingCode?: string;
   items: readonly OrderItem[];
-  address: DeliveryAddress;
+  /** `null` = entrega em mãos (combinada com a loja, sem endereço). */
+  address: DeliveryAddress | null;
   billing: BillingInfo;
   shipping: ShippingOption;
   payment: {

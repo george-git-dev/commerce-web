@@ -2,7 +2,7 @@
 export interface ShippingOption {
   id: 'economico' | 'expresso' | 'em-maos';
   label: string;
-  /** Prazo em dias úteis após a aprovação do pagamento. */
+  /** Prazo em dias úteis após a aprovação do pagamento (0 = combinado, sem prazo). */
   minDays: number;
   maxDays: number;
   /** 0 = grátis. */

@@ -2,6 +2,7 @@ import { CurrencyPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { Router, RouterLink } from '@angular/router';
+import { LOCAL_DELIVERY } from '../../../core/config/store-config';
 import { PAYMENT_METHOD_LABELS } from '../../../core/models/order';
 import { CartStore } from '../../../core/services/cart-store';
 import { CouponService } from '../../../core/services/coupon-service';
@@ -32,6 +33,8 @@ export class ReviewStep {
   protected readonly recipient = this.delivery.recipient;
   protected readonly address = this.delivery.address;
   protected readonly billing = this.state.billing.getRawValue();
+  protected readonly inHands = this.state.inHands();
+  protected readonly inHandsNote = LOCAL_DELIVERY.note;
   protected readonly payment = this.state.payment.getRawValue();
   protected readonly methodLabel = PAYMENT_METHOD_LABELS[this.payment.method];
   protected readonly cardLast4 = onlyDigits(this.payment.cardNumber).slice(-4);
@@ -57,7 +60,10 @@ export class ReviewStep {
         quantity: line.quantity,
         unitPrice: effectivePrice(line.variant),
       })),
-      address: { recipient: this.recipient, ...addressFromForm(this.address) },
+      // Entrega em mãos: sem endereço de entrega (combinado pelo WhatsApp).
+      address: this.inHands
+        ? null
+        : { recipient: this.recipient, ...addressFromForm(this.address) },
       billing: {
         document: this.billing.document,
         name: this.billing.sameAsDelivery ? this.recipient : this.billing.name,

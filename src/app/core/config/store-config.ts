@@ -64,16 +64,15 @@ export const STORE_CONFIG: StoreConfig = {
 };
 
 /**
- * Entrega em mãos (feita pela loja, sem transportadora, grátis). NÃO é aberta:
- * só aparece para a conta que o admin liberou no backoffice, e a liberação vale
- * para UM pedido (o back volta a flag para falso ao criar o pedido). O pagamento
- * continua online, como nos outros fretes.
+ * Entrega em mãos: o cliente recebe o perfume com a própria loja, em local e
+ * horário combinados pelo WhatsApp (sem endereço, sem frete). NÃO é aberta: só
+ * aparece para a conta que o admin liberou no backoffice, e a liberação vale para
+ * UM pedido (o back volta a flag para falso ao criar o pedido). O pagamento
+ * continua online.
  */
 export const LOCAL_DELIVERY = {
   label: 'Entrega em mãos',
-  minDays: 1,
-  maxDays: 2,
-  note: 'Combinamos o horário pelo WhatsApp.',
+  note: 'Sem frete. Combinamos local e horário pelo WhatsApp.',
 } as const;
 
 /** "R$ 599" — valor do frete grátis para textos (faixa, destaques, ajuda). */

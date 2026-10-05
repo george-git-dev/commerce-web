@@ -45,6 +45,7 @@ export function sampleOrders(name: string, find: (slug: string) => Product | und
     shipping: Order['shipping'],
     trackingCode?: string,
   ): Order => {
+    const inHands = shipping.id === 'em-maos';
     const shippingPrice = shipping.price;
     const subtotal = items.reduce((sum, line) => sum + line.unitPrice * line.quantity, 0);
     return {
@@ -53,7 +54,7 @@ export function sampleOrders(name: string, find: (slug: string) => Product | und
       status,
       trackingCode,
       items,
-      address: { recipient: name, ...address },
+      address: inHands ? null : { recipient: name, ...address },
       billing: { document: '', name, address },
       shipping,
       payment,
@@ -72,11 +73,11 @@ export function sampleOrders(name: string, find: (slug: string) => Product | und
     maxDays: 5,
     price,
   });
-  const inHands: Order['shipping'] = {
+  const inHandsShipping: Order['shipping'] = {
     id: 'em-maos',
     label: LOCAL_DELIVERY.label,
-    minDays: LOCAL_DELIVERY.minDays,
-    maxDays: LOCAL_DELIVERY.maxDays,
+    minDays: 0,
+    maxDays: 0,
     price: 0,
     note: LOCAL_DELIVERY.note,
   };
@@ -88,7 +89,7 @@ export function sampleOrders(name: string, find: (slug: string) => Product | und
       'aguardando-pagamento',
       { method: 'pix' },
       [item('NP100258', 1, 'maison-alhambra-delilah')],
-      inHands,
+      inHandsShipping,
     ),
     build(
       'NP100245',

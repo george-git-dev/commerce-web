@@ -57,10 +57,23 @@ export class ShippingService {
    * `inHands`: conta liberada pelo admin para entrega em mãos (só ela vê a opção).
    */
   quote(cep: string, subtotal: number, inHands = false): readonly ShippingOption[] {
-    if (!isValidCep(cep)) return [];
+    // Entrega em mãos não depende de CEP: vem primeiro e já fica escolhida.
+    const options: ShippingOption[] = inHands
+      ? [
+          {
+            id: 'em-maos',
+            label: LOCAL_DELIVERY.label,
+            minDays: 0,
+            maxDays: 0,
+            price: 0,
+            note: LOCAL_DELIVERY.note,
+          },
+        ]
+      : [];
+    if (!isValidCep(cep)) return options;
     const [eco, ecoMin, ecoMax, exp, expMin, expMax] = REGION_TABLE[cep[0]];
     const free = subtotal >= STORE_CONFIG.freeShippingMin;
-    const options: ShippingOption[] = [
+    options.push(
       {
         id: 'economico',
         label: 'Econômico',
@@ -69,17 +82,7 @@ export class ShippingService {
         price: free ? 0 : eco,
       },
       { id: 'expresso', label: 'Expresso', minDays: expMin, maxDays: expMax, price: exp },
-    ];
-    if (inHands) {
-      options.push({
-        id: 'em-maos',
-        label: LOCAL_DELIVERY.label,
-        minDays: LOCAL_DELIVERY.minDays,
-        maxDays: LOCAL_DELIVERY.maxDays,
-        price: 0,
-        note: LOCAL_DELIVERY.note,
-      });
-    }
+    );
     return options;
   }
 }

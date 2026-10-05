@@ -10,7 +10,9 @@
       />
       <span class="opts__text">
         <strong>{{ option.label }}</strong>
-        <small>{{ option.minDays }} a {{ option.maxDays }} dias úteis</small>
+        @if (option.maxDays) {
+          <small>{{ option.minDays }} a {{ option.maxDays }} dias úteis</small>
+        }
         @if (option.note) {
           <small class="opts__note">{{ option.note }}</small>
         }
