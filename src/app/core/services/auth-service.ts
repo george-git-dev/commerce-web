@@ -1,9 +1,12 @@
 import { computed, Injectable, signal } from '@angular/core';
-import { AuthResult, AuthUser } from '../models/auth';
+import { ActionResult, AuthResult, AuthUser } from '../models/auth';
 import { isValidCpf, isValidPhone } from '../utils/br-format';
 
 const STORAGE_KEY = 'nani.auth.mock';
 export const MIN_PASSWORD_LENGTH = 8;
+/** Validade do link de redefinição de senha. */
+export const RESET_LINK_MINUTES = 30;
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 /** Lê a sessão salva; navegador sem storage (aba anônima, SSR) = deslogado. */
 function readStoredUser(): AuthUser | null {
@@ -46,6 +49,8 @@ function nameFromEmail(email: string): string {
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly state = signal<AuthUser | null>(readStoredUser());
+  /** Links de redefinição de senha ainda válidos (só no mock; no back ficam no banco). */
+  private readonly resetLinks = new Map<string, { email: string; expiresAt: number }>();
 
   readonly user = this.state.asReadonly();
   readonly isLoggedIn = computed(() => this.state() !== null);
@@ -110,6 +115,50 @@ export class AuthService {
   }
 
   /**
+   * "Esqueci minha senha" SIMULADO. Cria um link de uso único que vale
+   * ${RESET_LINK_MINUTES} minutos e devolve o token só para a tela de
+   * demonstração (aqui não há e-mail). A tela mostra a MESMA mensagem exista ou
+   * não a conta, para não revelar quem é cliente. Fase 2 (B4):
+   * `POST /auth/password-reset` → o back guarda só o hash do token, envia o link
+   * por e-mail e limita pedidos por IP/e-mail; a resposta não traz o token.
+   */
+  requestPasswordReset(email: string): string | null {
+    const normalized = email.trim().toLowerCase();
+    if (!EMAIL_PATTERN.test(normalized)) return null;
+    const token = globalThis.crypto.randomUUID();
+    this.resetLinks.set(token, {
+      email: normalized,
+      expiresAt: Date.now() + RESET_LINK_MINUTES * 60_000,
+    });
+    return token;
+  }
+
+  /** O link ainda serve? (A tela de nova senha confere antes de mostrar o formulário.) */
+  isResetLinkValid(token: string | null): boolean {
+    const link = token ? this.resetLinks.get(token) : undefined;
+    return !!link && link.expiresAt > Date.now();
+  }
+
+  /**
+   * Define a nova senha pelo link. Não entra na conta: o cliente faz login com a
+   * senha nova. Fase 2: `POST /auth/password-reset/confirm` — o back invalida o
+   * token e encerra as sessões abertas.
+   */
+  resetPassword(token: string | null, password: string): ActionResult {
+    if (!token || !this.isResetLinkValid(token)) {
+      return { ok: false, message: 'Este link expirou ou já foi usado. Peça um novo.' };
+    }
+    if (password.length < MIN_PASSWORD_LENGTH) {
+      return {
+        ok: false,
+        message: `A senha precisa ter pelo menos ${MIN_PASSWORD_LENGTH} caracteres.`,
+      };
+    }
+    this.resetLinks.delete(token);
+    return { ok: true };
+  }
+
+  /**
    * "Continuar com Google" SIMULADO: entra com uma conta Google fictícia.
    * Fase 2: Google Identity Services no front (o próprio Google desenha o botão
    * e devolve um ID token) → `POST /auth/google` → o back valida o token com o
@@ -133,7 +182,7 @@ export class AuthService {
   }
 
   private credentialsProblem(email: string, password: string): string | null {
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) return 'Informe um e-mail válido.';
+    if (!EMAIL_PATTERN.test(email.trim())) return 'Informe um e-mail válido.';
     if (password.length < MIN_PASSWORD_LENGTH) {
       return `A senha precisa ter pelo menos ${MIN_PASSWORD_LENGTH} caracteres.`;
     }

@@ -1,5 +1,5 @@
 @if (page(); as item) {
-  <article class="help ui-section">
+  <article class="help ui-section ui-section--page">
     <div class="ui-container help__inner">
       <nav class="help__crumb" aria-label="Trilha de navegação">
         <a routerLink="/">Início</a>
@@ -59,7 +59,7 @@
     </div>
   </article>
 } @else {
-  <section class="ui-section">
+  <section class="ui-section ui-section--page">
     <div class="ui-container help__inner">
       <h1>Página não encontrada</h1>
       <p>Esse conteúdo não existe ou mudou de endereço.</p>

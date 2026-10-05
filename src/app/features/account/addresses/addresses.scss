@@ -2,10 +2,6 @@
 
 @include form.styles;
 
-.addresses.ui-section {
-  padding-block: 16px 40px;
-}
-
 .addresses__inner {
   max-width: 760px;
 }
@@ -114,10 +110,6 @@
 }
 
 @media (min-width: 900px) {
-  .addresses.ui-section {
-    padding-block: 24px 72px;
-  }
-
   .f-card {
     padding: 24px;
   }

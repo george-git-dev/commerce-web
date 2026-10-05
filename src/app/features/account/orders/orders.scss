@@ -1,7 +1,3 @@
-.orders.ui-section {
-  padding-block: 16px 40px;
-}
-
 .orders__inner {
   max-width: 760px;
 }
@@ -90,11 +86,5 @@
 
   strong {
     color: var(--foreground);
-  }
-}
-
-@media (min-width: 900px) {
-  .orders.ui-section {
-    padding-block: 24px 72px;
   }
 }

@@ -1,7 +1,3 @@
-.co.ui-section {
-  padding-block: 16px 40px;
-}
-
 .co__title {
   font-size: clamp(1.75rem, 1.3rem + 2vw, 2.25rem);
 }
@@ -63,10 +59,6 @@
 }
 
 @media (min-width: 900px) {
-  .co.ui-section {
-    padding-block: 24px 72px;
-  }
-
   .co__layout {
     grid-template-columns: minmax(0, 1fr) 360px;
     grid-template-areas: 'main summary';

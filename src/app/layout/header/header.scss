@@ -10,54 +10,6 @@ $header-h-mobile: 120px;
   isolation: isolate;
 }
 
-// Faixa superior clara, com as mensagens rolando de ponta a ponta.
-.announce {
-  background: var(--muted);
-  color: var(--earth);
-  font-size: 0.75rem;
-
-  // Área visível das mensagens: largura total da tela.
-  &__viewport {
-    display: flex;
-    align-items: center;
-    height: 28px;
-    overflow: hidden;
-    mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
-  }
-
-  // As duas cópias lado a lado; anda uma cópia e recomeça, sem emenda.
-  &__track {
-    display: flex;
-    width: max-content;
-    animation: announce-scroll 80s linear infinite;
-  }
-
-  &__viewport:hover &__track {
-    animation-play-state: paused;
-  }
-
-  &__list {
-    display: flex;
-    align-items: center;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-
-    li {
-      white-space: nowrap;
-
-      // Estrela da logo como separador (inclusive entre o fim de uma cópia e o começo da outra).
-      &::after {
-        content: '✦';
-        margin-inline: 22px;
-        color: var(--gold);
-        font-size: 0.625rem;
-        vertical-align: middle;
-      }
-    }
-  }
-}
-
 // Bug histórico corrigido aqui: `&__inner`/`&__actions` aninhados dentro deste
 // bloco compilavam para `.bar.mat-toolbar__inner` (classes "bar" E
 // "mat-toolbar__inner" no MESMO elemento) — um seletor composto que nunca
@@ -189,7 +141,6 @@ $header-h-mobile: 120px;
   z-index: 1;
   display: flex;
   flex-direction: column;
-  gap: 0px;
   padding: calc(#{$header-h-mobile} + 12px) 24px calc(env(safe-area-inset-bottom, 0px) + 24px);
   height: 100dvh;
   background: var(--card);
@@ -279,10 +230,6 @@ $header-h-mobile: 120px;
     display: none;
   }
 
-  .brand small {
-    display: block;
-  }
-
   .bar__inner {
     // Volta a ser flex: com o menu de texto de volta, as 3 zonas do grid mobile
     // (hambúrguer / logo centralizada / ícones) não fazem mais sentido — aqui é
@@ -296,12 +243,8 @@ $header-h-mobile: 120px;
     margin-left: auto;
   }
 
-  .brand {
-    justify-self: initial;
-
-    &__logo {
-      height: 85px;
-    }
+  .brand__logo {
+    height: 85px;
   }
 
   .search-panel__form {
@@ -309,34 +252,7 @@ $header-h-mobile: 120px;
   }
 }
 
-@media (min-width: 640px) {
-  .announce {
-    font-size: 0.8125rem;
-
-    &__viewport {
-      height: 32px;
-    }
-  }
-}
-
 // Botão de som ambiente: dourado quando ligado.
 .bar__sound--on mat-icon {
   color: var(--gold);
-}
-
-@keyframes announce-scroll {
-  to {
-    transform: translateX(-50%);
-  }
-}
-
-// Quem pediu "reduzir movimento": mensagens paradas, só a primeira cópia.
-@media (prefers-reduced-motion: reduce) {
-  .announce__track {
-    animation: none;
-  }
-
-  .announce__list[aria-hidden] {
-    display: none;
-  }
 }

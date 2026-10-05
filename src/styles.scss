@@ -171,6 +171,11 @@ textarea {
   padding-block: 40px;
 }
 
+// Páginas internas (conta, checkout, ajuda…): pouco respiro no topo.
+.ui-section--page {
+  padding-block: 16px 40px;
+}
+
 .ui-section-head {
   text-align: center;
   margin-bottom: clamp(24px, 5vw, 52px);
@@ -254,5 +259,9 @@ textarea {
 @media (min-width: 900px) {
   .ui-section {
     padding-block: clamp(48px, 6vw, 96px);
+  }
+
+  .ui-section--page {
+    padding-block: 24px 72px;
   }
 }

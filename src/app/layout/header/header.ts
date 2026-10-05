@@ -5,15 +5,22 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { Router, RouterLink } from '@angular/router';
 import { CATALOG_QUERY_PARAMS, NAV_LINKS } from '../../core/config/navigation';
-import { ANNOUNCEMENTS } from '../../core/config/store-config';
 import { AuthService } from '../../core/services/auth-service';
 import { CartStore } from '../../core/services/cart-store';
 import { FavoritesStore } from '../../core/services/favorites-store';
 import { AmbientSoundService } from '../../core/services/ambient-sound-service';
+import { AnnounceBar } from '../announce-bar/announce-bar';
 
 @Component({
   selector: 'app-header',
-  imports: [MatBadgeModule, MatButtonModule, MatIconModule, MatToolbarModule, RouterLink],
+  imports: [
+    MatBadgeModule,
+    MatButtonModule,
+    MatIconModule,
+    MatToolbarModule,
+    RouterLink,
+    AnnounceBar,
+  ],
   templateUrl: './header.html',
   styleUrl: './header.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -21,7 +28,6 @@ import { AmbientSoundService } from '../../core/services/ambient-sound-service';
 export class Header {
   // A lista é repetida para que cada "cópia" da faixa fique mais larga que qualquer tela
   // (inclusive monitores ultrawide); senão sobra espaço vazio à direita durante o loop.
-  protected readonly announcements = Array.from({ length: 4 }, () => ANNOUNCEMENTS).flat();
   protected readonly navLinks = NAV_LINKS;
   protected readonly auth = inject(AuthService);
   protected readonly cart = inject(CartStore);

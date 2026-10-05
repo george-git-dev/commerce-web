@@ -2,10 +2,6 @@
 
 @include form.styles;
 
-.profile.ui-section {
-  padding-block: 16px 40px;
-}
-
 .profile__inner {
   max-width: 760px;
 
@@ -78,10 +74,6 @@ input[readonly] {
 }
 
 @media (min-width: 900px) {
-  .profile.ui-section {
-    padding-block: 24px 72px;
-  }
-
   .f-card {
     padding: 24px;
   }

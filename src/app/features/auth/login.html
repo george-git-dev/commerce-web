@@ -124,6 +124,10 @@
           }
         </label>
 
+        @if (mode() === 'entrar') {
+          <a class="auth__forgot" routerLink="/esqueci-senha">Esqueci minha senha</a>
+        }
+
         @if (error()) {
           <p class="auth__error auth__error--form" role="alert">{{ error() }}</p>
         }

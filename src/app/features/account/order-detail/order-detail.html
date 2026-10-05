@@ -1,5 +1,5 @@
 @if (order(); as item) {
-  <section class="od ui-section">
+  <section class="od ui-section ui-section--page">
     <div class="ui-container od__inner">
       <nav class="od__crumb" aria-label="Trilha de navegação">
         <a routerLink="/minha-conta/pedidos">Meus pedidos</a>
@@ -130,7 +130,7 @@
     </div>
   </section>
 } @else {
-  <section class="ui-section">
+  <section class="ui-section ui-section--page">
     <div class="ui-container od__inner">
       <h1>Pedido não encontrado</h1>
       <p>Confira a lista dos seus pedidos.</p>

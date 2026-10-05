@@ -1,8 +1,4 @@
 // Leitura confortável no celular: coluna única e linha curta também no desktop.
-.help.ui-section {
-  padding-block: 16px 40px;
-}
-
 .help__inner {
   max-width: 760px;
 }
@@ -106,10 +102,4 @@
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
-}
-
-@media (min-width: 900px) {
-  .help.ui-section {
-    padding-block: 24px 72px;
-  }
 }

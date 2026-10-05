@@ -1,0 +1,122 @@
+// Cartão das telas de conta (login, esqueci a senha, nova senha).
+// Uso: `@use './auth'; @include auth.styles;`
+@mixin styles {
+  :host {
+    display: block;
+  }
+
+  .auth {
+    background: var(--muted);
+    min-height: calc(100dvh - 400px);
+
+    &__container {
+      display: flex;
+      justify-content: center;
+    }
+
+    &__card {
+      width: 100%;
+      max-width: 440px;
+      padding: 32px 24px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--card);
+
+      h1 {
+        font-size: 1.75rem;
+      }
+    }
+
+    &__subtitle {
+      margin: 8px 0 28px;
+      color: var(--muted-foreground);
+    }
+
+    &__form {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+
+      label {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        font-size: 0.8125rem;
+        color: var(--muted-foreground);
+      }
+
+      input {
+        height: 48px;
+        padding-inline: 14px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        background: var(--background);
+        color: var(--foreground);
+
+        &:focus {
+          outline: 2px solid var(--gold);
+          outline-offset: 1px;
+        }
+      }
+    }
+
+    &__password {
+      position: relative;
+      display: flex;
+
+      input {
+        flex: 1;
+        padding-right: 48px;
+      }
+    }
+
+    &__eye {
+      position: absolute;
+      inset: 0 0 0 auto;
+      width: 48px;
+      border: 0;
+      background: none;
+      color: var(--muted-foreground);
+      cursor: pointer;
+    }
+
+    &__hint {
+      font-size: 0.75rem;
+    }
+
+    &__error {
+      color: var(--wine);
+      font-size: 0.75rem;
+
+      &--form {
+        margin: 0;
+        font-size: 0.875rem;
+      }
+    }
+
+    &__form input[aria-invalid='true'] {
+      border-color: var(--wine);
+    }
+
+    &__notice {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0 0 16px;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      background: var(--muted);
+      font-size: 0.8125rem;
+
+      mat-icon {
+        flex-shrink: 0;
+        color: var(--gold);
+      }
+    }
+
+    &__submit {
+      width: 100%;
+      margin-top: 6px;
+    }
+  }
+}

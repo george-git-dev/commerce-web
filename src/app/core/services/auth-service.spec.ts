@@ -53,6 +53,26 @@ describe('AuthService (simulado)', () => {
     expect(service.updateProfile('Maria', '(11) 1234').ok).toBe(false);
   });
 
+  it('link de redefinição de senha: uso único e com validade', () => {
+    expect(service.requestPasswordReset('não-é-email')).toBeNull();
+    const token = service.requestPasswordReset('Maria@Email.com')!;
+    expect(service.isResetLinkValid(token)).toBe(true);
+    expect(service.resetPassword(token, 'curta').ok).toBe(false);
+    expect(service.resetPassword(token, 'novasenha1').ok).toBe(true);
+    expect(service.isResetLinkValid(token)).toBe(false);
+    expect(service.resetPassword(token, 'novasenha1').ok).toBe(false);
+    expect(service.resetPassword('inventado', 'novasenha1').ok).toBe(false);
+    expect(service.user()).toBeNull();
+  });
+
+  it('link de redefinição expira', () => {
+    vi.useFakeTimers();
+    const token = service.requestPasswordReset('maria@email.com')!;
+    vi.advanceTimersByTime(31 * 60_000);
+    expect(service.isResetLinkValid(token)).toBe(false);
+    vi.useRealTimers();
+  });
+
   it('troca de senha valida tamanho e exige senha diferente', () => {
     service.login('maria@email.com', '12345678');
     expect(service.changePassword('123', 'novasenha1').ok).toBe(false);

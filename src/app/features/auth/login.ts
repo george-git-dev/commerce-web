@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/cor
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { RETURN_URL_PARAM, safeReturnUrl } from '../../core/guards/auth-guard';
 import { LOGIN_REASON_PARAM } from '../../core/services/favorite-action';
 import { cpfValidator } from '../../core/utils/br-validators';
@@ -18,7 +18,7 @@ type AuthMode = 'entrar' | 'cadastro';
  */
 @Component({
   selector: 'app-login',
-  imports: [BrandIcon, InputMask, MatButtonModule, MatIconModule, ReactiveFormsModule],
+  imports: [BrandIcon, InputMask, MatButtonModule, MatIconModule, ReactiveFormsModule, RouterLink],
   templateUrl: './login.html',
   styleUrl: './login.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

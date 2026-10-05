@@ -36,6 +36,16 @@ export const routes: Routes = [
     loadComponent: () => import('./features/auth/login').then((m) => m.Login),
   },
   {
+    path: 'esqueci-senha',
+    title: 'Nani Perfumes | Esqueci minha senha',
+    loadComponent: () => import('./features/auth/forgot-password').then((m) => m.ForgotPassword),
+  },
+  {
+    path: 'redefinir-senha',
+    title: 'Nani Perfumes | Nova senha',
+    loadComponent: () => import('./features/auth/reset-password').then((m) => m.ResetPassword),
+  },
+  {
     path: 'minha-conta/dados',
     title: 'Nani Perfumes | Dados pessoais',
     canActivate: [authGuard],
