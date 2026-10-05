@@ -22,11 +22,16 @@
   }
   <p class="rev__text rev__muted">
     Nota fiscal:
-    {{
-      billing.sameAsDelivery
-        ? 'mesmos dados da entrega'
-        : billing.name + ' · ' + billing.address.city
-    }}
+    @if (billingAddress; as nf) {
+      {{ billing.name }} · {{ billingDocument }}<br />
+      {{ nf.street }}, {{ nf.number }}
+      @if (nf.complement) {
+        — {{ nf.complement }}
+      }
+      — {{ nf.city }}/{{ nf.state }}
+    } @else {
+      {{ recipient }} · {{ billingDocument }} · mesmo endereço da entrega
+    }
   </p>
   @if (summary.selectedShipping(); as option) {
     @if (option.maxDays) {

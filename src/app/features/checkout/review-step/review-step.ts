@@ -8,7 +8,7 @@ import { CartStore } from '../../../core/services/cart-store';
 import { CouponService } from '../../../core/services/coupon-service';
 import { OrderService } from '../../../core/services/order-service';
 import { OrderSummary } from '../../../core/services/order-summary';
-import { cardBrand, onlyDigits } from '../../../core/utils/br-format';
+import { cardBrand, maskDocument, onlyDigits } from '../../../core/utils/br-format';
 import { effectivePrice, variantLabel } from '../../../core/utils/product-pricing';
 import { addressFromForm } from '../../../shared/address-fields/address-form';
 import { CheckoutState } from '../checkout-state';
@@ -34,6 +34,11 @@ export class ReviewStep {
   protected readonly address = this.delivery.address;
   protected readonly billing = this.state.billing.getRawValue();
   protected readonly inHands = this.state.inHands();
+  /** Nota fiscal: CPF mascarado e, quando difere da entrega, o endereço da nota. */
+  protected readonly billingDocument = maskDocument(this.billing.document);
+  protected readonly billingAddress = this.billing.sameAsDelivery
+    ? null
+    : addressFromForm(this.billing.address);
   protected readonly inHandsNote = LOCAL_DELIVERY.note;
   protected readonly payment = this.state.payment.getRawValue();
   protected readonly methodLabel = PAYMENT_METHOD_LABELS[this.payment.method];

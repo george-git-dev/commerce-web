@@ -11,6 +11,7 @@ import {
   isValidExpiry,
   isValidPhone,
   maskCpf,
+  maskDocument,
 } from './br-format';
 
 describe('br-format', () => {
@@ -66,5 +67,7 @@ describe('telefone e CPF mascarado', () => {
   it('mascara o CPF para exibir', () => {
     expect(maskCpf('529.982.247-25')).toBe('***.982.247-**');
     expect(maskCpf('')).toBe('');
+    expect(maskDocument('52998224725')).toBe('***.982.247-**');
+    expect(maskDocument('11222333000181')).toBe('11.222.333/0001-81');
   });
 });

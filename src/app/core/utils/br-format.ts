@@ -126,3 +126,8 @@ export function maskCpf(value: string): string {
   const d = onlyDigits(value, 11);
   return d.length === 11 ? `***.${d.slice(3, 6)}.${d.slice(6, 9)}-**` : '';
 }
+
+/** Documento para exibir: CPF mascarado; CNPJ (dado público da empresa) completo. */
+export function maskDocument(value: string): string {
+  return onlyDigits(value).length === 11 ? maskCpf(value) : formatDocument(value);
+}
