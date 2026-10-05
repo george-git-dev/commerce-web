@@ -159,6 +159,28 @@
   }
 }
 
+.od__in-hands {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 12px !important;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--muted);
+  font-size: 0.8125rem !important;
+
+  mat-icon {
+    flex-shrink: 0;
+    color: var(--gold);
+  }
+
+  a {
+    color: var(--earth);
+    font-weight: 600;
+    text-decoration: underline;
+  }
+}
+
 .od__totals {
   display: grid;
   gap: 6px;

@@ -1,4 +1,5 @@
 import { BODY_CARE_CATEGORIES } from '../config/product-categories';
+import { FREE_SHIPPING_LABEL, STORE_CONFIG } from '../config/store-config';
 import { Category } from '../models/category';
 import { Highlight } from '../models/highlight';
 
@@ -11,7 +12,7 @@ export const HIGHLIGHTS_MOCK: readonly Highlight[] = [
   {
     icon: 'local_shipping',
     title: 'Frete grátis',
-    text: 'Acima de R$ 599, para todo o Brasil',
+    text: `Acima de ${FREE_SHIPPING_LABEL}, para todo o Brasil`,
   },
   {
     icon: 'lock',
@@ -26,7 +27,7 @@ export const HIGHLIGHTS_MOCK: readonly Highlight[] = [
   {
     icon: 'payments',
     title: 'Pagamento facilitado',
-    text: 'Parcele em até 12x sem juros',
+    text: `Parcele em até ${STORE_CONFIG.maxInstallments}x sem juros`,
   },
 ];
 

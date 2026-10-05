@@ -1,4 +1,5 @@
 import { computed, Injectable, signal } from '@angular/core';
+import { IN_HANDS_MOCK_EMAILS } from '../data/customers-mock';
 import { ActionResult, AuthResult, AuthUser } from '../models/auth';
 import { isValidCpf, isValidPhone } from '../utils/br-format';
 
@@ -48,7 +49,9 @@ function nameFromEmail(email: string): string {
  */
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private readonly state = signal<AuthUser | null>(readStoredUser());
+  /** Contas que já usaram a liberação de entrega em mãos nesta sessão (mock). */
+  private readonly inHandsUsed = new Set<string>();
+  private readonly state = signal<AuthUser | null>(this.withFlags(readStoredUser()));
   /** Links de redefinição de senha ainda válidos (só no mock; no back ficam no banco). */
   private readonly resetLinks = new Map<string, { email: string; expiresAt: number }>();
 
@@ -175,7 +178,33 @@ export class AuthService {
     storeUser(null);
   }
 
-  private start(user: AuthUser): AuthResult {
+  /**
+   * Usa a liberação de entrega em mãos (chamado ao criar o pedido com ela).
+   * No back isso acontece na mesma transação que cria o pedido; para outra
+   * entrega em mãos, o admin libera de novo.
+   */
+  consumeInHandsDelivery(): void {
+    const user = this.state();
+    if (!user?.inHandsDelivery) return;
+    this.inHandsUsed.add(user.email);
+    this.state.set(this.withFlags(user));
+  }
+
+  /**
+   * Mock da flag que o admin liga no backoffice: uma lista fixa de e-mails, menos
+   * quem já usou a liberação nesta sessão. Sem liberação, o campo nem aparece.
+   */
+  private withFlags(user: AuthUser | null): AuthUser | null {
+    if (!user) return null;
+    const next: AuthUser = { ...user };
+    delete next.inHandsDelivery;
+    const allowed = IN_HANDS_MOCK_EMAILS.includes(user.email) && !this.inHandsUsed.has(user.email);
+    if (allowed) next.inHandsDelivery = true;
+    return next;
+  }
+
+  private start(input: AuthUser): AuthResult {
+    const user = this.withFlags(input)!;
     this.state.set(user);
     storeUser(user);
     return { ok: true, user };

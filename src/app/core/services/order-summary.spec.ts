@@ -67,4 +67,35 @@ describe('OrderSummary', () => {
     auth.login('outra@email.com', '12345678');
     expect(orders.find(pix.number)).toBeUndefined();
   });
+
+  it('entrega em mãos só para conta liberada, e só para um pedido', () => {
+    const auth = TestBed.inject(AuthService);
+    const orders = TestBed.inject(OrderService);
+    TestBed.inject(ShippingService).cep.set('05794340');
+    const ids = () => summary.shippingOptions().map((option) => option.id);
+
+    auth.login('maria@email.com', '12345678');
+    expect(ids()).not.toContain('em-maos');
+
+    auth.logout();
+    auth.login('vizinho@email.com', '12345678');
+    expect(ids()).toContain('em-maos');
+
+    const inHands = summary.shippingOptions().find((option) => option.id === 'em-maos')!;
+    const sample = orders.orders()[0];
+    orders.place({
+      items: sample.items,
+      address: sample.address,
+      billing: sample.billing,
+      shipping: inHands,
+      payment: { method: 'pix' },
+      subtotal: sample.subtotal,
+      discount: 0,
+      pixDiscount: 0,
+      shippingPrice: 0,
+      total: sample.subtotal,
+    });
+    expect(auth.user()?.inHandsDelivery).toBeUndefined();
+    expect(ids()).not.toContain('em-maos');
+  });
 });

@@ -89,6 +89,20 @@
           {{ item.shipping.label }} · {{ item.shipping.minDays }} a {{ item.shipping.maxDays }} dias
           úteis após a aprovação
         </p>
+        @if (
+          item.shipping.id === 'em-maos' &&
+          item.status !== 'entregue' &&
+          item.status !== 'cancelado'
+        ) {
+          <p class="od__in-hands">
+            <mat-icon aria-hidden="true">handshake</mat-icon>
+            <span>
+              Vamos te chamar no WhatsApp para combinar o horário da entrega. Se preferir, fale com
+              a gente:
+              <a [href]="store.whatsappHref" target="_blank" rel="noopener">{{ store.whatsapp }}</a>
+            </span>
+          </p>
+        }
       </section>
 
       <section class="od__card">

@@ -1,8 +1,7 @@
-import { STORE_CONFIG } from './store-config';
+import { FREE_SHIPPING_LABEL, STORE_CONFIG } from './store-config';
 import { HelpGroup, HelpPage } from '../models/help-page';
 
 const store = STORE_CONFIG;
-const FREE_SHIPPING = 'R$ 599';
 
 /**
  * Conteúdo das páginas de ajuda e políticas. Fica no front (texto estático,
@@ -57,7 +56,9 @@ export const HELP_PAGES: readonly HelpPage[] = [
       },
       {
         heading: 'Frete grátis',
-        paragraphs: [`Compras acima de ${FREE_SHIPPING} têm frete grátis para todo o Brasil.`],
+        paragraphs: [
+          `Compras acima de ${FREE_SHIPPING_LABEL} têm frete grátis para todo o Brasil.`,
+        ],
       },
       {
         heading: 'Rastreamento',

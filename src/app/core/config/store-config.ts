@@ -63,6 +63,22 @@ export const STORE_CONFIG: StoreConfig = {
   minInstallmentValue: 20,
 };
 
+/**
+ * Entrega em mãos (feita pela loja, sem transportadora, grátis). NÃO é aberta:
+ * só aparece para a conta que o admin liberou no backoffice, e a liberação vale
+ * para UM pedido (o back volta a flag para falso ao criar o pedido). O pagamento
+ * continua online, como nos outros fretes.
+ */
+export const LOCAL_DELIVERY = {
+  label: 'Entrega em mãos',
+  minDays: 1,
+  maxDays: 2,
+  note: 'Combinamos o horário pelo WhatsApp.',
+} as const;
+
+/** "R$ 599" — valor do frete grátis para textos (faixa, destaques, ajuda). */
+export const FREE_SHIPPING_LABEL = `R$ ${STORE_CONFIG.freeShippingMin.toLocaleString('pt-BR')}`;
+
 /** Perfis da loja, na ordem de exibição (URLs fictícias até o lançamento). */
 export const SOCIAL_LINKS: readonly SocialLink[] = [
   { brand: 'instagram', label: 'Instagram', url: 'https://www.instagram.com/naniperfumes' },
@@ -83,7 +99,7 @@ export const PAYMENT_METHODS: readonly PaymentMethod[] = [
 
 /** Mensagens da faixa rolante no topo do site, na ordem de exibição. */
 export const ANNOUNCEMENTS: readonly string[] = [
-  'Frete grátis acima de R$ 599',
-  'Parcele em até 12x',
+  `Frete grátis acima de ${FREE_SHIPPING_LABEL}`,
+  `Parcele em até ${STORE_CONFIG.maxInstallments}x sem juros`,
   'Compra segura',
 ];

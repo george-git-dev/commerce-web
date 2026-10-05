@@ -32,6 +32,8 @@ export class OrderService {
       // Cartão aprovado na hora no mock; Pix e boleto aguardam o pagamento.
       status: draft.payment.method === 'cartao' ? 'pago' : 'aguardando-pagamento',
     };
+    // A liberação de entrega em mãos vale para um pedido só.
+    if (order.shipping.id === 'em-maos') this.auth.consumeInHandsDelivery();
     const email = this.auth.user()?.email;
     if (email) {
       this.created.update((all) => ({ ...all, [email]: [order, ...(all[email] ?? [])] }));

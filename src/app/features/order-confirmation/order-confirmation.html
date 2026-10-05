@@ -47,6 +47,9 @@
           <dd>
             {{ item.shipping.label }} · {{ item.shipping.minDays }} a
             {{ item.shipping.maxDays }} dias úteis após a aprovação
+            @if (item.shipping.note) {
+              <br />{{ item.shipping.note }}
+            }
           </dd>
         </div>
         <div>

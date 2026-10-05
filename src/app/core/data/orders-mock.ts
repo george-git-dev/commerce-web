@@ -1,3 +1,4 @@
+import { LOCAL_DELIVERY } from '../config/store-config';
 import { Address, Order } from '../models/order';
 import { Product } from '../models/product';
 import { effectivePrice, variantLabel } from '../utils/product-pricing';
@@ -41,9 +42,10 @@ export function sampleOrders(name: string, find: (slug: string) => Product | und
     status: Order['status'],
     payment: Order['payment'],
     items: Order['items'],
-    shippingPrice: number,
+    shipping: Order['shipping'],
     trackingCode?: string,
   ): Order => {
+    const shippingPrice = shipping.price;
     const subtotal = items.reduce((sum, line) => sum + line.unitPrice * line.quantity, 0);
     return {
       number,
@@ -53,13 +55,7 @@ export function sampleOrders(name: string, find: (slug: string) => Product | und
       items,
       address: { recipient: name, ...address },
       billing: { document: '', name, address },
-      shipping: {
-        id: 'economico',
-        label: 'Econômico',
-        minDays: 3,
-        maxDays: 5,
-        price: shippingPrice,
-      },
+      shipping,
       payment,
       subtotal,
       discount: 0,
@@ -69,6 +65,22 @@ export function sampleOrders(name: string, find: (slug: string) => Product | und
     };
   };
 
+  const economic = (price: number): Order['shipping'] => ({
+    id: 'economico',
+    label: 'Econômico',
+    minDays: 3,
+    maxDays: 5,
+    price,
+  });
+  const inHands: Order['shipping'] = {
+    id: 'em-maos',
+    label: LOCAL_DELIVERY.label,
+    minDays: LOCAL_DELIVERY.minDays,
+    maxDays: LOCAL_DELIVERY.maxDays,
+    price: 0,
+    note: LOCAL_DELIVERY.note,
+  };
+
   return [
     build(
       'NP100258',
@@ -76,7 +88,7 @@ export function sampleOrders(name: string, find: (slug: string) => Product | und
       'aguardando-pagamento',
       { method: 'pix' },
       [item('NP100258', 1, 'maison-alhambra-delilah')],
-      14.9,
+      inHands,
     ),
     build(
       'NP100245',
@@ -84,7 +96,7 @@ export function sampleOrders(name: string, find: (slug: string) => Product | und
       'enviado',
       { method: 'cartao', installments: 3, cardLast4: '1111', cardBrand: 'Visa' },
       [item('NP100245', 1, 'lattafa-khamrah')],
-      14.9,
+      economic(14.9),
       'BR123456789BR',
     ),
     build(
@@ -93,7 +105,7 @@ export function sampleOrders(name: string, find: (slug: string) => Product | und
       'entregue',
       { method: 'pix' },
       [item('NP100231', 1, 'lattafa-asad'), item('NP100231', 2, 'lattafa-yara-body-mist', 2)],
-      0,
+      economic(0),
     ),
   ];
 }

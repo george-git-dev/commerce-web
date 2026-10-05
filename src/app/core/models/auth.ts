@@ -5,6 +5,11 @@ export interface AuthUser {
   cpf?: string;
   /** Celular com DDD (opcional). Só em memória, como o CPF. */
   phone?: string;
+  /**
+   * Entrega em mãos liberada pelo admin no backoffice. Vale para UM pedido:
+   * ao criar o pedido com essa entrega, volta a falso. Vem do back (`GET /me`).
+   */
+  inHandsDelivery?: boolean;
 }
 
 /** Resultado de ações que não devolvem usuário (ex.: redefinir senha). */

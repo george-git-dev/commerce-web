@@ -1,5 +1,5 @@
 import { effect, Injectable, signal } from '@angular/core';
-import { STORE_CONFIG } from '../config/store-config';
+import { LOCAL_DELIVERY, STORE_CONFIG } from '../config/store-config';
 import { ShippingOption } from '../models/shipping';
 import { readJson, writeJson } from '../utils/browser-storage';
 
@@ -52,12 +52,15 @@ export class ShippingService {
     effect(() => writeJson(CEP_STORAGE_KEY, this.cep()));
   }
 
-  /** Opções para o CEP e o subtotal. Acima do mínimo, o econômico sai grátis. */
-  quote(cep: string, subtotal: number): readonly ShippingOption[] {
+  /**
+   * Opções para o CEP e o subtotal. Acima do mínimo, o econômico sai grátis.
+   * `inHands`: conta liberada pelo admin para entrega em mãos (só ela vê a opção).
+   */
+  quote(cep: string, subtotal: number, inHands = false): readonly ShippingOption[] {
     if (!isValidCep(cep)) return [];
     const [eco, ecoMin, ecoMax, exp, expMin, expMax] = REGION_TABLE[cep[0]];
     const free = subtotal >= STORE_CONFIG.freeShippingMin;
-    return [
+    const options: ShippingOption[] = [
       {
         id: 'economico',
         label: 'Econômico',
@@ -67,5 +70,16 @@ export class ShippingService {
       },
       { id: 'expresso', label: 'Expresso', minDays: expMin, maxDays: expMax, price: exp },
     ];
+    if (inHands) {
+      options.push({
+        id: 'em-maos',
+        label: LOCAL_DELIVERY.label,
+        minDays: LOCAL_DELIVERY.minDays,
+        maxDays: LOCAL_DELIVERY.maxDays,
+        price: 0,
+        note: LOCAL_DELIVERY.note,
+      });
+    }
+    return options;
   }
 }

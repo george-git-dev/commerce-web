@@ -11,6 +11,9 @@
       <span class="opts__text">
         <strong>{{ option.label }}</strong>
         <small>{{ option.minDays }} a {{ option.maxDays }} dias úteis</small>
+        @if (option.note) {
+          <small class="opts__note">{{ option.note }}</small>
+        }
       </span>
       <span class="opts__price" [class.opts__price--free]="allFree() || !option.price">
         {{ allFree() || !option.price ? 'Grátis' : (option.price | currency: 'BRL') }}

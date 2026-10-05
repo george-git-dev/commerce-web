@@ -3,6 +3,7 @@ import { STORE_CONFIG } from '../config/store-config';
 import { PaymentMethod } from '../models/order';
 import { ShippingOption } from '../models/shipping';
 import { CartStore } from './cart-store';
+import { AuthService } from './auth-service';
 import { CouponService } from './coupon-service';
 import { ShippingService } from './shipping-service';
 
@@ -18,13 +19,21 @@ export class OrderSummary {
   private readonly cart = inject(CartStore);
   private readonly shipping = inject(ShippingService);
   private readonly coupons = inject(CouponService);
+  private readonly auth = inject(AuthService);
 
   readonly subtotal = this.cart.subtotal;
   readonly coupon = this.coupons.applied;
 
-  /** Opções para o CEP da sessão; recalcula se o subtotal mudar (frete grátis). */
+  /**
+   * Opções para o CEP da sessão; recalcula se o subtotal mudar (frete grátis).
+   * Entrega em mãos só entra para a conta liberada pelo admin.
+   */
   readonly shippingOptions = computed(() =>
-    this.shipping.quote(this.shipping.cep(), this.subtotal()),
+    this.shipping.quote(
+      this.shipping.cep(),
+      this.subtotal(),
+      this.auth.user()?.inHandsDelivery ?? false,
+    ),
   );
   /** Mantém a escolha quando as opções mudam; padrão: a primeira (mais barata). */
   readonly shippingId = linkedSignal<readonly ShippingOption[], ShippingOption['id'] | null>({

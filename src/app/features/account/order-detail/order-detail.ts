@@ -4,6 +4,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { STORE_CONFIG } from '../../../core/config/store-config';
 import { ORDER_TIMELINE, OrderItem, PAYMENT_METHOD_LABELS } from '../../../core/models/order';
 import { OrderService } from '../../../core/services/order-service';
 import { ReviewService } from '../../../core/services/review-service';
@@ -36,6 +37,7 @@ export class OrderDetail {
 
   protected readonly order = computed(() => this.orders.find(this.paramMap().get('numero')));
   protected readonly methodLabels = PAYMENT_METHOD_LABELS;
+  protected readonly store = STORE_CONFIG;
   /** Item com o formulário de avaliação aberto (um por vez). */
   protected readonly reviewing = signal<string | null>(null);
 
@@ -43,7 +45,13 @@ export class OrderDetail {
   protected readonly timeline = computed(() => {
     const status = this.order()?.status;
     const current = ORDER_TIMELINE.findIndex((step) => step.status === status);
-    return ORDER_TIMELINE.map((step, index) => ({ ...step, done: index <= current }));
+    const inHands = this.order()?.shipping.id === 'em-maos';
+    return ORDER_TIMELINE.map((step, index) => ({
+      ...step,
+      // Entrega em mãos não tem transportadora: "Enviado" vira "Saiu para entrega".
+      label: inHands && step.status === 'enviado' ? 'Saiu para entrega' : step.label,
+      done: index <= current,
+    }));
   });
 
   protected toggleReview(item: OrderItem): void {
