@@ -11,10 +11,7 @@ interface AccountCard {
   link?: string;
 }
 
-/**
- * `/minha-conta`. Só o card de Favoritos linka de verdade — os demais dependem
- * de autenticação e histórico de pedidos reais (Etapas 3/5/6 do roadmap).
- */
+/** `/minha-conta`: atalhos para pedidos, favoritos, endereços e dados pessoais. */
 @Component({
   selector: 'app-account',
   imports: [MatButtonModule, MatIconModule, RouterLink],
@@ -53,7 +50,8 @@ export class Account {
     {
       icon: 'person',
       title: 'Dados pessoais',
-      description: 'Atualize nome, e-mail e telefone de contato.',
+      description: 'Atualize nome, celular e senha.',
+      link: '/minha-conta/dados',
     },
   ];
 }

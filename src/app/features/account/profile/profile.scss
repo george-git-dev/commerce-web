@@ -1,0 +1,88 @@
+@use '../../../shared/forms/form';
+
+@include form.styles;
+
+.profile.ui-section {
+  padding-block: 16px 40px;
+}
+
+.profile__inner {
+  max-width: 760px;
+
+  h1 {
+    margin-bottom: 20px;
+  }
+}
+
+.profile__crumb {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 12px;
+  font-size: 0.8125rem;
+  color: var(--muted-foreground);
+
+  mat-icon {
+    width: 16px;
+    height: 16px;
+    font-size: 16px;
+  }
+}
+
+// Campo só leitura: mesmo visual, sem parecer editável.
+input[readonly] {
+  background: var(--muted) !important;
+  color: var(--muted-foreground) !important;
+}
+
+.profile__hint {
+  font-size: 0.75rem;
+
+  a {
+    color: var(--earth);
+    text-decoration: underline;
+  }
+}
+
+.profile__check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  font-size: 0.875rem;
+  cursor: pointer;
+
+  input {
+    margin: 0;
+    accent-color: var(--primary);
+  }
+}
+
+.profile__message {
+  margin: 14px 0 0;
+}
+
+.f-actions {
+  margin-top: 16px;
+}
+
+@media (min-width: 600px) {
+  // CPF e celular lado a lado só com espaço; no celular, um embaixo do outro.
+  .profile__half {
+    grid-column: span 3;
+  }
+
+  .f-actions .ui-cta {
+    flex: 0 1 240px;
+  }
+}
+
+@media (min-width: 900px) {
+  .profile.ui-section {
+    padding-block: 24px 72px;
+  }
+
+  .f-card {
+    padding: 24px;
+  }
+}

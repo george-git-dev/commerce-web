@@ -36,6 +36,12 @@ export const routes: Routes = [
     loadComponent: () => import('./features/auth/login').then((m) => m.Login),
   },
   {
+    path: 'minha-conta/dados',
+    title: 'Nani Perfumes | Dados pessoais',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/account/profile/profile').then((m) => m.Profile),
+  },
+  {
     path: 'minha-conta/enderecos',
     title: 'Nani Perfumes | Meus endereços',
     canActivate: [authGuard],

@@ -1,0 +1,140 @@
+<section class="profile ui-section">
+  <div class="ui-container profile__inner">
+    <nav class="profile__crumb" aria-label="Trilha de navegação">
+      <a routerLink="/minha-conta">Minha conta</a>
+      <mat-icon aria-hidden="true">chevron_right</mat-icon>
+      <span aria-current="page">Dados pessoais</span>
+    </nav>
+    <h1>Dados pessoais</h1>
+
+    <form class="f-card" [formGroup]="data" (ngSubmit)="saveData()" novalidate>
+      <h2>Seus dados</h2>
+      <div class="f-grid">
+        <label class="f-field">
+          Nome completo
+          <input
+            formControlName="name"
+            autocomplete="name"
+            [attr.aria-invalid]="invalid(data.controls.name) || null"
+          />
+          @if (invalid(data.controls.name)) {
+            <small class="f-error">Informe seu nome.</small>
+          }
+        </label>
+
+        <label class="f-field">
+          E-mail
+          <input [value]="auth.user()?.email" readonly aria-readonly="true" />
+          <small class="profile__hint">
+            Para trocar o e-mail, fale com o <a routerLink="/ajuda/contato">atendimento</a>.
+          </small>
+        </label>
+
+        @if (auth.user()?.cpf; as cpf) {
+          <label class="f-field profile__half">
+            CPF
+            <input [value]="maskCpf(cpf)" readonly aria-readonly="true" />
+          </label>
+        } @else {
+          <label class="f-field profile__half">
+            CPF
+            <input
+              formControlName="cpf"
+              appMask="cpf"
+              inputmode="numeric"
+              placeholder="000.000.000-00"
+              [attr.aria-invalid]="invalid(data.controls.cpf) || null"
+            />
+            @if (invalid(data.controls.cpf)) {
+              <small class="f-error">CPF inválido.</small>
+            } @else {
+              <small class="profile__hint">Usado na nota fiscal. Não dá para alterar depois.</small>
+            }
+          </label>
+        }
+
+        <label class="f-field profile__half">
+          Celular
+          <input
+            formControlName="phone"
+            appMask="phone"
+            type="tel"
+            inputmode="tel"
+            autocomplete="tel-national"
+            placeholder="(11) 98765-4321"
+            [attr.aria-invalid]="invalid(data.controls.phone) || null"
+          />
+          @if (invalid(data.controls.phone)) {
+            <small class="f-error">Celular inválido.</small>
+          }
+        </label>
+      </div>
+      @if (dataError(); as message) {
+        <p class="f-error profile__message" role="alert">{{ message }}</p>
+      }
+      <div class="f-actions">
+        <button matButton="filled" class="ui-cta" type="submit">Salvar dados</button>
+      </div>
+    </form>
+
+    <form class="f-card" [formGroup]="password" (ngSubmit)="savePassword()" novalidate>
+      <h2>Trocar senha</h2>
+      <div class="f-grid">
+        <label class="f-field">
+          Senha atual
+          <input
+            formControlName="current"
+            [type]="showPasswords() ? 'text' : 'password'"
+            autocomplete="current-password"
+            [attr.aria-invalid]="invalid(password.controls.current) || null"
+          />
+          @if (invalid(password.controls.current)) {
+            <small class="f-error">Informe a senha atual.</small>
+          }
+        </label>
+        <label class="f-field">
+          Nova senha
+          <input
+            formControlName="next"
+            [type]="showPasswords() ? 'text' : 'password'"
+            autocomplete="new-password"
+            [attr.aria-invalid]="invalid(password.controls.next) || null"
+          />
+          @if (invalid(password.controls.next)) {
+            <small class="f-error">Pelo menos {{ minPassword }} caracteres.</small>
+          }
+        </label>
+        <label class="f-field">
+          Confirmar nova senha
+          <input
+            formControlName="confirm"
+            [type]="showPasswords() ? 'text' : 'password'"
+            autocomplete="new-password"
+            [attr.aria-invalid]="
+              ((password.hasError('mismatch') || password.controls.confirm.invalid) &&
+                password.controls.confirm.touched) ||
+              null
+            "
+          />
+          @if (password.hasError('mismatch') && password.controls.confirm.touched) {
+            <small class="f-error">As senhas não conferem.</small>
+          }
+        </label>
+      </div>
+      <label class="profile__check">
+        <input
+          type="checkbox"
+          [checked]="showPasswords()"
+          (change)="showPasswords.set($any($event.target).checked)"
+        />
+        Mostrar senhas
+      </label>
+      @if (passwordError(); as message) {
+        <p class="f-error profile__message" role="alert">{{ message }}</p>
+      }
+      <div class="f-actions">
+        <button matButton="filled" class="ui-cta" type="submit">Trocar senha</button>
+      </div>
+    </form>
+  </div>
+</section>

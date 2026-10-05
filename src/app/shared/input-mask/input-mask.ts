@@ -6,10 +6,11 @@ import {
   formatCpf,
   formatDocument,
   formatExpiry,
+  formatPhone,
   onlyDigits,
 } from '../../core/utils/br-format';
 
-export type MaskKind = 'cep' | 'cpf' | 'document' | 'card' | 'expiry' | 'cvv';
+export type MaskKind = 'cep' | 'cpf' | 'document' | 'card' | 'expiry' | 'cvv' | 'phone';
 
 const MASKS: Record<MaskKind, (value: string) => string> = {
   cep: formatCep,
@@ -18,6 +19,7 @@ const MASKS: Record<MaskKind, (value: string) => string> = {
   card: formatCardNumber,
   expiry: formatExpiry,
   cvv: (value) => onlyDigits(value, 4),
+  phone: formatPhone,
 };
 
 /**

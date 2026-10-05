@@ -43,6 +43,23 @@ describe('AuthService (simulado)', () => {
     expect(service.user()).toBeNull();
     expect(localStorage.getItem('nani.auth.mock')).toBeNull();
   });
+
+  it('atualiza nome e celular, sem levar o celular para o navegador', () => {
+    service.login('maria@email.com', '12345678');
+    expect(service.updateProfile('Maria Souza', '(11) 98765-4321').ok).toBe(true);
+    expect(service.user()?.phone).toBe('(11) 98765-4321');
+    expect(localStorage.getItem('nani.auth.mock')).toContain('Maria Souza');
+    expect(localStorage.getItem('nani.auth.mock')).not.toContain('98765');
+    expect(service.updateProfile('Maria', '(11) 1234').ok).toBe(false);
+  });
+
+  it('troca de senha valida tamanho e exige senha diferente', () => {
+    service.login('maria@email.com', '12345678');
+    expect(service.changePassword('123', 'novasenha1').ok).toBe(false);
+    expect(service.changePassword('12345678', 'curta').ok).toBe(false);
+    expect(service.changePassword('12345678', '12345678').ok).toBe(false);
+    expect(service.changePassword('12345678', 'novasenha1').ok).toBe(true);
+  });
 });
 
 describe('safeReturnUrl', () => {

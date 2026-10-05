@@ -1,6 +1,6 @@
 import { computed, Injectable, signal } from '@angular/core';
 import { AuthResult, AuthUser } from '../models/auth';
-import { isValidCpf } from '../utils/br-format';
+import { isValidCpf, isValidPhone } from '../utils/br-format';
 
 const STORAGE_KEY = 'nani.auth.mock';
 export const MIN_PASSWORD_LENGTH = 8;
@@ -73,6 +73,40 @@ export class AuthService {
     if (!user) return { ok: false, message: 'Entre na sua conta.' };
     if (!isValidCpf(cpf)) return { ok: false, message: 'Informe um CPF válido.' };
     return this.start({ ...user, cpf });
+  }
+
+  /**
+   * Minha conta → Dados pessoais. E-mail não muda aqui (no back exige confirmar o
+   * novo endereço). Fase 2: `PATCH /me`.
+   */
+  updateProfile(name: string, phone: string): AuthResult {
+    const user = this.state();
+    if (!user) return { ok: false, message: 'Entre na sua conta.' };
+    if (name.trim().length < 2) return { ok: false, message: 'Informe seu nome.' };
+    if (phone && !isValidPhone(phone)) return { ok: false, message: 'Informe um celular válido.' };
+    return this.start({ ...user, name: name.trim(), phone: phone || undefined });
+  }
+
+  /**
+   * Troca de senha SIMULADA: não há senha guardada para conferir a atual, então
+   * só valida o formato. Fase 2: `POST /me/password` — o back confere a atual
+   * (BCrypt), aplica a política de senha e encerra as outras sessões.
+   */
+  changePassword(current: string, next: string): AuthResult {
+    const user = this.state();
+    if (!user) return { ok: false, message: 'Entre na sua conta.' };
+    if (current.length < MIN_PASSWORD_LENGTH)
+      return { ok: false, message: 'Senha atual incorreta.' };
+    if (next.length < MIN_PASSWORD_LENGTH) {
+      return {
+        ok: false,
+        message: `A nova senha precisa ter pelo menos ${MIN_PASSWORD_LENGTH} caracteres.`,
+      };
+    }
+    if (next === current) {
+      return { ok: false, message: 'A nova senha precisa ser diferente da atual.' };
+    }
+    return { ok: true, user };
   }
 
   /**

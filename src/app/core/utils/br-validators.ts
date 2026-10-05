@@ -5,6 +5,7 @@ import {
   isValidCpf,
   isValidDocument,
   isValidExpiry,
+  isValidPhone,
   onlyDigits,
 } from './br-format';
 
@@ -21,4 +22,5 @@ export const cpfValidator = check('cpf', isValidCpf);
 export const documentValidator = check('document', isValidDocument);
 export const cardNumberValidator = check('cardNumber', isValidCardNumber);
 export const expiryValidator = check('expiry', (value) => isValidExpiry(value));
+export const phoneValidator = check('phone', isValidPhone);
 export const cvvValidator = check('cvv', (value) => /^\d{3,4}$/.test(onlyDigits(value)));

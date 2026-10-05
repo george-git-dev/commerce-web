@@ -4,10 +4,13 @@ import {
   formatCpf,
   formatDocument,
   formatExpiry,
+  formatPhone,
   isValidCardNumber,
   isValidCpf,
   isValidDocument,
   isValidExpiry,
+  isValidPhone,
+  maskCpf,
 } from './br-format';
 
 describe('br-format', () => {
@@ -41,5 +44,27 @@ describe('br-format', () => {
     expect(isValidExpiry('10/26', now)).toBe(true);
     expect(isValidExpiry('09/26', now)).toBe(false);
     expect(isValidExpiry('13/29', now)).toBe(false);
+  });
+});
+
+describe('telefone e CPF mascarado', () => {
+  it('formata celular e fixo enquanto digita', () => {
+    expect(formatPhone('11')).toBe('(11');
+    expect(formatPhone('1198765')).toBe('(11) 98765');
+    expect(formatPhone('11987654321')).toBe('(11) 98765-4321');
+    expect(formatPhone('1134567890')).toBe('(11) 3456-7890');
+  });
+
+  it('valida DDD e celular começando com 9', () => {
+    expect(isValidPhone('(11) 98765-4321')).toBe(true);
+    expect(isValidPhone('(11) 3456-7890')).toBe(true);
+    expect(isValidPhone('(11) 88765-4321')).toBe(false);
+    expect(isValidPhone('(01) 98765-4321')).toBe(false);
+    expect(isValidPhone('(11) 9876')).toBe(false);
+  });
+
+  it('mascara o CPF para exibir', () => {
+    expect(maskCpf('529.982.247-25')).toBe('***.982.247-**');
+    expect(maskCpf('')).toBe('');
   });
 });

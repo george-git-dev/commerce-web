@@ -103,3 +103,26 @@ export function isValidExpiry(value: string, now = new Date()): boolean {
   const lastDay = new Date(year, month, 0, 23, 59, 59);
   return lastDay >= now;
 }
+
+/** Telefone com DDD: "(11) 98765-4321" (celular) ou "(11) 3456-7890" (fixo). */
+export function formatPhone(value: string): string {
+  const d = onlyDigits(value, 11);
+  if (d.length <= 2) return d ? `(${d}` : '';
+  // Celular (3º dígito 9) já nasce no formato 5+4; fixo, 4+4.
+  const split = d[2] === '9' ? 7 : 6;
+  const tail = d.length > split ? `-${d.slice(split)}` : '';
+  return `(${d.slice(0, 2)}) ${d.slice(2, split)}${tail}`;
+}
+
+/** DDD válido (11–99) + 8 dígitos (fixo) ou 9 começando com 9 (celular). */
+export function isValidPhone(value: string): boolean {
+  const d = onlyDigits(value);
+  if (!/^[1-9][1-9]/.test(d)) return false;
+  return d.length === 10 || (d.length === 11 && d[2] === '9');
+}
+
+/** "529.982.247-25" → "***.982.247-**": só o meio aparece na tela. */
+export function maskCpf(value: string): string {
+  const d = onlyDigits(value, 11);
+  return d.length === 11 ? `***.${d.slice(3, 6)}.${d.slice(6, 9)}-**` : '';
+}
