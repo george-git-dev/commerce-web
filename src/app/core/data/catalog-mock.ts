@@ -68,7 +68,7 @@ export const CATEGORIES_MOCK: readonly Category[] = [
     name: 'Corpo e banho',
     text: 'Hidratantes e body splash',
     icon: 'spa',
-    // Sem foto por enquanto (gerar no ChatGPT, como as outras).
+    image: 'img/categorias/corpo-e-banho.webp',
     categoryFilter: BODY_CARE_CATEGORIES,
   },
   {

@@ -914,7 +914,7 @@ export const MOCK_PRODUCTS: readonly Product[] = [
     reviewCount: 3,
     soldCount: 144,
     images: [
-      'img/categorias/kits.webp',
+      'img/produtos/kit-presente.webp',
       'img/produtos/garrafa-preta.webp',
       'img/produtos/colecao.webp',
     ],
@@ -940,7 +940,7 @@ export const MOCK_PRODUCTS: readonly Product[] = [
     reviewCount: 4,
     soldCount: 88,
     images: [
-      'img/categorias/kits.webp',
+      'img/produtos/kit-presente.webp',
       'img/produtos/garrafa-cristal.webp',
       'img/produtos/colecao.webp',
     ],
@@ -978,7 +978,7 @@ export const MOCK_PRODUCTS: readonly Product[] = [
     reviewCount: 1,
     soldCount: 60,
     images: [
-      'img/categorias/kits.webp',
+      'img/produtos/kit-presente.webp',
       'img/produtos/garrafa-verde.webp',
       'img/produtos/colecao.webp',
     ],
