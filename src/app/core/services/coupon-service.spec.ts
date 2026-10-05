@@ -5,6 +5,7 @@ describe('CouponService', () => {
   let service: CouponService;
 
   beforeEach(() => {
+    localStorage.clear();
     service = TestBed.inject(CouponService);
   });
 

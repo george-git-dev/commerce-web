@@ -5,6 +5,7 @@ describe('ShippingService', () => {
   let service: ShippingService;
 
   beforeEach(() => {
+    localStorage.clear();
     service = TestBed.inject(ShippingService);
   });
 

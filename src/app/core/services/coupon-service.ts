@@ -1,5 +1,8 @@
-import { Injectable, signal } from '@angular/core';
+import { effect, Injectable, signal } from '@angular/core';
 import { Coupon } from '../models/coupon';
+import { readJson, writeJson } from '../utils/browser-storage';
+
+const COUPON_STORAGE_KEY = 'nani.coupon.v1';
 
 /** Cupons fictícios para testar os cálculos. Na Fase 2 quem valida é o back. */
 const COUPONS_MOCK: readonly Coupon[] = [
@@ -27,7 +30,14 @@ export type CouponResult = { ok: true; coupon: Coupon } | { ok: false; message: 
  */
 @Injectable({ providedIn: 'root' })
 export class CouponService {
-  readonly applied = signal<Coupon | null>(null);
+  /** Volta só o código salvo e só se ainda existir; o mínimo é reavaliado no carrinho. */
+  readonly applied = signal<Coupon | null>(
+    COUPONS_MOCK.find((coupon) => coupon.code === readJson<string>(COUPON_STORAGE_KEY)) ?? null,
+  );
+
+  constructor() {
+    effect(() => writeJson(COUPON_STORAGE_KEY, this.applied()?.code ?? null));
+  }
 
   apply(rawCode: string, subtotal: number): CouponResult {
     const code = rawCode.trim().toUpperCase();

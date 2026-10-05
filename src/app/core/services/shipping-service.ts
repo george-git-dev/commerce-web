@@ -1,6 +1,9 @@
-import { Injectable, signal } from '@angular/core';
+import { effect, Injectable, signal } from '@angular/core';
 import { STORE_CONFIG } from '../config/store-config';
 import { ShippingOption } from '../models/shipping';
+import { readJson, writeJson } from '../utils/browser-storage';
+
+const CEP_STORAGE_KEY = 'nani.shipping-cep.v1';
 
 /** Tabela fictícia por região (1º dígito do CEP): [econômico, prazo, expresso, prazo]. */
 const REGION_TABLE: Record<string, readonly [number, number, number, number, number, number]> = {
@@ -42,7 +45,12 @@ export function isValidCep(value: string): boolean {
 @Injectable({ providedIn: 'root' })
 export class ShippingService {
   /** CEP consultado (só dígitos); vazio = ainda não calculado. */
-  readonly cep = signal('');
+  readonly cep = signal(readJson<string>(CEP_STORAGE_KEY) ?? '');
+
+  constructor() {
+    // O CEP volta preenchido na próxima visita (carrinho e checkout).
+    effect(() => writeJson(CEP_STORAGE_KEY, this.cep()));
+  }
 
   /** Opções para o CEP e o subtotal. Acima do mínimo, o econômico sai grátis. */
   quote(cep: string, subtotal: number): readonly ShippingOption[] {

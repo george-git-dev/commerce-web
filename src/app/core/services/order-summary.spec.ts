@@ -10,6 +10,7 @@ describe('OrderSummary', () => {
   let summary: OrderSummary;
 
   beforeEach(() => {
+    localStorage.clear();
     summary = TestBed.inject(OrderSummary);
     const asad = MOCK_PRODUCTS.find((product) => product.slug === 'lattafa-asad')!;
     TestBed.inject(CartStore).add(asad, asad.variants[0]);
