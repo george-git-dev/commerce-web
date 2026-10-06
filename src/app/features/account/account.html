@@ -7,7 +7,7 @@
     </header>
 
     <div class="account__grid">
-      @for (card of cards; track card.title) {
+      @for (card of visibleCards(); track card.title) {
         @if (card.link) {
           <a class="card" [routerLink]="card.link">
             <mat-icon>{{ card.icon }}</mat-icon>

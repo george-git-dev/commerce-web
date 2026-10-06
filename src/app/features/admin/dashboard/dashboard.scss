@@ -1,0 +1,297 @@
+h2,
+h3 {
+  margin: 0;
+}
+
+.dash {
+  display: grid;
+  gap: 20px;
+}
+
+.dash__head {
+  display: grid;
+  gap: 14px;
+}
+
+.dash__eyebrow {
+  margin: 0;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.dash__hello {
+  font-size: clamp(1.75rem, 1.4rem + 1.6vw, 2.5rem);
+}
+
+// Seletor de período: segmentos que rolam se faltar espaço.
+.dash__periods {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--muted);
+
+  button {
+    flex: 1 0 auto;
+    min-height: 40px;
+    padding: 0 14px;
+    border: 0;
+    border-radius: var(--radius-sm);
+    background: none;
+    color: var(--muted-foreground);
+    font: inherit;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+  }
+
+  .dash__period--on {
+    background: var(--card);
+    color: var(--foreground);
+    box-shadow: var(--shadow-sm);
+  }
+}
+
+.dash__kpis {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.dash__subtitle {
+  font-family: var(--font-ui);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.dash__alerts {
+  display: grid;
+  gap: 8px;
+  margin: -8px 0 0;
+  padding: 0;
+  list-style: none;
+
+  a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 52px;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--card);
+    font-size: 0.9375rem;
+
+    > mat-icon:first-child {
+      flex-shrink: 0;
+      color: var(--gold);
+    }
+
+    span {
+      flex: 1;
+    }
+  }
+}
+
+.dash__go {
+  flex-shrink: 0;
+  color: var(--muted-foreground);
+}
+
+.dash__grid {
+  display: grid;
+  gap: 16px;
+}
+
+.dash__card {
+  display: grid;
+  align-content: start;
+  gap: 14px;
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+}
+
+.dash__card-head {
+  h3 {
+    font-family: var(--font-ui);
+    font-size: 1rem;
+    font-weight: 600;
+  }
+
+  p {
+    margin: 2px 0 0;
+    font-size: 0.8125rem;
+    color: var(--muted-foreground);
+  }
+}
+
+// Listas com barra horizontal (mais vendidos, status): rótulo + valor + barra.
+.dash__bars {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  img {
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-sm);
+    object-fit: cover;
+  }
+}
+
+.dash__bar-text {
+  display: grid;
+  flex: 1;
+  gap: 6px;
+  min-width: 0;
+}
+
+.dash__bar-label {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 0.875rem;
+
+  strong {
+    flex-shrink: 0;
+    font-weight: 600;
+  }
+}
+
+.dash__bar {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--muted);
+
+  span {
+    display: block;
+    height: 100%;
+    min-width: 4px;
+    border-radius: 999px;
+    background: #a67b41;
+  }
+}
+
+.dash__empty {
+  margin: 0;
+  color: var(--muted-foreground);
+}
+
+.dash__table {
+  font-size: 0.8125rem;
+
+  summary {
+    color: var(--earth);
+    cursor: pointer;
+  }
+
+  table {
+    width: 100%;
+    margin-top: 8px;
+    border-collapse: collapse;
+  }
+
+  th,
+  td {
+    padding: 4px 0;
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+  }
+
+  td:last-child,
+  th:last-child {
+    text-align: right;
+  }
+}
+
+.dash__latest {
+  display: grid;
+  gap: 10px;
+}
+
+.dash__latest-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  a {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    min-height: 44px;
+    font-size: 0.875rem;
+    color: var(--earth);
+
+    mat-icon {
+      width: 18px;
+      height: 18px;
+      font-size: 18px;
+    }
+  }
+}
+
+@media (min-width: 600px) {
+  .dash__head {
+    grid-template-columns: 1fr auto;
+    align-items: end;
+  }
+
+  .dash__alerts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .dash {
+    gap: 24px;
+  }
+
+  .dash__kpis {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  .dash__alerts {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .dash__grid {
+    grid-template-columns: 2fr 1fr;
+  }
+
+  .dash__card {
+    padding: 20px;
+  }
+
+  .dash__card--wide {
+    --chart-height: 280px;
+  }
+
+  // Segunda linha: categorias (largo) à esquerda, status à direita.
+  .dash__grid > :nth-child(3) {
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+  .dash__grid > :nth-child(4) {
+    grid-column: 1;
+    grid-row: 2;
+  }
+}

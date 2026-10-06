@@ -1,0 +1,17 @@
+<ul class="lo__orders">
+  @for (order of orders(); track order.number) {
+    <li>
+      <a class="lo__order" routerLink="/admin/pedidos">
+        <span class="lo__order-main">
+          <strong>{{ order.number }}</strong>
+          <span>{{ order.customer.name }}</span>
+          <small>{{ order.customer.city }}</small>
+        </span>
+        <span class="lo__order-date">{{ order.createdAt | date: 'dd/MM/yyyy HH:mm' }}</span>
+        <span class="lo__order-pay">{{ methodLabels[order.payment] }}</span>
+        <strong class="lo__order-total">{{ order.total | currency: 'BRL' }}</strong>
+        <app-order-status [status]="order.status" />
+      </a>
+    </li>
+  }
+</ul>

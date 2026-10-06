@@ -13,7 +13,11 @@ describe('AuthService (simulado)', () => {
   it('entra com e-mail válido e senha de 8+ caracteres, sem guardar a senha', () => {
     const result = service.login('Maria.Silva@Email.com', '12345678');
     expect(result.ok).toBe(true);
-    expect(service.user()).toEqual({ name: 'Maria', email: 'maria.silva@email.com' });
+    expect(service.user()).toEqual({
+      name: 'Maria',
+      email: 'maria.silva@email.com',
+      roles: ['ROLE_CUSTOMER'],
+    });
     expect(localStorage.getItem('nani.auth.mock')).not.toContain('12345678');
   });
 
@@ -79,6 +83,18 @@ describe('AuthService (simulado)', () => {
     expect(service.changePassword('12345678', 'curta').ok).toBe(false);
     expect(service.changePassword('12345678', '12345678').ok).toBe(false);
     expect(service.changePassword('12345678', 'novasenha1').ok).toBe(true);
+  });
+
+  it('todo cadastro é cliente; equipe ganha perfil a mais', () => {
+    service.login('maria@email.com', '12345678');
+    expect(service.can('shop:checkout')).toBe(true);
+    expect(service.isStaff()).toBe(false);
+    service.logout();
+    expect(service.can('shop:checkout')).toBe(false);
+    service.login('viewer@email.com', '12345678');
+    expect(service.user()?.roles).toEqual(['ROLE_CUSTOMER', 'ROLE_VIEWER']);
+    expect(service.isStaff()).toBe(true);
+    expect(service.can('orders:edit')).toBe(false);
   });
 });
 

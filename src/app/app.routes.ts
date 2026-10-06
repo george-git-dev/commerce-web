@@ -1,8 +1,15 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth-guard';
+import { customerGuard, staffGuard } from './core/guards/role-guard';
 import { cartNotEmptyGuard } from './core/guards/cart-guard';
 
 export const routes: Routes = [
+  {
+    // Backoffice: área separada, carregada só por quem é da equipe.
+    path: 'admin',
+    canActivate: [staffGuard],
+    loadChildren: () => import('./features/admin/admin.routes').then((m) => m.ADMIN_ROUTES),
+  },
   {
     path: '',
     title: 'Nani Perfumes | Essência do Oriente',
@@ -79,7 +86,7 @@ export const routes: Routes = [
   {
     path: 'finalizar-compra',
     title: 'Nani Perfumes | Finalizar compra',
-    canActivate: [authGuard, cartNotEmptyGuard],
+    canActivate: [authGuard, customerGuard, cartNotEmptyGuard],
     loadComponent: () => import('./features/checkout/checkout').then((m) => m.Checkout),
   },
   {

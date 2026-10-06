@@ -1,5 +1,6 @@
 import { computed, Injectable, signal } from '@angular/core';
-import { IN_HANDS_MOCK_EMAILS } from '../data/customers-mock';
+import { hasPermission, Permission, Role } from '../config/permissions';
+import { IN_HANDS_MOCK_EMAILS, STAFF_MOCK } from '../data/customers-mock';
 import { ActionResult, AuthResult, AuthUser } from '../models/auth';
 import { isValidCpf, isValidPhone } from '../utils/br-format';
 
@@ -57,6 +58,13 @@ export class AuthService {
 
   readonly user = this.state.asReadonly();
   readonly isLoggedIn = computed(() => this.state() !== null);
+  /** Tem acesso ao backoffice (algum perfil além de cliente). */
+  readonly isStaff = computed(() => this.can('admin:access'));
+
+  /** O usuário logado tem a permissão? (Só para a tela — o back confere de novo.) */
+  can(permission: Permission): boolean {
+    return hasPermission(this.state()?.roles, permission);
+  }
 
   login(email: string, password: string): AuthResult {
     const problem = this.credentialsProblem(email, password);
@@ -191,12 +199,14 @@ export class AuthService {
   }
 
   /**
-   * Mock da flag que o admin liga no backoffice: uma lista fixa de e-mails, menos
-   * quem já usou a liberação nesta sessão. Sem liberação, o campo nem aparece.
+   * Mock do que vem do back: perfis (todo cadastro tem `ROLE_CUSTOMER`; a equipe
+   * fictícia ganha mais um) e a flag de entrega em mãos (lista fixa de e-mails,
+   * menos quem já usou a liberação nesta sessão; sem liberação, o campo nem aparece).
    */
   private withFlags(user: AuthUser | null): AuthUser | null {
     if (!user) return null;
-    const next: AuthUser = { ...user };
+    const roles: Role[] = ['ROLE_CUSTOMER', ...(STAFF_MOCK[user.email] ?? [])];
+    const next: AuthUser = { ...user, roles };
     delete next.inHandsDelivery;
     const allowed = IN_HANDS_MOCK_EMAILS.includes(user.email) && !this.inHandsUsed.has(user.email);
     if (allowed) next.inHandsDelivery = true;

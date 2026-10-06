@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { Router, RouterLink } from '@angular/router';
@@ -28,7 +28,22 @@ export class Account {
     this.router.navigateByUrl('/');
   }
 
-  protected readonly cards: readonly AccountCard[] = [
+  /** Equipe ganha o atalho para o backoffice. */
+  protected readonly visibleCards = computed(() =>
+    this.auth.isStaff()
+      ? [
+          ...this.cards,
+          {
+            icon: 'admin_panel_settings',
+            title: 'Backoffice',
+            description: 'Pedidos, produtos, estoque e números da loja.',
+            link: '/admin',
+          },
+        ]
+      : this.cards,
+  );
+
+  private readonly cards: readonly AccountCard[] = [
     {
       icon: 'local_shipping',
       title: 'Pedidos',

@@ -1,0 +1,89 @@
+<mat-sidenav-container class="adm">
+  <mat-sidenav
+    class="adm__nav"
+    [mode]="desktop() ? 'side' : 'over'"
+    [opened]="desktop() || menuOpen()"
+    (closedStart)="menuOpen.set(false)"
+    [fixedInViewport]="!desktop()"
+  >
+    <div class="adm__brand">
+      <span class="adm__logo">NANI</span>
+      <small>Perfumes · Backoffice</small>
+    </div>
+
+    <p class="adm__section">Gestão da loja</p>
+    <nav aria-label="Menu do backoffice">
+      @for (item of items(); track item.path) {
+        <a
+          class="adm__item"
+          [routerLink]="link(item.path)"
+          routerLinkActive="adm__item--active"
+          [routerLinkActiveOptions]="{ exact: !item.path }"
+          (click)="closeMenuOnMobile()"
+        >
+          <mat-icon aria-hidden="true">{{ item.icon }}</mat-icon>
+          <span>{{ item.label }}</span>
+          @if (item.badge && pendingApprovals) {
+            <span class="adm__badge" [attr.aria-label]="pendingApprovals + ' pendentes'">
+              {{ pendingApprovals }}
+            </span>
+          }
+        </a>
+      }
+    </nav>
+
+    <div class="adm__foot">
+      <a class="adm__item" routerLink="/">
+        <mat-icon aria-hidden="true">storefront</mat-icon>
+        <span>Ver a loja</span>
+      </a>
+      <button type="button" class="adm__item" (click)="logout()">
+        <mat-icon aria-hidden="true">logout</mat-icon>
+        <span>Sair</span>
+      </button>
+    </div>
+  </mat-sidenav>
+
+  <mat-sidenav-content class="adm__content">
+    <header class="adm__top">
+      @if (!desktop()) {
+        <button matIconButton type="button" aria-label="Abrir menu" (click)="menuOpen.set(true)">
+          <mat-icon>menu</mat-icon>
+        </button>
+      }
+      <h1 class="adm__title">{{ pageTitle() }}</h1>
+      <div class="adm__user">
+        <span class="adm__avatar" aria-hidden="true">{{ auth.user()?.name?.charAt(0) }}</span>
+        <span class="adm__user-text">
+          <strong>{{ auth.user()?.name }}</strong>
+          <small>{{ roleLabel() }}</small>
+        </span>
+      </div>
+    </header>
+
+    <main class="adm__main">
+      <router-outlet />
+    </main>
+
+    @if (!desktop()) {
+      <nav class="adm__tabs" aria-label="Atalhos">
+        @for (item of shortcuts(); track item.path) {
+          <a
+            class="adm__tab"
+            [routerLink]="link(item.path)"
+            routerLinkActive="adm__tab--active"
+            [routerLinkActiveOptions]="{ exact: !item.path }"
+          >
+            <span class="adm__tab-icon">
+              <mat-icon aria-hidden="true">{{ item.icon }}</mat-icon>
+              @if (item.badge && pendingApprovals) {
+                <span class="adm__dot">{{ pendingApprovals }}</span>
+              }
+            </span>
+            {{ item.label }}
+          </a>
+        }
+      </nav>
+    }
+  </mat-sidenav-content>
+</mat-sidenav-container>

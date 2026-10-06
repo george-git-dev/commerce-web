@@ -1,3 +1,5 @@
+import { Role } from '../config/permissions';
+
 export interface AuthUser {
   name: string;
   email: string;
@@ -10,6 +12,8 @@ export interface AuthUser {
    * ao criar o pedido com essa entrega, volta a falso. Vem do back (`GET /me`).
    */
   inHandsDelivery?: boolean;
+  /** Perfis (todo cadastro tem `ROLE_CUSTOMER`). Vêm do back no JWT/`GET /me`. */
+  roles?: readonly Role[];
 }
 
 /** Resultado de ações que não devolvem usuário (ex.: redefinir senha). */
