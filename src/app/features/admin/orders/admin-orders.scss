@@ -1,0 +1,264 @@
+h2 {
+  margin: 0;
+  font-size: clamp(1.75rem, 1.4rem + 1.6vw, 2.5rem);
+}
+
+.ao {
+  display: grid;
+  gap: 14px;
+}
+
+.ao__eyebrow {
+  margin: 0;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+// Abas de status: rolam de lado no celular (só esta faixa, nunca a página).
+.ao__tabs {
+  display: flex;
+  gap: 6px;
+  margin-inline: -16px;
+  padding: 2px 16px 4px;
+  overflow-x: auto;
+  scrollbar-width: none;
+
+  button {
+    flex-shrink: 0;
+    min-height: 40px;
+    padding: 0 14px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--card);
+    color: var(--muted-foreground);
+    font: inherit;
+    font-size: 0.875rem;
+    white-space: nowrap;
+    cursor: pointer;
+
+    span {
+      margin-left: 4px;
+      font-size: 0.75rem;
+      opacity: 0.8;
+    }
+  }
+
+  .ao__tab--on {
+    border-color: var(--primary);
+    background: var(--primary);
+    color: var(--primary-foreground);
+  }
+}
+
+.ao__filters {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.ao__search {
+  display: flex;
+  grid-column: 1 / -1;
+  align-items: center;
+  gap: 8px;
+  height: 48px;
+  padding-inline: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--card);
+
+  mat-icon {
+    flex-shrink: 0;
+    color: var(--muted-foreground);
+  }
+
+  input {
+    flex: 1;
+    width: 0;
+    border: 0;
+    outline: none;
+    background: none;
+    font: inherit;
+    font-size: 1rem;
+  }
+}
+
+.ao__select {
+  display: grid;
+  gap: 4px;
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+
+  select {
+    height: 44px;
+    padding-inline: 10px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--card);
+    color: var(--foreground);
+    font: inherit;
+    font-size: 0.9375rem;
+  }
+}
+
+.ao__count {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--muted-foreground);
+}
+
+.ao__list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+// Celular: card. Desktop (≥1024px): linha de tabela.
+.ao__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 6px 12px;
+  align-items: center;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+  font-size: 0.875rem;
+
+  &:hover {
+    border-color: var(--gold);
+  }
+
+  small {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.75rem;
+    color: var(--muted-foreground);
+  }
+
+  mat-icon {
+    width: 14px;
+    height: 14px;
+    font-size: 14px;
+    color: var(--gold);
+  }
+}
+
+.ao__id,
+.ao__customer,
+.ao__pay {
+  display: grid;
+  min-width: 0;
+}
+
+.ao__customer small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ao__total {
+  grid-row: 1;
+  grid-column: 2;
+  text-align: right;
+}
+
+.ao__items {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted-foreground);
+}
+
+.ao__thumbs {
+  display: flex;
+
+  img {
+    width: 32px;
+    height: 32px;
+    border: 2px solid var(--card);
+    border-radius: var(--radius-sm);
+    object-fit: cover;
+
+    & + img {
+      margin-left: -10px;
+    }
+  }
+}
+
+.ao__pay {
+  text-align: right;
+  justify-items: end;
+}
+
+.ao__status {
+  justify-self: start;
+}
+
+.ao__more {
+  justify-self: center;
+}
+
+.ao__empty {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  padding: 40px 16px;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  color: var(--muted-foreground);
+
+  mat-icon {
+    width: 36px;
+    height: 36px;
+    font-size: 36px;
+    color: var(--gold);
+  }
+
+  p {
+    margin: 0;
+  }
+}
+
+@media (min-width: 700px) {
+  .ao__filters {
+    grid-template-columns: minmax(0, 1fr) 160px 200px;
+    align-items: end;
+  }
+
+  .ao__search {
+    grid-column: auto;
+  }
+}
+
+@media (min-width: 1024px) {
+  .ao__tabs {
+    flex-wrap: wrap;
+    margin-inline: 0;
+    padding-inline: 0;
+  }
+
+  .ao__row {
+    grid-template-columns: 150px minmax(0, 1.6fr) 150px 150px 110px 170px;
+    gap: 16px;
+    padding: 12px 18px;
+  }
+
+  .ao__total,
+  .ao__pay {
+    grid-row: auto;
+    grid-column: auto;
+    text-align: left;
+    justify-items: start;
+  }
+
+  .ao__status {
+    justify-self: end;
+  }
+}

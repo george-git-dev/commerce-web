@@ -131,3 +131,9 @@ export function maskCpf(value: string): string {
 export function maskDocument(value: string): string {
   return onlyDigits(value).length === 11 ? maskCpf(value) : formatDocument(value);
 }
+
+/** "(11) 98765-4321" → "(11) *****-4321": DDD e final para reconhecer, sem expor. */
+export function maskPhone(value: string): string {
+  const d = onlyDigits(value);
+  return d.length >= 10 ? `(${d.slice(0, 2)}) *****-${d.slice(-4)}` : '';
+}

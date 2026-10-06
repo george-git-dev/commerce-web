@@ -23,9 +23,9 @@
         >
           <mat-icon aria-hidden="true">{{ item.icon }}</mat-icon>
           <span>{{ item.label }}</span>
-          @if (item.badge && pendingApprovals) {
-            <span class="adm__badge" [attr.aria-label]="pendingApprovals + ' pendentes'">
-              {{ pendingApprovals }}
+          @if (item.badge && pendingApprovals()) {
+            <span class="adm__badge" [attr.aria-label]="pendingApprovals() + ' pendentes'">
+              {{ pendingApprovals() }}
             </span>
           }
         </a>
@@ -76,8 +76,8 @@
           >
             <span class="adm__tab-icon">
               <mat-icon aria-hidden="true">{{ item.icon }}</mat-icon>
-              @if (item.badge && pendingApprovals) {
-                <span class="adm__dot">{{ pendingApprovals }}</span>
+              @if (item.badge && pendingApprovals()) {
+                <span class="adm__dot">{{ pendingApprovals() }}</span>
               }
             </span>
             {{ item.label }}

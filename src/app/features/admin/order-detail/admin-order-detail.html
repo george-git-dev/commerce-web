@@ -1,0 +1,158 @@
+@if (order(); as o) {
+  <section class="od">
+    <a class="od__back" routerLink="/admin/pedidos">
+      <mat-icon aria-hidden="true">arrow_back</mat-icon> Pedidos
+    </a>
+
+    <header class="od__head">
+      <div>
+        <h2>Pedido {{ o.number }}</h2>
+        <p>{{ o.createdAt | date: "dd/MM/yyyy 'às' HH:mm" }} · {{ o.customer.name }}</p>
+      </div>
+      <app-order-status [status]="o.status" [text]="statusLabel(o.status, o.shipping)" />
+    </header>
+
+    @if (o.status === 'aguardando-pagamento') {
+      <p class="od__note">
+        <mat-icon aria-hidden="true">info</mat-icon>
+        A confirmação do pagamento é automática (gateway). Assim que o cliente pagar, o pedido passa
+        para "Pago".
+      </p>
+    }
+    @if (o.status === 'cancelado' && o.cancelReason) {
+      <p class="od__note od__note--cancel">
+        <mat-icon aria-hidden="true">block</mat-icon> Cancelado: {{ o.cancelReason }}
+      </p>
+    }
+
+    <div class="od__grid">
+      <div class="od__main">
+        <article class="od__card">
+          <h3>Itens</h3>
+          <ul class="od__items">
+            @for (item of o.items; track $index) {
+              <li>
+                <img [src]="item.image" alt="" width="56" height="56" />
+                <span>
+                  {{ item.name }}
+                  <small>{{ item.quantity }} × {{ item.unitPrice | currency: 'BRL' }}</small>
+                </span>
+                <strong>{{ item.quantity * item.unitPrice | currency: 'BRL' }}</strong>
+              </li>
+            }
+          </ul>
+          <dl class="od__totals">
+            <div>
+              <dt>Subtotal</dt>
+              <dd>{{ o.subtotal | currency: 'BRL' }}</dd>
+            </div>
+            <div>
+              <dt>Frete</dt>
+              <dd>{{ o.shippingPrice ? (o.shippingPrice | currency: 'BRL') : 'Grátis' }}</dd>
+            </div>
+            <div class="od__total">
+              <dt>Total</dt>
+              <dd>{{ o.total | currency: 'BRL' }}</dd>
+            </div>
+          </dl>
+        </article>
+
+        <article class="od__card">
+          <h3>Histórico</h3>
+          <ol class="od__history">
+            @for (event of o.history; track $index) {
+              <li [class.od__history--cancel]="event.status === 'cancelado'">
+                <span class="od__dot" aria-hidden="true"></span>
+                <span>
+                  <strong>{{ statusLabel(event.status, o.shipping) }}</strong>
+                  <small>{{ event.at | date: 'dd/MM/yyyy HH:mm' }} · {{ event.by }}</small>
+                </span>
+              </li>
+            }
+          </ol>
+        </article>
+      </div>
+
+      <aside class="od__side">
+        <article class="od__card">
+          <h3>Cliente</h3>
+          <p class="od__lines">
+            <strong>{{ o.customer.name }}</strong>
+            <span>{{ o.customer.email }}</span>
+            <span>{{ phone(o.customer.phone) }}</span>
+            <span>{{ o.customer.city }}</span>
+          </p>
+          @if (sensitive()) {
+            <a
+              matButton="outlined"
+              class="ui-cta od__wa"
+              [href]="whatsapp(o.customer.phone)"
+              target="_blank"
+              rel="noopener"
+            >
+              <mat-icon>chat</mat-icon> Chamar no WhatsApp
+            </a>
+          }
+        </article>
+
+        <article class="od__card">
+          <h3>Entrega</h3>
+          @if (o.address; as address) {
+            <p class="od__lines">
+              <span>{{ address.street }}, {{ address.number }}</span>
+              <span>{{ address.district }} · {{ address.city }}/{{ address.state }}</span>
+              <span>CEP {{ address.cep }}</span>
+            </p>
+            <p class="od__muted">{{ o.shipping === 'expresso' ? 'Expresso' : 'Econômico' }}</p>
+          } @else {
+            <p class="od__lines">
+              <strong>Entrega em mãos</strong>
+              <span>Combinar local e horário pelo WhatsApp.</span>
+            </p>
+          }
+          @if (o.trackingCode) {
+            <p class="od__tracking">
+              Rastreio: <strong>{{ o.trackingCode }}</strong>
+            </p>
+          }
+        </article>
+
+        <article class="od__card">
+          <h3>Pagamento</h3>
+          <p class="od__lines">
+            <strong>{{ methodLabels[o.payment] }}</strong>
+            <span>{{ o.total | currency: 'BRL' }}</span>
+          </p>
+        </article>
+
+        @if (canEdit() && (advanceText() || cancellable())) {
+          <div class="od__actions">
+            @if (advanceText(); as label) {
+              <button matButton="filled" class="ui-cta" type="button" (click)="advance()">
+                {{ label }}
+              </button>
+            }
+            @if (cancellable()) {
+              <button
+                matButton="outlined"
+                class="ui-cta od__cancel"
+                type="button"
+                (click)="cancel()"
+              >
+                Cancelar pedido
+              </button>
+            }
+          </div>
+        }
+        <button matButton class="od__print" type="button" (click)="print()">
+          <mat-icon>print</mat-icon> Imprimir pedido
+        </button>
+      </aside>
+    </div>
+  </section>
+} @else {
+  <section class="od__missing">
+    <h2>Pedido não encontrado</h2>
+    <a matButton="outlined" class="ui-cta" routerLink="/admin/pedidos">Ver pedidos</a>
+  </section>
+}

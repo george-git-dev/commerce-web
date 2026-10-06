@@ -1,0 +1,110 @@
+<section class="ao">
+  <header class="ao__head">
+    <p class="ao__eyebrow">Vendas</p>
+    <h2>Pedidos</h2>
+  </header>
+
+  <div class="ao__tabs" role="tablist" aria-label="Status do pedido">
+    @for (tab of tabs(); track tab.id) {
+      <button
+        type="button"
+        role="tab"
+        [attr.aria-selected]="status() === tab.id"
+        [class.ao__tab--on]="status() === tab.id"
+        (click)="setStatus(tab.id)"
+      >
+        {{ tab.label }} <span>{{ tab.count }}</span>
+      </button>
+    }
+  </div>
+
+  <div class="ao__filters">
+    <label class="ao__search">
+      <mat-icon aria-hidden="true">search</mat-icon>
+      <input
+        type="search"
+        placeholder="Número, cliente ou e-mail"
+        aria-label="Buscar pedido"
+        [value]="search()"
+        (input)="onFilter(() => search.set($any($event.target).value))"
+      />
+    </label>
+    <label class="ao__select">
+      Período
+      <select [value]="period()" (change)="onFilter(() => period.set($any($event.target).value))">
+        <option value="7">7 dias</option>
+        <option value="30">30 dias</option>
+        <option value="90">90 dias</option>
+        <option value="todos">Tudo</option>
+      </select>
+    </label>
+    <label class="ao__select">
+      Entrega
+      <select
+        [value]="shipping()"
+        (change)="onFilter(() => shipping.set($any($event.target).value))"
+      >
+        <option value="todos">Todas</option>
+        <option value="economico">Econômico</option>
+        <option value="expresso">Expresso</option>
+        <option value="em-maos">Entrega em mãos</option>
+      </select>
+    </label>
+  </div>
+
+  <p class="ao__count" aria-live="polite">
+    {{ filtered().length }} {{ filtered().length === 1 ? 'pedido' : 'pedidos' }}
+  </p>
+
+  @if (visible().length) {
+    <ul class="ao__list">
+      @for (order of visible(); track order.number) {
+        <li>
+          <a class="ao__row" [routerLink]="['/admin/pedidos', order.number]">
+            <span class="ao__id">
+              <strong>{{ order.number }}</strong>
+              <small>{{ order.createdAt | date: 'dd/MM/yyyy HH:mm' }}</small>
+            </span>
+            <span class="ao__customer">
+              {{ order.customer.name }}
+              <small>{{ order.customer.email }}</small>
+            </span>
+            <span class="ao__items">
+              <span class="ao__thumbs">
+                @for (item of order.items; track $index) {
+                  <img [src]="item.image" alt="" width="32" height="32" />
+                }
+              </span>
+              {{ itemCount(order) }} {{ itemCount(order) === 1 ? 'item' : 'itens' }}
+            </span>
+            <span class="ao__pay">
+              {{ methodLabels[order.payment] }}
+              <small>
+                @if (order.shipping === 'em-maos') {
+                  <mat-icon aria-hidden="true">handshake</mat-icon>
+                }
+                {{ shippingLabels[order.shipping] }}
+              </small>
+            </span>
+            <strong class="ao__total">{{ order.total | currency: 'BRL' }}</strong>
+            <app-order-status
+              class="ao__status"
+              [status]="order.status"
+              [text]="statusLabel(order.status, order.shipping)"
+            />
+          </a>
+        </li>
+      }
+    </ul>
+    @if (visible().length < filtered().length) {
+      <button matButton="outlined" class="ui-cta ao__more" type="button" (click)="more()">
+        Carregar mais ({{ filtered().length - visible().length }})
+      </button>
+    }
+  } @else {
+    <div class="ao__empty">
+      <mat-icon aria-hidden="true">receipt_long</mat-icon>
+      <p>Nenhum pedido com esses filtros.</p>
+    </div>
+  }
+</section>

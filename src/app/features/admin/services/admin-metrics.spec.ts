@@ -19,7 +19,7 @@ function order(days: number, total: number, extra: Partial<AdminOrder> = {}): Ad
     number: `NP${days}${total}`,
     createdAt,
     status: 'pago',
-    customer: { name: 'Ana', email: 'ana@x.com', city: 'São Paulo, SP' },
+    customer: { name: 'Ana', email: 'ana@x.com', city: 'São Paulo, SP', phone: '' },
     firstPurchase: false,
     items: [
       {
@@ -34,6 +34,10 @@ function order(days: number, total: number, extra: Partial<AdminOrder> = {}): Ad
     ],
     payment: 'pix',
     shipping: 'economico',
+    address: null,
+    history: [],
+    subtotal: total,
+    shippingPrice: 0,
     total,
     ...extra,
   };

@@ -3,6 +3,9 @@ import { permissionGuard } from '../../core/guards/role-guard';
 import { ADMIN_NAV } from './admin-nav';
 import { AdminLayout } from './layout/admin-layout';
 
+/** Telas já prontas (as outras do menu abrem "em construção"). */
+const READY = ['pedidos'];
+
 /** Rotas do backoffice (`/admin`). Cada tela exige a permissão do seu item de menu. */
 export const ADMIN_ROUTES: Routes = [
   {
@@ -14,8 +17,21 @@ export const ADMIN_ROUTES: Routes = [
         title: 'Nani Admin | Início',
         loadComponent: () => import('./dashboard/dashboard').then((m) => m.Dashboard),
       },
+      {
+        path: 'pedidos',
+        title: 'Nani Admin | Pedidos',
+        canActivate: [permissionGuard('orders:view', '/admin')],
+        loadComponent: () => import('./orders/admin-orders').then((m) => m.AdminOrders),
+      },
+      {
+        path: 'pedidos/:numero',
+        title: 'Nani Admin | Pedido',
+        canActivate: [permissionGuard('orders:view', '/admin')],
+        loadComponent: () =>
+          import('./order-detail/admin-order-detail').then((m) => m.AdminOrderDetail),
+      },
       // Telas das próximas sessões: por enquanto, uma página "em construção".
-      ...ADMIN_NAV.filter((item) => item.path).map((item) => ({
+      ...ADMIN_NAV.filter((item) => item.path && !READY.includes(item.path)).map((item) => ({
         path: item.path,
         title: `Nani Admin | ${item.label}`,
         canActivate: [permissionGuard(item.permission, '/admin')],

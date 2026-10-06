@@ -43,5 +43,7 @@ import { ORDER_STATUS_LABELS, OrderStatus } from '../../core/models/order';
 })
 export class OrderStatusChip {
   readonly status = input.required<OrderStatus>();
-  protected readonly label = computed(() => ORDER_STATUS_LABELS[this.status()]);
+  /** Texto próprio (ex.: no admin, "Pronto para entrega" na entrega em mãos). */
+  readonly text = input<string>();
+  protected readonly label = computed(() => this.text() ?? ORDER_STATUS_LABELS[this.status()]);
 }

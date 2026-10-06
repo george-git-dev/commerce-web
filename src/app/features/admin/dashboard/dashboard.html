@@ -53,7 +53,7 @@
   </div>
 
   <h3 class="dash__subtitle">Precisa da sua atenção</h3>
-  @let a = data.alerts;
+  @let a = data.alerts();
   <ul class="dash__alerts">
     <li>
       <a routerLink="/admin/pedidos" [queryParams]="{ status: 'pago' }">
@@ -204,6 +204,6 @@
         >Ver todos <mat-icon aria-hidden="true">arrow_forward</mat-icon></a
       >
     </header>
-    <app-latest-orders [orders]="data.latestOrders" />
+    <app-latest-orders [orders]="data.latestOrders()" />
   </section>
 </section>

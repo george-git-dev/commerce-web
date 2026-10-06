@@ -1,10 +1,7 @@
-import { computed, Injectable, signal } from '@angular/core';
+import { computed, inject, Injectable, signal } from '@angular/core';
 import { MOCK_PRODUCTS } from '../../../core/data/mock-products';
-import {
-  adminOrdersMock,
-  LOW_STOCK_THRESHOLD,
-  PENDING_REVIEWS_MOCK,
-} from '../data/admin-orders-mock';
+import { LOW_STOCK_THRESHOLD, PENDING_REVIEWS_MOCK } from '../data/admin-orders-mock';
+import { AdminOrderStore } from './admin-order-store';
 import {
   dailySeries,
   DashboardPeriod,
@@ -23,8 +20,12 @@ import {
  */
 @Injectable({ providedIn: 'root' })
 export class AdminDashboard {
-  private readonly now = new Date();
-  private readonly orders = adminOrdersMock(this.now);
+  private readonly store = inject(AdminOrderStore);
+  private readonly now = this.store.now;
+  /** Pedidos da loja (mudam quando a equipe avança ou cancela um pedido). */
+  private get orders() {
+    return this.store.orders();
+  }
 
   readonly period = signal<DashboardPeriod>('30d');
   private readonly range = computed(() => periodRange(this.period(), this.now));
@@ -80,7 +81,7 @@ export class AdminDashboard {
   });
 
   /** Pendências que pedem ação, independentes do período escolhido. */
-  readonly alerts = {
+  readonly alerts = computed(() => ({
     toSeparate: this.orders.filter((order) => order.status === 'pago').length,
     inHandsPending: this.orders.filter(
       (order) =>
@@ -90,10 +91,12 @@ export class AdminDashboard {
       (variant) => variant.stock <= LOW_STOCK_THRESHOLD,
     ).length,
     pendingReviews: PENDING_REVIEWS_MOCK,
-  };
+  }));
 
   /** Contador do menu "Aprovações". */
-  readonly pendingApprovals = this.alerts.pendingReviews + this.alerts.inHandsPending;
+  readonly pendingApprovals = computed(
+    () => this.alerts().pendingReviews + this.alerts().inHandsPending,
+  );
 
-  readonly latestOrders = this.orders.slice(0, 5);
+  readonly latestOrders = computed(() => this.orders.slice(0, 5));
 }

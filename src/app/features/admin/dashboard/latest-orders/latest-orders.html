@@ -1,7 +1,7 @@
 <ul class="lo__orders">
   @for (order of orders(); track order.number) {
     <li>
-      <a class="lo__order" routerLink="/admin/pedidos">
+      <a class="lo__order" [routerLink]="['/admin/pedidos', order.number]">
         <span class="lo__order-main">
           <strong>{{ order.number }}</strong>
           <span>{{ order.customer.name }}</span>
