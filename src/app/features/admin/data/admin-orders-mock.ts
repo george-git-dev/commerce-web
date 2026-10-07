@@ -51,8 +51,6 @@ export interface AdminOrder {
   total: number;
 }
 
-/** Variantes com estoque igual ou abaixo disto aparecem como "estoque baixo". */
-export const LOW_STOCK_THRESHOLD = 5;
 /** Avaliações aguardando moderação (mock até a tela de Aprovações). */
 export const PENDING_REVIEWS_MOCK = 4;
 

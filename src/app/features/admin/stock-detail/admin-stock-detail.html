@@ -1,0 +1,123 @@
+<section class="sd">
+  <a class="sd__back" routerLink="/admin/estoque">
+    <mat-icon aria-hidden="true">arrow_back</mat-icon> Estoque
+  </a>
+
+  @if (row(); as r) {
+    <header class="sd__head">
+      @if (r.product.images[0]; as image) {
+        <img [src]="image" alt="" width="64" height="64" />
+      }
+      <div>
+        <h2>{{ r.product.name }}</h2>
+        <p>
+          {{ r.product.brandName }} · {{ title() }} · SKU {{ r.variant.id }} ·
+          <a [routerLink]="['/admin/produtos', r.product.slug]">ver produto</a>
+        </p>
+      </div>
+    </header>
+
+    <div class="sd__cards">
+      <div class="sd__card">
+        <span class="sd__label">Estoque atual</span>
+        <strong class="sd__qty">{{ r.variant.stock }} <small>un.</small></strong>
+        <span [class]="'sd__badge sd__badge--' + r.status">{{ labels[r.status] }}</span>
+        <span class="sd__hint">
+          Custo médio:
+          <strong>{{
+            r.cost != null ? (r.cost | currency: 'BRL') : 'sem compra registrada'
+          }}</strong>
+        </span>
+        @if (canEdit) {
+          <button matButton="filled" class="ui-cta" type="button" (click)="adjust()">
+            <mat-icon>tune</mat-icon> Ajustar estoque
+          </button>
+        }
+      </div>
+
+      <form class="sd__card" (submit)="$event.preventDefault(); saveMinimum()" novalidate>
+        <label class="sd__label" for="min">Estoque mínimo</label>
+        <p class="sd__hint">No mínimo ou abaixo, o item aparece como "Baixo" e no painel.</p>
+        @if (canEdit) {
+          <div class="sd__min">
+            <input
+              id="min"
+              type="number"
+              inputmode="numeric"
+              appNonNegative="integer"
+              min="0"
+              [value]="minDraft()"
+              [attr.aria-invalid]="!minValid() || null"
+              (input)="minDraft.set($any($event.target).value)"
+            />
+            <button
+              matButton="outlined"
+              type="submit"
+              [disabled]="!minValid() || minDraft() === '' + r.min"
+            >
+              Salvar
+            </button>
+          </div>
+          @if (!minValid()) {
+            <small class="sd__error">Inteiro, zero ou mais.</small>
+          }
+        } @else {
+          <strong class="sd__qty">{{ r.min }} <small>un.</small></strong>
+        }
+      </form>
+    </div>
+
+    @if (purchases().length) {
+      <h3>Compras deste item</h3>
+      <ul class="sd__history">
+        @for (p of purchases(); track p.entry.id) {
+          <li [class.sd__best]="p.item.unitCost === bestCost()">
+            <span class="sd__when">{{ p.entry.date | date: 'dd/MM/yyyy' }}</span>
+            <span class="sd__what">
+              <strong>{{ p.supplier }}</strong> ·
+              <a [routerLink]="['/admin/estoque/entradas', p.entry.id]">NF {{ p.entry.invoice }}</a>
+            </span>
+            <span class="sd__delta">{{ p.item.unitCost | currency: 'BRL' }}</span>
+            <span class="sd__balance">{{ p.item.quantity }} un.</span>
+            <span class="sd__by">{{ p.item.unitCost === bestCost() ? 'menor custo' : '' }}</span>
+          </li>
+        }
+      </ul>
+    }
+
+    <h3>Histórico</h3>
+    <ol class="sd__history">
+      @for (move of history(); track move.id) {
+        <li>
+          <span class="sd__when">{{ move.at | date: 'dd/MM/yyyy HH:mm' }}</span>
+          <span class="sd__what">
+            <strong>{{ moveLabels[move.type] }}</strong>
+            {{ move.reason !== moveLabels[move.type] ? '· ' + move.reason : '' }}
+            @if (move.reference) {
+              ·
+              @if (move.link) {
+                <a [routerLink]="move.link">{{ move.reference }}</a>
+              } @else {
+                {{ move.reference }}
+              }
+            }
+            @if (move.note) {
+              <small>{{ move.note }}</small>
+            }
+          </span>
+          <span class="sd__delta" [class.sd__delta--out]="move.quantity < 0">
+            {{ move.quantity > 0 ? '+' : '' }}{{ move.quantity }}
+          </span>
+          <span class="sd__balance">saldo {{ move.balance }}</span>
+          <span class="sd__by">{{ move.by }}</span>
+        </li>
+      }
+    </ol>
+  } @else {
+    <div class="sd__empty">
+      <mat-icon aria-hidden="true">inventory_2</mat-icon>
+      <p>Item de estoque não encontrado.</p>
+      <a matButton="outlined" routerLink="/admin/estoque">Ver estoque</a>
+    </div>
+  }
+</section>

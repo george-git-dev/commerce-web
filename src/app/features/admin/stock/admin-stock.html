@@ -1,0 +1,101 @@
+<section class="st">
+  <app-stock-tabs />
+
+  <div class="st__summary" role="group" aria-label="Resumo do estoque">
+    <button type="button" [attr.aria-pressed]="status() === 'todas'" (click)="status.set('todas')">
+      <strong>{{ counts().total }}</strong> itens
+    </button>
+    <button
+      type="button"
+      class="st__chip--baixo"
+      [attr.aria-pressed]="status() === 'baixo'"
+      (click)="toggleStatus('baixo')"
+    >
+      <strong>{{ counts().baixo }}</strong> baixos
+    </button>
+    <button
+      type="button"
+      class="st__chip--zerado"
+      [attr.aria-pressed]="status() === 'zerado'"
+      (click)="toggleStatus('zerado')"
+    >
+      <strong>{{ counts().zerado }}</strong> zerados
+    </button>
+  </div>
+
+  <div class="st__filters">
+    <label class="st__search">
+      <mat-icon aria-hidden="true">search</mat-icon>
+      <input
+        type="search"
+        placeholder="Produto, marca ou SKU"
+        aria-label="Buscar no estoque"
+        [value]="search()"
+        (input)="search.set($any($event.target).value)"
+      />
+    </label>
+    <label class="st__select">
+      Situação
+      <select [value]="status()" (change)="status.set($any($event.target).value)">
+        <option value="todas">Todas</option>
+        <option value="alerta">Baixo/zerado</option>
+        <option value="zerado">Zerado</option>
+        <option value="baixo">Baixo</option>
+        <option value="ok">OK</option>
+      </select>
+    </label>
+    <label class="st__select">
+      Tipo
+      <select [value]="kind()" (change)="kind.set($any($event.target).value)">
+        <option value="todos">Todos</option>
+        <option value="frasco">Frasco</option>
+        <option value="decant">Decant</option>
+      </select>
+    </label>
+    <label class="st__select">
+      Marca
+      <select [value]="brand()" (change)="brand.set($any($event.target).value)">
+        <option value="todas">Todas</option>
+        @for (name of brands(); track name) {
+          <option [value]="name">{{ name }}</option>
+        }
+      </select>
+    </label>
+  </div>
+
+  <p class="st__count" aria-live="polite">
+    {{ filtered().length }} {{ filtered().length === 1 ? 'item' : 'itens' }}
+  </p>
+
+  @if (filtered().length) {
+    <ul class="st__list">
+      @for (row of filtered(); track track(row)) {
+        <li>
+          <a class="st__row" [routerLink]="['/admin/estoque', row.variant.id]">
+            @if (row.product.images[0]; as image) {
+              <img [src]="image" alt="" width="44" height="44" />
+            } @else {
+              <span class="st__noimg" aria-hidden="true"><mat-icon>image</mat-icon></span>
+            }
+            <span class="st__name">
+              <strong>{{ row.product.name }}</strong>
+              <small>{{ variantLabel(row.product, row.variant) }} · {{ row.variant.id }}</small>
+            </span>
+            <span class="st__qty">
+              <strong>{{ row.variant.stock }}</strong>
+              <small>mín. {{ row.min }}</small>
+            </span>
+            <span [class]="'st__badge st__badge--' + row.status">
+              {{ labels[row.status] }}
+            </span>
+          </a>
+        </li>
+      }
+    </ul>
+  } @else {
+    <div class="st__empty">
+      <mat-icon aria-hidden="true">inventory_2</mat-icon>
+      <p>Nenhum item com esses filtros.</p>
+    </div>
+  }
+</section>

@@ -76,10 +76,10 @@
       </li>
     }
     <li>
-      <a routerLink="/admin/estoque">
+      <a routerLink="/admin/estoque" [queryParams]="{ situacao: 'alerta' }">
         <mat-icon aria-hidden="true">warning_amber</mat-icon>
         <span
-          ><strong>{{ a.lowStock }}</strong> variantes com estoque baixo</span
+          ><strong>{{ a.lowStock }}</strong> itens com estoque baixo ou zerado</span
         >
         <mat-icon class="dash__go" aria-hidden="true">chevron_right</mat-icon>
       </a>

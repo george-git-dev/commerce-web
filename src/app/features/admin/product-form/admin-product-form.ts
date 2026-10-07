@@ -31,12 +31,10 @@ import {
 import { AuthService } from '../../../core/services/auth-service';
 import { AdminProductStore } from '../services/admin-product-store';
 import {
-  DECANT_ON_DEMAND_LIMIT,
   DECANT_SIZES_ML,
   draftProblems,
   MIN_DESCRIPTION,
   validPromo,
-  validStock,
   requiredProblems,
   slugify,
   uniqueSlug,
@@ -44,6 +42,7 @@ import {
 } from '../services/product-rules';
 import { FormSteps } from './form-steps/form-steps';
 import { NonNegative } from '../../../shared/input-mask/non-negative';
+import { BrandRename } from './brand-rename/brand-rename';
 import { NamePicker } from './name-picker/name-picker';
 import { NoteLayer } from './note-layer/note-layer';
 import { ProductImages } from './product-images/product-images';
@@ -52,6 +51,8 @@ interface DecantSize {
   ml: number;
   checked: boolean;
   price: number | null;
+  /** Já existe no produto: o saldo muda só pela tela de Estoque. */
+  saved: boolean;
 }
 
 const STEPS = ['Dados', 'Variantes', 'Perfil olfativo', 'Imagens', 'Vitrine'] as const;
@@ -70,6 +71,7 @@ const STEPS = ['Dados', 'Variantes', 'Perfil olfativo', 'Imagens', 'Vitrine'] as
     ReactiveFormsModule,
     RouterLink,
     FormSteps,
+    BrandRename,
     NamePicker,
     NonNegative,
     NoteLayer,
@@ -139,7 +141,7 @@ export class AdminProductForm {
   );
 
   // 2. Variantes
-  private readonly originalBottle = this.original?.variants.find((v) => v.kind === 'frasco');
+  protected readonly originalBottle = this.original?.variants.find((v) => v.kind === 'frasco');
   private readonly originalDecants =
     this.original?.variants.filter((v) => v.kind === 'decant') ?? [];
   protected readonly bottle = this.fb.group({
@@ -147,18 +149,29 @@ export class AdminProductForm {
     volumeMl: [this.originalBottle?.volumeMl ?? (null as number | null)],
     price: [this.originalBottle?.price ?? (null as number | null)],
     promoPrice: [this.originalBottle?.promoPrice ?? (null as number | null)],
-    stock: [this.originalBottle?.stock ?? (null as number | null)],
   });
+  /** Saldo atual de um SKU já cadastrado (pode ter mudado no Estoque). */
+  protected currentStock(sku: string | undefined): number {
+    return (
+      this.store
+        .products()
+        .flatMap((p) => p.variants)
+        .find((v) => v.id === sku)?.stock ?? 0
+    );
+  }
   protected readonly bottleOn = signal(this.bottle.controls.enabled.value);
-  /** Decant ligado = disponível na loja (sob demanda, sem estoque). */
-  protected readonly decantOn = signal(this.originalDecants.some((v) => v.stock > 0));
   protected readonly decantSizes = signal<readonly DecantSize[]>(
     [...new Set([...DECANT_SIZES_ML, ...this.originalDecants.map((v) => v.volumeMl ?? 0)])]
       .filter(Boolean)
       .sort((a, b) => a - b)
       .map((ml) => {
         const existing = this.originalDecants.find((v) => v.volumeMl === ml);
-        return { ml, checked: !!existing, price: existing?.price ?? null };
+        return {
+          ml,
+          checked: !!existing,
+          price: existing?.price ?? null,
+          saved: !!existing,
+        };
       }),
   );
   protected readonly customSize = signal<number | null>(null);
@@ -237,7 +250,7 @@ export class AdminProductForm {
     const ml = Math.round(Number(this.customSize()));
     if (!(ml > 0) || this.decantSizes().some((s) => s.ml === ml)) return;
     this.decantSizes.update((list) =>
-      [...list, { ml, checked: true, price: null }].sort((a, b) => a.ml - b.ml),
+      [...list, { ml, checked: true, price: null, saved: false }].sort((a, b) => a.ml - b.ml),
     );
     this.customSize.set(null);
   }
@@ -254,16 +267,17 @@ export class AdminProductForm {
         volumeMl: b.volumeMl ?? undefined,
         price: Number(b.price),
         promoPrice: b.promoPrice ? Number(b.promoPrice) : undefined,
-        stock: Number(b.stock),
+        stock: this.originalBottle ? this.currentStock(this.originalBottle.id) : 0,
       });
     }
     for (const size of this.decantSizes().filter((s) => s.checked)) {
+      const saved = this.originalDecants.find((v) => v.volumeMl === size.ml);
       variants.push({
-        id: this.originalDecants.find((v) => v.volumeMl === size.ml)?.id ?? `${base}-d${size.ml}`,
+        id: saved?.id ?? `${base}-d${size.ml}`,
         kind: 'decant',
         volumeMl: size.ml,
         price: Number(size.price),
-        stock: this.decantOn() ? DECANT_ON_DEMAND_LIMIT : 0,
+        stock: saved ? this.currentStock(saved.id) : 0,
       });
     }
     return variants;
@@ -295,14 +309,7 @@ export class AdminProductForm {
   /** Campo obrigatório vazio — só destaca depois de tentar avançar. */
   protected missing(
     field:
-      | 'gender'
-      | 'concentration'
-      | 'description'
-      | 'kitItems'
-      | 'volumeMl'
-      | 'price'
-      | 'promoPrice'
-      | 'stock',
+      'gender' | 'concentration' | 'description' | 'kitItems' | 'volumeMl' | 'price' | 'promoPrice',
   ): boolean {
     if (!this.showErrors()) return false;
     const { description, kitItems, gender, concentration } = this.data.getRawValue();
@@ -311,11 +318,14 @@ export class AdminProductForm {
     if (field === 'concentration') return !concentration;
     const value = { ...bottle, description, kitItems }[field];
     if (field === 'description') return `${value}`.trim().length < MIN_DESCRIPTION;
-    if (field === 'stock') return !validStock(bottle.stock);
     if (field === 'promoPrice') return !validPromo(bottle.promoPrice, bottle.price);
     return (
       value == null || `${value}`.trim() === '' || (field !== 'kitItems' && !(Number(value) > 0))
     );
+  }
+
+  protected skuOf(ml: number): string | undefined {
+    return this.originalDecants.find((v) => v.volumeMl === ml)?.id;
   }
 
   protected missingSizePrice(size: DecantSize): boolean {

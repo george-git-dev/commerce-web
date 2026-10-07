@@ -2,6 +2,8 @@ import { Permission } from '../../core/config/permissions';
 
 export interface AdminNavItem {
   label: string;
+  /** Nome curto na barra de atalhos do celular (padrão: `label`). */
+  shortLabel?: string;
   icon: string;
   /** Caminho dentro de `/admin` ('' = Início). */
   path: string;
@@ -30,18 +32,14 @@ export const ADMIN_NAV: readonly AdminNavItem[] = [
     shortcut: true,
   },
   { label: 'Produtos', icon: 'inventory_2', path: 'produtos', permission: 'products:view' },
+  // Saldo, entradas de mercadoria (compras) e fornecedores, em abas.
   {
-    label: 'Estoque',
+    label: 'Estoque e compras',
+    shortLabel: 'Estoque',
     icon: 'warehouse',
     path: 'estoque',
     permission: 'stock:view',
     shortcut: true,
-  },
-  {
-    label: 'Fornecedores',
-    icon: 'local_shipping',
-    path: 'fornecedores',
-    permission: 'suppliers:view',
   },
   { label: 'Clientes', icon: 'group', path: 'clientes', permission: 'customers:view' },
   {

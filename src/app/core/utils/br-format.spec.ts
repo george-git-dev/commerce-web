@@ -1,6 +1,7 @@
 import {
   cardBrand,
   formatCardNumber,
+  formatCnpj,
   formatCpf,
   formatDocument,
   formatExpiry,
@@ -71,5 +72,9 @@ describe('telefone e CPF mascarado', () => {
     expect(maskDocument('52998224725')).toBe('***.982.247-**');
     expect(maskDocument('11222333000181')).toBe('11.222.333/0001-81');
     expect(maskPhone('(11) 98765-4321')).toBe('(11) *****-4321');
+  });
+  it('formata CNPJ enquanto digita', () => {
+    expect(formatCnpj('11222333000181')).toBe('11.222.333/0001-81');
+    expect(formatCnpj('112223')).toBe('11.222.3');
   });
 });

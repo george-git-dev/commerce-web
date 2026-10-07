@@ -41,6 +41,15 @@ export function isValidCnpj(value: string): boolean {
   return digit(12) === Number(d[12]) && digit(13) === Number(d[13]);
 }
 
+/** 00.000.000/0000-00 enquanto digita (só CNPJ, sem cair na máscara de CPF). */
+export function formatCnpj(value: string): string {
+  return onlyDigits(value, 14)
+    .replace(/^(\d{2})(\d)/, '$1.$2')
+    .replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3')
+    .replace(/\.(\d{3})(\d)/, '.$1/$2')
+    .replace(/(\d{4})(\d{1,2})$/, '$1-$2');
+}
+
 /** "CPF ou CNPJ" no mesmo campo: formata conforme a quantidade de dígitos. */
 export function formatDocument(value: string): string {
   const d = onlyDigits(value, 14);

@@ -48,7 +48,7 @@ describe('regras do cadastro de produto', () => {
       concentration: 'Eau de Parfum',
       description: 'Oriental especiado intenso.',
       kitItems: '',
-      bottle: { enabled: true, volumeMl: 100, price: 299.9, stock: 0 },
+      bottle: { enabled: true, volumeMl: 100, price: 299.9 },
       decants: [{ checked: true, price: 19.9 }],
       families: ['Oriental'],
       occasions: ['noite'],
@@ -64,14 +64,13 @@ describe('regras do cadastro de produto', () => {
     const perfume = { ...draft, gender: '', concentration: '' };
     expect(requiredProblems(0, perfume)).toHaveLength(2);
     expect(requiredProblems(0, { ...draft, concentration: 'none' })).toEqual([]);
-    const noPrice = { ...draft.bottle, price: '', stock: '' };
-    expect(requiredProblems(1, { ...draft, bottle: noPrice })).toHaveLength(2);
-    const negative = { ...draft.bottle, volumeMl: -100, price: 0, stock: -1, promoPrice: -5 };
-    expect(requiredProblems(1, { ...draft, bottle: negative })).toHaveLength(4);
+    // Estoque não é do cadastro: entra por compra/ajuste em Estoque e compras.
+    const noPrice = { ...draft.bottle, price: '' };
+    expect(requiredProblems(1, { ...draft, bottle: noPrice })).toHaveLength(1);
+    const negative = { ...draft.bottle, volumeMl: -100, price: 0, promoPrice: -5 };
+    expect(requiredProblems(1, { ...draft, bottle: negative })).toHaveLength(3);
     const promoHigh = { ...draft.bottle, promoPrice: 299.9 };
     expect(requiredProblems(1, { ...draft, bottle: promoHigh })[0]).toContain('promoção');
-    const halfUnit = { ...draft.bottle, stock: 1.5 };
-    expect(requiredProblems(1, { ...draft, bottle: halfUnit })).toHaveLength(1);
     const negativeDecant = [{ checked: true, price: -10 }];
     expect(requiredProblems(1, { ...draft, decants: negativeDecant })).toHaveLength(1);
     expect(

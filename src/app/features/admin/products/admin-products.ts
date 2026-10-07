@@ -3,12 +3,11 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { RouterLink } from '@angular/router';
-import { BRANDS } from '../../../core/config/brands';
 import { Product, ProductStatus } from '../../../core/models/product';
 import { AuthService } from '../../../core/services/auth-service';
 import { lowestPrice } from '../../../core/utils/product-pricing';
-import { LOW_STOCK_THRESHOLD } from '../data/admin-orders-mock';
 import { AdminProductStore } from '../services/admin-product-store';
+import { AdminStockStore } from '../services/admin-stock-store';
 
 /** `/admin/produtos` — catálogo com busca e filtros. */
 @Component({
@@ -21,8 +20,24 @@ import { AdminProductStore } from '../services/admin-product-store';
 export class AdminProducts {
   protected readonly store = inject(AdminProductStore);
   protected readonly auth = inject(AuthService);
+  private readonly stockStore = inject(AdminStockStore);
+  /** SKUs com estoque baixo ou zerado (mesma regra da tela de Estoque). */
+  private readonly alertSkus = computed(
+    () =>
+      new Set(
+        this.stockStore
+          .rows()
+          .filter((row) => row.status !== 'ok')
+          .map((row) => row.variant.id),
+      ),
+  );
 
-  protected readonly brands = BRANDS.map((brand) => brand.name);
+  /** Todas as marcas com produto (inclusive inativas), para filtrar. */
+  protected readonly brands = computed(() =>
+    [...new Set(this.store.products().map((product) => product.brandName))].sort((a, b) =>
+      a.localeCompare(b, 'pt-BR'),
+    ),
+  );
   protected readonly lowestPrice = lowestPrice;
 
   protected readonly search = signal('');
@@ -52,8 +67,8 @@ export class AdminProducts {
     return product.variants.reduce((sum, variant) => sum + variant.stock, 0);
   }
 
-  /** Alguma variante no limite de estoque baixo. */
+  /** Alguma variante com estoque baixo ou zerado. */
   protected lowStock(product: Product): boolean {
-    return product.variants.some((variant) => variant.stock <= LOW_STOCK_THRESHOLD);
+    return product.variants.some((variant) => this.alertSkus().has(variant.id));
   }
 }

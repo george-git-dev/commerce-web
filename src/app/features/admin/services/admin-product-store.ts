@@ -1,12 +1,12 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
-import { BRANDS } from '../../../core/config/brands';
 import { CategoryInfo, PRODUCT_CATEGORIES } from '../../../core/config/product-categories';
 import { FRAGRANCE_NOTES, NOTE_IMAGES } from '../../../core/config/fragrance';
 import { MOCK_PRODUCTS } from '../../../core/data/mock-products';
-import { Product } from '../../../core/models/product';
+import { Gender, Product } from '../../../core/models/product';
 import { AuthService } from '../../../core/services/auth-service';
+import { BRANDS } from '../../../core/config/brands';
 import { AdminAudit } from './admin-audit';
-import { BADGE_OPTIONS, normalizeName, slugify } from './product-rules';
+import { BADGE_OPTIONS, normalizeName, slugify, uniqueSlug } from './product-rules';
 
 const brl = (value: number | undefined) =>
   value == null ? '—' : value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -53,10 +53,34 @@ export class AdminProductStore {
     ]),
   ]);
 
-  /** Marcas: as da vitrine + as já usadas em produtos. */
+  /** Marcas criadas no cadastro ("+ Nova marca"). Fase 2: tabela `brand` (B3). */
+  private readonly brandList = signal<readonly string[]>(BRANDS.map((brand) => brand.name));
+
+  /** Marcas para escolher: as cadastradas + as já usadas em produtos. */
   readonly brandNames = computed(() => [
-    ...new Set([...BRANDS.map((brand) => brand.name), ...this.state().map((p) => p.brandName)]),
+    ...new Set([...this.brandList(), ...this.state().map((p) => p.brandName)]),
   ]);
+
+  /** Garante a marca na lista (criada no cadastro de produto, no fornecedor…). */
+  addBrand(name: string): void {
+    const key = normalizeName(name);
+    if (!this.brandNames().some((brand) => normalizeName(brand) === key)) {
+      this.brandList.update((list) => [...list, name.trim()]);
+    }
+  }
+
+  /** Quantos produtos usam a marca. */
+  productCount(brand: string): number {
+    return this.state().filter((product) => product.brandName === brand).length;
+  }
+
+  /** Renomeou a marca: os produtos acompanham (quem audita é o `AdminBrandStore`). */
+  renameBrand(from: string, to: string): void {
+    this.brandList.update((list) => list.map((brand) => (brand === from ? to : brand)));
+    this.state.update((list) =>
+      list.map((product) => (product.brandName === from ? { ...product, brandName: to } : product)),
+    );
+  }
 
   readonly noteNames = computed(() => [
     ...FRAGRANCE_NOTES,
@@ -110,7 +134,64 @@ export class AdminProductStore {
       .flatMap((product) => product.variants.map((variant) => variant.id.toLowerCase()));
   }
 
+  /**
+   * Cadastro rápido (na entrada de mercadoria): rascunho com só os dados e o
+   * frasco, sem preço nem fotos — completa e publica depois, em Produtos.
+   * Devolve o SKU do frasco.
+   */
+  createDraft(d: {
+    brand: string;
+    line: string;
+    subtitle: string;
+    category: string;
+    gender: Gender;
+    volumeMl: number;
+  }): string {
+    const line = d.line.trim();
+    const subtitle = d.subtitle.trim();
+    const base = slugify(`${d.brand} ${line} ${subtitle}`);
+    const slug = uniqueSlug(
+      base,
+      this.state().map((p) => p.slug),
+    );
+    const sku = uniqueSlug(`${slug}-${d.volumeMl}`, this.skusExcept(null));
+    this.save({
+      id: this.nextId(),
+      slug,
+      line,
+      subtitle: subtitle || undefined,
+      name: subtitle ? `${line} ${subtitle}` : line,
+      description: '',
+      brandId: Math.max(1, this.brandNames().indexOf(d.brand) + 1),
+      brandName: d.brand,
+      category: d.category,
+      gender: d.gender,
+      families: [],
+      status: 'rascunho',
+      images: [],
+      variants: [{ id: sku, kind: 'frasco', volumeMl: d.volumeMl, price: 0, stock: 0 }],
+    });
+    return sku;
+  }
+
+  /** Só o saldo de um SKU (quem audita é o `AdminStockStore`). */
+  setStock(sku: string, stock: number): void {
+    this.state.update((list) =>
+      list.map((product) =>
+        product.variants.some((variant) => variant.id === sku)
+          ? {
+              ...product,
+              variants: product.variants.map((variant) =>
+                variant.id === sku ? { ...variant, stock } : variant,
+              ),
+            }
+          : product,
+      ),
+    );
+  }
+
   save(product: Product): void {
+    this.addBrand(product.brandName);
     const before = this.state().find((item) => item.id === product.id);
     this.state.update((list) =>
       before ? list.map((item) => (item.id === product.id ? product : item)) : [product, ...list],

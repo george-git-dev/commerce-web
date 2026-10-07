@@ -1,0 +1,71 @@
+<section class="en">
+  <app-stock-tabs />
+
+  <div class="en__bar">
+    <label class="en__search">
+      <mat-icon aria-hidden="true">search</mat-icon>
+      <input
+        type="search"
+        placeholder="Nota ou fornecedor"
+        aria-label="Buscar entrada"
+        [value]="search()"
+        (input)="search.set($any($event.target).value)"
+      />
+    </label>
+    @if (canEdit) {
+      <a matButton="filled" class="ui-cta" routerLink="/admin/estoque/entradas/nova">
+        <mat-icon>add</mat-icon> Nova entrada
+      </a>
+    }
+  </div>
+
+  <div class="en__filters">
+    <label>
+      Situação
+      <select [value]="status()" (change)="status.set($any($event.target).value)">
+        <option value="todas">Todas</option>
+        <option value="pedido">Pedido ao fornecedor</option>
+        <option value="recebido">Recebido</option>
+      </select>
+    </label>
+    <label>
+      Fornecedor
+      <select [value]="supplier()" (change)="supplier.set($any($event.target).value)">
+        <option value="todos">Todos</option>
+        @for (item of store.suppliers(); track item.id) {
+          <option [value]="'' + item.id">{{ item.tradeName || item.legalName }}</option>
+        }
+      </select>
+    </label>
+  </div>
+
+  @if (filtered().length) {
+    <ul class="en__list">
+      @for (entry of filtered(); track entry.id) {
+        <li>
+          <a class="en__row" [routerLink]="['/admin/estoque/entradas', entry.id]">
+            <span class="en__main">
+              <strong>NF {{ entry.invoice }}</strong>
+              <small>{{ store.supplierName(entry.supplierId) }}</small>
+            </span>
+            <span class="en__total">
+              {{ total(entry.items) | currency: 'BRL' }}
+              <small>
+                {{ entry.date | date: 'dd/MM/yyyy' }} · {{ entry.items.length }}
+                {{ entry.items.length === 1 ? 'item' : 'itens' }}
+              </small>
+            </span>
+            <span class="en__status" [class.en__status--pending]="entry.status === 'pedido'">
+              {{ labels[entry.status] }}
+            </span>
+          </a>
+        </li>
+      }
+    </ul>
+  } @else {
+    <div class="en__empty">
+      <mat-icon aria-hidden="true">local_shipping</mat-icon>
+      <p>Nenhuma entrada com esses filtros.</p>
+    </div>
+  }
+</section>

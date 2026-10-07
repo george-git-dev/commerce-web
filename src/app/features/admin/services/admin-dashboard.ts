@@ -1,7 +1,7 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
-import { MOCK_PRODUCTS } from '../../../core/data/mock-products';
-import { LOW_STOCK_THRESHOLD, PENDING_REVIEWS_MOCK } from '../data/admin-orders-mock';
+import { PENDING_REVIEWS_MOCK } from '../data/admin-orders-mock';
 import { AdminOrderStore } from './admin-order-store';
+import { AdminStockStore } from './admin-stock-store';
 import {
   dailySeries,
   DashboardPeriod,
@@ -21,6 +21,7 @@ import {
 @Injectable({ providedIn: 'root' })
 export class AdminDashboard {
   private readonly store = inject(AdminOrderStore);
+  private readonly stock = inject(AdminStockStore);
   private readonly now = this.store.now;
   /** Pedidos da loja (mudam quando a equipe avança ou cancela um pedido). */
   private get orders() {
@@ -87,9 +88,7 @@ export class AdminDashboard {
       (order) =>
         order.shipping === 'em-maos' && ['pago', 'em-separacao', 'enviado'].includes(order.status),
     ).length,
-    lowStock: MOCK_PRODUCTS.flatMap((product) => product.variants).filter(
-      (variant) => variant.stock <= LOW_STOCK_THRESHOLD,
-    ).length,
+    lowStock: this.stock.alertCount(),
     pendingReviews: PENDING_REVIEWS_MOCK,
   }));
 

@@ -78,8 +78,6 @@ h2 {
 }
 
 textarea,
-.f-field select,
-.pf__opt select,
 .pf__sizes input[type='number'],
 .pf__add-size input {
   width: 100%;
@@ -106,8 +104,6 @@ textarea,
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  font-size: 0.9375rem;
-  cursor: pointer;
 }
 
 .pf__switch input,
@@ -131,7 +127,7 @@ textarea,
 
   li {
     display: grid;
-    grid-template-columns: 96px 1fr;
+    grid-template-columns: 76px 1fr 1fr;
     align-items: center;
     gap: 10px;
     padding: 6px 10px;
@@ -146,6 +142,13 @@ textarea,
     min-height: 44px;
     font-weight: 600;
   }
+}
+
+.pf__stock {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
 }
 
 .pf__size--on {

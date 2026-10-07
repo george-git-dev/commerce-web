@@ -80,7 +80,7 @@
                 <span class="adm__dot">{{ pendingApprovals() }}</span>
               }
             </span>
-            {{ item.label }}
+            {{ item.shortLabel ?? item.label }}
           </a>
         }
       </nav>

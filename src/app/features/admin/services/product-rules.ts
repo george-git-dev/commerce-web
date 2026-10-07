@@ -83,9 +83,9 @@ export interface ProductDraft {
     enabled: boolean;
     volumeMl: number | string | null;
     price: number | string | null;
-    stock: number | string | null;
     promoPrice?: number | string | null;
   };
+  /** Estoque não entra aqui: só por compra/envase/ajuste (Estoque e compras). */
   decants: readonly { checked: boolean; price: number | string | null }[];
   families: readonly string[];
   occasions: readonly string[];
@@ -106,11 +106,6 @@ type Field = number | string | null;
 const filled = (value: Field) => value != null && `${value}`.trim() !== '';
 /** Preço/volume: preenchido e maior que zero (negativo e zero não valem). */
 const positive = (value: Field) => filled(value) && Number(value) > 0;
-
-/** Estoque: inteiro, zero ou mais. */
-export function validStock(value: Field): boolean {
-  return filled(value) && Number.isInteger(Number(value)) && Number(value) >= 0;
-}
 
 /** Promoção é opcional; se preenchida, maior que zero e menor que o preço. */
 export function validPromo(promo: Field, price: Field): boolean {
@@ -153,12 +148,12 @@ export function requiredProblems(step: number, d: ProductDraft): string[] {
           !validPromo(d.bottle.promoPrice ?? null, d.bottle.price),
           'A promoção precisa ser maior que zero e menor que o preço.',
         );
-        add(!validStock(d.bottle.stock), 'Informe o estoque do frasco: inteiro, zero ou mais.');
       }
       add(
         checked.some((size) => !positive(size.price)),
         'Informe o preço de cada decant marcado (maior que zero).',
       );
+
       break;
     }
     case 2:
@@ -190,13 +185,6 @@ export function requiredProblems(step: number, d: ProductDraft): string[] {
 
 /** Tamanhos de decant oferecidos no cadastro (marque só os que vai vender). */
 export const DECANT_SIZES_ML = [2, 3, 5, 10] as const;
-
-/**
- * Decant é produzido sob demanda: não tem estoque. Ligado, a loja trata como
- * disponível até este limite por pedido; desligado, aparece indisponível.
- * Fase 2: o back devolve o mesmo (`stock` calculado) — a vitrine não muda.
- */
-export const DECANT_ON_DEMAND_LIMIT = 10;
 
 /** Selos sugeridos no card da vitrine; dá para criar outros no cadastro. */
 export const BADGE_OPTIONS = ['Exclusivo', 'Edição limitada'] as const;

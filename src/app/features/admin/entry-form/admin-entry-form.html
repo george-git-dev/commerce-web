@@ -1,0 +1,134 @@
+<section class="ef">
+  <a class="ef__back" routerLink="/admin/estoque/entradas">
+    <mat-icon aria-hidden="true">arrow_back</mat-icon> Entradas
+  </a>
+  <h2>Nova entrada de mercadoria</h2>
+
+  @if (tried() && problems().length) {
+    <ul class="ef__problems" role="alert">
+      @for (problem of problems(); track problem) {
+        <li>{{ problem }}</li>
+      }
+    </ul>
+  }
+
+  <form class="ef__card" (submit)="$event.preventDefault()" novalidate>
+    <h3>Nota do fornecedor</h3>
+    <label class="ef__field">
+      Fornecedor
+      <select
+        [attr.aria-invalid]="(tried() && supplierId() == null) || null"
+        (change)="chooseSupplier($any($event.target).value)"
+      >
+        <option value="" disabled [selected]="supplierId() == null">Escolha o fornecedor</option>
+        @for (item of suppliers(); track item.id) {
+          <option [value]="'' + item.id" [selected]="item.id === supplierId()">
+            {{ item.tradeName || item.legalName }}
+          </option>
+        }
+        @if (canAddSupplier) {
+          <option [value]="new">+ Novo fornecedor</option>
+        }
+      </select>
+    </label>
+    <div class="ef__grid">
+      <label class="ef__field">
+        Nº da nota
+        <input
+          placeholder="Ex.: 7.215"
+          [value]="invoice()"
+          [attr.aria-invalid]="(tried() && !invoice().trim()) || null"
+          (input)="invoice.set($any($event.target).value)"
+        />
+      </label>
+      <label class="ef__field">
+        Data da nota
+        <input
+          type="date"
+          [max]="maxDate"
+          [value]="date()"
+          (input)="date.set($any($event.target).value)"
+        />
+      </label>
+    </div>
+  </form>
+
+  <section class="ef__card">
+    <h3>Itens</h3>
+    <p class="ef__hint">Só frascos. Produto que ainda não existe: "+ Produto novo".</p>
+    <ol class="ef__items">
+      @for (item of items(); track item.key; let i = $index) {
+        <li>
+          <label class="ef__field ef__product">
+            Produto {{ i + 1 }}
+            <select
+              [attr.aria-invalid]="invalid(item, 'sku') || null"
+              (change)="chooseProduct(item.key, $any($event.target).value)"
+            >
+              <option value="" disabled [selected]="!item.sku">Escolha o produto</option>
+              @for (option of options(); track option.sku) {
+                <option [value]="option.sku" [selected]="option.sku === item.sku">
+                  {{ option.label }}
+                </option>
+              }
+              <option [value]="new">+ Produto novo (cadastro rápido)</option>
+            </select>
+          </label>
+          <label class="ef__field">
+            Quantidade
+            <input
+              type="number"
+              inputmode="numeric"
+              appNonNegative="integer"
+              min="1"
+              [value]="item.quantity"
+              [attr.aria-invalid]="invalid(item, 'quantity') || null"
+              (input)="update(item.key, { quantity: $any($event.target).value })"
+            />
+          </label>
+          <label class="ef__field">
+            Custo unitário (R$)
+            <input
+              type="number"
+              inputmode="decimal"
+              appNonNegative="decimal"
+              step="0.01"
+              min="0"
+              [value]="item.unitCost"
+              [attr.aria-invalid]="invalid(item, 'unitCost') || null"
+              (input)="update(item.key, { unitCost: $any($event.target).value })"
+            />
+          </label>
+          <div class="ef__line">
+            <span>Subtotal {{ subtotal(item) | currency: 'BRL' }}</span>
+            @if (items().length > 1) {
+              <button
+                matIconButton
+                type="button"
+                [attr.aria-label]="'Remover item ' + (i + 1)"
+                (click)="removeItem(item.key)"
+              >
+                <mat-icon>delete_outline</mat-icon>
+              </button>
+            }
+          </div>
+        </li>
+      }
+    </ol>
+    <button matButton="outlined" type="button" (click)="addItem()">
+      <mat-icon>add</mat-icon> Adicionar item
+    </button>
+    <p class="ef__total">
+      Total da nota <strong>{{ total() | currency: 'BRL' }}</strong>
+    </p>
+  </section>
+
+  <div class="ef__actions">
+    <button matButton="outlined" class="ui-cta" type="button" (click)="save(false)">
+      Salvar como pedido
+    </button>
+    <button matButton="filled" class="ui-cta" type="button" (click)="save(true)">
+      Receber agora
+    </button>
+  </div>
+</section>

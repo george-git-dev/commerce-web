@@ -26,7 +26,7 @@
       Marca
       <select [value]="brand()" (change)="brand.set($any($event.target).value)">
         <option value="todas">Todas</option>
-        @for (name of brands; track name) {
+        @for (name of brands(); track name) {
           <option [value]="name">{{ name }}</option>
         }
       </select>
@@ -81,8 +81,12 @@
               <small>{{ product.gender }}</small>
             </span>
             <span class="ap__price">
-              <small>a partir de</small>
-              {{ lowestPrice(product) | currency: 'BRL' }}
+              @if (lowestPrice(product) > 0) {
+                <small>a partir de</small>
+                {{ lowestPrice(product) | currency: 'BRL' }}
+              } @else {
+                <small>sem preço</small>
+              }
             </span>
             <span class="ap__stock" [class.ap__stock--low]="lowStock(product)">
               @if (lowStock(product)) {

@@ -49,6 +49,9 @@
               [(value)]="brand"
               [disabled]="readOnly"
             />
+            @if (brand() && !readOnly) {
+              <app-brand-rename class="f-field" [brand]="brand()" (renamed)="brand.set($event)" />
+            }
             <app-name-picker
               class="f-field f-field--half"
               label="Linha"
@@ -135,7 +138,7 @@
         <section class="f-card" [formGroup]="bottle">
           <label class="pf__switch">
             <input type="checkbox" formControlName="enabled" />
-            <span><strong>Frasco</strong> — original lacrado, com estoque</span>
+            <span><strong>Frasco</strong> — original lacrado</span>
           </label>
           @if (bottleOn()) {
             <div class="f-grid pf__block">
@@ -151,17 +154,17 @@
                   [attr.aria-invalid]="missing('volumeMl') || null"
                 />
               </label>
-              <label class="f-field f-field--half">
-                Estoque (unidades)
-                <input
-                  formControlName="stock"
-                  type="number"
-                  inputmode="numeric"
-                  appNonNegative="integer"
-                  min="0"
-                  [attr.aria-invalid]="missing('stock') || null"
-                />
-              </label>
+              <div class="f-field f-field--half">
+                Estoque
+                <div class="pf__stock">
+                  @if (originalBottle; as saved) {
+                    <strong>{{ currentStock(saved.id) }} un.</strong>
+                    <a [routerLink]="['/admin/estoque', saved.id]">ver</a>
+                  } @else {
+                    <strong>0 un.</strong> entra pela compra
+                  }
+                </div>
+              </div>
               <label class="f-field f-field--half">
                 Preço (R$)
                 <input
@@ -191,18 +194,10 @@
         </section>
 
         <section class="f-card">
-          <label class="pf__switch">
-            <input
-              type="checkbox"
-              [checked]="decantOn()"
-              [disabled]="readOnly"
-              (change)="decantOn.set($any($event.target).checked)"
-            />
-            <span><strong>Decant disponível</strong> — feito sob demanda, sem estoque</span>
-          </label>
+          <p><strong>Decant</strong> — envasado por você, com estoque por tamanho</p>
           <p class="pf__hint">
-            Marque os tamanhos que vai vender e o preço de cada um. Desligado, os tamanhos ficam
-            cadastrados mas aparecem indisponíveis na loja.
+            Marque os tamanhos que vai vender e o preço de cada um. O estoque entra em Estoque e
+            compras (envase = ajuste com motivo "Envase de decant").
           </p>
           <ul class="pf__sizes">
             @for (size of decantSizes(); track size.ml) {
@@ -222,13 +217,14 @@
                   appNonNegative="decimal"
                   step="0.01"
                   min="0"
-                  placeholder="Preço (R$)"
+                  placeholder="R$"
                   [attr.aria-label]="'Preço do decant de ' + size.ml + ' ml'"
                   [value]="size.price ?? ''"
                   [attr.aria-invalid]="missingSizePrice(size) || null"
                   [disabled]="readOnly || !size.checked"
                   (input)="setSizePrice(size.ml, $any($event.target).value)"
                 />
+                <span>{{ size.saved ? currentStock(skuOf(size.ml)) : 0 }} un.</span>
               </li>
             }
           </ul>
@@ -337,11 +333,7 @@
                 </dt>
                 <dd>
                   {{ variant.price | currency: 'BRL' }}
-                  @if (variant.kind === 'frasco') {
-                    · {{ variant.stock }} un.
-                  } @else {
-                    · {{ decantOn() ? 'disponível' : 'indisponível' }}
-                  }
+                  · {{ variant.stock }} un.
                 </dd>
               </div>
             }

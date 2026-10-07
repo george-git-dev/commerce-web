@@ -53,8 +53,8 @@ export const MOCK_PRODUCTS: readonly Product[] = [
     ],
     variants: [
       { id: 'lattafa-asad-100', kind: 'frasco', volumeMl: 100, price: 299.9, stock: 24 },
-      { id: 'lattafa-asad-d5', kind: 'decant', volumeMl: 5, price: 34.9, stock: 30 },
-      { id: 'lattafa-asad-d10', kind: 'decant', volumeMl: 10, price: 59.9, stock: 0 },
+      { id: 'lattafa-asad-d5', kind: 'decant', volumeMl: 5, price: 34.9, stock: 6 },
+      { id: 'lattafa-asad-d10', kind: 'decant', volumeMl: 10, price: 59.9, stock: 2 },
     ],
   },
   {
