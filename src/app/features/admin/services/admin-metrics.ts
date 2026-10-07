@@ -4,13 +4,13 @@ import { AdminOrder } from '../data/admin-orders-mock';
 /** Atalhos relativos a hoje (usados pelo painel e pelos testes). */
 export type QuickPeriod = 'hoje' | '7d' | '30d' | 'mes';
 
-/** Visões do painel: um dia, 7 ou 30 dias, um mês ou de/até. */
-export type DashboardPeriod = 'dia' | '7d' | '30d' | 'mes' | 'personalizado';
+/** Visões do painel: hoje, últimos 7 ou 30 dias, um mês ou de/até (um dia só = de e até iguais). */
+export type DashboardPeriod = 'hoje' | '7d' | '30d' | 'mes' | 'personalizado';
 
 export const PERIOD_LABELS: Record<DashboardPeriod, string> = {
-  dia: 'Dia',
-  '7d': '7 dias',
-  '30d': '30 dias',
+  hoje: 'Hoje',
+  '7d': 'Últimos 7 dias',
+  '30d': 'Últimos 30 dias',
   mes: 'Mês',
   personalizado: 'Personalizado',
 };

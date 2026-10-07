@@ -47,8 +47,6 @@ export class AdminDashboard {
 
   // --- Período -------------------------------------------------------------
   readonly period = signal<DashboardPeriod>('30d');
-  /** Dia escolhido (`aaaa-mm-dd`); começa hoje. */
-  readonly day = signal(this.today);
   /** Mês escolhido (`aaaa-mm`); começa no atual. */
   readonly month = signal(this.today.slice(0, 7));
   /** Personalizado: começa nos últimos 30 dias para não abrir vazio. */
@@ -58,9 +56,6 @@ export class AdminDashboard {
   /** Data inválida/futura na visão escolhida (`null` = ok). */
   readonly periodProblem = computed(() => {
     switch (this.period()) {
-      case 'dia':
-        if (!parseDay(this.day())) return 'Escolha o dia.';
-        return this.day() > this.today ? 'O dia não pode ser no futuro.' : null;
       case 'mes':
         if (!monthRange(this.month(), this.now)) return 'Escolha o mês.';
         return this.month() > this.today.slice(0, 7) ? 'O mês não pode ser no futuro.' : null;
@@ -76,8 +71,8 @@ export class AdminDashboard {
     // Data inválida: mostra os últimos 30 dias até corrigir.
     if (this.periodProblem()) return periodRange('30d', this.now);
     switch (period) {
-      case 'dia':
-        return dayRange(parseDay(this.day())!, this.now);
+      case 'hoje':
+        return dayRange(this.now, this.now);
       case 'mes':
         return monthRange(this.month(), this.now)!;
       case 'personalizado':

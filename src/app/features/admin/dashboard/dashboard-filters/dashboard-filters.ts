@@ -6,7 +6,7 @@ import { DashboardPeriod, PERIOD_LABELS } from '../../services/admin-metrics';
 import { AdminProductStore } from '../../services/admin-product-store';
 import { AdminPurchaseStore } from '../../services/admin-purchase-store';
 
-/** Visão (dia, 7/30 dias, mês ou de/até) e filtros: categoria, destaque, gênero, marca e fornecedor. */
+/** Visão (hoje, últimos 7/30 dias, mês ou de/até) e filtros: categoria, destaque, gênero, marca e fornecedor. */
 @Component({
   selector: 'app-dashboard-filters',
   imports: [MatIconModule],

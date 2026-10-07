@@ -14,23 +14,6 @@
   </div>
 
   @switch (data.period()) {
-    @case ('dia') {
-      <div class="df__dates">
-        <label>
-          Dia
-          <input
-            type="date"
-            [max]="data.today"
-            [value]="data.day()"
-            [attr.aria-invalid]="!!data.periodProblem() || null"
-            (input)="data.day.set($any($event.target).value)"
-          />
-        </label>
-        @if (data.periodProblem(); as problem) {
-          <p class="df__error" role="alert">{{ problem }}</p>
-        }
-      </div>
-    }
     @case ('mes') {
       <div class="df__dates">
         <label>
