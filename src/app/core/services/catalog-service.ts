@@ -1,4 +1,4 @@
-import { Injectable, signal } from '@angular/core';
+import { computed, Injectable, signal } from '@angular/core';
 import { CATEGORIES_MOCK, HIGHLIGHTS_MOCK } from '../data/catalog-mock';
 import { MOCK_PRODUCTS } from '../data/mock-products';
 import { RELATED_MOCK } from '../data/related-mock';
@@ -7,6 +7,7 @@ import { Category } from '../models/category';
 import { Highlight } from '../models/highlight';
 import { Product } from '../models/product';
 import { ReviewPage } from '../models/review';
+import { withHighlights } from '../utils/product-highlights';
 
 /** Avaliações por página na página do produto. */
 export const REVIEWS_PAGE_SIZE = 5;
@@ -28,7 +29,8 @@ export class CatalogService {
 
   readonly categories = this.categoriesState.asReadonly();
   readonly highlights = this.highlightsState.asReadonly();
-  readonly products = this.productsState.asReadonly();
+  /** Com Lançamento e Mais vendido calculados (Fase 2: vêm prontos do back). */
+  readonly products = computed(() => withHighlights(this.productsState()));
 
   /** Chamado dentro de um `computed`, acompanha as mudanças de `products`. */
   findBySlug(slug: string | null): Product | undefined {

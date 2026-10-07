@@ -86,6 +86,18 @@ export class Catalog {
   protected readonly ratingOptions = [4, 3] as const;
   protected readonly occasionOptions = Object.entries(OCCASION_LABELS) as [Occasion, string][];
 
+  /** Selos manuais presentes no catálogo (Exclusivo, Edição limitada…), em ordem alfabética. */
+  protected readonly badgeOptions = computed(() =>
+    [
+      ...new Set(
+        this.catalog
+          .products()
+          .map((product) => product.badge)
+          .filter((badge): badge is string => !!badge),
+      ),
+    ].sort((a, b) => a.localeCompare(b, 'pt-BR')),
+  );
+
   protected readonly brands = computed(() =>
     [...new Set(this.catalog.products().map((product) => product.brandName))].sort(),
   );
@@ -104,12 +116,13 @@ export class Catalog {
   protected readonly title = computed(() => {
     const categories = this.selectedCategories();
     if (categories.length) return categoriesTitle(categories);
-    const launch = this.launchOnly();
-    const deal = this.dealOnly();
-    if (launch && deal) return 'Lançamentos e ofertas';
-    if (launch) return 'Lançamentos';
-    if (deal) return 'Ofertas';
-    return categoriesTitle([]);
+    const highlights = [
+      ...(this.launchOnly() ? ['Lançamentos'] : []),
+      ...(this.dealOnly() ? ['Ofertas'] : []),
+      ...(this.bestSellerOnly() ? ['Mais vendidos'] : []),
+      ...this.badges(),
+    ];
+    return highlights.length ? highlights.join(' · ') : categoriesTitle([]);
   });
   /** `?familia=Oriental,Floral` — várias valem como "ou". */
   protected readonly families = computed(() => {
@@ -145,6 +158,14 @@ export class Catalog {
   protected readonly launchOnly = computed(
     () => this.queryParamMap().get(this.params.launch) === 'true',
   );
+  protected readonly bestSellerOnly = computed(
+    () => this.queryParamMap().get(this.params.bestSeller) === 'true',
+  );
+  /** `?selo=Exclusivo,Edição limitada` — só os que existem no catálogo. */
+  protected readonly badges = computed(() => {
+    const ids = (this.queryParamMap().get(this.params.badge) ?? '').split(',');
+    return this.badgeOptions().filter((badge) => ids.includes(badge));
+  });
   /** `?tipo=decant` — entra no menu junto com os decants (pós-MVP). */
   protected readonly kind = computed<VariantKind | null>(() => {
     const value = this.queryParamMap().get(this.params.kind);
@@ -168,6 +189,8 @@ export class Catalog {
       !!this.search() ||
       this.dealOnly() ||
       this.launchOnly() ||
+      this.bestSellerOnly() ||
+      this.badges().length > 0 ||
       !!this.kind(),
   );
 
@@ -184,6 +207,9 @@ export class Catalog {
     const search = this.search().trim().toLowerCase();
     const dealOnly = this.dealOnly();
     const launchOnly = this.launchOnly();
+    const bestSellerOnly = this.bestSellerOnly();
+    const badges = this.badges();
+    const anyHighlight = dealOnly || launchOnly || bestSellerOnly || badges.length > 0;
     const kind = this.kind();
 
     let list = this.catalog.products().filter((product) => {
@@ -215,8 +241,13 @@ export class Catalog {
       // Destaques: dentro do grupo vale "ou" (como nas categorias) —
       // Lançamentos + Ofertas mostra os dois, não só quem é as duas coisas.
       if (
-        (dealOnly || launchOnly) &&
-        !((dealOnly && hasDeal(product)) || (launchOnly && product.launch))
+        anyHighlight &&
+        !(
+          (dealOnly && hasDeal(product)) ||
+          (launchOnly && product.launch) ||
+          (bestSellerOnly && product.bestSeller) ||
+          (!!product.badge && badges.includes(product.badge))
+        )
       ) {
         return false;
       }
@@ -291,6 +322,15 @@ export class Catalog {
       ? current.filter((item) => item !== occasion)
       : [...current, occasion];
     this.setFilter(this.params.occasion, next.join(',') || null);
+  }
+
+  /** Chip de selo (Exclusivo, Edição limitada…): marca/desmarca, mantendo os outros. */
+  protected toggleBadge(badge: string): void {
+    const current = this.badges();
+    const next = current.includes(badge)
+      ? current.filter((item) => item !== badge)
+      : [...current, badge];
+    this.setFilter(this.params.badge, next.join(',') || null);
   }
 
   /** Remove, enquanto o usuário digita, tudo que não for dígito, e limita o tamanho. */

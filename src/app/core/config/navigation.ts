@@ -11,6 +11,9 @@ export const CATALOG_QUERY_PARAMS = {
   search: 'busca',
   deal: 'oferta',
   launch: 'lancamento',
+  bestSeller: 'maisVendido',
+  /** Selos manuais do card (`?selo=Exclusivo,Edição limitada`). */
+  badge: 'selo',
   category: 'categoria',
   family: 'familia',
   occasion: 'ocasiao',

@@ -1,0 +1,78 @@
+:host {
+  display: block;
+}
+
+.pi__hint {
+  margin: -8px 0 14px;
+  font-size: 0.8125rem;
+  color: var(--muted-foreground);
+}
+
+.pi__error {
+  margin: 8px 0 0;
+  color: var(--wine);
+  font-size: 0.8125rem;
+}
+
+.pi__images {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
+  gap: 10px;
+  margin: 0 0 12px;
+  padding: 0;
+  list-style: none;
+
+  li {
+    position: relative;
+    display: grid;
+    gap: 4px;
+  }
+
+  img {
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: var(--radius-sm);
+    object-fit: cover;
+  }
+}
+
+.pi__main {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  font-size: 0.6875rem;
+  font-weight: 600;
+}
+
+.pi__img-actions {
+  display: flex;
+  justify-content: space-between;
+}
+
+.pi__upload {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 72px;
+  border: 1px dashed var(--gold);
+  border-radius: var(--radius-sm);
+  color: var(--earth);
+  font-weight: 500;
+  cursor: pointer;
+
+  input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+  }
+
+  &:focus-within {
+    outline: 2px solid var(--gold);
+  }
+}

@@ -1,0 +1,377 @@
+<section class="pf">
+  <a class="pf__back" routerLink="/admin/produtos">
+    <mat-icon aria-hidden="true">arrow_back</mat-icon> Produtos
+  </a>
+  <header class="pf__head">
+    <h2>{{ title() }}</h2>
+    @if (original) {
+      <span class="pf__status" [class.pf__status--draft]="original.status === 'rascunho'">
+        {{ original.status === 'publicado' ? 'Publicado' : 'Rascunho' }}
+      </span>
+    }
+  </header>
+  @if (readOnly) {
+    <p class="pf__note"><mat-icon aria-hidden="true">visibility</mat-icon> Somente leitura.</p>
+  }
+
+  <app-form-steps
+    [steps]="steps"
+    [current]="step()"
+    [done]="done()"
+    [lockAhead]="!readOnly"
+    (pick)="go($event)"
+  />
+
+  @if (problems().length) {
+    <div class="pf__problems" role="alert">
+      <ul>
+        @for (problem of problems(); track problem) {
+          <li>{{ problem }}</li>
+        }
+      </ul>
+    </div>
+  }
+
+  <form (submit)="$event.preventDefault()" novalidate>
+    @switch (step()) {
+      @case (0) {
+        <section class="f-card" [formGroup]="data">
+          <h2>Dados do produto</h2>
+          <div class="f-grid">
+            <app-name-picker
+              class="f-field"
+              label="Marca"
+              placeholder="Escolha a marca"
+              newLabel="Nova marca"
+              error="Escolha a marca."
+              [showError]="showErrors()"
+              [options]="store.brandNames()"
+              [(value)]="brand"
+              [disabled]="readOnly"
+            />
+            <app-name-picker
+              class="f-field f-field--half"
+              label="Linha"
+              [placeholder]="brand() ? 'Escolha a linha' : 'Escolha a marca primeiro'"
+              newLabel="Nova linha"
+              error="Escolha ou crie a linha."
+              [showError]="showErrors()"
+              [options]="lineOptions()"
+              [(value)]="line"
+              [disabled]="readOnly || !brand()"
+            />
+            <label class="f-field f-field--half">
+              Versão (opcional)
+              <input formControlName="subtitle" placeholder="Ex.: Bourbon, Elixir" />
+            </label>
+            @if (duplicate(); as existing) {
+              <p class="pf__dup f-field" role="alert">
+                Este produto já existe:
+                <a [routerLink]="['/admin/produtos', existing.slug]">abrir "{{ existing.name }}"</a>
+              </p>
+            }
+            <app-name-picker
+              class="f-field f-field--half"
+              label="Categoria"
+              placeholder="Escolha a categoria"
+              newLabel="Nova categoria"
+              error="Escolha a categoria."
+              [showError]="showErrors()"
+              [options]="categoryNames()"
+              [sort]="false"
+              [value]="categoryName()"
+              (valueChange)="setCategory($event)"
+              [disabled]="readOnly"
+            />
+            <label class="f-field f-field--half">
+              Gênero
+              <select formControlName="gender" [attr.aria-invalid]="missing('gender') || null">
+                <option value="" disabled>Escolha o gênero</option>
+                @for (gender of genders; track gender) {
+                  <option [value]="gender">{{ gender }}</option>
+                }
+              </select>
+            </label>
+            @if (category() === 'perfume') {
+              <label class="f-field">
+                Concentração
+                <select
+                  formControlName="concentration"
+                  [attr.aria-invalid]="missing('concentration') || null"
+                >
+                  <option value="" disabled>Escolha a concentração</option>
+                  <option value="none">Não informar</option>
+                  @for (item of concentrations; track item) {
+                    <option [value]="item">{{ item }}</option>
+                  }
+                </select>
+              </label>
+            }
+            <label class="f-field">
+              Descrição
+              <textarea
+                formControlName="description"
+                [attr.aria-invalid]="missing('description') || null"
+                rows="4"
+                placeholder="Como é o perfume, fixação, ocasião…"
+              ></textarea>
+            </label>
+            @if (category() === 'kit') {
+              <label class="f-field">
+                Itens do kit (um por linha)
+                <textarea
+                  formControlName="kitItems"
+                  [attr.aria-invalid]="missing('kitItems') || null"
+                  rows="3"
+                  placeholder="Asad Eau de Parfum 100 ml"
+                ></textarea>
+              </label>
+            }
+          </div>
+        </section>
+      }
+
+      @case (1) {
+        <section class="f-card" [formGroup]="bottle">
+          <label class="pf__switch">
+            <input type="checkbox" formControlName="enabled" />
+            <span><strong>Frasco</strong> — original lacrado, com estoque</span>
+          </label>
+          @if (bottleOn()) {
+            <div class="f-grid pf__block">
+              <label class="f-field f-field--half">
+                Volume (ml)
+                <input
+                  formControlName="volumeMl"
+                  placeholder="Ex.: 100"
+                  type="number"
+                  inputmode="numeric"
+                  appNonNegative="integer"
+                  min="1"
+                  [attr.aria-invalid]="missing('volumeMl') || null"
+                />
+              </label>
+              <label class="f-field f-field--half">
+                Estoque (unidades)
+                <input
+                  formControlName="stock"
+                  type="number"
+                  inputmode="numeric"
+                  appNonNegative="integer"
+                  min="0"
+                  [attr.aria-invalid]="missing('stock') || null"
+                />
+              </label>
+              <label class="f-field f-field--half">
+                Preço (R$)
+                <input
+                  formControlName="price"
+                  [attr.aria-invalid]="missing('price') || null"
+                  type="number"
+                  inputmode="decimal"
+                  appNonNegative="decimal"
+                  step="0.01"
+                  min="0"
+                />
+              </label>
+              <label class="f-field f-field--half">
+                Promoção (R$, opcional)
+                <input
+                  formControlName="promoPrice"
+                  [attr.aria-invalid]="missing('promoPrice') || null"
+                  type="number"
+                  inputmode="decimal"
+                  appNonNegative="decimal"
+                  step="0.01"
+                  min="0"
+                />
+              </label>
+            </div>
+          }
+        </section>
+
+        <section class="f-card">
+          <label class="pf__switch">
+            <input
+              type="checkbox"
+              [checked]="decantOn()"
+              [disabled]="readOnly"
+              (change)="decantOn.set($any($event.target).checked)"
+            />
+            <span><strong>Decant disponível</strong> — feito sob demanda, sem estoque</span>
+          </label>
+          <p class="pf__hint">
+            Marque os tamanhos que vai vender e o preço de cada um. Desligado, os tamanhos ficam
+            cadastrados mas aparecem indisponíveis na loja.
+          </p>
+          <ul class="pf__sizes">
+            @for (size of decantSizes(); track size.ml) {
+              <li [class.pf__size--on]="size.checked">
+                <label>
+                  <input
+                    type="checkbox"
+                    [checked]="size.checked"
+                    [disabled]="readOnly"
+                    (change)="toggleSize(size.ml, $any($event.target).checked)"
+                  />
+                  {{ size.ml }} ml
+                </label>
+                <input
+                  type="number"
+                  inputmode="decimal"
+                  appNonNegative="decimal"
+                  step="0.01"
+                  min="0"
+                  placeholder="Preço (R$)"
+                  [attr.aria-label]="'Preço do decant de ' + size.ml + ' ml'"
+                  [value]="size.price ?? ''"
+                  [attr.aria-invalid]="missingSizePrice(size) || null"
+                  [disabled]="readOnly || !size.checked"
+                  (input)="setSizePrice(size.ml, $any($event.target).value)"
+                />
+              </li>
+            }
+          </ul>
+          @if (!readOnly) {
+            <div class="pf__add-size">
+              <input
+                type="number"
+                inputmode="numeric"
+                appNonNegative="integer"
+                min="1"
+                placeholder="Outro tamanho (ml)"
+                aria-label="Outro tamanho de decant em ml"
+                [value]="customSize() ?? ''"
+                (input)="customSize.set($any($event.target).value)"
+              />
+              <button matButton="outlined" type="button" (click)="addSize()">
+                Adicionar tamanho
+              </button>
+            </div>
+          }
+        </section>
+      }
+
+      @case (2) {
+        <section class="f-card">
+          <h2>Perfil olfativo</h2>
+          <p class="pf__hint">Família e ocasião aparecem nos filtros da loja.</p>
+          <p class="pf__label">Famílias</p>
+          <div class="pf__chips">
+            @for (family of families; track family) {
+              <button
+                type="button"
+                [attr.aria-pressed]="selectedFamilies().includes(family)"
+                [disabled]="readOnly"
+                (click)="toggle(selectedFamilies, family)"
+              >
+                {{ family }}
+              </button>
+            }
+          </div>
+          <p class="pf__label">Ocasião</p>
+          <div class="pf__chips">
+            @for (occasion of occasions; track occasion[0]) {
+              <button
+                type="button"
+                [attr.aria-pressed]="selectedOccasions().includes(occasion[0])"
+                [disabled]="readOnly"
+                (click)="toggle(selectedOccasions, occasion[0])"
+              >
+                {{ occasion[1] }}
+              </button>
+            }
+          </div>
+          @for (layer of layers; track layer.id) {
+            <app-note-layer
+              [label]="layer.label"
+              [(selected)]="notes[layer.id]"
+              [readOnly]="readOnly"
+            />
+          }
+        </section>
+      }
+
+      @case (3) {
+        <section class="f-card">
+          <h2>Imagens</h2>
+          <app-product-images [(images)]="images" [readOnly]="readOnly" />
+        </section>
+      }
+
+      @case (4) {
+        <section class="f-card">
+          <h2>Vitrine</h2>
+          <p class="pf__hint">Como o produto aparece para o cliente na loja.</p>
+          <app-name-picker
+            class="pf__opt"
+            label="Selo no card (opcional) — etiqueta sobre a foto"
+            emptyLabel="Nenhum"
+            newLabel="Novo selo"
+            [options]="store.badgeNames()"
+            [(value)]="badge"
+            [disabled]="readOnly"
+          />
+          <p class="pf__hint">
+            Automáticos, não precisa marcar: <strong>Mais vendido</strong> (os 10 que mais vendem),
+            <strong>Lançamento</strong> (os 10 últimos cadastrados) e <strong>Oferta</strong> (com
+            preço promocional).
+          </p>
+        </section>
+
+        <section class="f-card">
+          <h2>Resumo</h2>
+          <dl class="pf__summary">
+            <div>
+              <dt>Produto</dt>
+              <dd>{{ brand() || '—' }} · {{ line() || '—' }} {{ data.controls.subtitle.value }}</dd>
+            </div>
+            <div>
+              <dt>Categoria</dt>
+              <dd>{{ categoryName() }}</dd>
+            </div>
+            @for (variant of summary(); track variant.id) {
+              <div>
+                <dt>
+                  {{ variant.kind === 'frasco' ? 'Frasco' : 'Decant' }} {{ variant.volumeMl }} ml
+                </dt>
+                <dd>
+                  {{ variant.price | currency: 'BRL' }}
+                  @if (variant.kind === 'frasco') {
+                    · {{ variant.stock }} un.
+                  } @else {
+                    · {{ decantOn() ? 'disponível' : 'indisponível' }}
+                  }
+                </dd>
+              </div>
+            }
+            <div>
+              <dt>Imagens</dt>
+              <dd>{{ images().length }}</dd>
+            </div>
+          </dl>
+        </section>
+      }
+    }
+
+    <div class="pf__actions">
+      @if (step() > 0) {
+        <button matIconButton type="button" aria-label="Voltar" (click)="go(step() - 1)">
+          <mat-icon>arrow_back</mat-icon>
+        </button>
+      }
+      @if (!readOnly) {
+        <button matButton="outlined" class="ui-cta" type="button" (click)="save('rascunho')">
+          Salvar rascunho
+        </button>
+      }
+      @if (step() < steps.length - 1) {
+        <button matButton="filled" class="ui-cta" type="button" (click)="next()">Próximo</button>
+      } @else if (!readOnly) {
+        <button matButton="filled" class="ui-cta" type="button" (click)="save('publicado')">
+          Publicar
+        </button>
+      }
+    </div>
+  </form>
+</section>

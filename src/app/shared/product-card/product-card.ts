@@ -4,7 +4,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { RouterLink } from '@angular/router';
 import { IMAGERY } from '../../core/config/imagery';
-import { CATEGORY_LABELS } from '../../core/config/product-categories';
+import { categoryInfo } from '../../core/config/product-categories';
 import { Product, ProductSelection } from '../../core/models/product';
 import {
   defaultVariant,
@@ -57,8 +57,7 @@ export class ProductCard {
    */
   protected readonly tag = computed(() => {
     const item = this.product();
-    const kind =
-      item.category === 'perfume' ? item.families[0] : CATEGORY_LABELS[item.category].label;
+    const kind = item.category === 'perfume' ? item.families[0] : categoryInfo(item.category).label;
     return [kind, item.gender].filter(Boolean).join(' · ');
   });
   protected readonly discount = computed(() => {

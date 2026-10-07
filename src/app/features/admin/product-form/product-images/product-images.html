@@ -1,0 +1,60 @@
+<p class="pi__hint">
+  De 1 a {{ imageMax }} imagens, JPG, PNG ou WEBP, até 5 MB cada. A primeira é a principal.
+</p>
+@if (images().length) {
+  <ol class="pi__images">
+    @for (image of images(); track image; let i = $index; let last = $last) {
+      <li>
+        <img [src]="image" [alt]="'Imagem ' + (i + 1)" width="96" height="96" />
+        @if (i === 0) {
+          <span class="pi__main">Principal</span>
+        }
+        @if (!readOnly()) {
+          <span class="pi__img-actions">
+            <button
+              matIconButton
+              type="button"
+              [disabled]="i === 0"
+              (click)="moveImage(i, -1)"
+              aria-label="Mover para a esquerda"
+            >
+              <mat-icon>chevron_left</mat-icon>
+            </button>
+            <button
+              matIconButton
+              type="button"
+              (click)="removeImage(i)"
+              aria-label="Remover imagem"
+            >
+              <mat-icon>close</mat-icon>
+            </button>
+            <button
+              matIconButton
+              type="button"
+              [disabled]="last"
+              (click)="moveImage(i, 1)"
+              aria-label="Mover para a direita"
+            >
+              <mat-icon>chevron_right</mat-icon>
+            </button>
+          </span>
+        }
+      </li>
+    }
+  </ol>
+}
+@if (!readOnly() && images().length < imageMax) {
+  <label class="pi__upload">
+    <mat-icon aria-hidden="true">add_photo_alternate</mat-icon>
+    Adicionar imagens
+    <input
+      type="file"
+      accept="image/jpeg,image/png,image/webp"
+      multiple
+      (change)="addImages($any($event.target))"
+    />
+  </label>
+}
+@if (imageError()) {
+  <p class="pi__error" role="alert">{{ imageError() }}</p>
+}

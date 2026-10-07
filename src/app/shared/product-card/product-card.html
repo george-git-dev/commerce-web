@@ -13,6 +13,8 @@
       <span class="card__badge">{{ item.badge }}</span>
     } @else if (deal()) {
       <span class="card__badge card__badge--sale">Oferta</span>
+    } @else if (item.bestSeller) {
+      <span class="card__badge">Mais vendido</span>
     } @else if (item.launch) {
       <span class="card__badge">Lançamento</span>
     }

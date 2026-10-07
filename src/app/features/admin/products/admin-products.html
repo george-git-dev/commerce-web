@@ -1,0 +1,106 @@
+<section class="ap">
+  <header class="ap__head">
+    <div>
+      <p class="ap__eyebrow">Catálogo</p>
+      <h2>Produtos</h2>
+    </div>
+    @if (auth.can('products:edit')) {
+      <a matButton="filled" class="ui-cta" routerLink="/admin/produtos/novo">
+        <mat-icon>add</mat-icon> Novo produto
+      </a>
+    }
+  </header>
+
+  <div class="ap__filters">
+    <label class="ap__search">
+      <mat-icon aria-hidden="true">search</mat-icon>
+      <input
+        type="search"
+        placeholder="Nome, marca ou SKU"
+        aria-label="Buscar produto"
+        [value]="search()"
+        (input)="search.set($any($event.target).value)"
+      />
+    </label>
+    <label class="ap__select">
+      Marca
+      <select [value]="brand()" (change)="brand.set($any($event.target).value)">
+        <option value="todas">Todas</option>
+        @for (name of brands; track name) {
+          <option [value]="name">{{ name }}</option>
+        }
+      </select>
+    </label>
+    <label class="ap__select">
+      Categoria
+      <select [value]="category()" (change)="category.set($any($event.target).value)">
+        <option value="todas">Todas</option>
+        @for (item of store.categories(); track item.id) {
+          <option [value]="item.id">{{ item.label }}</option>
+        }
+      </select>
+    </label>
+    <label class="ap__select">
+      Status
+      <select [value]="status()" (change)="status.set($any($event.target).value)">
+        <option value="todos">Todos</option>
+        <option value="publicado">Publicado</option>
+        <option value="rascunho">Rascunho</option>
+      </select>
+    </label>
+    <label class="ap__check">
+      <input
+        type="checkbox"
+        [checked]="onlyLowStock()"
+        (change)="onlyLowStock.set($any($event.target).checked)"
+      />
+      Só estoque baixo
+    </label>
+  </div>
+
+  <p class="ap__count" aria-live="polite">
+    {{ filtered().length }} {{ filtered().length === 1 ? 'produto' : 'produtos' }}
+  </p>
+
+  @if (filtered().length) {
+    <ul class="ap__list">
+      @for (product of filtered(); track product.id) {
+        <li>
+          <a class="ap__row" [routerLink]="['/admin/produtos', product.slug]">
+            @if (product.images[0]; as image) {
+              <img [src]="image" alt="" width="48" height="48" />
+            } @else {
+              <span class="ap__noimg" aria-hidden="true"><mat-icon>image</mat-icon></span>
+            }
+            <span class="ap__name">
+              <strong>{{ product.name }}</strong>
+              <small>{{ product.brandName }}</small>
+            </span>
+            <span class="ap__cat">
+              {{ store.categoryLabel(product.category) }}
+              <small>{{ product.gender }}</small>
+            </span>
+            <span class="ap__price">
+              <small>a partir de</small>
+              {{ lowestPrice(product) | currency: 'BRL' }}
+            </span>
+            <span class="ap__stock" [class.ap__stock--low]="lowStock(product)">
+              @if (lowStock(product)) {
+                <mat-icon aria-hidden="true">warning_amber</mat-icon>
+              }
+              {{ stock(product) }} un.
+            </span>
+            <span class="ap__status" [class.ap__status--draft]="product.status === 'rascunho'">
+              {{ product.status === 'publicado' ? 'Publicado' : 'Rascunho' }}
+            </span>
+          </a>
+        </li>
+      }
+    </ul>
+  } @else {
+    <div class="ap__empty">
+      <mat-icon aria-hidden="true">inventory_2</mat-icon>
+      <p>Nenhum produto com esses filtros.</p>
+    </div>
+  }
+</section>

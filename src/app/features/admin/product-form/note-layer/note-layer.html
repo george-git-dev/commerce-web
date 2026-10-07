@@ -1,0 +1,58 @@
+<p class="nl__label">{{ label() }}</p>
+@if (selected().length) {
+  <ul class="nl__notes">
+    @for (note of selected(); track note) {
+      <li>
+        <img [src]="store.noteImage(note)" alt="" width="24" height="24" />
+        {{ note }}
+        @if (!readOnly()) {
+          <button type="button" [attr.aria-label]="'Remover ' + note" (click)="remove(note)">
+            <mat-icon>close</mat-icon>
+          </button>
+        }
+      </li>
+    }
+  </ul>
+}
+@if (!readOnly()) {
+  @if (creating()) {
+    <div class="nl__new">
+      <input
+        placeholder="Nome da nota"
+        aria-label="Nome da nova nota"
+        [value]="name()"
+        (input)="name.set($any($event.target).value)"
+      />
+      <label class="nl__img">
+        @if (image()) {
+          <img [src]="image()" alt="" width="40" height="40" />
+        } @else {
+          <mat-icon aria-hidden="true">add_photo_alternate</mat-icon>
+        }
+        Imagem
+        <input
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          (change)="pickImage($any($event.target))"
+        />
+      </label>
+      <button matButton="filled" type="button" (click)="create()">Adicionar</button>
+      <button matButton type="button" (click)="reset()">Cancelar</button>
+    </div>
+    @if (error()) {
+      <small class="nl__error" role="alert">{{ error() }}</small>
+    }
+  } @else {
+    <select
+      class="nl__add"
+      [attr.aria-label]="'Adicionar ' + label().toLowerCase()"
+      (change)="add($any($event.target).value); $any($event.target).value = ''"
+    >
+      <option value="">+ Adicionar nota</option>
+      @for (note of store.noteNames(); track note) {
+        <option [value]="note">{{ note }}</option>
+      }
+      <option value="__nova__">+ Nova nota (não está na lista)</option>
+    </select>
+  }
+}

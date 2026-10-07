@@ -4,7 +4,7 @@ import { ADMIN_NAV } from './admin-nav';
 import { AdminLayout } from './layout/admin-layout';
 
 /** Telas já prontas (as outras do menu abrem "em construção"). */
-const READY = ['pedidos'];
+const READY = ['pedidos', 'produtos'];
 
 /** Rotas do backoffice (`/admin`). Cada tela exige a permissão do seu item de menu. */
 export const ADMIN_ROUTES: Routes = [
@@ -29,6 +29,26 @@ export const ADMIN_ROUTES: Routes = [
         canActivate: [permissionGuard('orders:view', '/admin')],
         loadComponent: () =>
           import('./order-detail/admin-order-detail').then((m) => m.AdminOrderDetail),
+      },
+      {
+        path: 'produtos',
+        title: 'Nani Admin | Produtos',
+        canActivate: [permissionGuard('products:view', '/admin')],
+        loadComponent: () => import('./products/admin-products').then((m) => m.AdminProducts),
+      },
+      {
+        path: 'produtos/novo',
+        title: 'Nani Admin | Novo produto',
+        canActivate: [permissionGuard('products:edit', '/admin/produtos')],
+        loadComponent: () =>
+          import('./product-form/admin-product-form').then((m) => m.AdminProductForm),
+      },
+      {
+        path: 'produtos/:slug',
+        title: 'Nani Admin | Produto',
+        canActivate: [permissionGuard('products:view', '/admin')],
+        loadComponent: () =>
+          import('./product-form/admin-product-form').then((m) => m.AdminProductForm),
       },
       // Telas das próximas sessões: por enquanto, uma página "em construção".
       ...ADMIN_NAV.filter((item) => item.path && !READY.includes(item.path)).map((item) => ({

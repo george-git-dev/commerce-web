@@ -3,24 +3,27 @@ import { ProductCategory } from '../models/product';
 /**
  * Categorias de produto da loja, na ordem em que aparecem nos filtros.
  * O `id` é o valor usado na URL (`/produtos?categoria=kit`) e no contrato.
- * Para acrescentar uma categoria: incluir no tipo `ProductCategory` e aqui.
+ * Categorias criadas no backoffice ficam no `AdminProductStore` até o B3.
  */
-export const PRODUCT_CATEGORIES: readonly {
+export interface CategoryInfo {
   id: ProductCategory;
   /** Singular, para etiquetas ("Kit", "Hidratante"). */
   label: string;
   /** Plural, para filtros e títulos ("Kits e presentes"). */
   plural: string;
-}[] = [
+}
+
+export const PRODUCT_CATEGORIES: readonly CategoryInfo[] = [
   { id: 'perfume', label: 'Perfume', plural: 'Perfumes' },
   { id: 'kit', label: 'Kit', plural: 'Kits e presentes' },
   { id: 'hidratante', label: 'Hidratante', plural: 'Hidratantes' },
   { id: 'body-splash', label: 'Body splash', plural: 'Body splash' },
 ];
 
-export const CATEGORY_LABELS = Object.fromEntries(
-  PRODUCT_CATEGORIES.map((category) => [category.id, category]),
-) as Record<ProductCategory, (typeof PRODUCT_CATEGORIES)[number]>;
+/** Rótulos de uma categoria; id desconhecido (ex.: criada no backoffice) usa o próprio id. */
+export function categoryInfo(id: ProductCategory): CategoryInfo {
+  return PRODUCT_CATEGORIES.find((category) => category.id === id) ?? { id, label: id, plural: id };
+}
 
 export function isProductCategory(value: string | null): value is ProductCategory {
   return PRODUCT_CATEGORIES.some((category) => category.id === value);
@@ -63,5 +66,5 @@ export function categoriesTitle(categories: readonly ProductCategory[]): string 
       item.categories.every((id) => categories.includes(id)),
   );
   if (group) return group.label;
-  return categories.map((id) => CATEGORY_LABELS[id].plural).join(' · ');
+  return categories.map((id) => categoryInfo(id).plural).join(' · ');
 }

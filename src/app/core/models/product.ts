@@ -16,10 +16,12 @@ export type Occasion = 'dia' | 'noite';
 export type ProductStatus = 'rascunho' | 'publicado';
 
 /**
- * Categoria do produto. O foco é perfume, mas a loja vende também kits,
- * hidratantes e body splash. Rótulos em `core/config/product-categories.ts`.
+ * Id da categoria do produto ("perfume", "kit"…). As fixas e seus rótulos
+ * estão em `core/config/product-categories.ts`; novas são criadas no
+ * backoffice. `perfume` e `kit` têm campos próprios (concentração, itens).
+ * Fase 2 (B3): tabela `category` + `GET /categories`.
  */
-export type ProductCategory = 'perfume' | 'kit' | 'hidratante' | 'body-splash';
+export type ProductCategory = string;
 
 /**
  * O que o cliente compra: um tamanho de um perfume, com preço e estoque próprios.
@@ -79,8 +81,11 @@ export interface Product {
   occasions?: readonly Occasion[];
   /** Só produtos publicados aparecem na loja. */
   status: ProductStatus;
+  /** Automático: entre os últimos cadastrados (`core/utils/product-highlights.ts`). */
   launch?: boolean;
-  /** Selo manual (ex.: "Mais vendido"). */
+  /** Automático: entre os mais vendidos (`core/utils/product-highlights.ts`). */
+  bestSeller?: boolean;
+  /** Selo manual do card (ex.: "Exclusivo"). Mais vendido/Lançamento/Oferta são automáticos. */
   badge?: string;
   // Avaliações: decisão pendente no roadmap (não exibir nota inventada).
   /** Média das avaliações aprovadas (calculada pelo back). Ausente = sem avaliações. */

@@ -6,7 +6,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CATALOG_QUERY_PARAMS } from '../../core/config/navigation';
-import { CATEGORY_LABELS } from '../../core/config/product-categories';
+import { categoryInfo } from '../../core/config/product-categories';
 import { Product, ProductSelection, ProductVariant, VariantKind } from '../../core/models/product';
 import { CartStore } from '../../core/services/cart-store';
 import { CatalogService } from '../../core/services/catalog-service';
@@ -74,7 +74,7 @@ export class ProductDetail {
     const product = this.product();
     if (!product) return null;
     return {
-      label: CATEGORY_LABELS[product.category].plural,
+      label: categoryInfo(product.category).plural,
       queryParams: { [CATALOG_QUERY_PARAMS.category]: product.category },
     };
   });
@@ -87,9 +87,7 @@ export class ProductDetail {
     const product = this.product();
     if (!product) return '';
     const type =
-      product.category === 'perfume'
-        ? product.concentration
-        : CATEGORY_LABELS[product.category].label;
+      product.category === 'perfume' ? product.concentration : categoryInfo(product.category).label;
     return [type, product.gender].filter(Boolean).join(' · ');
   });
 

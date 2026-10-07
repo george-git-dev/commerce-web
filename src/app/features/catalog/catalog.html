@@ -47,6 +47,26 @@
       >
         Ofertas
       </button>
+      <button
+        type="button"
+        class="chip"
+        [class.chip--active]="bestSellerOnly()"
+        [attr.aria-pressed]="bestSellerOnly()"
+        (click)="setFilter(params.bestSeller, bestSellerOnly() ? null : 'true')"
+      >
+        Mais vendidos
+      </button>
+      @for (badge of badgeOptions(); track badge) {
+        <button
+          type="button"
+          class="chip"
+          [class.chip--active]="badges().includes(badge)"
+          [attr.aria-pressed]="badges().includes(badge)"
+          (click)="toggleBadge(badge)"
+        >
+          {{ badge }}
+        </button>
+      }
     </div>
   </div>
 
