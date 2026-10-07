@@ -1,13 +1,12 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
-import { OCCASION_LABELS } from '../../../../core/config/fragrance';
-import { Occasion } from '../../../../core/models/product';
+import { Gender } from '../../../../core/models/product';
 import { AdminDashboard } from '../../services/admin-dashboard';
 import { DashboardPeriod, PERIOD_LABELS } from '../../services/admin-metrics';
 import { AdminProductStore } from '../../services/admin-product-store';
 import { AdminPurchaseStore } from '../../services/admin-purchase-store';
 
-/** Período (atalhos ou de/até) e filtros do painel: categoria, ocasião, marca e fornecedor. */
+/** Visão (dia, 7/30 dias, mês ou de/até) e filtros: categoria, destaque, gênero, marca e fornecedor. */
 @Component({
   selector: 'app-dashboard-filters',
   imports: [MatIconModule],
@@ -21,7 +20,7 @@ export class DashboardFilters {
   protected readonly suppliers = inject(AdminPurchaseStore).suppliers;
 
   protected readonly periods = Object.entries(PERIOD_LABELS) as [DashboardPeriod, string][];
-  protected readonly occasions = Object.entries(OCCASION_LABELS) as [Occasion, string][];
+  protected readonly genders: readonly Gender[] = ['Masculino', 'Feminino', 'Unissex'];
   protected readonly categories = this.products.categories;
   protected readonly brands = computed(() =>
     [...this.products.brandNames()].sort((a, b) => a.localeCompare(b, 'pt-BR')),

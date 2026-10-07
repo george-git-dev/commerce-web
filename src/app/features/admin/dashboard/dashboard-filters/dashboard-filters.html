@@ -13,32 +13,68 @@
     }
   </div>
 
-  @if (data.period() === 'personalizado') {
-    <div class="df__dates">
-      <label>
-        De
-        <input
-          type="date"
-          [max]="data.today"
-          [value]="data.customFrom()"
-          [attr.aria-invalid]="!!data.customProblem() || null"
-          (input)="data.customFrom.set($any($event.target).value)"
-        />
-      </label>
-      <label>
-        Até
-        <input
-          type="date"
-          [max]="data.today"
-          [value]="data.customTo()"
-          [attr.aria-invalid]="!!data.customProblem() || null"
-          (input)="data.customTo.set($any($event.target).value)"
-        />
-      </label>
-      @if (data.customProblem(); as problem) {
-        <p class="df__error" role="alert">{{ problem }}</p>
-      }
-    </div>
+  @switch (data.period()) {
+    @case ('dia') {
+      <div class="df__dates">
+        <label>
+          Dia
+          <input
+            type="date"
+            [max]="data.today"
+            [value]="data.day()"
+            [attr.aria-invalid]="!!data.periodProblem() || null"
+            (input)="data.day.set($any($event.target).value)"
+          />
+        </label>
+        @if (data.periodProblem(); as problem) {
+          <p class="df__error" role="alert">{{ problem }}</p>
+        }
+      </div>
+    }
+    @case ('mes') {
+      <div class="df__dates">
+        <label>
+          Mês
+          <input
+            type="month"
+            [max]="data.today.slice(0, 7)"
+            [value]="data.month()"
+            [attr.aria-invalid]="!!data.periodProblem() || null"
+            (input)="data.month.set($any($event.target).value)"
+          />
+        </label>
+        @if (data.periodProblem(); as problem) {
+          <p class="df__error" role="alert">{{ problem }}</p>
+        }
+      </div>
+    }
+    @case ('personalizado') {
+      <div class="df__dates">
+        <label>
+          De
+          <input
+            type="date"
+            [max]="data.today"
+            [value]="data.customFrom()"
+            [attr.aria-invalid]="!!data.periodProblem() || null"
+            (input)="data.customFrom.set($any($event.target).value)"
+          />
+        </label>
+        <label>
+          Até
+          <input
+            type="date"
+            [max]="data.today"
+            [value]="data.customTo()"
+            [attr.aria-invalid]="!!data.periodProblem() || null"
+            (input)="data.customTo.set($any($event.target).value)"
+          />
+        </label>
+        @if (data.periodProblem(); as problem) {
+          <p class="df__error" role="alert">{{ problem }}</p>
+        }
+      </div>
+    }
   }
 
   <div class="df__filters">
@@ -54,11 +90,22 @@
       </select>
     </label>
     <label>
-      Ocasião
-      <select (change)="data.occasion.set($any($event.target).value)">
-        <option value="" [selected]="!data.occasion()">Todas</option>
-        @for (item of occasions; track item[0]) {
-          <option [value]="item[0]" [selected]="item[0] === data.occasion()">{{ item[1] }}</option>
+      Destaque
+      <select (change)="data.highlight.set($any($event.target).value)">
+        <option value="" [selected]="!data.highlight()">Todos</option>
+        @for (item of data.highlightOptions(); track item.id) {
+          <option [value]="item.id" [selected]="item.id === data.highlight()">
+            {{ item.label }}
+          </option>
+        }
+      </select>
+    </label>
+    <label>
+      Gênero
+      <select (change)="data.gender.set($any($event.target).value)">
+        <option value="" [selected]="!data.gender()">Todos</option>
+        @for (item of genders; track item) {
+          <option [value]="item" [selected]="item === data.gender()">{{ item }}</option>
         }
       </select>
     </label>

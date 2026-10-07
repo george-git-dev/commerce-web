@@ -5,7 +5,7 @@ export interface AdminNavItem {
   /** Nome curto na barra de atalhos do celular (padrão: `label`). */
   shortLabel?: string;
   icon: string;
-  /** Caminho dentro de `/admin` ('' = Início). */
+  /** Caminho dentro de `/admin` ('' = Painel de vendas). */
   path: string;
   /** Sem esta permissão, o item some do menu e a rota é barrada. */
   permission: Permission;
@@ -18,7 +18,8 @@ export interface AdminNavItem {
 /** Menu do backoffice, na ordem de exibição. */
 export const ADMIN_NAV: readonly AdminNavItem[] = [
   {
-    label: 'Início',
+    label: 'Painel de vendas',
+    shortLabel: 'Vendas',
     icon: 'space_dashboard',
     path: '',
     permission: 'dashboard:view',

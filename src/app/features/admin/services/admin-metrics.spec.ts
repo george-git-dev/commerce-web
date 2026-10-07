@@ -2,6 +2,9 @@ import { AdminOrder } from '../data/admin-orders-mock';
 import {
   customRange,
   customRangeProblem,
+  dayRange,
+  monthlySeries,
+  monthRange,
   dailySeries,
   delta,
   filterOrders,
@@ -93,6 +96,28 @@ describe('métricas do painel', () => {
     expect(customRangeProblem('2026-09-01', '2026-10-07', '2026-10-06')).toContain('futuro');
     expect(customRangeProblem('', '2026-10-01', '2026-10-06')).toContain('duas datas');
     expect(customRangeProblem('2026-09-01', '2026-09-01', '2026-10-06')).toBeNull();
+  });
+
+  it('dia: o dia inteiro contra o anterior; mês: mesmos dias do mês anterior', () => {
+    const day = dayRange(new Date(2026, 9, 3), now);
+    expect(day.start).toEqual(new Date(2026, 9, 3));
+    expect(day.previousStart).toEqual(new Date(2026, 9, 2));
+    expect(dayRange(now, now).end).toEqual(now);
+    const current = monthRange('2026-10', now)!;
+    expect(current.days).toBe(6);
+    expect(current.previousStart).toEqual(new Date(2026, 8, 1));
+    expect(current.previousEnd).toEqual(new Date(2026, 8, 6, 23, 59, 59, 999));
+    const september = monthRange('2026-09', now)!;
+    expect(september.days).toBe(30);
+    expect(september.previousEnd).toEqual(new Date(2026, 7, 30, 23, 59, 59, 999));
+    expect(monthRange('x', now)).toBeNull();
+  });
+
+  it('série por mês', () => {
+    const orders = [order(0, 300), order(40, 100)];
+    const series = monthlySeries(orders, new Date(2026, 7, 1), now, revenueOf);
+    expect(series.map((p) => p.label)).toEqual(['ago/26', 'set/26', 'out/26']);
+    expect(series.map((p) => p.value)).toEqual([100, 0, 300]);
   });
 
   it('filtro deixa só os itens que passam e recalcula o total sem frete', () => {

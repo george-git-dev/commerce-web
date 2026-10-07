@@ -14,7 +14,7 @@ export const ADMIN_ROUTES: Routes = [
     children: [
       {
         path: '',
-        title: 'Nani Admin | Início',
+        title: 'Nani Admin | Painel de vendas',
         loadComponent: () => import('./dashboard/dashboard').then((m) => m.Dashboard),
       },
       {

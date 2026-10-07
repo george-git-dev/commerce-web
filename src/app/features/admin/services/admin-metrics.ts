@@ -1,15 +1,22 @@
 import { OrderStatus } from '../../../core/models/order';
 import { AdminOrder } from '../data/admin-orders-mock';
 
-export type DashboardPeriod = 'hoje' | '7d' | '30d' | 'mes' | 'personalizado';
+/** Atalhos relativos a hoje (usados pelo painel e pelos testes). */
+export type QuickPeriod = 'hoje' | '7d' | '30d' | 'mes';
+
+/** Visões do painel: um dia, 7 ou 30 dias, um mês ou de/até. */
+export type DashboardPeriod = 'dia' | '7d' | '30d' | 'mes' | 'personalizado';
 
 export const PERIOD_LABELS: Record<DashboardPeriod, string> = {
-  hoje: 'Hoje',
+  dia: 'Dia',
   '7d': '7 dias',
   '30d': '30 dias',
-  mes: 'Mês atual',
+  mes: 'Mês',
   personalizado: 'Personalizado',
 };
+
+/** Acima disto o gráfico agrupa por mês (por dia ficaria ilegível). */
+export const MAX_DAILY_POINTS = 62;
 
 export interface DateRange {
   start: Date;
@@ -36,6 +43,40 @@ export function parseDay(value: string): Date | null {
   return Number.isNaN(date.getTime()) ? null : date;
 }
 
+/** Um dia inteiro (até agora, se for hoje), comparado com o dia anterior. */
+export function dayRange(day: Date, now: Date): DateRange {
+  const start = startOfDay(day);
+  const fullEnd = new Date(start.getTime() + DAY - 1);
+  const end = fullEnd > now ? new Date(now) : fullEnd;
+  return {
+    start,
+    end,
+    previousStart: new Date(start.getTime() - DAY),
+    previousEnd: new Date(start.getTime() - 1),
+    days: 1,
+  };
+}
+
+/**
+ * Um mês (`aaaa-mm`; o atual vai até hoje), comparado com os mesmos dias do
+ * mês anterior — 1º a 7 de outubro contra 1º a 7 de setembro.
+ */
+export function monthRange(month: string, now: Date): DateRange | null {
+  const match = /^(\d{4})-(\d{2})$/.exec(month);
+  if (!match) return null;
+  const year = Number(match[1]);
+  const index = Number(match[2]) - 1;
+  const start = new Date(year, index, 1);
+  const fullEnd = new Date(new Date(year, index + 1, 1).getTime() - 1);
+  const end = fullEnd > now ? new Date(now) : fullEnd;
+  const days = Math.round((startOfDay(end).getTime() - start.getTime()) / DAY) + 1;
+  const previousStart = new Date(year, index - 1, 1);
+  const previousMonthEnd = new Date(start.getTime() - 1);
+  const shifted = new Date(previousStart.getTime() + days * DAY - 1);
+  const previousEnd = shifted < previousMonthEnd ? shifted : previousMonthEnd;
+  return { start, end, previousStart, previousEnd, days };
+}
+
 /** Problema do período personalizado (`null` = válido). `today` = `aaaa-mm-dd`. */
 export function customRangeProblem(from: string, to: string, today: string): string | null {
   if (!parseDay(from) || !parseDay(to)) return 'Escolha as duas datas.';
@@ -54,10 +95,7 @@ export function customRange(from: Date, to: Date): DateRange {
   return { start, end, previousStart, previousEnd, days };
 }
 
-export function periodRange(
-  period: Exclude<DashboardPeriod, 'personalizado'>,
-  now: Date,
-): DateRange {
+export function periodRange(period: QuickPeriod, now: Date): DateRange {
   const end = new Date(now);
   const today = startOfDay(now);
   const start =
@@ -115,6 +153,30 @@ export function dailySeries(
       value: value(orders.filter((order) => counts(order) && within(order, day, next))),
     };
   });
+}
+
+const MONTHS = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+
+/** Série por mês (rótulo "set/26"), de `start` a `end`. */
+export function monthlySeries(
+  orders: readonly AdminOrder[],
+  start: Date,
+  end: Date,
+  value: (orders: readonly AdminOrder[]) => number,
+): { label: string; value: number }[] {
+  const points: { label: string; value: number }[] = [];
+  let month = new Date(start.getFullYear(), start.getMonth(), 1);
+  while (month <= end) {
+    const next = new Date(month.getFullYear(), month.getMonth() + 1, 1);
+    const from = month < start ? start : month;
+    const to = new Date(Math.min(next.getTime() - 1, end.getTime()));
+    points.push({
+      label: `${MONTHS[month.getMonth()]}/${String(month.getFullYear()).slice(2)}`,
+      value: value(orders.filter((order) => counts(order) && within(order, from, to))),
+    });
+    month = next;
+  }
+  return points;
 }
 
 export const revenueOf = (orders: readonly AdminOrder[]) =>

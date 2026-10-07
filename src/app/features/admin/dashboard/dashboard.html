@@ -1,7 +1,7 @@
 <section class="dash">
   <header class="dash__head">
     <div>
-      <p class="dash__eyebrow">Visão geral da loja</p>
+      <p class="dash__eyebrow">Painel de vendas</p>
       <h2 class="dash__hello">Olá, {{ firstName() }}</h2>
     </div>
   </header>
@@ -43,7 +43,7 @@
   <div class="dash__grid">
     <article class="dash__card dash__card--wide">
       <header class="dash__card-head">
-        <h3>Vendas por dia</h3>
+        <h3>Vendas por {{ data.grouping() === 'mes' ? 'mês' : 'dia' }}</h3>
         <p>Pedidos não cancelados · {{ seriesLabel() }}</p>
       </header>
       <app-chart

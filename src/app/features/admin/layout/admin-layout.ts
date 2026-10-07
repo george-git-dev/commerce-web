@@ -71,7 +71,7 @@ export class AdminLayout {
       .split('?')[0]
       .replace(/^\/admin\/?/, '')
       .split('/')[0];
-    return ADMIN_NAV.find((item) => item.path === path)?.label ?? 'Início';
+    return ADMIN_NAV.find((item) => item.path === path)?.label ?? 'Painel de vendas';
   });
 
   protected link(path: string): string {

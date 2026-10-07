@@ -1,11 +1,17 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
-import { Occasion } from '../../../core/models/product';
+import { Gender, Product } from '../../../core/models/product';
+import { withHighlights } from '../../../core/utils/product-highlights';
+import { hasDeal } from '../../../core/utils/product-pricing';
 import { PENDING_REVIEWS_MOCK } from '../data/admin-orders-mock';
 import {
   customRange,
   customRangeProblem,
   dailySeries,
   DashboardPeriod,
+  dayRange,
+  MAX_DAILY_POINTS,
+  monthlySeries,
+  monthRange,
   delta,
   filterOrders,
   kpis,
@@ -28,7 +34,7 @@ function isoDay(date: Date): string {
 
 /**
  * Números do painel. Hoje calculados no front a partir de pedidos fictícios;
- * na Fase 2 viram `GET /admin/dashboard?de=&ate=&categoria=&ocasiao=&marca=&fornecedor=`
+ * na Fase 2 viram `GET /admin/dashboard?de=&ate=&categoria=&destaque=&genero=&marca=&fornecedor=`
  * (o back agrega no banco).
  */
 @Injectable({ providedIn: 'root' })
@@ -41,44 +47,99 @@ export class AdminDashboard {
 
   // --- Período -------------------------------------------------------------
   readonly period = signal<DashboardPeriod>('30d');
+  /** Dia escolhido (`aaaa-mm-dd`); começa hoje. */
+  readonly day = signal(this.today);
+  /** Mês escolhido (`aaaa-mm`); começa no atual. */
+  readonly month = signal(this.today.slice(0, 7));
   /** Personalizado: começa nos últimos 30 dias para não abrir vazio. */
   readonly customFrom = signal(isoDay(new Date(this.now.getTime() - 29 * 86_400_000)));
   readonly customTo = signal(this.today);
-  readonly customProblem = computed(() =>
-    this.period() === 'personalizado'
-      ? customRangeProblem(this.customFrom(), this.customTo(), this.today)
-      : null,
-  );
+
+  /** Data inválida/futura na visão escolhida (`null` = ok). */
+  readonly periodProblem = computed(() => {
+    switch (this.period()) {
+      case 'dia':
+        if (!parseDay(this.day())) return 'Escolha o dia.';
+        return this.day() > this.today ? 'O dia não pode ser no futuro.' : null;
+      case 'mes':
+        if (!monthRange(this.month(), this.now)) return 'Escolha o mês.';
+        return this.month() > this.today.slice(0, 7) ? 'O mês não pode ser no futuro.' : null;
+      case 'personalizado':
+        return customRangeProblem(this.customFrom(), this.customTo(), this.today);
+      default:
+        return null;
+    }
+  });
+
   readonly range = computed(() => {
     const period = this.period();
-    if (period !== 'personalizado') return periodRange(period, this.now);
-    // Datas inválidas: mantém o último período válido visível (30 dias).
-    if (this.customProblem()) return periodRange('30d', this.now);
-    return customRange(parseDay(this.customFrom())!, parseDay(this.customTo())!);
+    // Data inválida: mostra os últimos 30 dias até corrigir.
+    if (this.periodProblem()) return periodRange('30d', this.now);
+    switch (period) {
+      case 'dia':
+        return dayRange(parseDay(this.day())!, this.now);
+      case 'mes':
+        return monthRange(this.month(), this.now)!;
+      case 'personalizado':
+        return customRange(parseDay(this.customFrom())!, parseDay(this.customTo())!);
+      default:
+        return periodRange(period, this.now);
+    }
   });
+
+  /** Gráfico por dia até 62 dias; acima disso, por mês. */
+  readonly grouping = computed<'dia' | 'mes'>(() =>
+    this.range().days > MAX_DAILY_POINTS ? 'mes' : 'dia',
+  );
 
   // --- Filtros -------------------------------------------------------------
   readonly category = signal('');
-  readonly occasion = signal<Occasion | ''>('');
+  /** `lancamento`, `oferta`, `mais-vendido` ou `selo:<nome>` (Exclusivo…). */
+  readonly highlight = signal('');
+  readonly gender = signal<Gender | ''>('');
   readonly brand = signal('');
   readonly supplierId = signal<number | null>(null);
   readonly hasFilters = computed(
-    () => !!(this.category() || this.occasion() || this.brand() || this.supplierId() != null),
+    () =>
+      !!(
+        this.category() ||
+        this.highlight() ||
+        this.gender() ||
+        this.brand() ||
+        this.supplierId() != null
+      ),
   );
 
   clearFilters(): void {
     this.category.set('');
-    this.occasion.set('');
+    this.highlight.set('');
+    this.gender.set('');
     this.brand.set('');
     this.supplierId.set(null);
   }
 
-  /** Produtos (por slug) que passam nos filtros de marca, ocasião e fornecedor. */
+  /** Produtos com Lançamento/Mais vendido calculados (situação de hoje). */
+  private readonly catalog = computed(() => withHighlights(this.products.products()));
+
+  /** Destaques que existem hoje no catálogo, para o filtro. */
+  readonly highlightOptions = computed(() => {
+    const badges = [...new Set(this.catalog().flatMap((p) => (p.badge ? [p.badge] : [])))].sort(
+      (a, b) => a.localeCompare(b, 'pt-BR'),
+    );
+    return [
+      { id: 'lancamento', label: 'Lançamentos' },
+      { id: 'oferta', label: 'Ofertas' },
+      { id: 'mais-vendido', label: 'Mais vendidos' },
+      ...badges.map((badge) => ({ id: `selo:${badge}`, label: badge })),
+    ];
+  });
+
+  /** Produtos (por slug) que passam nos filtros de destaque, marca e fornecedor. */
   private readonly allowedSlugs = computed(() => {
+    const highlight = this.highlight();
     const brand = this.brand();
-    const occasion = this.occasion();
     const supplierId = this.supplierId();
-    if (!brand && !occasion && supplierId == null) return null;
+    if (!highlight && !brand && supplierId == null) return null;
     // Fornecedor = produtos que ele já entregou (entradas recebidas).
     const supplied =
       supplierId == null
@@ -89,13 +150,19 @@ export class AdminDashboard {
               .filter((entry) => entry.status === 'recebido')
               .flatMap((entry) => entry.items.map((item) => item.sku)),
           );
+    const isHighlight = (p: Product) => {
+      if (!highlight) return true;
+      if (highlight === 'lancamento') return !!p.launch;
+      if (highlight === 'oferta') return hasDeal(p);
+      if (highlight === 'mais-vendido') return !!p.bestSeller;
+      return p.badge === highlight.replace(/^selo:/, '');
+    };
     return new Set(
-      this.products
-        .products()
+      this.catalog()
         .filter(
           (p) =>
+            isHighlight(p) &&
             (!brand || p.brandName === brand) &&
-            (!occasion || !!p.occasions?.includes(occasion)) &&
             (!supplied || p.variants.some((v) => supplied.has(v.id))),
         )
         .map((p) => p.slug),
@@ -105,11 +172,14 @@ export class AdminDashboard {
   /** Pedidos da loja já filtrados (mudam quando a equipe avança ou cancela um pedido). */
   private readonly orders = computed(() => {
     const category = this.category();
+    const gender = this.gender();
     const slugs = this.allowedSlugs();
     const matches =
-      category || slugs
-        ? (item: { slug: string; category: string }) =>
-            (!category || item.category === category) && (!slugs || slugs.has(item.slug))
+      category || gender || slugs
+        ? (item: { slug: string; category: string; gender: string }) =>
+            (!category || item.category === category) &&
+            (!gender || item.gender === gender) &&
+            (!slugs || slugs.has(item.slug))
         : null;
     return filterOrders(this.store.orders(), matches);
   });
@@ -129,22 +199,23 @@ export class AdminDashboard {
     };
   });
 
-  /** Dias do gráfico: no mínimo 7, para "Hoje" ainda mostrar tendência. */
-  private readonly chartDays = computed(() => Math.max(7, this.range().days));
-  /** Último dia do gráfico: hoje, ou o "até" do personalizado. */
-  private readonly lastDay = computed(() =>
-    this.range().end < this.now ? this.range().end : this.now,
-  );
+  /**
+   * Série do gráfico na visão escolhida: por dia (no mínimo 7 dias, para
+   * "Dia" ainda mostrar tendência) ou por mês em períodos longos.
+   */
+  private series(value: Parameters<typeof dailySeries>[3]) {
+    const { start, end, days } = this.range();
+    return this.grouping() === 'mes'
+      ? monthlySeries(this.orders(), start, end, value)
+      : dailySeries(this.orders(), end, Math.max(7, days), value);
+  }
 
-  readonly salesSeries = computed(() =>
-    dailySeries(this.orders(), this.lastDay(), this.chartDays(), revenueOf),
-  );
+  readonly salesSeries = computed(() => this.series(revenueOf));
 
   /** Mini gráficos dos cards (mesma janela do gráfico principal). */
   readonly sparks = computed(() => {
-    const days = this.chartDays();
     const series = (value: Parameters<typeof dailySeries>[3]) =>
-      dailySeries(this.orders(), this.lastDay(), days, value).map((point) => point.value);
+      this.series(value).map((point) => point.value);
     return {
       revenue: series(revenueOf),
       orders: series((orders) => orders.length),
