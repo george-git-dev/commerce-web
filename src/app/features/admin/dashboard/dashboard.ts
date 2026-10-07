@@ -5,10 +5,10 @@ import { RouterLink } from '@angular/router';
 import { ChartConfiguration } from 'chart.js';
 import { ORDER_STATUS_LABELS } from '../../../core/models/order';
 import { AuthService } from '../../../core/services/auth-service';
-import { DashboardPeriod, PERIOD_LABELS } from '../services/admin-metrics';
 import { AdminDashboard } from '../services/admin-dashboard';
 import { ChartCanvas } from '../shared/chart/chart';
 import { KpiCard } from '../shared/kpi-card/kpi-card';
+import { DashboardFilters } from './dashboard-filters/dashboard-filters';
 import { LatestOrders } from './latest-orders/latest-orders';
 
 /** Dourado dos gráficos: um tom abaixo do da marca, para ter contraste ≥ 3:1 no card. */
@@ -23,10 +23,18 @@ const brlShort = new Intl.NumberFormat('pt-BR', {
   maximumFractionDigits: 1,
 });
 
-/** `/admin` — visão geral: indicadores, pendências, gráficos e últimos pedidos. */
+/** `/admin` — visão geral: indicadores, gráficos e últimos pedidos, com período e filtros. */
 @Component({
   selector: 'app-dashboard',
-  imports: [CurrencyPipe, MatIconModule, RouterLink, ChartCanvas, KpiCard, LatestOrders],
+  imports: [
+    CurrencyPipe,
+    MatIconModule,
+    RouterLink,
+    ChartCanvas,
+    DashboardFilters,
+    KpiCard,
+    LatestOrders,
+  ],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -35,11 +43,16 @@ export class Dashboard {
   protected readonly data = inject(AdminDashboard);
   protected readonly auth = inject(AuthService);
 
-  protected readonly periods = Object.entries(PERIOD_LABELS) as [DashboardPeriod, string][];
   protected readonly statusLabels = ORDER_STATUS_LABELS;
   protected readonly firstName = computed(() => this.auth.user()?.name.split(' ')[0] ?? '');
 
   protected readonly brl = (value: number) => brl.format(value);
+
+  /** "01/09 a 30/09" — janela do gráfico de vendas por dia. */
+  protected readonly seriesLabel = computed(() => {
+    const series = this.data.salesSeries();
+    return `${series[0]?.label} a ${series.at(-1)?.label}`;
+  });
 
   /** Maior valor das listas com barra (para a largura proporcional). */
   protected readonly topMax = computed(() =>

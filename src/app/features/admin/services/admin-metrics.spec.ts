@@ -1,7 +1,10 @@
 import { AdminOrder } from '../data/admin-orders-mock';
 import {
+  customRange,
+  customRangeProblem,
   dailySeries,
   delta,
+  filterOrders,
   kpis,
   periodRange,
   revenueOf,
@@ -79,5 +82,30 @@ describe('métricas do painel', () => {
     expect(topProducts(orders, start, end)[0].units).toBe(3);
     expect(statusCounts(orders, start, end).find((s) => s.status === 'pago')?.count).toBe(2);
     expect(salesByGroup(orders, start, end)[0]).toEqual({ group: 'Masculinos', value: 450 });
+  });
+
+  it('período personalizado: de/até inteiros, anterior de mesmo tamanho e validação', () => {
+    const range = customRange(new Date(2026, 8, 1), new Date(2026, 8, 10));
+    expect(range.days).toBe(10);
+    expect(range.end).toEqual(new Date(2026, 8, 10, 23, 59, 59, 999));
+    expect(range.previousStart).toEqual(new Date(2026, 7, 22));
+    expect(customRangeProblem('2026-09-10', '2026-09-01', '2026-10-06')).toContain('antes');
+    expect(customRangeProblem('2026-09-01', '2026-10-07', '2026-10-06')).toContain('futuro');
+    expect(customRangeProblem('', '2026-10-01', '2026-10-06')).toContain('duas datas');
+    expect(customRangeProblem('2026-09-01', '2026-09-01', '2026-10-06')).toBeNull();
+  });
+
+  it('filtro deixa só os itens que passam e recalcula o total sem frete', () => {
+    const base = order(0, 300, { shippingPrice: 20, total: 320 });
+    const mixed: AdminOrder = {
+      ...base,
+      items: [...base.items, { ...base.items[0], slug: 'lattafa-yara', unitPrice: 100 }],
+    };
+    expect(filterOrders([mixed], null)).toEqual([mixed]);
+    const onlyYara = filterOrders([mixed], (item) => item.slug === 'lattafa-yara');
+    expect(onlyYara).toHaveLength(1);
+    expect(onlyYara[0].items).toHaveLength(1);
+    expect(onlyYara[0].total).toBe(100);
+    expect(filterOrders([mixed], () => false)).toEqual([]);
   });
 });

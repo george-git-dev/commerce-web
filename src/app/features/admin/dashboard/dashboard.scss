@@ -26,37 +26,6 @@ h3 {
   font-size: clamp(1.75rem, 1.4rem + 1.6vw, 2.5rem);
 }
 
-// Seletor de período: segmentos que rolam se faltar espaço.
-.dash__periods {
-  display: flex;
-  gap: 4px;
-  padding: 4px;
-  overflow-x: auto;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--muted);
-
-  button {
-    flex: 1 0 auto;
-    min-height: 40px;
-    padding: 0 14px;
-    border: 0;
-    border-radius: var(--radius-sm);
-    background: none;
-    color: var(--muted-foreground);
-    font: inherit;
-    font-size: 0.875rem;
-    font-weight: 500;
-    cursor: pointer;
-  }
-
-  .dash__period--on {
-    background: var(--card);
-    color: var(--foreground);
-    box-shadow: var(--shadow-sm);
-  }
-}
-
 .dash__kpis {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -67,40 +36,6 @@ h3 {
   font-family: var(--font-ui);
   font-size: 1rem;
   font-weight: 600;
-}
-
-.dash__alerts {
-  display: grid;
-  gap: 8px;
-  margin: -8px 0 0;
-  padding: 0;
-  list-style: none;
-
-  a {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    min-height: 52px;
-    padding: 10px 12px;
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    background: var(--card);
-    font-size: 0.9375rem;
-
-    > mat-icon:first-child {
-      flex-shrink: 0;
-      color: var(--gold);
-    }
-
-    span {
-      flex: 1;
-    }
-  }
-}
-
-.dash__go {
-  flex-shrink: 0;
-  color: var(--muted-foreground);
 }
 
 .dash__grid {
@@ -247,17 +182,6 @@ h3 {
   }
 }
 
-@media (min-width: 600px) {
-  .dash__head {
-    grid-template-columns: 1fr auto;
-    align-items: end;
-  }
-
-  .dash__alerts {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
 @media (min-width: 1024px) {
   .dash {
     gap: 24px;
@@ -266,10 +190,6 @@ h3 {
   .dash__kpis {
     grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 16px;
-  }
-
-  .dash__alerts {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
   .dash__grid {

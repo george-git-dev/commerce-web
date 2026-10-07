@@ -1,0 +1,122 @@
+.df {
+  display: grid;
+  gap: 10px;
+}
+
+// Período: segmentos que quebram em duas linhas no celular.
+.df__periods {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--muted);
+
+  button {
+    flex: 1 0 auto;
+    min-height: 40px;
+    padding: 0 14px;
+    border: 0;
+    border-radius: var(--radius-sm);
+    background: none;
+    color: var(--muted-foreground);
+    font: inherit;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+  }
+
+  .df__period--on {
+    background: var(--card);
+    color: var(--foreground);
+    box-shadow: var(--shadow-sm);
+  }
+}
+
+.df__dates,
+.df__filters {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+
+  label {
+    display: grid;
+    gap: 4px;
+    min-width: 0;
+    font-size: 0.75rem;
+    color: var(--muted-foreground);
+  }
+
+  input,
+  select {
+    width: 100%;
+    height: 44px;
+    padding-inline: 10px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--card);
+    color: var(--foreground);
+    font: inherit;
+    font-size: 0.9375rem;
+
+    &[aria-invalid='true'] {
+      border-color: var(--wine);
+    }
+  }
+}
+
+.df__error {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--wine);
+  font-size: 0.8125rem;
+}
+
+.df__active {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--muted-foreground);
+
+  mat-icon {
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+    color: var(--gold);
+  }
+
+  button {
+    padding: 4px 0;
+    border: 0;
+    background: none;
+    color: var(--earth);
+    font: inherit;
+    font-weight: 600;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+}
+
+@media (min-width: 900px) {
+  .df__periods {
+    justify-self: start;
+  }
+
+  .df__dates {
+    grid-template-columns: 180px 180px 1fr;
+    align-items: end;
+  }
+
+  .df__error {
+    grid-column: auto;
+    align-self: center;
+  }
+
+  .df__filters {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}

@@ -4,20 +4,8 @@
       <p class="dash__eyebrow">Visão geral da loja</p>
       <h2 class="dash__hello">Olá, {{ firstName() }}</h2>
     </div>
-    <div class="dash__periods" role="radiogroup" aria-label="Período">
-      @for (period of periods; track period[0]) {
-        <button
-          type="button"
-          role="radio"
-          [attr.aria-checked]="data.period() === period[0]"
-          [class.dash__period--on]="data.period() === period[0]"
-          (click)="data.period.set(period[0])"
-        >
-          {{ period[1] }}
-        </button>
-      }
-    </div>
   </header>
+  <app-dashboard-filters />
 
   @let k = data.kpis();
   @let s = data.sparks();
@@ -52,56 +40,11 @@
     />
   </div>
 
-  <h3 class="dash__subtitle">Precisa da sua atenção</h3>
-  @let a = data.alerts();
-  <ul class="dash__alerts">
-    <li>
-      <a routerLink="/admin/pedidos" [queryParams]="{ status: 'pago' }">
-        <mat-icon aria-hidden="true">inventory</mat-icon>
-        <span
-          ><strong>{{ a.toSeparate }}</strong> pedidos aguardando separação</span
-        >
-        <mat-icon class="dash__go" aria-hidden="true">chevron_right</mat-icon>
-      </a>
-    </li>
-    @if (auth.can('approvals:view')) {
-      <li>
-        <a routerLink="/admin/aprovacoes">
-          <mat-icon aria-hidden="true">handshake</mat-icon>
-          <span
-            ><strong>{{ a.inHandsPending }}</strong> entregas em mãos pendentes</span
-          >
-          <mat-icon class="dash__go" aria-hidden="true">chevron_right</mat-icon>
-        </a>
-      </li>
-    }
-    <li>
-      <a routerLink="/admin/estoque" [queryParams]="{ situacao: 'alerta' }">
-        <mat-icon aria-hidden="true">warning_amber</mat-icon>
-        <span
-          ><strong>{{ a.lowStock }}</strong> itens com estoque baixo ou zerado</span
-        >
-        <mat-icon class="dash__go" aria-hidden="true">chevron_right</mat-icon>
-      </a>
-    </li>
-    @if (auth.can('approvals:view')) {
-      <li>
-        <a routerLink="/admin/aprovacoes">
-          <mat-icon aria-hidden="true">rate_review</mat-icon>
-          <span
-            ><strong>{{ a.pendingReviews }}</strong> avaliações aguardando moderação</span
-          >
-          <mat-icon class="dash__go" aria-hidden="true">chevron_right</mat-icon>
-        </a>
-      </li>
-    }
-  </ul>
-
   <div class="dash__grid">
     <article class="dash__card dash__card--wide">
       <header class="dash__card-head">
         <h3>Vendas por dia</h3>
-        <p>Pedidos não cancelados · últimos {{ data.salesSeries().length }} dias</p>
+        <p>Pedidos não cancelados · {{ seriesLabel() }}</p>
       </header>
       <app-chart
         [config]="salesChart()"

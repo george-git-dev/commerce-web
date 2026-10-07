@@ -1,13 +1,14 @@
 import { OrderStatus } from '../../../core/models/order';
 import { AdminOrder } from '../data/admin-orders-mock';
 
-export type DashboardPeriod = 'hoje' | '7d' | '30d' | 'mes';
+export type DashboardPeriod = 'hoje' | '7d' | '30d' | 'mes' | 'personalizado';
 
 export const PERIOD_LABELS: Record<DashboardPeriod, string> = {
   hoje: 'Hoje',
   '7d': '7 dias',
   '30d': '30 dias',
   mes: 'Mês atual',
+  personalizado: 'Personalizado',
 };
 
 export interface DateRange {
@@ -27,7 +28,36 @@ function startOfDay(date: Date): Date {
   return copy;
 }
 
-export function periodRange(period: DashboardPeriod, now: Date): DateRange {
+/** `aaaa-mm-dd` (campo de data) → início do dia, no fuso local. */
+export function parseDay(value: string): Date | null {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (!match) return null;
+  const date = new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+/** Problema do período personalizado (`null` = válido). `today` = `aaaa-mm-dd`. */
+export function customRangeProblem(from: string, to: string, today: string): string | null {
+  if (!parseDay(from) || !parseDay(to)) return 'Escolha as duas datas.';
+  if (from > to) return 'A data inicial precisa ser antes da final.';
+  if (to > today) return 'A data final não pode ser no futuro.';
+  return null;
+}
+
+/** Período escolhido de/até (dias inteiros), com o anterior de mesmo tamanho. */
+export function customRange(from: Date, to: Date): DateRange {
+  const start = startOfDay(from);
+  const end = new Date(startOfDay(to).getTime() + DAY - 1);
+  const days = Math.round((startOfDay(to).getTime() - start.getTime()) / DAY) + 1;
+  const previousEnd = new Date(start.getTime() - 1);
+  const previousStart = new Date(start.getTime() - days * DAY);
+  return { start, end, previousStart, previousEnd, days };
+}
+
+export function periodRange(
+  period: Exclude<DashboardPeriod, 'personalizado'>,
+  now: Date,
+): DateRange {
   const end = new Date(now);
   const today = startOfDay(now);
   const start =
@@ -68,14 +98,14 @@ export function delta(current: number, previous: number): number | null {
   return Math.round(((current - previous) / previous) * 1000) / 10;
 }
 
-/** Série diária (rótulo dd/MM + valor) dos últimos `days` dias até `now`. */
+/** Série diária (rótulo dd/MM + valor) dos `days` dias que terminam em `last`. */
 export function dailySeries(
   orders: readonly AdminOrder[],
-  now: Date,
+  last: Date,
   days: number,
   value: (orders: readonly AdminOrder[]) => number,
 ): { label: string; value: number }[] {
-  const today = startOfDay(now);
+  const today = startOfDay(last);
   return Array.from({ length: days }, (_, index) => {
     const day = new Date(today.getTime() - (days - 1 - index) * DAY);
     const next = new Date(day.getTime() + DAY - 1);
@@ -89,6 +119,27 @@ export function dailySeries(
 
 export const revenueOf = (orders: readonly AdminOrder[]) =>
   Math.round(orders.reduce((sum, order) => sum + order.total, 0) * 100) / 100;
+
+type Item = AdminOrder['items'][number];
+
+/**
+ * Pedidos só com os itens que passam no filtro (categoria, marca…). Pedido
+ * sem nenhum item do filtro sai; o total vira a soma desses itens (sem frete),
+ * para faturamento e ticket médio falarem só do que foi filtrado.
+ */
+export function filterOrders(
+  orders: readonly AdminOrder[],
+  matches: ((item: Item) => boolean) | null,
+): readonly AdminOrder[] {
+  if (!matches) return orders;
+  return orders.flatMap((order) => {
+    const items = order.items.filter(matches);
+    if (!items.length) return [];
+    const total =
+      Math.round(items.reduce((sum, i) => sum + i.unitPrice * i.quantity, 0) * 100) / 100;
+    return [{ ...order, items, subtotal: total, shippingPrice: 0, total }];
+  });
+}
 
 export interface TopProduct {
   slug: string;
