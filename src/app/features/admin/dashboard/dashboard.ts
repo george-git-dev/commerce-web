@@ -1,7 +1,5 @@
 import { CurrencyPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
-import { MatIconModule } from '@angular/material/icon';
-import { RouterLink } from '@angular/router';
 import { ChartConfiguration } from 'chart.js';
 import { ORDER_STATUS_LABELS } from '../../../core/models/order';
 import { AuthService } from '../../../core/services/auth-service';
@@ -9,7 +7,6 @@ import { AdminDashboard } from '../services/admin-dashboard';
 import { ChartCanvas } from '../shared/chart/chart';
 import { KpiCard } from '../shared/kpi-card/kpi-card';
 import { DashboardFilters } from './dashboard-filters/dashboard-filters';
-import { LatestOrders } from './latest-orders/latest-orders';
 
 /** Dourado dos gráficos: um tom abaixo do da marca, para ter contraste ≥ 3:1 no card. */
 const CHART_GOLD = '#a67b41';
@@ -23,18 +20,10 @@ const brlShort = new Intl.NumberFormat('pt-BR', {
   maximumFractionDigits: 1,
 });
 
-/** `/admin` — visão geral: indicadores, gráficos e últimos pedidos, com período e filtros. */
+/** `/admin` — painel de vendas: indicadores e gráficos, com período e filtros. */
 @Component({
   selector: 'app-dashboard',
-  imports: [
-    CurrencyPipe,
-    MatIconModule,
-    RouterLink,
-    ChartCanvas,
-    DashboardFilters,
-    KpiCard,
-    LatestOrders,
-  ],
+  imports: [CurrencyPipe, ChartCanvas, DashboardFilters, KpiCard],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

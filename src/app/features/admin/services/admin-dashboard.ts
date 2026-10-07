@@ -251,13 +251,4 @@ export class AdminDashboard {
             ['pago', 'em-separacao', 'enviado'].includes(order.status),
         ).length,
   );
-
-  /** Últimos pedidos que têm algo do filtro (com o total real do pedido). */
-  readonly latestOrders = computed(() => {
-    const numbers = new Set(this.orders().map((order) => order.number));
-    return this.store
-      .orders()
-      .filter((order) => numbers.has(order.number))
-      .slice(0, 5);
-  });
 }

@@ -32,12 +32,6 @@ h3 {
   gap: 10px;
 }
 
-.dash__subtitle {
-  font-family: var(--font-ui);
-  font-size: 1rem;
-  font-weight: 600;
-}
-
 .dash__grid {
   display: grid;
   gap: 16px;
@@ -153,32 +147,6 @@ h3 {
   td:last-child,
   th:last-child {
     text-align: right;
-  }
-}
-
-.dash__latest {
-  display: grid;
-  gap: 10px;
-}
-
-.dash__latest-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-
-  a {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    min-height: 44px;
-    font-size: 0.875rem;
-    color: var(--earth);
-
-    mat-icon {
-      width: 18px;
-      height: 18px;
-      font-size: 18px;
-    }
   }
 }
 
