@@ -13,6 +13,8 @@ import { AdminPurchaseStore } from '../services/admin-purchase-store';
 import { AdminStockStore, StockMoveType } from '../services/admin-stock-store';
 import { STOCK_STATUS_LABELS, validMinimum } from '../services/stock-rules';
 import { StockAdjustDialog, StockAdjustData, StockAdjustResult } from './stock-adjust-dialog';
+import { Pager } from '../shared/pager/pager';
+import { Paging } from '../shared/pager/paging';
 
 const MOVE_LABELS: Record<StockMoveType, string> = {
   inicial: 'Saldo inicial',
@@ -22,12 +24,11 @@ const MOVE_LABELS: Record<StockMoveType, string> = {
 };
 
 /** Movimentações por página no histórico. */
-const HISTORY_PAGE = 20;
 
 /** `/admin/estoque/:sku` — saldo, mínimo, ajuste manual e histórico de um item. */
 @Component({
   selector: 'app-admin-stock-detail',
-  imports: [CurrencyPipe, DatePipe, MatButtonModule, MatIconModule, NonNegative, RouterLink],
+  imports: [CurrencyPipe, DatePipe, MatButtonModule, MatIconModule, NonNegative, Pager, RouterLink],
   templateUrl: './admin-stock-detail.html',
   styleUrl: './admin-stock-detail.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -50,15 +51,9 @@ export class AdminStockDetail {
     const row = this.row();
     return row ? this.store.history(row.variant.id) : [];
   });
-  /** Histórico mostra 20 por vez ("Ver mais"); volta a 20 ao trocar de item. */
-  protected readonly historyLimit = linkedSignal<string, number>({
-    source: () => this.row()?.variant.id ?? '',
-    computation: () => HISTORY_PAGE,
-  });
-  protected readonly visibleHistory = computed(() => this.history().slice(0, this.historyLimit()));
-  protected moreHistory(): void {
-    this.historyLimit.update((value) => value + HISTORY_PAGE);
-  }
+  /** Histórico paginado; volta à 1ª página ao trocar de item. */
+  protected readonly historyPaging = new Paging(() => this.row()?.variant.id ?? '');
+  protected readonly historyPage = computed(() => this.historyPaging.of(this.history()));
   /** Compras recebidas deste item (comparativo de custo por fornecedor). */
   private readonly purchaseStore = inject(AdminPurchaseStore);
   protected readonly purchases = computed(() => {

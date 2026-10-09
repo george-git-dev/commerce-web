@@ -1,8 +1,7 @@
 import { CurrencyPipe, DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { OrderStatus, PAYMENT_METHOD_LABELS } from '../../../core/models/order';
 import { ShippingOption } from '../../../core/models/shipping';
 import { OrderStatusChip } from '../../../shared/order-status/order-status';
@@ -10,17 +9,31 @@ import { AdminOrder } from '../data/admin-orders-mock';
 import { STATUS_ORDER } from '../services/admin-metrics';
 import { statusLabel } from '../services/admin-order-flow';
 import { AdminOrderStore } from '../services/admin-order-store';
+import { ListMemory } from '../services/list-memory';
+import { Pager } from '../shared/pager/pager';
+import { Paging } from '../shared/pager/paging';
 
 type StatusFilter = OrderStatus | 'todos';
 type PeriodFilter = '7' | '30' | '90' | 'todos';
 type ShippingFilter = ShippingOption['id'] | 'todos';
 
-const PAGE_SIZE = 20;
+function createState() {
+  const status = signal<StatusFilter>('todos');
+  const search = signal('');
+  const period = signal<PeriodFilter>('30');
+  const shipping = signal<ShippingFilter>('todos');
+  const paging = new Paging(() => `${status()}|${search()}|${period()}|${shipping()}`);
+  return { status, search, period, shipping, paging };
+}
 
-/** `/admin/pedidos` — lista com abas de status, busca e filtros. */
+/**
+ * `/admin/pedidos` — lista com abas de status, busca, filtros e paginação.
+ * Estado em memória (voltar do pedido cai na mesma página). Fase 2:
+ * `GET /admin/orders?status=&q=&days=&shipping=&page=&size=`.
+ */
 @Component({
   selector: 'app-admin-orders',
-  imports: [CurrencyPipe, DatePipe, MatButtonModule, MatIconModule, RouterLink, OrderStatusChip],
+  imports: [CurrencyPipe, DatePipe, MatIconModule, RouterLink, OrderStatusChip, Pager],
   templateUrl: './admin-orders.html',
   styleUrl: './admin-orders.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -37,16 +50,24 @@ export class AdminOrders {
     'em-maos': 'Entrega em mãos',
   };
 
-  /** Filtros (a aba de status pode vir do painel: `?status=pago`). */
-  protected readonly status = signal<StatusFilter>(
-    (STATUS_ORDER as readonly string[]).includes(this.query.get('status') ?? '')
-      ? (this.query.get('status') as OrderStatus)
-      : 'todos',
-  );
-  protected readonly search = signal('');
-  protected readonly period = signal<PeriodFilter>('30');
-  protected readonly shipping = signal<ShippingFilter>('todos');
-  protected readonly limit = signal(PAGE_SIZE);
+  private readonly state = inject(ListMemory).get('pedidos', createState);
+  protected readonly status = this.state.status;
+  protected readonly search = this.state.search;
+  protected readonly period = this.state.period;
+  protected readonly shipping = this.state.shipping;
+  protected readonly paging = this.state.paging;
+
+  constructor() {
+    // Link do painel (`?status=pago`) escolhe a aba e volta para a 1ª página.
+    const fromLink = this.query.get('status');
+    if (fromLink && (STATUS_ORDER as readonly string[]).includes(fromLink)) {
+      this.status.set(fromLink as OrderStatus);
+    }
+    // Tira o parâmetro: voltar de um pedido não pode desfazer a aba escolhida depois.
+    if (fromLink) {
+      void inject(Router).navigate([], { queryParams: {}, replaceUrl: true });
+    }
+  }
 
   /** Pedidos que passam por busca, período e entrega (antes da aba de status). */
   private readonly base = computed(() => {
@@ -83,23 +104,9 @@ export class AdminOrders {
       ? this.base()
       : this.base().filter((order) => order.status === this.status()),
   );
-  protected readonly visible = computed(() => this.filtered().slice(0, this.limit()));
-
-  protected setStatus(status: StatusFilter): void {
-    this.status.set(status);
-    this.limit.set(PAGE_SIZE);
-  }
-
-  protected onFilter(update: () => void): void {
-    update();
-    this.limit.set(PAGE_SIZE);
-  }
+  protected readonly page = computed(() => this.paging.of(this.filtered()));
 
   protected itemCount(order: AdminOrder): number {
     return order.items.reduce((sum, item) => sum + item.quantity, 0);
-  }
-
-  protected more(): void {
-    this.limit.update((value) => value + PAGE_SIZE);
   }
 }

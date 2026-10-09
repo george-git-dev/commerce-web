@@ -1,4 +1,4 @@
-<section class="ap">
+<section class="ap" #top>
   <header class="ap__head">
     <div>
       <p class="ap__eyebrow">Catálogo</p>
@@ -64,7 +64,7 @@
 
   @if (filtered().length) {
     <ul class="ap__list">
-      @for (product of filtered(); track product.id) {
+      @for (product of page().content; track product.id) {
         <li>
           <a class="ap__row" [routerLink]="['/admin/produtos', product.slug]">
             @if (product.images[0]; as image) {
@@ -101,6 +101,7 @@
         </li>
       }
     </ul>
+    <app-pager [paging]="paging" [page]="page()" [anchor]="top" noun="produtos" />
   } @else {
     <div class="ap__empty">
       <mat-icon aria-hidden="true">inventory_2</mat-icon>

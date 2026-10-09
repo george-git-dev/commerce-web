@@ -8,11 +8,26 @@ import { AuthService } from '../../../core/services/auth-service';
 import { lowestPrice } from '../../../core/utils/product-pricing';
 import { AdminProductStore } from '../services/admin-product-store';
 import { AdminStockStore } from '../services/admin-stock-store';
+import { ListMemory } from '../services/list-memory';
+import { Pager } from '../shared/pager/pager';
+import { Paging } from '../shared/pager/paging';
 
-/** `/admin/produtos` — catálogo com busca e filtros. */
+function createState() {
+  const search = signal('');
+  const brand = signal('todas');
+  const category = signal('todas');
+  const status = signal<ProductStatus | 'todos'>('todos');
+  const onlyLowStock = signal(false);
+  const paging = new Paging(
+    () => `${search()}|${brand()}|${category()}|${status()}|${onlyLowStock()}`,
+  );
+  return { search, brand, category, status, onlyLowStock, paging };
+}
+
+/** `/admin/produtos` — catálogo com busca, filtros e paginação (estado em memória). */
 @Component({
   selector: 'app-admin-products',
-  imports: [CurrencyPipe, MatButtonModule, MatIconModule, RouterLink],
+  imports: [CurrencyPipe, MatButtonModule, MatIconModule, RouterLink, Pager],
   templateUrl: './admin-products.html',
   styleUrl: './admin-products.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -40,11 +55,13 @@ export class AdminProducts {
   );
   protected readonly lowestPrice = lowestPrice;
 
-  protected readonly search = signal('');
-  protected readonly brand = signal('todas');
-  protected readonly category = signal('todas');
-  protected readonly status = signal<ProductStatus | 'todos'>('todos');
-  protected readonly onlyLowStock = signal(false);
+  private readonly state = inject(ListMemory).get('produtos', createState);
+  protected readonly search = this.state.search;
+  protected readonly brand = this.state.brand;
+  protected readonly category = this.state.category;
+  protected readonly status = this.state.status;
+  protected readonly onlyLowStock = this.state.onlyLowStock;
+  protected readonly paging = this.state.paging;
 
   protected readonly filtered = computed(() => {
     const term = this.search().trim().toLowerCase();
@@ -62,6 +79,8 @@ export class AdminProducts {
             product.variants.some((variant) => variant.id.toLowerCase().includes(term))),
       );
   });
+
+  protected readonly page = computed(() => this.paging.of(this.filtered()));
 
   protected stock(product: Product): number {
     return product.variants.reduce((sum, variant) => sum + variant.stock, 0);

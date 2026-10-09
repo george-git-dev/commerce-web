@@ -80,13 +80,24 @@ export function accessChangeProblem(ctx: AccessContext): string | null {
   return null;
 }
 
-export type CustomerSort = 'ultima-compra' | 'total' | 'nome';
+/** Colunas ordenáveis (tabela no desktop, select no celular). */
+export type CustomerSortColumn = 'nome' | 'pedidos' | 'total' | 'ultima-compra' | 'desde';
 
-export const CUSTOMER_SORT_LABELS: Record<CustomerSort, string> = {
+export interface CustomerSort {
+  column: CustomerSortColumn;
+  desc: boolean;
+}
+
+export const CUSTOMER_SORT_LABELS: Record<CustomerSortColumn, string> = {
   'ultima-compra': 'Última compra',
   total: 'Total gasto',
+  pedidos: 'Pedidos',
   nome: 'Nome',
+  desde: 'Cliente desde',
 };
+
+/** Primeiro clique: nome de A a Z; números e datas do maior/mais recente. */
+export const defaultDesc = (column: CustomerSortColumn) => column !== 'nome';
 
 const round2 = (value: number) => Math.round(value * 100) / 100;
 
@@ -179,13 +190,25 @@ export function matchesCustomer(customer: AdminCustomer, term: string): boolean 
 }
 
 /** Ordena a lista (sem compra vai para o fim em "Última compra"). */
+const SORT_VALUE: Record<CustomerSortColumn, (c: AdminCustomer) => number | string> = {
+  nome: (c) => c.name,
+  pedidos: (c) => c.orderCount,
+  total: (c) => c.totalSpent,
+  'ultima-compra': (c) => c.lastOrderAt?.getTime() ?? -1,
+  desde: (c) => c.since.getTime(),
+};
+
+/** Ordena pela coluna; empate desempata pelo código (ordem estável entre páginas). */
 export function sortCustomers(list: readonly AdminCustomer[], sort: CustomerSort): AdminCustomer[] {
-  const copy = [...list];
-  if (sort === 'nome') return copy.sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
-  if (sort === 'total') return copy.sort((a, b) => b.totalSpent - a.totalSpent || a.id - b.id);
-  return copy.sort(
-    (a, b) => (b.lastOrderAt?.getTime() ?? -1) - (a.lastOrderAt?.getTime() ?? -1) || a.id - b.id,
-  );
+  const value = SORT_VALUE[sort.column];
+  const dir = sort.desc ? -1 : 1;
+  return [...list].sort((a, b) => {
+    const va = value(a);
+    const vb = value(b);
+    const diff =
+      typeof va === 'string' ? va.localeCompare(vb as string, 'pt-BR') : va - (vb as number);
+    return diff * dir || a.id - b.id;
+  });
 }
 
 /** Motivo do bloqueio: obrigatório, curto e só texto. */

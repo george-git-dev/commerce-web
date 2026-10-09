@@ -85,9 +85,9 @@
       </ul>
     }
 
-    <h3>Histórico</h3>
+    <h3 #historyTop>Histórico</h3>
     <ol class="sd__history">
-      @for (move of visibleHistory(); track move.id) {
+      @for (move of historyPage().content; track move.id) {
         <li>
           <span class="sd__when">{{ move.at | date: 'dd/MM/yyyy HH:mm' }}</span>
           <span class="sd__what">
@@ -113,11 +113,12 @@
         </li>
       }
     </ol>
-    @if (history().length > visibleHistory().length) {
-      <button matButton="outlined" class="sd__more" type="button" (click)="moreHistory()">
-        Ver mais ({{ history().length - visibleHistory().length }})
-      </button>
-    }
+    <app-pager
+      [paging]="historyPaging"
+      [page]="historyPage()"
+      [anchor]="historyTop"
+      noun="movimentações"
+    />
   } @else {
     <div class="sd__empty">
       <mat-icon aria-hidden="true">inventory_2</mat-icon>

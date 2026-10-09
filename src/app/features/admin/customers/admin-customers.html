@@ -1,4 +1,4 @@
-<section class="cl">
+<section class="cl" #top>
   <header class="cl__head">
     <p class="cl__eyebrow">Gestão da loja</p>
     <h2>Clientes</h2>
@@ -16,26 +16,43 @@
         aria-label="Buscar cliente"
         autocomplete="off"
         [value]="search()"
-        (input)="set(search, $any($event.target).value)"
+        (input)="search.set($any($event.target).value)"
       />
     </label>
     <div class="cl__selects">
       <label>
         Mostrar
-        <select (change)="set(filter, $any($event.target).value)">
+        <select (change)="filter.set($any($event.target).value)">
           @for (item of filters; track item[0]) {
             <option [value]="item[0]" [selected]="filter() === item[0]">{{ item[1] }}</option>
           }
         </select>
       </label>
-      <label>
-        Ordenar por
-        <select (change)="set(sort, $any($event.target).value)">
-          @for (item of sorts; track item[0]) {
-            <option [value]="item[0]" [selected]="sort() === item[0]">{{ item[1] }}</option>
-          }
-        </select>
-      </label>
+      <!-- Só no celular: no desktop ordena clicando no título da coluna. -->
+      <div class="cl__sort">
+        <label>
+          Ordenar por
+          <select (change)="sortColumn($any($event.target).value)">
+            @for (item of sorts; track item[0]) {
+              <option [value]="item[0]" [selected]="sort().column === item[0]">
+                {{ item[1] }}
+              </option>
+            }
+          </select>
+        </label>
+        <button
+          type="button"
+          class="cl__dir"
+          [attr.aria-label]="
+            sort().desc ? 'Ordem decrescente (inverter)' : 'Ordem crescente (inverter)'
+          "
+          (click)="flipSort()"
+        >
+          <mat-icon aria-hidden="true">{{
+            sort().desc ? 'arrow_downward' : 'arrow_upward'
+          }}</mat-icon>
+        </button>
+      </div>
     </div>
   </div>
 
@@ -43,32 +60,18 @@
     {{ filtered().length }} {{ filtered().length === 1 ? 'cliente' : 'clientes' }}
   </p>
 
-  @if (visible().length) {
+  @if (page().content.length) {
+    <!-- Celular: cards. -->
     <ul class="cl__list">
-      @for (c of visible(); track c.id) {
+      @for (c of page().content; track c.id) {
+        @let t = tags(c);
         <li>
           <a class="cl__row" [routerLink]="['/admin/clientes', c.id]">
             <span class="cl__avatar" aria-hidden="true">{{ c.name.charAt(0) }}</span>
             <span class="cl__main">
               <strong>{{ c.name }}</strong>
               <small>{{ c.email }}</small>
-              <span class="cl__tags">
-                @if (store.directory.blockOf(c.email)) {
-                  <span class="cl__tag cl__tag--blocked">
-                    <mat-icon aria-hidden="true">block</mat-icon> Bloqueado
-                  </span>
-                }
-                @if (store.directory.canReceiveInHands(c.email)) {
-                  <span class="cl__tag">
-                    <mat-icon aria-hidden="true">handshake</mat-icon> Entrega em mãos
-                  </span>
-                }
-                @if (store.directory.staffRolesOf(c.email).length) {
-                  <span class="cl__tag">
-                    <mat-icon aria-hidden="true">badge</mat-icon> Equipe
-                  </span>
-                }
-              </span>
+              <ng-container *ngTemplateOutlet="tagList; context: { $implicit: t }"></ng-container>
             </span>
             <span class="cl__stats">
               @if (c.orderCount) {
@@ -83,12 +86,72 @@
         </li>
       }
     </ul>
-    @if (filtered().length > visible().length) {
-      <button matButton="outlined" class="cl__more" type="button" (click)="more()">
-        Carregar mais ({{ filtered().length - visible().length }})
-      </button>
-    }
+
+    <!-- Desktop: tabela ordenável. -->
+    <div class="cl__table-wrap">
+      <table class="cl__table">
+        <thead>
+          <tr>
+            @for (col of columns; track col.id) {
+              <th scope="col" [attr.aria-sort]="ariaSort(col.id)" [class.cl__num]="col.numeric">
+                <button type="button" (click)="sortBy(col.id)">
+                  {{ col.label }}
+                  <span class="cl__arrow" aria-hidden="true">
+                    {{ sort().column === col.id ? (sort().desc ? '↓' : '↑') : '' }}
+                  </span>
+                </button>
+              </th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @for (c of page().content; track c.id) {
+            @let t = tags(c);
+            <tr (click)="open($event, c)">
+              <td>
+                <a class="cl__cell-link" [routerLink]="['/admin/clientes', c.id]">
+                  <span class="cl__avatar" aria-hidden="true">{{ c.name.charAt(0) }}</span>
+                  <span class="cl__main">
+                    <strong>{{ c.name }}</strong>
+                    <small>{{ c.email }}</small>
+                    <ng-container
+                      *ngTemplateOutlet="tagList; context: { $implicit: t }"
+                    ></ng-container>
+                  </span>
+                </a>
+              </td>
+              <td class="cl__num">{{ c.orderCount }}</td>
+              <td class="cl__num">{{ c.totalSpent | currency: 'BRL' }}</td>
+              <td>{{ c.lastOrderAt ? (c.lastOrderAt | date: 'dd/MM/yyyy') : '—' }}</td>
+              <td>{{ c.since | date: 'dd/MM/yyyy' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <app-pager [paging]="paging" [page]="page()" [anchor]="top" noun="clientes" />
   } @else {
     <p class="cl__empty">Nenhum cliente encontrado.</p>
   }
 </section>
+
+<ng-template #tagList let-t>
+  @if (t.blocked || t.inHands || t.staff) {
+    <span class="cl__tags">
+      @if (t.blocked) {
+        <span class="cl__tag cl__tag--blocked">
+          <mat-icon aria-hidden="true">block</mat-icon> Bloqueado
+        </span>
+      }
+      @if (t.inHands) {
+        <span class="cl__tag"
+          ><mat-icon aria-hidden="true">handshake</mat-icon> Entrega em mãos</span
+        >
+      }
+      @if (t.staff) {
+        <span class="cl__tag"><mat-icon aria-hidden="true">badge</mat-icon> Equipe</span>
+      }
+    </span>
+  }
+</ng-template>

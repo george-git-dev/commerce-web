@@ -7,11 +7,22 @@ import { AuthService } from '../../../core/services/auth-service';
 import { AdminPurchaseStore } from '../services/admin-purchase-store';
 import { ENTRY_STATUS_LABELS, EntryStatus, entryTotal } from '../services/purchase-rules';
 import { StockTabs } from '../stock/stock-tabs';
+import { ListMemory } from '../services/list-memory';
+import { Pager } from '../shared/pager/pager';
+import { Paging } from '../shared/pager/paging';
 
-/** `/admin/estoque/entradas` — compras (entradas de mercadoria) por fornecedor. */
+function createState() {
+  const search = signal('');
+  const status = signal<EntryStatus | 'todas'>('todas');
+  const supplier = signal('todos');
+  const paging = new Paging(() => `${search()}|${status()}|${supplier()}`);
+  return { search, status, supplier, paging };
+}
+
+/** `/admin/estoque/entradas` — compras (entradas de mercadoria) por fornecedor, paginadas. */
 @Component({
   selector: 'app-admin-entries',
-  imports: [CurrencyPipe, DatePipe, MatButtonModule, MatIconModule, RouterLink, StockTabs],
+  imports: [CurrencyPipe, DatePipe, MatButtonModule, MatIconModule, RouterLink, StockTabs, Pager],
   templateUrl: './admin-entries.html',
   styleUrl: './admin-entries.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -22,9 +33,11 @@ export class AdminEntries {
   protected readonly labels = ENTRY_STATUS_LABELS;
   protected readonly total = entryTotal;
 
-  protected readonly search = signal('');
-  protected readonly status = signal<EntryStatus | 'todas'>('todas');
-  protected readonly supplier = signal('todos');
+  private readonly state = inject(ListMemory).get('entradas', createState);
+  protected readonly search = this.state.search;
+  protected readonly status = this.state.status;
+  protected readonly supplier = this.state.supplier;
+  protected readonly paging = this.state.paging;
 
   protected readonly filtered = computed(() => {
     const term = this.search().trim().toLowerCase();
@@ -40,4 +53,6 @@ export class AdminEntries {
               .includes(term)),
       );
   });
+
+  protected readonly page = computed(() => this.paging.of(this.filtered()));
 }

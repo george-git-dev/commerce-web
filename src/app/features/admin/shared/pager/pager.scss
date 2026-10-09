@@ -1,0 +1,19 @@
+:host {
+  display: block;
+}
+
+// Mesmo fundo da página; no celular quebra em duas linhas centralizadas.
+mat-paginator {
+  background: transparent;
+
+  ::ng-deep .mat-mdc-paginator-container {
+    justify-content: center;
+    padding: 0;
+  }
+}
+
+@media (min-width: 900px) {
+  mat-paginator ::ng-deep .mat-mdc-paginator-container {
+    justify-content: flex-end;
+  }
+}

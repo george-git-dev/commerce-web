@@ -1,4 +1,4 @@
-<section class="st">
+<section class="st" #top>
   <app-stock-tabs />
 
   <div class="st__summary" role="group" aria-label="Resumo do estoque">
@@ -69,7 +69,7 @@
 
   @if (filtered().length) {
     <ul class="st__list">
-      @for (row of filtered(); track track(row)) {
+      @for (row of page().content; track track(row)) {
         <li>
           <a class="st__row" [routerLink]="['/admin/estoque', row.variant.id]">
             @if (row.product.images[0]; as image) {
@@ -92,6 +92,7 @@
         </li>
       }
     </ul>
+    <app-pager [paging]="paging" [page]="page()" [anchor]="top" noun="itens de estoque" />
   } @else {
     <div class="st__empty">
       <mat-icon aria-hidden="true">inventory_2</mat-icon>

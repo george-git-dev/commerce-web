@@ -3,6 +3,8 @@ import { AdminOrder } from '../data/admin-orders-mock';
 import {
   accessChangeProblem,
   blockReasonProblem,
+  CustomerSortColumn,
+  defaultDesc,
   GRANTABLE_ROLES,
   buildCustomers,
   fakeCpf,
@@ -102,8 +104,13 @@ describe('clientes do backoffice', () => {
     expect(matchesCustomer(bia, 'bia@')).toBe(true);
     expect(matchesCustomer(bia, '9999')).toBe(true);
     expect(matchesCustomer(ana, 'bia')).toBe(false);
-    expect(sortCustomers([vizinho, bia, ana], 'total').map((c) => c.email)[0]).toBe('ana@x.com');
-    expect(sortCustomers([vizinho, ana, bia], 'ultima-compra').at(-1)?.email).toBe('vizinho@x.com');
+    const by = (column: CustomerSortColumn, desc = defaultDesc(column)) =>
+      sortCustomers([vizinho, bia, ana], { column, desc }).map((c) => c.email);
+    expect(by('total')[0], 'total').toBe('ana@x.com');
+    expect(by('total', false).at(-1), 'total asc').toBe('ana@x.com');
+    expect(by('ultima-compra').at(-1), 'sem compra no fim').toBe('vizinho@x.com');
+    expect(by('nome')[0], 'nome A-Z').toBe('ana@x.com');
+    expect(by('pedidos').at(-1), 'pedidos').toBe('vizinho@x.com');
   });
 
   it('CPF fictício sempre válido e motivo do bloqueio obrigatório', () => {

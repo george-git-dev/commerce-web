@@ -205,13 +205,13 @@
       </article>
     </div>
 
-    <article class="cd__card">
+    <article class="cd__card" #ordersTop>
       <h3>
         Pedidos <small>({{ c.orders.length }})</small>
       </h3>
       @if (c.orders.length) {
         <ul class="cd__orders">
-          @for (o of visibleOrders(); track o.number) {
+          @for (o of ordersPage().content; track o.number) {
             <li>
               <a [routerLink]="['/admin/pedidos', o.number]">
                 <span>
@@ -229,11 +229,12 @@
             </li>
           }
         </ul>
-        @if (c.orders.length > visibleOrders().length) {
-          <button matButton="outlined" type="button" class="cd__more" (click)="moreOrders()">
-            Ver mais ({{ c.orders.length - visibleOrders().length }})
-          </button>
-        }
+        <app-pager
+          [paging]="ordersPaging"
+          [page]="ordersPage()"
+          [anchor]="ordersTop"
+          noun="pedidos do cliente"
+        />
       } @else {
         <p class="cd__empty">Ainda não comprou.</p>
       }

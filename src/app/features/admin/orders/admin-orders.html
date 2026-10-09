@@ -1,4 +1,4 @@
-<section class="ao">
+<section class="ao" #top>
   <header class="ao__head">
     <p class="ao__eyebrow">Vendas</p>
     <h2>Pedidos</h2>
@@ -11,7 +11,7 @@
         role="tab"
         [attr.aria-selected]="status() === tab.id"
         [class.ao__tab--on]="status() === tab.id"
-        (click)="setStatus(tab.id)"
+        (click)="status.set(tab.id)"
       >
         {{ tab.label }} <span>{{ tab.count }}</span>
       </button>
@@ -26,12 +26,12 @@
         placeholder="Número, cliente ou e-mail"
         aria-label="Buscar pedido"
         [value]="search()"
-        (input)="onFilter(() => search.set($any($event.target).value))"
+        (input)="search.set($any($event.target).value)"
       />
     </label>
     <label class="ao__select">
       Período
-      <select [value]="period()" (change)="onFilter(() => period.set($any($event.target).value))">
+      <select [value]="period()" (change)="period.set($any($event.target).value)">
         <option value="7">7 dias</option>
         <option value="30">30 dias</option>
         <option value="90">90 dias</option>
@@ -40,10 +40,7 @@
     </label>
     <label class="ao__select">
       Entrega
-      <select
-        [value]="shipping()"
-        (change)="onFilter(() => shipping.set($any($event.target).value))"
-      >
+      <select [value]="shipping()" (change)="shipping.set($any($event.target).value)">
         <option value="todos">Todas</option>
         <option value="economico">Econômico</option>
         <option value="expresso">Expresso</option>
@@ -56,9 +53,9 @@
     {{ filtered().length }} {{ filtered().length === 1 ? 'pedido' : 'pedidos' }}
   </p>
 
-  @if (visible().length) {
+  @if (page().content.length) {
     <ul class="ao__list">
-      @for (order of visible(); track order.number) {
+      @for (order of page().content; track order.number) {
         <li>
           <a class="ao__row" [routerLink]="['/admin/pedidos', order.number]">
             <span class="ao__id">
@@ -96,11 +93,7 @@
         </li>
       }
     </ul>
-    @if (visible().length < filtered().length) {
-      <button matButton="outlined" class="ui-cta ao__more" type="button" (click)="more()">
-        Carregar mais ({{ filtered().length - visible().length }})
-      </button>
-    }
+    <app-pager [paging]="paging" [page]="page()" [anchor]="top" noun="pedidos" />
   } @else {
     <div class="ao__empty">
       <mat-icon aria-hidden="true">receipt_long</mat-icon>

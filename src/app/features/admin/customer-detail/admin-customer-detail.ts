@@ -1,12 +1,5 @@
 import { CurrencyPipe, DatePipe } from '@angular/common';
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  inject,
-  linkedSignal,
-  signal,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, linkedSignal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
@@ -25,8 +18,8 @@ import {
   ROLE_HINTS,
 } from '../services/customer-rules';
 import { ActionDialog, ActionDialogData } from '../shared/action-dialog/action-dialog';
-
-const ORDERS_PAGE = 10;
+import { Pager } from '../shared/pager/pager';
+import { Paging } from '../shared/pager/paging';
 
 /**
  * `/admin/clientes/:id` — contato, resumo de compras, endereços e pedidos.
@@ -36,7 +29,7 @@ const ORDERS_PAGE = 10;
  */
 @Component({
   selector: 'app-admin-customer-detail',
-  imports: [CurrencyPipe, DatePipe, MatButtonModule, MatIconModule, RouterLink],
+  imports: [CurrencyPipe, DatePipe, MatButtonModule, MatIconModule, Pager, RouterLink],
   templateUrl: './admin-customer-detail.html',
   styleUrl: './admin-customer-detail.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -108,14 +101,11 @@ export class AdminCustomerDetail {
     this.currentAccess(),
   );
 
-  protected readonly ordersLimit = signal(ORDERS_PAGE);
-  protected readonly visibleOrders = computed(
-    () => this.customer()?.orders.slice(0, this.ordersLimit()) ?? [],
+  /** Pedidos do cliente paginados; volta à 1ª página ao trocar de cliente. */
+  protected readonly ordersPaging = new Paging(() => String(this.customer()?.id ?? ''));
+  protected readonly ordersPage = computed(() =>
+    this.ordersPaging.of(this.customer()?.orders ?? []),
   );
-
-  protected moreOrders(): void {
-    this.ordersLimit.update((value) => value + ORDERS_PAGE);
-  }
 
   protected toggleInHands(): void {
     const customer = this.customer();

@@ -7,13 +7,16 @@ import { AuthService } from '../../../core/services/auth-service';
 import { formatCnpj, onlyDigits } from '../../../core/utils/br-format';
 import { AdminPurchaseStore } from '../services/admin-purchase-store';
 import { StockTabs } from '../stock/stock-tabs';
+import { ListMemory } from '../services/list-memory';
+import { Pager } from '../shared/pager/pager';
+import { Paging } from '../shared/pager/paging';
 
 /** `/admin/estoque/fornecedores` — quem vende para a loja e quanto já se comprou no ano. */
 @Component({
   selector: 'app-admin-suppliers',
-  imports: [CurrencyPipe, MatButtonModule, MatIconModule, RouterLink, StockTabs],
+  imports: [CurrencyPipe, MatButtonModule, MatIconModule, RouterLink, StockTabs, Pager],
   template: `
-    <section class="su">
+    <section class="su" #top>
       <app-stock-tabs />
       <div class="su__bar">
         <label class="su__search">
@@ -34,7 +37,7 @@ import { StockTabs } from '../stock/stock-tabs';
       </div>
       @if (filtered().length) {
         <ul class="su__list">
-          @for (s of filtered(); track s.id) {
+          @for (s of page().content; track s.id) {
             <li>
               <a class="su__row" [routerLink]="['/admin/estoque/fornecedores', s.id]">
                 <span class="su__main">
@@ -52,6 +55,7 @@ import { StockTabs } from '../stock/stock-tabs';
             </li>
           }
         </ul>
+        <app-pager [paging]="paging" [page]="page()" [anchor]="top" noun="fornecedores" />
       } @else {
         <p class="su__empty">Nenhum fornecedor encontrado.</p>
       }
@@ -64,7 +68,12 @@ export class AdminSuppliers {
   protected readonly store = inject(AdminPurchaseStore);
   protected readonly canEdit = inject(AuthService).can('suppliers:edit');
   protected readonly cnpj = formatCnpj;
-  protected readonly search = signal('');
+  private readonly state = inject(ListMemory).get('fornecedores', () => {
+    const search = signal('');
+    return { search, paging: new Paging(() => search()) };
+  });
+  protected readonly search = this.state.search;
+  protected readonly paging = this.state.paging;
 
   protected readonly filtered = computed(() => {
     const term = this.search().trim().toLowerCase();
@@ -78,4 +87,6 @@ export class AdminSuppliers {
           (digits.length >= 3 && s.cnpj.includes(digits)),
       );
   });
+
+  protected readonly page = computed(() => this.paging.of(this.filtered()));
 }

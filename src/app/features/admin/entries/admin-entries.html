@@ -1,4 +1,4 @@
-<section class="en">
+<section class="en" #top>
   <app-stock-tabs />
 
   <div class="en__bar">
@@ -41,7 +41,7 @@
 
   @if (filtered().length) {
     <ul class="en__list">
-      @for (entry of filtered(); track entry.id) {
+      @for (entry of page().content; track entry.id) {
         <li>
           <a class="en__row" [routerLink]="['/admin/estoque/entradas', entry.id]">
             <span class="en__main">
@@ -62,6 +62,7 @@
         </li>
       }
     </ul>
+    <app-pager [paging]="paging" [page]="page()" [anchor]="top" noun="entradas" />
   } @else {
     <div class="en__empty">
       <mat-icon aria-hidden="true">local_shipping</mat-icon>
