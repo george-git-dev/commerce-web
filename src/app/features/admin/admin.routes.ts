@@ -4,7 +4,7 @@ import { ADMIN_NAV } from './admin-nav';
 import { AdminLayout } from './layout/admin-layout';
 
 /** Telas já prontas (as outras do menu abrem "em construção"). */
-const READY = ['pedidos', 'produtos', 'estoque', 'vitrine', 'configuracoes'];
+const READY = ['pedidos', 'produtos', 'estoque', 'clientes', 'vitrine', 'configuracoes'];
 
 /** Rotas do backoffice (`/admin`). Cada tela exige a permissão do seu item de menu. */
 export const ADMIN_ROUTES: Routes = [
@@ -101,6 +101,19 @@ export const ADMIN_ROUTES: Routes = [
         canActivate: [permissionGuard('stock:view', '/admin')],
         loadComponent: () =>
           import('./stock-detail/admin-stock-detail').then((m) => m.AdminStockDetail),
+      },
+      {
+        path: 'clientes',
+        title: 'Nani Admin | Clientes',
+        canActivate: [permissionGuard('customers:view', '/admin')],
+        loadComponent: () => import('./customers/admin-customers').then((m) => m.AdminCustomers),
+      },
+      {
+        path: 'clientes/:id',
+        title: 'Nani Admin | Cliente',
+        canActivate: [permissionGuard('customers:view', '/admin')],
+        loadComponent: () =>
+          import('./customer-detail/admin-customer-detail').then((m) => m.AdminCustomerDetail),
       },
       {
         path: 'vitrine',

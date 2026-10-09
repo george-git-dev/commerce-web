@@ -1,14 +1,19 @@
-import { computed, Injectable, signal } from '@angular/core';
-import { hasPermission, Permission, Role } from '../config/permissions';
-import { IN_HANDS_MOCK_EMAILS, STAFF_MOCK } from '../data/customers-mock';
+import { computed, inject, Injectable, signal } from '@angular/core';
+import { hasPermission, Permission } from '../config/permissions';
 import { ActionResult, AuthResult, AuthUser } from '../models/auth';
 import { isValidCpf, isValidPhone } from '../utils/br-format';
+import { AccountDirectory } from './account-directory';
 
 const STORAGE_KEY = 'nani.auth.mock';
 export const MIN_PASSWORD_LENGTH = 8;
 /** Validade do link de redefinição de senha. */
 export const RESET_LINK_MINUTES = 30;
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+/** Mesma mensagem genérica para qualquer bloqueio (o motivo fica só no backoffice). */
+const BLOCKED: AuthResult = {
+  ok: false,
+  message: 'Não foi possível entrar nesta conta. Fale com o nosso atendimento.',
+};
 
 /** Lê a sessão salva; navegador sem storage (aba anônima, SSR) = deslogado. */
 function readStoredUser(): AuthUser | null {
@@ -50,9 +55,9 @@ function nameFromEmail(email: string): string {
  */
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  /** Contas que já usaram a liberação de entrega em mãos nesta sessão (mock). */
-  private readonly inHandsUsed = new Set<string>();
-  private readonly state = signal<AuthUser | null>(this.withFlags(readStoredUser()));
+  /** Perfis, entrega em mãos e bloqueio (o backoffice altera em Clientes/Equipe). */
+  private readonly directory = inject(AccountDirectory);
+  private readonly state = signal<AuthUser | null>(this.restore());
   /** Links de redefinição de senha ainda válidos (só no mock; no back ficam no banco). */
   private readonly resetLinks = new Map<string, { email: string; expiresAt: number }>();
 
@@ -69,6 +74,7 @@ export class AuthService {
   login(email: string, password: string): AuthResult {
     const problem = this.credentialsProblem(email, password);
     if (problem) return { ok: false, message: problem };
+    if (this.directory.blockOf(email.trim().toLowerCase())) return BLOCKED;
     return this.start({ name: nameFromEmail(email.trim()), email: email.trim().toLowerCase() });
   }
 
@@ -77,6 +83,7 @@ export class AuthService {
     if (!isValidCpf(cpf)) return { ok: false, message: 'Informe um CPF válido.' };
     const problem = this.credentialsProblem(email, password);
     if (problem) return { ok: false, message: problem };
+    if (this.directory.blockOf(email.trim().toLowerCase())) return BLOCKED;
     return this.start({ name: name.trim(), email: email.trim().toLowerCase(), cpf });
   }
 
@@ -178,6 +185,7 @@ export class AuthService {
    * token sozinho.
    */
   loginWithGoogle(): AuthResult {
+    if (this.directory.blockOf('cliente.google@gmail.com')) return BLOCKED;
     return this.start({ name: 'Cliente Google', email: 'cliente.google@gmail.com' });
   }
 
@@ -194,23 +202,30 @@ export class AuthService {
   consumeInHandsDelivery(): void {
     const user = this.state();
     if (!user?.inHandsDelivery) return;
-    this.inHandsUsed.add(user.email);
+    this.directory.setInHands(user.email, false);
     this.state.set(this.withFlags(user));
   }
 
   /**
    * Mock do que vem do back: perfis (todo cadastro tem `ROLE_CUSTOMER`; a equipe
-   * fictícia ganha mais um) e a flag de entrega em mãos (lista fixa de e-mails,
-   * menos quem já usou a liberação nesta sessão; sem liberação, o campo nem aparece).
+   * ganha mais um) e a flag de entrega em mãos (sem liberação, o campo nem aparece).
    */
   private withFlags(user: AuthUser | null): AuthUser | null {
     if (!user) return null;
-    const roles: Role[] = ['ROLE_CUSTOMER', ...(STAFF_MOCK[user.email] ?? [])];
-    const next: AuthUser = { ...user, roles };
+    const next: AuthUser = { ...user, roles: this.directory.rolesOf(user.email) };
     delete next.inHandsDelivery;
-    const allowed = IN_HANDS_MOCK_EMAILS.includes(user.email) && !this.inHandsUsed.has(user.email);
-    if (allowed) next.inHandsDelivery = true;
+    if (this.directory.canReceiveInHands(user.email)) next.inHandsDelivery = true;
     return next;
+  }
+
+  /** Sessão salva no navegador; conta bloqueada desde então = sai. */
+  private restore(): AuthUser | null {
+    const stored = readStoredUser();
+    if (stored && this.directory.blockOf(stored.email)) {
+      storeUser(null);
+      return null;
+    }
+    return this.withFlags(stored);
   }
 
   private start(input: AuthUser): AuthResult {

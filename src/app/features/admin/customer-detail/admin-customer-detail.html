@@ -1,0 +1,189 @@
+<section class="cd">
+  <a class="cd__back" routerLink="/admin/clientes">
+    <mat-icon aria-hidden="true">arrow_back</mat-icon> Clientes
+  </a>
+
+  @if (customer(); as c) {
+    <header class="cd__head">
+      <span class="cd__avatar" aria-hidden="true">{{ c.name.charAt(0) }}</span>
+      <div>
+        <h2>{{ c.name }}</h2>
+        <p>Cliente desde {{ c.since | date: 'dd/MM/yyyy' }} · código {{ c.id }}</p>
+        <span class="cd__tags">
+          @if (block()) {
+            <span class="cd__tag cd__tag--blocked">
+              <mat-icon aria-hidden="true">block</mat-icon> Bloqueado
+            </span>
+          } @else {
+            <span class="cd__tag"><mat-icon aria-hidden="true">check_circle</mat-icon> Ativo</span>
+          }
+          @if (inHands()) {
+            <span class="cd__tag">
+              <mat-icon aria-hidden="true">handshake</mat-icon> Entrega em mãos no próximo pedido
+            </span>
+          }
+          @for (role of staffRoles(); track role) {
+            <span class="cd__tag"
+              ><mat-icon aria-hidden="true">badge</mat-icon> {{ roleLabels[role] }}</span
+            >
+          }
+        </span>
+      </div>
+    </header>
+
+    @if (block(); as b) {
+      <p class="cd__alert" role="status">
+        <mat-icon aria-hidden="true">block</mat-icon>
+        <span>
+          Bloqueado por {{ b.by }} em {{ b.at | date: 'dd/MM/yyyy HH:mm' }}.
+          <strong>Motivo:</strong> {{ b.reason }}
+        </span>
+      </p>
+    }
+
+    <div class="cd__grid">
+      <article class="cd__card">
+        <h3>Contato</h3>
+        <dl class="cd__data">
+          <div>
+            <dt>E-mail</dt>
+            <dd>{{ c.email }}</dd>
+          </div>
+          <div>
+            <dt>Telefone</dt>
+            <dd>
+              {{ phone() || '—' }}
+              @if (whatsapp(); as link) {
+                <a [href]="link" target="_blank" rel="noopener">WhatsApp</a>
+              }
+            </dd>
+          </div>
+          <div>
+            <dt>CPF</dt>
+            <dd>{{ cpf() || 'Não informado' }}</dd>
+          </div>
+          <div>
+            <dt>Cidade</dt>
+            <dd>{{ c.city }}</dd>
+          </div>
+        </dl>
+        @if (!sensitive) {
+          <p class="cd__note">
+            <mat-icon aria-hidden="true">lock</mat-icon>
+            CPF, telefone e endereço completos só para quem tem permissão de dados sensíveis.
+          </p>
+        }
+      </article>
+
+      <article class="cd__card">
+        <h3>Compras</h3>
+        <dl class="cd__stats">
+          <div>
+            <dt>Total gasto</dt>
+            <dd>{{ c.totalSpent | currency: 'BRL' }}</dd>
+          </div>
+          <div>
+            <dt>Pedidos</dt>
+            <dd>{{ c.orderCount }}</dd>
+          </div>
+          <div>
+            <dt>Ticket médio</dt>
+            <dd>{{ c.orderCount ? (c.averageTicket | currency: 'BRL') : '—' }}</dd>
+          </div>
+          <div>
+            <dt>Cancelados</dt>
+            <dd>{{ c.cancelledCount }}</dd>
+          </div>
+          <div>
+            <dt>Última compra</dt>
+            <dd>{{ c.lastOrderAt ? (c.lastOrderAt | date: 'dd/MM/yyyy') : '—' }}</dd>
+          </div>
+        </dl>
+      </article>
+
+      @if (canEdit) {
+        <article class="cd__card cd__actions">
+          <h3>Ações</h3>
+          <button matButton="outlined" type="button" (click)="toggleInHands()">
+            <mat-icon>handshake</mat-icon>
+            {{ inHands() ? 'Cancelar entrega em mãos' : 'Liberar entrega em mãos' }}
+          </button>
+          @if (store.isStaff(c)) {
+            <p class="cd__note">
+              <mat-icon aria-hidden="true">badge</mat-icon>
+              Conta da equipe: para bloquear, tire o acesso em Equipe antes.
+            </p>
+          } @else if (store.isSelf(c)) {
+            <p class="cd__note">Você não pode bloquear a própria conta.</p>
+          } @else {
+            <button
+              matButton="outlined"
+              type="button"
+              [class.cd__danger]="!block()"
+              (click)="toggleBlock()"
+            >
+              <mat-icon>{{ block() ? 'lock_open' : 'block' }}</mat-icon>
+              {{ block() ? 'Desbloquear cliente' : 'Bloquear cliente' }}
+            </button>
+          }
+        </article>
+      }
+
+      <article class="cd__card">
+        <h3>Endereços</h3>
+        @if (c.addresses.length) {
+          <ul class="cd__addresses">
+            @for (a of c.addresses; track $index) {
+              <li>
+                @if (sensitive) {
+                  {{ a.street }}, {{ a.number }} — {{ a.district }}<br />
+                  {{ a.city }}/{{ a.state }} · CEP {{ a.cep }}
+                } @else {
+                  {{ a.city }}/{{ a.state }} · CEP {{ a.cep.slice(0, 5) }}-***
+                }
+              </li>
+            }
+          </ul>
+        } @else {
+          <p class="cd__empty">Nenhum endereço em pedidos.</p>
+        }
+      </article>
+    </div>
+
+    <article class="cd__card">
+      <h3>
+        Pedidos <small>({{ c.orders.length }})</small>
+      </h3>
+      @if (c.orders.length) {
+        <ul class="cd__orders">
+          @for (o of visibleOrders(); track o.number) {
+            <li>
+              <a [routerLink]="['/admin/pedidos', o.number]">
+                <span>
+                  <strong>{{ o.number }}</strong>
+                  <small
+                    >{{ o.createdAt | date: 'dd/MM/yyyy' }} · {{ o.items.length }}
+                    {{ o.items.length === 1 ? 'item' : 'itens' }}</small
+                  >
+                </span>
+                <span class="cd__status" [class.cd__status--off]="o.status === 'cancelado'">
+                  {{ statusLabels[o.status] }}
+                </span>
+                <strong>{{ o.total | currency: 'BRL' }}</strong>
+              </a>
+            </li>
+          }
+        </ul>
+        @if (c.orders.length > visibleOrders().length) {
+          <button matButton="outlined" type="button" class="cd__more" (click)="moreOrders()">
+            Ver mais ({{ c.orders.length - visibleOrders().length }})
+          </button>
+        }
+      } @else {
+        <p class="cd__empty">Ainda não comprou.</p>
+      }
+    </article>
+  } @else {
+    <p class="cd__empty">Cliente não encontrado.</p>
+  }
+</section>

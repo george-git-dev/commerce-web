@@ -17,6 +17,7 @@ import {
   needsTracking,
   statusLabel,
 } from '../services/admin-order-flow';
+import { AdminCustomerStore } from '../services/admin-customer-store';
 import { AdminOrderStore } from '../services/admin-order-store';
 import { ActionDialog, ActionDialogData } from '../shared/action-dialog/action-dialog';
 
@@ -37,6 +38,13 @@ export class AdminOrderDetail {
   private readonly params = toSignal(inject(ActivatedRoute).paramMap, { requireSync: true });
 
   protected readonly order = computed(() => this.store.find(this.params().get('numero')));
+  /** Código do cliente (link para a ficha; só com `customers:view`). */
+  protected readonly customerId = computed(() => {
+    const email = this.order()?.customer.email;
+    if (!email || !this.auth.can('customers:view')) return null;
+    return this.customers.customers().find((c) => c.email === email)?.id ?? null;
+  });
+  private readonly customers = inject(AdminCustomerStore);
   protected readonly methodLabels = PAYMENT_METHOD_LABELS;
   protected readonly statusLabel = statusLabel;
 

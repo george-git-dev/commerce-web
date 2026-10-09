@@ -1,0 +1,94 @@
+<section class="cl">
+  <header class="cl__head">
+    <p class="cl__eyebrow">Gestão da loja</p>
+    <h2>Clientes</h2>
+    <p class="cl__lead">
+      {{ store.customers().length }} contas · busca por nome, e-mail ou telefone
+    </p>
+  </header>
+
+  <div class="cl__bar">
+    <label class="cl__search">
+      <mat-icon aria-hidden="true">search</mat-icon>
+      <input
+        type="search"
+        placeholder="Nome, e-mail ou telefone"
+        aria-label="Buscar cliente"
+        autocomplete="off"
+        [value]="search()"
+        (input)="set(search, $any($event.target).value)"
+      />
+    </label>
+    <div class="cl__selects">
+      <label>
+        Mostrar
+        <select (change)="set(filter, $any($event.target).value)">
+          @for (item of filters; track item[0]) {
+            <option [value]="item[0]" [selected]="filter() === item[0]">{{ item[1] }}</option>
+          }
+        </select>
+      </label>
+      <label>
+        Ordenar por
+        <select (change)="set(sort, $any($event.target).value)">
+          @for (item of sorts; track item[0]) {
+            <option [value]="item[0]" [selected]="sort() === item[0]">{{ item[1] }}</option>
+          }
+        </select>
+      </label>
+    </div>
+  </div>
+
+  <p class="cl__count" aria-live="polite">
+    {{ filtered().length }} {{ filtered().length === 1 ? 'cliente' : 'clientes' }}
+  </p>
+
+  @if (visible().length) {
+    <ul class="cl__list">
+      @for (c of visible(); track c.id) {
+        <li>
+          <a class="cl__row" [routerLink]="['/admin/clientes', c.id]">
+            <span class="cl__avatar" aria-hidden="true">{{ c.name.charAt(0) }}</span>
+            <span class="cl__main">
+              <strong>{{ c.name }}</strong>
+              <small>{{ c.email }}</small>
+              <span class="cl__tags">
+                @if (store.directory.blockOf(c.email)) {
+                  <span class="cl__tag cl__tag--blocked">
+                    <mat-icon aria-hidden="true">block</mat-icon> Bloqueado
+                  </span>
+                }
+                @if (store.directory.canReceiveInHands(c.email)) {
+                  <span class="cl__tag">
+                    <mat-icon aria-hidden="true">handshake</mat-icon> Entrega em mãos
+                  </span>
+                }
+                @if (store.directory.staffRolesOf(c.email).length) {
+                  <span class="cl__tag">
+                    <mat-icon aria-hidden="true">badge</mat-icon> Equipe
+                  </span>
+                }
+              </span>
+            </span>
+            <span class="cl__stats">
+              @if (c.orderCount) {
+                <strong>{{ c.totalSpent | currency: 'BRL' }}</strong>
+                <small>{{ c.orderCount }} {{ c.orderCount === 1 ? 'pedido' : 'pedidos' }}</small>
+                <small>última {{ c.lastOrderAt | date: 'dd/MM/yy' }}</small>
+              } @else {
+                <small>Sem compra</small>
+              }
+            </span>
+          </a>
+        </li>
+      }
+    </ul>
+    @if (filtered().length > visible().length) {
+      <button matButton="outlined" class="cl__more" type="button" (click)="more()">
+        Carregar mais ({{ filtered().length - visible().length }})
+      </button>
+    }
+  } @else {
+    <p class="cl__empty">Nenhum cliente encontrado.</p>
+  }
+</section>

@@ -260,3 +260,12 @@ h3 {
     display: none;
   }
 }
+
+.od__customer {
+  justify-self: start;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.875rem;
+  color: var(--earth);
+}

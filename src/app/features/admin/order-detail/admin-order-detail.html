@@ -85,6 +85,9 @@
             <span>{{ phone(o.customer.phone) }}</span>
             <span>{{ o.customer.city }}</span>
           </p>
+          @if (customerId(); as id) {
+            <a class="od__customer" [routerLink]="['/admin/clientes', id]">Ver ficha do cliente</a>
+          }
           @if (sensitive()) {
             <a
               matButton="outlined"

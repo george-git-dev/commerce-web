@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { safeReturnUrl } from '../guards/auth-guard';
+import { AccountDirectory } from './account-directory';
 import { AuthService } from './auth-service';
 
 describe('AuthService (simulado)', () => {
@@ -105,5 +106,25 @@ describe('safeReturnUrl', () => {
     expect(safeReturnUrl('/\\site-falso.com')).toBe('/minha-conta');
     expect(safeReturnUrl('https://site-falso.com')).toBe('/minha-conta');
     expect(safeReturnUrl(null)).toBe('/minha-conta');
+  });
+});
+
+describe('AuthService + AccountDirectory (backoffice)', () => {
+  beforeEach(() => localStorage.clear());
+
+  it('conta bloqueada não entra; desbloqueada volta a entrar', () => {
+    const auth = TestBed.inject(AuthService);
+    const directory = TestBed.inject(AccountDirectory);
+    directory.block('cliente@x.com', 'fraude', 'Admin');
+    expect(auth.login('cliente@x.com', '12345678').ok).toBe(false);
+    directory.unblock('cliente@x.com');
+    expect(auth.login('cliente@x.com', '12345678').ok).toBe(true);
+  });
+
+  it('entrega em mãos liberada no backoffice aparece no próximo login', () => {
+    const auth = TestBed.inject(AuthService);
+    TestBed.inject(AccountDirectory).setInHands('maria@x.com', true);
+    auth.login('maria@x.com', '12345678');
+    expect(auth.user()?.inHandsDelivery).toBe(true);
   });
 });

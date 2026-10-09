@@ -151,7 +151,8 @@ export function adminOrdersMock(now = new Date()): AdminOrder[] {
   const products = MOCK_PRODUCTS.filter((product) => product.status === 'publicado');
   const seen = new Set<string>();
   /** Clientes que já compraram (para sortear recompra). */
-  const known: { index: number; email: string }[] = [];
+  /** Cada cliente: nome/cidade da lista + nº próprio (e-mail, telefone e endereço únicos). */
+  const known: { index: number; email: string; n: number }[] = [];
   const orders: AdminOrder[] = [];
   let number = 100000;
 
@@ -177,7 +178,8 @@ export function adminOrdersMock(now = new Date()): AdminOrder[] {
         : (() => {
             const index = Math.floor(random() * CUSTOMERS.length);
             const handle = CUSTOMERS[index][0].split(' ')[0].toLowerCase();
-            return { index, email: `${handle}.${known.length + 1}@exemplo.com.br` };
+            const n = known.length + 1;
+            return { index, email: `${handle}.${n}@exemplo.com.br`, n };
           })();
       if (!returning) known.push(customer);
       const customerIndex = customer.index;
@@ -227,7 +229,7 @@ export function adminOrdersMock(now = new Date()): AdminOrder[] {
           name,
           email,
           city,
-          phone: `(11) 9${String(87650000 + customerIndex * 1373).slice(0, 4)}-${String(1000 + customerIndex * 211).slice(-4)}`,
+          phone: `(11) 9${String(1000 + ((customer.n * 7919) % 9000)).slice(-4)}-${String(1000 + ((customer.n * 4271) % 9000)).slice(-4)}`,
         },
         firstPurchase: !seen.has(email),
         items,
@@ -237,12 +239,12 @@ export function adminOrdersMock(now = new Date()): AdminOrder[] {
           shipping === 'em-maos'
             ? null
             : {
-                street: STREETS[customerIndex % STREETS.length],
-                number: String(10 + customerIndex * 37),
+                street: STREETS[customer.n % STREETS.length],
+                number: String(10 + ((customer.n * 37) % 990)),
                 district: 'Centro',
                 city: cityName,
                 state,
-                cep: `0${String(1000 + customerIndex * 211).slice(-4)}-${String(100 + customerIndex).slice(-3)}`,
+                cep: `0${String(1000 + ((customer.n * 211) % 9000)).slice(-4)}-${String(100 + (customer.n % 900)).slice(-3)}`,
               },
         trackingCode: shipped ? `BR${String(100000000 + number * 7).slice(-9)}BR` : undefined,
         cancelReason: status === 'cancelado' ? 'Pagamento não confirmado no prazo.' : undefined,
