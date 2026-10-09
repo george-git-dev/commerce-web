@@ -1,4 +1,5 @@
 import { Role } from '../../../core/config/permissions';
+import { OrderStatus } from '../../../core/models/order';
 import { AdminOrder, AdminOrderAddress } from '../data/admin-orders-mock';
 
 /**
@@ -37,6 +38,53 @@ export interface AdminCustomer {
   averageTicket: number;
   since: Date;
   lastOrderAt: Date | null;
+  /** Cadastro excluído (LGPD): sem dado pessoal, pedidos mantidos. */
+  anonymized: boolean;
+}
+
+/** Domínio reservado (RFC 2606): nunca recebe e-mail. */
+const ANONYMIZED_DOMAIN = '@anonimizado.invalid';
+
+/** Identidade que fica no lugar da pessoa depois de excluir o cadastro. */
+export function anonymizedIdentity(id: number) {
+  return { name: `Cliente excluído #${id}`, email: `excluido-${id}${ANONYMIZED_DOMAIN}` };
+}
+
+export const isAnonymizedEmail = (email: string) => email.endsWith(ANONYMIZED_DOMAIN);
+
+/** Pedidos ainda em andamento: com eles, o cadastro não pode ser excluído. */
+const OPEN_STATUSES: readonly OrderStatus[] = [
+  'aguardando-pagamento',
+  'pago',
+  'em-separacao',
+  'enviado',
+];
+
+export interface DeletionContext {
+  self: boolean;
+  staff: boolean;
+  anonymized: boolean;
+  orders: readonly { status: OrderStatus }[];
+}
+
+/** Por que não dá para excluir este cadastro (null = pode). */
+export function deletionProblem(ctx: DeletionContext): string | null {
+  if (ctx.anonymized) return 'Cadastro já excluído.';
+  if (ctx.self) return 'Você não pode excluir a própria conta por aqui.';
+  if (ctx.staff) return 'Conta da equipe: tire o acesso ao backoffice antes.';
+  const open = ctx.orders.filter((order) => OPEN_STATUSES.includes(order.status)).length;
+  if (open) {
+    return `Tem ${open} ${open === 1 ? 'pedido em andamento' : 'pedidos em andamento'}: conclua ou cancele antes.`;
+  }
+  return null;
+}
+
+/** Motivo da exclusão: obrigatório e curto (vai para a auditoria, sem dado pessoal). */
+export function deletionReasonProblem(reason: string): string | null {
+  const text = reason.trim();
+  if (text.length < 5) return 'Explique o motivo (mínimo 5 letras).';
+  if (text.length > 200) return 'Motivo com no máximo 200 caracteres.';
+  return null;
 }
 
 export type CustomerFilter =
@@ -129,7 +177,7 @@ export function buildCustomers(
     if (list) list.push(order);
     else byEmail.set(order.customer.email, [order]);
   }
-  const drafts: Omit<AdminCustomer, 'id' | 'cpf'>[] = [];
+  const drafts: Omit<AdminCustomer, 'id' | 'cpf' | 'anonymized'>[] = [];
   for (const [email, list] of byEmail) {
     const sorted = [...list].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
     const valid = sorted.filter((order) => order.status !== 'cancelado');
@@ -172,7 +220,16 @@ export function buildCustomers(
   }
   return drafts
     .sort((a, b) => a.since.getTime() - b.since.getTime() || a.email.localeCompare(b.email))
-    .map((draft, index) => ({ ...draft, id: 1001 + index, cpf: fakeCpf(1001 + index) }));
+    .map((draft, index) => {
+      const anonymized = isAnonymizedEmail(draft.email);
+      return {
+        ...draft,
+        id: 1001 + index,
+        cpf: anonymized ? '' : fakeCpf(1001 + index),
+        addresses: anonymized ? [] : draft.addresses,
+        anonymized,
+      };
+    });
 }
 
 /** Busca: nome, e-mail ou telefone (só dígitos, a partir de 4). Sem acento/maiúscula. */

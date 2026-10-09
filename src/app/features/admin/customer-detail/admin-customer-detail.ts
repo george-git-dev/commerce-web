@@ -8,7 +8,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { ROLE_LABELS } from '../../../core/config/permissions';
 import { ORDER_STATUS_LABELS } from '../../../core/models/order';
-import { AuthService } from '../../../core/services/auth-service';
+import { AuthService, RESET_LINK_MINUTES } from '../../../core/services/auth-service';
 import { formatCpf, maskCpf, maskPhone, onlyDigits } from '../../../core/utils/br-format';
 import { AdminCustomerStore } from '../services/admin-customer-store';
 import {
@@ -18,6 +18,8 @@ import {
   ROLE_HINTS,
 } from '../services/customer-rules';
 import { ActionDialog, ActionDialogData } from '../shared/action-dialog/action-dialog';
+import { DeleteCustomerDialog, DeleteCustomerDialogData } from './delete-customer-dialog';
+import { ResetLinkDialog, ResetLinkDialogData } from './reset-link-dialog';
 import { Pager } from '../shared/pager/pager';
 import { Paging } from '../shared/pager/paging';
 
@@ -70,6 +72,30 @@ export class AdminCustomerDetail {
     const customer = this.customer();
     return !!customer && this.store.directory.canReceiveInHands(customer.email);
   });
+  /** Exclusão (LGPD): registro, e por que não dá para excluir (null = pode). */
+  protected readonly deletion = computed(() => {
+    const customer = this.customer();
+    return customer?.anonymized ? this.store.directory.deletionById(customer.id) : undefined;
+  });
+  protected readonly deletionProblem = computed(() => {
+    const customer = this.customer();
+    return customer ? this.store.deletionProblem(customer) : null;
+  });
+
+  /** Senha: como entra, último e-mail de redefinição e se pode agir. */
+  protected readonly googleOnly = computed(() => {
+    const customer = this.customer();
+    return !!customer && this.store.directory.isGoogleOnly(customer.email);
+  });
+  protected readonly resetEmail = computed(() => {
+    const customer = this.customer();
+    return customer ? this.store.directory.resetEmailOf(customer.email) : undefined;
+  });
+  protected readonly passwordProblem = computed(() => {
+    const customer = this.customer();
+    return customer ? this.store.passwordProblem(customer) : null;
+  });
+
   protected readonly staffRoles = computed(() => {
     const customer = this.customer();
     return customer ? this.store.directory.staffRolesOf(customer.email) : [];
@@ -169,6 +195,63 @@ export class AdminCustomerDetail {
           'Fechar',
           { duration: 3000 },
         );
+      });
+  }
+
+  protected sendResetEmail(): void {
+    const customer = this.customer();
+    if (!customer) return;
+    const data: ActionDialogData = {
+      title: 'Enviar link de redefinição?',
+      message: `Vai um e-mail para ${customer.email} com um link para ${customer.name} criar uma senha nova (vale ${RESET_LINK_MINUTES} minutos, uma vez só). A senha atual continua valendo até a troca.`,
+      confirmLabel: 'Enviar',
+    };
+    this.dialog
+      .open(ActionDialog, { data, width: '440px', maxWidth: 'calc(100vw - 32px)' })
+      .afterClosed()
+      .subscribe((confirmed) => {
+        if (!confirmed) return;
+        const ok = this.store.sendResetEmail(customer);
+        this.snackBar.open(
+          ok
+            ? 'Link enviado para o e-mail do cadastro.'
+            : 'O e-mail não foi enviado. Use "Gerar link de redefinição".',
+          'Fechar',
+          { duration: ok ? 3000 : 6000 },
+        );
+      });
+  }
+
+  protected openResetLink(): void {
+    const customer = this.customer();
+    if (!customer) return;
+    const digits = onlyDigits(customer.phone);
+    const data: ResetLinkDialogData = {
+      name: customer.name,
+      phoneDigits: digits.length >= 10 ? digits : null,
+      issue: () => this.store.issueResetLink(customer),
+    };
+    this.dialog.open(ResetLinkDialog, { data, width: '480px', maxWidth: 'calc(100vw - 32px)' });
+  }
+
+  protected deleteCustomer(): void {
+    const customer = this.customer();
+    if (!customer || this.deletionProblem()) return;
+    const data: DeleteCustomerDialogData = {
+      id: customer.id,
+      name: customer.name,
+      email: customer.email,
+    };
+    this.dialog
+      .open(DeleteCustomerDialog, { data, width: '480px', maxWidth: 'calc(100vw - 32px)' })
+      .afterClosed()
+      .subscribe((reason) => {
+        if (typeof reason !== 'string') return;
+        if (this.store.deleteCustomer(customer, reason)) {
+          this.snackBar.open('Cadastro excluído. Os pedidos foram mantidos.', 'Fechar', {
+            duration: 4000,
+          });
+        }
       });
   }
 

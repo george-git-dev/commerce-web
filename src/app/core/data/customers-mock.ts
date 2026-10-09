@@ -16,3 +16,15 @@ export const STAFF_MOCK: Readonly<Record<string, readonly Role[]>> = {
   'admin@email.com': ['ROLE_ADMIN'],
   'viewer@email.com': ['ROLE_VIEWER'],
 };
+
+/**
+ * Contas FICTÍCIAS criadas com "Continuar com Google" (sem senha na loja): a
+ * ficha mostra "Entra com Google" e não oferece redefinir senha.
+ */
+export const GOOGLE_MOCK_EMAILS: readonly string[] = ['cliente.google@gmail.com'];
+
+/**
+ * Simula o provedor de e-mail FALHANDO para estes endereços (para testar o
+ * plano B do link pelo WhatsApp). Na Fase 2 o status vem do back (fila de envio).
+ */
+export const EMAIL_FAILS_MOCK: readonly string[] = ['vizinho@email.com'];

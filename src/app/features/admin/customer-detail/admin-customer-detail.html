@@ -10,7 +10,11 @@
         <h2>{{ c.name }}</h2>
         <p>Cliente desde {{ c.since | date: 'dd/MM/yyyy' }} · código {{ c.id }}</p>
         <span class="cd__tags">
-          @if (block()) {
+          @if (c.anonymized) {
+            <span class="cd__tag cd__tag--blocked">
+              <mat-icon aria-hidden="true">person_off</mat-icon> Cadastro excluído
+            </span>
+          } @else if (block()) {
             <span class="cd__tag cd__tag--blocked">
               <mat-icon aria-hidden="true">block</mat-icon> Bloqueado
             </span>
@@ -31,6 +35,16 @@
       </div>
     </header>
 
+    @if (deletion(); as d) {
+      <p class="cd__alert" role="status">
+        <mat-icon aria-hidden="true">person_off</mat-icon>
+        <span>
+          Dados pessoais excluídos (LGPD) por {{ d.by }} em {{ d.at | date: 'dd/MM/yyyy HH:mm' }}.
+          <strong>Motivo:</strong> {{ d.reason }}. Os pedidos foram mantidos sem dados pessoais.
+        </span>
+      </p>
+    }
+
     @if (block(); as b) {
       <p class="cd__alert" role="status">
         <mat-icon aria-hidden="true">block</mat-icon>
@@ -44,34 +58,38 @@
     <div class="cd__grid">
       <article class="cd__card">
         <h3>Contato</h3>
-        <dl class="cd__data">
-          <div>
-            <dt>E-mail</dt>
-            <dd>{{ c.email }}</dd>
-          </div>
-          <div>
-            <dt>Telefone</dt>
-            <dd>
-              {{ phone() || '—' }}
-              @if (whatsapp(); as link) {
-                <a [href]="link" target="_blank" rel="noopener">WhatsApp</a>
-              }
-            </dd>
-          </div>
-          <div>
-            <dt>CPF</dt>
-            <dd>{{ cpf() || 'Não informado' }}</dd>
-          </div>
-          <div>
-            <dt>Cidade</dt>
-            <dd>{{ c.city }}</dd>
-          </div>
-        </dl>
-        @if (!sensitive) {
-          <p class="cd__note">
-            <mat-icon aria-hidden="true">lock</mat-icon>
-            CPF, telefone e endereço completos só para quem tem permissão de dados sensíveis.
-          </p>
+        @if (c.anonymized) {
+          <p class="cd__empty">Sem dados pessoais (cadastro excluído).</p>
+        } @else {
+          <dl class="cd__data">
+            <div>
+              <dt>E-mail</dt>
+              <dd>{{ c.email }}</dd>
+            </div>
+            <div>
+              <dt>Telefone</dt>
+              <dd>
+                {{ phone() || '—' }}
+                @if (whatsapp(); as link) {
+                  <a [href]="link" target="_blank" rel="noopener">WhatsApp</a>
+                }
+              </dd>
+            </div>
+            <div>
+              <dt>CPF</dt>
+              <dd>{{ cpf() || 'Não informado' }}</dd>
+            </div>
+            <div>
+              <dt>Cidade</dt>
+              <dd>{{ c.city }}</dd>
+            </div>
+          </dl>
+          @if (!sensitive) {
+            <p class="cd__note">
+              <mat-icon aria-hidden="true">lock</mat-icon>
+              CPF, telefone e endereço completos só para quem tem permissão de dados sensíveis.
+            </p>
+          }
         }
       </article>
 
@@ -101,7 +119,7 @@
         </dl>
       </article>
 
-      @if (canEdit) {
+      @if (canEdit && !c.anonymized) {
         <article class="cd__card cd__actions">
           <h3>Ações</h3>
           <button matButton="outlined" type="button" (click)="toggleInHands()">
@@ -126,10 +144,58 @@
               {{ block() ? 'Desbloquear cliente' : 'Bloquear cliente' }}
             </button>
           }
+          @if (canManageTeam) {
+            @if (deletionProblem(); as problem) {
+              <p class="cd__note">
+                <mat-icon aria-hidden="true">person_off</mat-icon> Excluir cadastro: {{ problem }}
+              </p>
+            } @else {
+              <button
+                matButton="outlined"
+                type="button"
+                class="cd__danger"
+                (click)="deleteCustomer()"
+              >
+                <mat-icon>person_off</mat-icon> Excluir cadastro (LGPD)
+              </button>
+            }
+          }
+        </article>
+
+        <article class="cd__card cd__actions">
+          <h3>Senha</h3>
+          <p class="cd__current">
+            Entra com: <strong>{{ googleOnly() ? 'Google' : 'E-mail e senha' }}</strong>
+          </p>
+          @if (resetEmail(); as e) {
+            <p class="cd__note" [class.cd__note--bad]="!e.ok" role="status">
+              <mat-icon aria-hidden="true">{{ e.ok ? 'mark_email_read' : 'error' }}</mat-icon>
+              @if (e.ok) {
+                E-mail de redefinição enviado em {{ e.at | date: 'dd/MM HH:mm' }}.
+              } @else {
+                O e-mail de redefinição FALHOU em {{ e.at | date: 'dd/MM HH:mm' }}. Use "Gerar link"
+                e mande pelo WhatsApp.
+              }
+            </p>
+          }
+          @if (passwordProblem(); as problem) {
+            <p class="cd__note"><mat-icon aria-hidden="true">info</mat-icon> {{ problem }}</p>
+          } @else {
+            <button matButton="outlined" type="button" (click)="sendResetEmail()">
+              <mat-icon>forward_to_inbox</mat-icon> Enviar link por e-mail
+            </button>
+            <button matButton="outlined" type="button" (click)="openResetLink()">
+              <mat-icon>link</mat-icon> Gerar link de redefinição
+            </button>
+            <p class="cd__note">
+              <mat-icon aria-hidden="true">lock</mat-icon>
+              Ninguém da equipe vê ou define a senha: o cliente cria a nova pelo link.
+            </p>
+          }
         </article>
       }
 
-      @if (canManageTeam) {
+      @if (canManageTeam && !c.anonymized) {
         <article class="cd__card">
           <h3>Acesso ao backoffice</h3>
           @if (accessProblem(); as problem) {

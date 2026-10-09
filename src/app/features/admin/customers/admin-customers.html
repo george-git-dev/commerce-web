@@ -54,7 +54,7 @@
             <span class="cl__avatar" aria-hidden="true">{{ c.name.charAt(0) }}</span>
             <span class="cl__main">
               <strong>{{ c.name }}</strong>
-              <small>{{ c.email }}</small>
+              <small>{{ c.anonymized ? 'Dados pessoais excluídos (LGPD)' : c.email }}</small>
               @if (t.blocked || t.inHands || t.staff) {
                 <span class="cl__tags">
                   @if (t.blocked) {

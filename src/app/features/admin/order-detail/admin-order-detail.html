@@ -81,14 +81,18 @@
           <h3>Cliente</h3>
           <p class="od__lines">
             <strong>{{ o.customer.name }}</strong>
-            <span>{{ o.customer.email }}</span>
-            <span>{{ phone(o.customer.phone) }}</span>
+            @if (anonymized()) {
+              <span>Dados pessoais excluídos (LGPD)</span>
+            } @else {
+              <span>{{ o.customer.email }}</span>
+              <span>{{ phone(o.customer.phone) }}</span>
+            }
             <span>{{ o.customer.city }}</span>
           </p>
           @if (customerId(); as id) {
             <a class="od__customer" [routerLink]="['/admin/clientes', id]">Ver ficha do cliente</a>
           }
-          @if (sensitive()) {
+          @if (sensitive() && o.customer.phone) {
             <a
               matButton="outlined"
               class="ui-cta od__wa"
@@ -105,9 +109,14 @@
           <h3>Entrega</h3>
           @if (o.address; as address) {
             <p class="od__lines">
-              <span>{{ address.street }}, {{ address.number }}</span>
-              <span>{{ address.district }} · {{ address.city }}/{{ address.state }}</span>
-              <span>CEP {{ address.cep }}</span>
+              @if (anonymized()) {
+                <span>Endereço removido (LGPD)</span>
+                <span>{{ address.city }}/{{ address.state }}</span>
+              } @else {
+                <span>{{ address.street }}, {{ address.number }}</span>
+                <span>{{ address.district }} · {{ address.city }}/{{ address.state }}</span>
+                <span>CEP {{ address.cep }}</span>
+              }
             </p>
             <p class="od__muted">{{ o.shipping === 'expresso' ? 'Expresso' : 'Econômico' }}</p>
           } @else {

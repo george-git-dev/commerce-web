@@ -17,6 +17,7 @@ import {
   needsTracking,
   statusLabel,
 } from '../services/admin-order-flow';
+import { isAnonymizedEmail } from '../services/customer-rules';
 import { AdminCustomerStore } from '../services/admin-customer-store';
 import { AdminOrderStore } from '../services/admin-order-store';
 import { ActionDialog, ActionDialogData } from '../shared/action-dialog/action-dialog';
@@ -59,6 +60,12 @@ export class AdminOrderDetail {
   protected readonly cancellable = computed(() => {
     const order = this.order();
     return !!order && canCancel(order);
+  });
+
+  /** Pedido de cliente que excluiu o cadastro: sem dados pessoais. */
+  protected readonly anonymized = computed(() => {
+    const order = this.order();
+    return !!order && isAnonymizedEmail(order.customer.email);
   });
 
   protected phone(value: string): string {

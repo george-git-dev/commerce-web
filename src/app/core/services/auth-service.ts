@@ -74,6 +74,10 @@ export class AuthService {
   login(email: string, password: string): AuthResult {
     const problem = this.credentialsProblem(email, password);
     if (problem) return { ok: false, message: problem };
+    // Conta excluída não existe mais: mesma resposta de credencial errada.
+    if (this.directory.deletionOf(email.trim().toLowerCase())) {
+      return { ok: false, message: 'E-mail ou senha incorretos.' };
+    }
     if (this.directory.blockOf(email.trim().toLowerCase())) return BLOCKED;
     return this.start({ name: nameFromEmail(email.trim()), email: email.trim().toLowerCase() });
   }
@@ -84,6 +88,8 @@ export class AuthService {
     const problem = this.credentialsProblem(email, password);
     if (problem) return { ok: false, message: problem };
     if (this.directory.blockOf(email.trim().toLowerCase())) return BLOCKED;
+    // E-mail de conta excluída vira um cadastro novo (sem nada do anterior).
+    this.directory.forgetDeletion(email.trim().toLowerCase());
     return this.start({ name: name.trim(), email: email.trim().toLowerCase(), cpf });
   }
 
@@ -143,12 +149,30 @@ export class AuthService {
   requestPasswordReset(email: string): string | null {
     const normalized = email.trim().toLowerCase();
     if (!EMAIL_PATTERN.test(normalized)) return null;
+    return this.createResetLink(normalized).token;
+  }
+
+  /**
+   * Link de redefinição gerado PELO BACKOFFICE (plano B quando o e-mail não
+   * chega): o admin repassa pelo WhatsApp do telefone cadastrado. Quem cria a
+   * senha continua sendo o cliente; a senha atual vale até ele trocar. Fase 2:
+   * `POST /admin/customers/{id}/password-reset-link` (só `customers:edit`;
+   * conta da equipe só `team:manage`), auditado, com limite por hora.
+   */
+  issueResetLink(email: string): { token: string; expiresAt: Date } {
+    const { token, expiresAt } = this.createResetLink(email.trim().toLowerCase());
+    return { token, expiresAt: new Date(expiresAt) };
+  }
+
+  /** Um link válido por conta: gerar outro invalida o anterior. */
+  private createResetLink(email: string): { token: string; expiresAt: number } {
+    for (const [token, link] of this.resetLinks) {
+      if (link.email === email) this.resetLinks.delete(token);
+    }
     const token = globalThis.crypto.randomUUID();
-    this.resetLinks.set(token, {
-      email: normalized,
-      expiresAt: Date.now() + RESET_LINK_MINUTES * 60_000,
-    });
-    return token;
+    const expiresAt = Date.now() + RESET_LINK_MINUTES * 60_000;
+    this.resetLinks.set(token, { email, expiresAt });
+    return { token, expiresAt };
   }
 
   /** O link ainda serve? (A tela de nova senha confere antes de mostrar o formulário.) */
@@ -186,6 +210,7 @@ export class AuthService {
    */
   loginWithGoogle(): AuthResult {
     if (this.directory.blockOf('cliente.google@gmail.com')) return BLOCKED;
+    this.directory.forgetDeletion('cliente.google@gmail.com');
     return this.start({ name: 'Cliente Google', email: 'cliente.google@gmail.com' });
   }
 
@@ -221,7 +246,10 @@ export class AuthService {
   /** Sessão salva no navegador; conta bloqueada desde então = sai. */
   private restore(): AuthUser | null {
     const stored = readStoredUser();
-    if (stored && this.directory.blockOf(stored.email)) {
+    if (
+      stored &&
+      (this.directory.blockOf(stored.email) || this.directory.deletionOf(stored.email))
+    ) {
       storeUser(null);
       return null;
     }

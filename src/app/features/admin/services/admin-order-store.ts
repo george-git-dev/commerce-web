@@ -74,6 +74,32 @@ export class AdminOrderStore {
     return updated;
   }
 
+  /**
+   * Exclusão de cadastro (LGPD): os pedidos ficam (fiscal/CDC), sem nome,
+   * e-mail, telefone nem rua/número/CEP — só cidade/UF para relatório.
+   * Fase 2: faz parte do `POST /admin/customers/{id}/anonymize`, numa transação.
+   */
+  anonymizeCustomer(email: string, identity: { name: string; email: string }): void {
+    this.state.update((list) =>
+      list.map((order) =>
+        order.customer.email !== email
+          ? order
+          : {
+              ...order,
+              customer: { ...order.customer, ...identity, phone: '' },
+              address: order.address && {
+                street: 'Endereço removido',
+                number: '',
+                district: '',
+                city: order.address.city,
+                state: order.address.state,
+                cep: '',
+              },
+            },
+      ),
+    );
+  }
+
   private save(order: AdminOrder): void {
     this.state.update((list) => list.map((item) => (item.number === order.number ? order : item)));
   }

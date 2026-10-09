@@ -8,7 +8,9 @@ import { AdminOrderStore } from './admin-order-store';
 import {
   accessChangeProblem,
   AdminCustomer,
+  anonymizedIdentity,
   buildCustomers,
+  deletionProblem,
   GrantableRole,
 } from './customer-rules';
 
@@ -28,7 +30,17 @@ export class AdminCustomerStore {
   private readonly audit = inject(AdminAudit);
   readonly directory = inject(AccountDirectory);
 
-  readonly customers = computed(() => buildCustomers(this.orders.orders(), REGISTERED_MOCK));
+  /** Contas sem pedido; as excluídas entram já anonimizadas. */
+  private readonly accounts = computed(() =>
+    REGISTERED_MOCK.map((account) => {
+      const deletion = this.directory.deletionOf(account.email);
+      return deletion
+        ? { ...account, ...anonymizedIdentity(deletion.customerId), phone: '', city: '—' }
+        : account;
+    }),
+  );
+
+  readonly customers = computed(() => buildCustomers(this.orders.orders(), this.accounts()));
 
   find(id: number | null): AdminCustomer | undefined {
     return id == null ? undefined : this.customers().find((customer) => customer.id === id);
@@ -93,6 +105,86 @@ export class AdminCustomerStore {
       customer,
       [{ field: 'Perfil', before: label(before), after: label(role) }],
     );
+  }
+
+  // ----- Senha (cliente não consegue entrar) -----
+
+  /**
+   * Por que esta conta não pode receber link de senha por aqui (null = pode).
+   * Conta da equipe só com `team:manage`; a própria conta usa "Esqueci minha senha".
+   */
+  passwordProblem(customer: AdminCustomer): string | null {
+    if (customer.anonymized) return 'Cadastro excluído.';
+    if (this.directory.isGoogleOnly(customer.email))
+      return 'Entra com Google: não tem senha na loja. Oriente a usar "Continuar com Google".';
+    if (this.isSelf(customer)) return 'Para a sua conta, use "Esqueci minha senha" no login.';
+    if (!this.auth.can('customers:edit')) return 'Sem permissão para esta ação.';
+    if (this.isStaff(customer) && !this.auth.can('team:manage'))
+      return 'Conta da equipe: só o super admin redefine a senha.';
+    return null;
+  }
+
+  /** Caminho normal: o e-mail com o link vai para o endereço cadastrado. */
+  sendResetEmail(customer: AdminCustomer): boolean {
+    if (this.passwordProblem(customer)) return false;
+    this.auth.requestPasswordReset(customer.email);
+    const status = this.directory.sendResetEmail(customer.email);
+    this.record('Enviou link de redefinição de senha por e-mail', customer, [
+      { field: 'Envio do e-mail', before: '', after: status.ok ? 'Enviado' : 'Falhou' },
+    ]);
+    return status.ok;
+  }
+
+  /**
+   * Plano B (e-mail não chega): gera o link para repassar pelo WhatsApp do
+   * telefone cadastrado. O token NUNCA vai para a auditoria.
+   */
+  issueResetLink(customer: AdminCustomer): { url: string; expiresAt: Date } | null {
+    if (this.passwordProblem(customer)) return null;
+    const { token, expiresAt } = this.auth.issueResetLink(customer.email);
+    this.record('Gerou link de redefinição de senha', customer, [
+      { field: 'Validade', before: '', after: `30 minutos (uso único)` },
+    ]);
+    const origin = globalThis.location?.origin ?? '';
+    return { url: `${origin}/redefinir-senha?token=${token}`, expiresAt };
+  }
+
+  // ----- Exclusão (LGPD) -----
+
+  deletionProblem(customer: AdminCustomer): string | null {
+    if (!this.auth.can('team:manage')) return 'Só o super admin exclui cadastros.';
+    return deletionProblem({
+      self: this.isSelf(customer),
+      staff: this.isStaff(customer),
+      anonymized: customer.anonymized,
+      orders: customer.orders,
+    });
+  }
+
+  /**
+   * Anonimiza o cadastro: nome/e-mail/telefone/CPF/endereços somem, pedidos
+   * ficam. Irreversível. Fase 2: `POST /admin/customers/{id}/anonymize` (só
+   * `team:manage`), que também encerra as sessões e apaga os tokens.
+   */
+  deleteCustomer(customer: AdminCustomer, reason: string): boolean {
+    if (this.deletionProblem(customer)) return false;
+    const deletion = {
+      customerId: customer.id,
+      reason: reason.trim(),
+      by: this.userName(),
+      at: new Date(),
+    };
+    this.orders.anonymizeCustomer(customer.email, anonymizedIdentity(customer.id));
+    this.directory.markDeleted(customer.email, deletion);
+    // Auditoria sem dado pessoal: só o código e o motivo.
+    this.audit.record({
+      by: deletion.by,
+      action: 'Excluiu cadastro (LGPD)',
+      entity: 'Cliente',
+      entityId: String(customer.id),
+      changes: [{ field: 'Motivo', before: '', after: deletion.reason }],
+    });
+    return true;
   }
 
   isSelf(customer: AdminCustomer): boolean {

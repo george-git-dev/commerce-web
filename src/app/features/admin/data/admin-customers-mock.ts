@@ -13,6 +13,13 @@ export const REGISTERED_MOCK: readonly RegisteredAccount[] = [
     createdAt: new Date(2026, 8, 20),
   },
   {
+    name: 'Cliente Google',
+    email: 'cliente.google@gmail.com',
+    city: 'Rio de Janeiro, RJ',
+    phone: '(21) 99876-5432',
+    createdAt: new Date(2026, 6, 14),
+  },
+  {
     name: 'Super Admin',
     email: 'superadmin@email.com',
     city: 'São Paulo, SP',

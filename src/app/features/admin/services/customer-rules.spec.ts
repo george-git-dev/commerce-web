@@ -2,6 +2,9 @@ import { isValidCpf } from '../../../core/utils/br-format';
 import { AdminOrder } from '../data/admin-orders-mock';
 import {
   accessChangeProblem,
+  anonymizedIdentity,
+  deletionProblem,
+  isAnonymizedEmail,
   blockReasonProblem,
   CustomerSortColumn,
   defaultDesc,
@@ -37,6 +40,37 @@ function order(email: string, day: number, total: number, extra: Partial<AdminOr
     ...extra,
   } as AdminOrder;
 }
+
+describe('exclusão de cadastro (LGPD)', () => {
+  const base = { self: false, staff: false, anonymized: false, orders: [] };
+
+  it('bloqueia própria conta, equipe, já excluído e pedido em andamento', () => {
+    expect(deletionProblem(base), 'pode').toBeNull();
+    expect(deletionProblem({ ...base, self: true }), 'própria').toContain('própria');
+    expect(deletionProblem({ ...base, staff: true }), 'equipe').toContain('equipe');
+    expect(deletionProblem({ ...base, anonymized: true }), 'já').toContain('já excluído');
+    expect(
+      deletionProblem({ ...base, orders: [{ status: 'enviado' }, { status: 'pago' }] }),
+      'andamento',
+    ).toContain('2 pedidos em andamento');
+    expect(
+      deletionProblem({ ...base, orders: [{ status: 'entregue' }, { status: 'cancelado' }] }),
+      'concluídos',
+    ).toBeNull();
+  });
+
+  it('identidade anônima não tem dado pessoal e some CPF/endereços na lista', () => {
+    const id = anonymizedIdentity(1234);
+    expect(id.name).toBe('Cliente excluído #1234');
+    expect(isAnonymizedEmail(id.email)).toBe(true);
+    const [customer] = buildCustomers(
+      [],
+      [{ ...id, city: '—', phone: '', createdAt: new Date(2025, 0, 1) }],
+    );
+    expect(customer.anonymized).toBe(true);
+    expect(customer.cpf).toBe('');
+  });
+});
 
 describe('acesso ao backoffice', () => {
   const ok = { self: false, blocked: false, roles: [] };

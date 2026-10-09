@@ -128,6 +128,31 @@ describe('AuthService + AccountDirectory (backoffice)', () => {
     expect(auth.user()?.inHandsDelivery).toBe(true);
   });
 
+  it('link do backoffice: um por conta, uso único', () => {
+    const auth = TestBed.inject(AuthService);
+    const first = auth.issueResetLink('maria@x.com');
+    const second = auth.issueResetLink('maria@x.com');
+    expect(auth.isResetLinkValid(first.token), 'anterior invalidado').toBe(false);
+    expect(auth.isResetLinkValid(second.token), 'novo vale').toBe(true);
+    expect(auth.resetPassword(second.token, 'senhaNova123').ok).toBe(true);
+    expect(auth.isResetLinkValid(second.token), 'usado').toBe(false);
+  });
+
+  it('conta excluída não entra; cadastro novo com o e-mail funciona', () => {
+    const auth = TestBed.inject(AuthService);
+    const directory = TestBed.inject(AccountDirectory);
+    directory.markDeleted('ex@x.com', {
+      customerId: 1500,
+      reason: 'Pedido do cliente',
+      by: 'Admin',
+      at: new Date(),
+    });
+    expect(auth.login('ex@x.com', '12345678').ok).toBe(false);
+    expect(auth.register('Nova Conta', 'ex@x.com', '52998224725', '12345678').ok).toBe(true);
+    auth.logout();
+    expect(auth.login('ex@x.com', '12345678').ok).toBe(true);
+  });
+
   it('perfil dado ou tirado no backoffice vale no próximo login', () => {
     const auth = TestBed.inject(AuthService);
     const directory = TestBed.inject(AccountDirectory);

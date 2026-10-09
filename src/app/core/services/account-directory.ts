@@ -1,11 +1,30 @@
 import { Injectable, signal } from '@angular/core';
 import { Role } from '../config/permissions';
-import { IN_HANDS_MOCK_EMAILS, STAFF_MOCK } from '../data/customers-mock';
+import {
+  EMAIL_FAILS_MOCK,
+  GOOGLE_MOCK_EMAILS,
+  IN_HANDS_MOCK_EMAILS,
+  STAFF_MOCK,
+} from '../data/customers-mock';
 
 /** Bloqueio de uma conta: motivo, quem e quando (o cliente não vê o motivo). */
 export interface AccountBlock {
   reason: string;
   by: string;
+  at: Date;
+}
+
+/** Cadastro excluído a pedido (LGPD): só o código, quem e quando — sem dado pessoal. */
+export interface AccountDeletion {
+  customerId: number;
+  reason: string;
+  by: string;
+  at: Date;
+}
+
+/** Último e-mail de redefinição de senha (o back registra o retorno do provedor). */
+export interface EmailStatus {
+  ok: boolean;
   at: Date;
 }
 
@@ -21,6 +40,9 @@ export class AccountDirectory {
   private readonly staff = signal<Readonly<Record<string, readonly Role[]>>>(STAFF_MOCK);
   private readonly inHands = signal<ReadonlySet<string>>(new Set(IN_HANDS_MOCK_EMAILS));
   private readonly blocks = signal<Readonly<Record<string, AccountBlock>>>({});
+  private readonly deletions = signal<Readonly<Record<string, AccountDeletion>>>({});
+  private readonly resetEmails = signal<Readonly<Record<string, EmailStatus>>>({});
+  private readonly googleOnly = new Set(GOOGLE_MOCK_EMAILS);
 
   /** Perfis da conta (todo cadastro tem `ROLE_CUSTOMER`). */
   rolesOf(email: string): Role[] {
@@ -55,6 +77,60 @@ export class AccountDirectory {
       const next = new Set(set);
       if (allowed) next.add(email);
       else next.delete(email);
+      return next;
+    });
+  }
+
+  /** Conta criada com Google: não tem senha na loja. */
+  isGoogleOnly(email: string): boolean {
+    return this.googleOnly.has(email);
+  }
+
+  resetEmailOf(email: string): EmailStatus | undefined {
+    return this.resetEmails()[email];
+  }
+
+  /**
+   * "Envia" o e-mail de redefinição (mock: falha para `EMAIL_FAILS_MOCK`).
+   * Fase 2: entra numa fila com novas tentativas; o status vem do provedor.
+   */
+  sendResetEmail(email: string): EmailStatus {
+    const status = { ok: !EMAIL_FAILS_MOCK.includes(email), at: new Date() };
+    this.resetEmails.update((all) => ({ ...all, [email]: status }));
+    return status;
+  }
+
+  deletionOf(email: string): AccountDeletion | undefined {
+    return this.deletions()[email];
+  }
+
+  /** Registro da exclusão pelo código do cliente (a ficha não tem mais o e-mail). */
+  deletionById(customerId: number): AccountDeletion | undefined {
+    return Object.values(this.deletions()).find((d) => d.customerId === customerId);
+  }
+
+  /**
+   * Marca a conta como excluída (no back a conta deixa de existir; aqui o
+   * e-mail fica só para o mock recusar o login). Some perfil, bloqueio,
+   * entrega em mãos e status de e-mail.
+   */
+  markDeleted(email: string, deletion: AccountDeletion): void {
+    this.deletions.update((all) => ({ ...all, [email]: deletion }));
+    this.setStaffRole(email, null);
+    this.setInHands(email, false);
+    this.unblock(email);
+    this.resetEmails.update((all) => {
+      const next = { ...all };
+      delete next[email];
+      return next;
+    });
+  }
+
+  /** E-mail de conta excluída pode criar um cadastro novo, do zero. */
+  forgetDeletion(email: string): void {
+    this.deletions.update((all) => {
+      const next = { ...all };
+      delete next[email];
       return next;
     });
   }
