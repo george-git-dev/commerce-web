@@ -1,7 +1,7 @@
-import { CurrencyPipe, DatePipe, NgTemplateOutlet } from '@angular/common';
+import { CurrencyPipe, DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
-import { Router, RouterLink } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { AdminCustomerStore } from '../services/admin-customer-store';
 import {
   AdminCustomer,
@@ -20,15 +20,6 @@ import { Paging } from '../shared/pager/paging';
 
 const RECENT_DAYS = 90;
 
-/** Colunas da tabela (desktop), na ordem em que aparecem. */
-const COLUMNS: readonly { id: CustomerSortColumn; label: string; numeric?: boolean }[] = [
-  { id: 'nome', label: 'Cliente' },
-  { id: 'pedidos', label: 'Pedidos', numeric: true },
-  { id: 'total', label: 'Total gasto', numeric: true },
-  { id: 'ultima-compra', label: 'Última compra' },
-  { id: 'desde', label: 'Cliente desde' },
-];
-
 function createState() {
   const search = signal('');
   const filter = signal<CustomerFilter>('todos');
@@ -38,26 +29,24 @@ function createState() {
 }
 
 /**
- * `/admin/clientes` — cards no celular, tabela com ordenação por coluna no
- * desktop, paginado. Busca, filtro, ordem e página ficam em memória (voltar
+ * `/admin/clientes` — lista em cards (mesmo padrão de Produtos), ordenação
+ * por select, paginada. Busca, filtro, ordem e página ficam em memória (voltar
  * da ficha cai no mesmo lugar; nada de dado pessoal na URL). Fase 2:
  * `GET /admin/customers?q=&filter=&page=&size=&sort=total,desc`.
  */
 @Component({
   selector: 'app-admin-customers',
-  imports: [CurrencyPipe, DatePipe, MatIconModule, NgTemplateOutlet, RouterLink, Pager],
+  imports: [CurrencyPipe, DatePipe, MatIconModule, RouterLink, Pager],
   templateUrl: './admin-customers.html',
   styleUrl: './admin-customers.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AdminCustomers {
   protected readonly store = inject(AdminCustomerStore);
-  private readonly router = inject(Router);
   private readonly state = inject(ListMemory).get('clientes', createState);
 
   protected readonly filters = Object.entries(CUSTOMER_FILTER_LABELS) as [CustomerFilter, string][];
   protected readonly sorts = Object.entries(CUSTOMER_SORT_LABELS) as [CustomerSortColumn, string][];
-  protected readonly columns = COLUMNS;
 
   protected readonly search = this.state.search;
   protected readonly filter = this.state.filter;
@@ -91,33 +80,9 @@ export class AdminCustomers {
 
   protected readonly page = computed(() => this.paging.of(this.filtered()));
 
-  /** Cabeçalho: mesma coluna inverte; outra começa na direção natural. */
-  protected sortBy(column: CustomerSortColumn): void {
-    const current = this.sort();
-    this.sort.set({
-      column,
-      desc: current.column === column ? !current.desc : defaultDesc(column),
-    });
-  }
-
-  /** Select do celular: escolhe a coluna (direção natural). */
+  /** Cada opção já vem na direção natural (nome A–Z; o resto, maior/mais recente primeiro). */
   protected sortColumn(column: CustomerSortColumn): void {
     this.sort.set({ column, desc: defaultDesc(column) });
-  }
-
-  protected flipSort(): void {
-    this.sort.update((s) => ({ ...s, desc: !s.desc }));
-  }
-
-  protected ariaSort(column: CustomerSortColumn): 'ascending' | 'descending' | null {
-    const { column: active, desc } = this.sort();
-    return active === column ? (desc ? 'descending' : 'ascending') : null;
-  }
-
-  /** Clique em qualquer parte da linha abre a ficha (o link do nome é o caminho acessível). */
-  protected open(event: MouseEvent, customer: AdminCustomer): void {
-    if ((event.target as HTMLElement).closest('a')) return;
-    void this.router.navigate(['/admin/clientes', customer.id]);
   }
 
   protected tags(c: AdminCustomer) {

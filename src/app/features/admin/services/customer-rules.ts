@@ -80,7 +80,7 @@ export function accessChangeProblem(ctx: AccessContext): string | null {
   return null;
 }
 
-/** Colunas ordenáveis (tabela no desktop, select no celular). */
+/** Ordenações do select "Ordenar por". */
 export type CustomerSortColumn = 'nome' | 'pedidos' | 'total' | 'ultima-compra' | 'desde';
 
 export interface CustomerSort {
@@ -89,14 +89,14 @@ export interface CustomerSort {
 }
 
 export const CUSTOMER_SORT_LABELS: Record<CustomerSortColumn, string> = {
-  'ultima-compra': 'Última compra',
-  total: 'Total gasto',
-  pedidos: 'Pedidos',
-  nome: 'Nome',
-  desde: 'Cliente desde',
+  'ultima-compra': 'Última compra (mais recente)',
+  total: 'Total gasto (maior)',
+  pedidos: 'Mais pedidos',
+  nome: 'Nome (A–Z)',
+  desde: 'Cadastro mais recente',
 };
 
-/** Primeiro clique: nome de A a Z; números e datas do maior/mais recente. */
+/** Nome de A a Z; números e datas do maior/mais recente. */
 export const defaultDesc = (column: CustomerSortColumn) => column !== 'nome';
 
 const round2 = (value: number) => Math.round(value * 100) / 100;
