@@ -249,3 +249,55 @@ h3 {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
+
+.cd__current {
+  margin: 0;
+  font-size: 0.9375rem;
+}
+
+.cd__roles {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+// Opção inteira clicável (alvo ≥ 44px).
+.cd__role {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+
+  input {
+    margin: 3px 0 0;
+    accent-color: var(--earth);
+  }
+
+  span {
+    display: grid;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  strong {
+    font-size: 0.9375rem;
+    font-weight: 600;
+  }
+
+  small {
+    font-size: 0.75rem;
+    font-weight: 400;
+    color: var(--muted-foreground);
+  }
+
+  &--on {
+    border-color: var(--gold);
+    background: var(--gold-soft);
+  }
+}

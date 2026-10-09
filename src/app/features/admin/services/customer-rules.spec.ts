@@ -1,7 +1,9 @@
 import { isValidCpf } from '../../../core/utils/br-format';
 import { AdminOrder } from '../data/admin-orders-mock';
 import {
+  accessChangeProblem,
   blockReasonProblem,
+  GRANTABLE_ROLES,
   buildCustomers,
   fakeCpf,
   matchesCustomer,
@@ -33,6 +35,27 @@ function order(email: string, day: number, total: number, extra: Partial<AdminOr
     ...extra,
   } as AdminOrder;
 }
+
+describe('acesso ao backoffice', () => {
+  const ok = { self: false, blocked: false, roles: [] };
+
+  it('cliente comum pode receber perfil', () => {
+    expect(accessChangeProblem(ok)).toBeNull();
+    expect(accessChangeProblem({ ...ok, roles: ['ROLE_ADMIN'] })).toBeNull();
+  });
+
+  it('não mexe na própria conta, em super admin nem em conta bloqueada', () => {
+    expect(accessChangeProblem({ ...ok, self: true }), 'própria').toContain('próprio');
+    expect(accessChangeProblem({ ...ok, roles: ['ROLE_SUPER_ADMIN'] }), 'super').toContain(
+      'Super admin',
+    );
+    expect(accessChangeProblem({ ...ok, blocked: true }), 'bloqueada').toContain('bloqueada');
+  });
+
+  it('super admin não é um perfil que a tela dá', () => {
+    expect(GRANTABLE_ROLES as readonly string[]).not.toContain('ROLE_SUPER_ADMIN');
+  });
+});
 
 describe('clientes do backoffice', () => {
   const orders = [

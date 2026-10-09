@@ -53,6 +53,8 @@ export class AdminCustomers {
           return !!directory.blockOf(customer.email);
         case 'em-maos':
           return directory.canReceiveInHands(customer.email);
+        case 'equipe':
+          return directory.staffRolesOf(customer.email).length > 0;
         default:
           return true;
       }

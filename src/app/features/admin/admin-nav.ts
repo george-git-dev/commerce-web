@@ -52,7 +52,7 @@ export const ADMIN_NAV: readonly AdminNavItem[] = [
     badge: true,
   },
   { label: 'Relatórios', icon: 'insights', path: 'relatorios', permission: 'reports:view' },
-  { label: 'Equipe', icon: 'admin_panel_settings', path: 'equipe', permission: 'team:manage' },
+
   { label: 'Auditoria', icon: 'history', path: 'auditoria', permission: 'audit:view' },
   // Banners do carrossel e avisos da faixa do topo (sem deploy).
   { label: 'Vitrine', icon: 'storefront', path: 'vitrine', permission: 'settings:view' },

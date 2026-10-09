@@ -127,4 +127,16 @@ describe('AuthService + AccountDirectory (backoffice)', () => {
     auth.login('maria@x.com', '12345678');
     expect(auth.user()?.inHandsDelivery).toBe(true);
   });
+
+  it('perfil dado ou tirado no backoffice vale no próximo login', () => {
+    const auth = TestBed.inject(AuthService);
+    const directory = TestBed.inject(AccountDirectory);
+    directory.setStaffRole('irma@x.com', 'ROLE_VIEWER');
+    auth.login('irma@x.com', '12345678');
+    expect(auth.can('admin:access'), 'com acesso').toBe(true);
+    auth.logout();
+    directory.setStaffRole('irma@x.com', null);
+    auth.login('irma@x.com', '12345678');
+    expect(auth.can('admin:access'), 'sem acesso').toBe(false);
+  });
 });

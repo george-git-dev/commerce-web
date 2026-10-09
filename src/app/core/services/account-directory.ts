@@ -32,6 +32,19 @@ export class AccountDirectory {
     return this.staff()[email] ?? [];
   }
 
+  /**
+   * Dá, troca (`role`) ou tira (`null`) o acesso ao backoffice. Vale no
+   * próximo login da pessoa (no back real, tirar derruba a sessão na hora).
+   */
+  setStaffRole(email: string, role: Role | null): void {
+    this.staff.update((all) => {
+      const next = { ...all };
+      if (role) next[email] = [role];
+      else delete next[email];
+      return next;
+    });
+  }
+
   canReceiveInHands(email: string): boolean {
     return this.inHands().has(email);
   }

@@ -111,7 +111,7 @@
           @if (store.isStaff(c)) {
             <p class="cd__note">
               <mat-icon aria-hidden="true">badge</mat-icon>
-              Conta da equipe: para bloquear, tire o acesso em Equipe antes.
+              Conta da equipe: para bloquear, tire o acesso ao backoffice antes.
             </p>
           } @else if (store.isSelf(c)) {
             <p class="cd__note">Você não pode bloquear a própria conta.</p>
@@ -125,6 +125,61 @@
               <mat-icon>{{ block() ? 'lock_open' : 'block' }}</mat-icon>
               {{ block() ? 'Desbloquear cliente' : 'Bloquear cliente' }}
             </button>
+          }
+        </article>
+      }
+
+      @if (canManageTeam) {
+        <article class="cd__card">
+          <h3>Acesso ao backoffice</h3>
+          @if (accessProblem(); as problem) {
+            <p class="cd__current">
+              Perfil:
+              <strong>{{
+                currentAccess() ? roleLabels[currentAccess()!] : 'Cliente (sem acesso)'
+              }}</strong>
+            </p>
+            <p class="cd__note"><mat-icon aria-hidden="true">lock</mat-icon> {{ problem }}</p>
+          } @else {
+            <fieldset class="cd__roles" aria-label="Perfil da conta">
+              @for (opt of accessOptions; track opt.label) {
+                <label class="cd__role" [class.cd__role--on]="chosenAccess() === opt.value">
+                  <input
+                    type="radio"
+                    name="access"
+                    [checked]="chosenAccess() === opt.value"
+                    (change)="chosenAccess.set(opt.value)"
+                  />
+                  <span>
+                    <strong
+                      >{{ opt.label }}
+                      @if (currentAccess() === opt.value) {
+                        <small>(atual)</small>
+                      }
+                    </strong>
+                    <small>{{ opt.hint }}</small>
+                  </span>
+                </label>
+              }
+            </fieldset>
+            <button
+              matButton="filled"
+              type="button"
+              [disabled]="chosenAccess() === currentAccess()"
+              (click)="applyAccess()"
+            >
+              {{
+                !chosenAccess() && currentAccess()
+                  ? 'Tirar acesso'
+                  : currentAccess()
+                    ? 'Trocar perfil'
+                    : 'Dar acesso'
+              }}
+            </button>
+            <p class="cd__note">
+              <mat-icon aria-hidden="true">info</mat-icon>
+              Vale no próximo login da pessoa. Super admin não é dado por aqui.
+            </p>
           }
         </article>
       }

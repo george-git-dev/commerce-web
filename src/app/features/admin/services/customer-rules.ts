@@ -1,3 +1,4 @@
+import { Role } from '../../../core/config/permissions';
 import { AdminOrder, AdminOrderAddress } from '../data/admin-orders-mock';
 
 /**
@@ -38,7 +39,8 @@ export interface AdminCustomer {
   lastOrderAt: Date | null;
 }
 
-export type CustomerFilter = 'todos' | 'recentes' | 'sem-compra' | 'bloqueados' | 'em-maos';
+export type CustomerFilter =
+  'todos' | 'recentes' | 'sem-compra' | 'bloqueados' | 'em-maos' | 'equipe';
 
 export const CUSTOMER_FILTER_LABELS: Record<CustomerFilter, string> = {
   todos: 'Todos',
@@ -46,7 +48,37 @@ export const CUSTOMER_FILTER_LABELS: Record<CustomerFilter, string> = {
   'sem-compra': 'Sem compra',
   bloqueados: 'Bloqueados',
   'em-maos': 'Entrega em mãos liberada',
+  equipe: 'Equipe (acesso ao backoffice)',
 };
+
+/**
+ * Perfis que o super admin dá pela tela. Super admin NÃO: é configurado
+ * direto no back/banco (conta de admin roubada não vira dona da loja).
+ */
+export const GRANTABLE_ROLES = ['ROLE_VIEWER', 'ROLE_ADMIN'] as const satisfies readonly Role[];
+export type GrantableRole = (typeof GRANTABLE_ROLES)[number];
+
+/** O que cada perfil pode fazer (texto curto para a ficha). */
+export const ROLE_HINTS: Record<GrantableRole | 'none', string> = {
+  none: 'Só compra na loja. Sem acesso ao backoffice.',
+  ROLE_VIEWER: 'Vê o backoffice, sem alterar nada nem ver dados sensíveis.',
+  ROLE_ADMIN: 'Opera a loja inteira, menos a equipe.',
+};
+
+export interface AccessContext {
+  self: boolean;
+  blocked: boolean;
+  roles: readonly Role[];
+}
+
+/** Por que não dá para mudar o acesso desta conta (null = pode). */
+export function accessChangeProblem(ctx: AccessContext): string | null {
+  if (ctx.self) return 'Você não pode mudar o próprio acesso.';
+  if (ctx.roles.includes('ROLE_SUPER_ADMIN'))
+    return 'Super admin só é alterado direto no sistema, não por esta tela.';
+  if (ctx.blocked) return 'Conta bloqueada: desbloqueie antes de dar acesso.';
+  return null;
+}
 
 export type CustomerSort = 'ultima-compra' | 'total' | 'nome';
 
