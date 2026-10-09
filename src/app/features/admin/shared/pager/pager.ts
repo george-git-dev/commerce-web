@@ -7,7 +7,7 @@ import { Paging } from './paging';
 /**
  * Paginador das listas do backoffice: `mat-paginator` (padrão do projeto) com
  * primeira/última página e textos em português. Ao trocar, volta ao topo da
- * lista. Some quando tudo cabe numa página.
+ * lista. Aparece sempre que a lista tem itens (nas fichas, só se precisar).
  */
 @Component({
   selector: 'app-pager',
@@ -36,11 +36,18 @@ export class Pager {
   readonly anchor = input<HTMLElement>();
   /** "pedidos", "clientes"… para o leitor de tela. */
   readonly noun = input('itens');
+  /**
+   * Listas dentro de fichas (pedidos do cliente, histórico do item): some
+   * quando tudo cabe numa página. Nas listas principais aparece sempre.
+   */
+  readonly hideWhenSingle = input(false);
 
   protected readonly sizes = [...PAGE_SIZES];
-  protected readonly visible = computed(
-    () => this.page().totalPages > 1 || this.page().size !== DEFAULT_PAGE_SIZE,
-  );
+  protected readonly visible = computed(() => {
+    const { totalElements, totalPages, size } = this.page();
+    if (!totalElements) return false;
+    return !this.hideWhenSingle() || totalPages > 1 || size !== DEFAULT_PAGE_SIZE;
+  });
 
   protected change(event: PageEvent): void {
     if (event.pageSize !== this.page().size) this.paging().setSize(event.pageSize);
