@@ -15,7 +15,7 @@
     navigation="true"
     a11y="true"
   >
-    @for (banner of banners; track banner.id; let first = $first) {
+    @for (banner of banners(); track banner.id; let first = $first) {
       <swiper-slide>
         @if (banner.link; as link) {
           <a class="banner__link" [routerLink]="link.path" [queryParams]="link.queryParams">
@@ -58,7 +58,7 @@
     <span class="banners__line banners__line--right"></span>
   </div>
 
-  @if (banners.length > 1) {
+  @if (banners().length > 1) {
     <button
       type="button"
       class="banners__toggle"

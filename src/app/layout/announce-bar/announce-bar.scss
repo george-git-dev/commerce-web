@@ -36,6 +36,12 @@
   li {
     white-space: nowrap;
 
+    a {
+      color: inherit;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+
     // Estrela da logo como separador (inclusive entre o fim de uma cópia e o começo da outra).
     &::after {
       content: '✦';

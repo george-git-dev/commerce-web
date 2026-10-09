@@ -6,6 +6,7 @@ import { CartStore } from './cart-store';
 import { AuthService } from './auth-service';
 import { CouponService } from './coupon-service';
 import { ShippingService } from './shipping-service';
+import { StorefrontContent } from './storefront-content';
 
 const round2 = (value: number) => Math.round(value * 100) / 100;
 
@@ -20,6 +21,7 @@ export class OrderSummary {
   private readonly shipping = inject(ShippingService);
   private readonly coupons = inject(CouponService);
   private readonly auth = inject(AuthService);
+  private readonly storefront = inject(StorefrontContent);
 
   readonly subtotal = this.cart.subtotal;
   readonly coupon = this.coupons.applied;
@@ -57,7 +59,7 @@ export class OrderSummary {
   );
   /** Quanto falta para o frete grátis (0 = já tem). */
   readonly missingForFreeShipping = computed(() =>
-    Math.max(0, STORE_CONFIG.freeShippingMin - this.subtotal()),
+    Math.max(0, this.storefront.freeShippingMin() - this.subtotal()),
   );
 
   /** Forma de pagamento escolhida no checkout (afeta o desconto no Pix). */

@@ -4,7 +4,7 @@ import { ADMIN_NAV } from './admin-nav';
 import { AdminLayout } from './layout/admin-layout';
 
 /** Telas já prontas (as outras do menu abrem "em construção"). */
-const READY = ['pedidos', 'produtos', 'estoque'];
+const READY = ['pedidos', 'produtos', 'estoque', 'vitrine', 'configuracoes'];
 
 /** Rotas do backoffice (`/admin`). Cada tela exige a permissão do seu item de menu. */
 export const ADMIN_ROUTES: Routes = [
@@ -101,6 +101,39 @@ export const ADMIN_ROUTES: Routes = [
         canActivate: [permissionGuard('stock:view', '/admin')],
         loadComponent: () =>
           import('./stock-detail/admin-stock-detail').then((m) => m.AdminStockDetail),
+      },
+      {
+        path: 'vitrine',
+        title: 'Nani Admin | Vitrine',
+        canActivate: [permissionGuard('settings:view', '/admin')],
+        loadComponent: () => import('./storefront/admin-banners').then((m) => m.AdminBanners),
+      },
+      {
+        path: 'vitrine/avisos',
+        title: 'Nani Admin | Avisos',
+        canActivate: [permissionGuard('settings:view', '/admin')],
+        loadComponent: () =>
+          import('./storefront/admin-announcements').then((m) => m.AdminAnnouncements),
+      },
+      {
+        path: 'vitrine/banners/novo',
+        title: 'Nani Admin | Novo banner',
+        canActivate: [permissionGuard('settings:edit', '/admin/vitrine')],
+        loadComponent: () =>
+          import('./banner-form/admin-banner-form').then((m) => m.AdminBannerForm),
+      },
+      {
+        path: 'vitrine/banners/:id',
+        title: 'Nani Admin | Banner',
+        canActivate: [permissionGuard('settings:view', '/admin')],
+        loadComponent: () =>
+          import('./banner-form/admin-banner-form').then((m) => m.AdminBannerForm),
+      },
+      {
+        path: 'configuracoes',
+        title: 'Nani Admin | Configurações da loja',
+        canActivate: [permissionGuard('settings:view', '/admin')],
+        loadComponent: () => import('./settings/admin-settings').then((m) => m.AdminSettings),
       },
       // Telas das próximas sessões: por enquanto, uma página "em construção".
       ...ADMIN_NAV.filter((item) => item.path && !READY.includes(item.path)).map((item) => ({

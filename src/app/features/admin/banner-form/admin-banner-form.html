@@ -1,0 +1,117 @@
+<section class="vf">
+  <a class="vf__back" routerLink="/admin/vitrine">
+    <mat-icon aria-hidden="true">arrow_back</mat-icon> Vitrine
+  </a>
+  <h2>{{ original ? original.name : 'Novo banner' }}</h2>
+
+  @if (tried() && problems().length) {
+    <ul class="vf__problems" role="alert">
+      @for (problem of problems(); track problem) {
+        <li>{{ problem }}</li>
+      }
+    </ul>
+  }
+
+  <form class="vf__card" (submit)="$event.preventDefault(); save()" novalidate>
+    <fieldset [disabled]="readOnly">
+      <label>
+        Nome do banner (só a equipe vê)
+        <input
+          placeholder="Ex.: Black Friday 2026"
+          [attr.maxlength]="rules.nameMax"
+          [value]="name()"
+          [attr.aria-invalid]="(tried() && name().trim().length < 3) || null"
+          (input)="name.set($any($event.target).value)"
+        />
+      </label>
+
+      <h3>Arte</h3>
+      <app-banner-image
+        label="Celular (obrigatória)"
+        hint="Vertical 4:5 — 1080 × 1350 px, até 5 MB. É o que 90% dos clientes veem."
+        [readOnly]="readOnly"
+        [(image)]="image"
+      />
+      <app-banner-image
+        label="Tablet e computador (opcional)"
+        hint="Larga 8:3 — 1920 × 720 px. Sem ela, a loja usa a do celular."
+        [wide]="true"
+        [removable]="true"
+        [readOnly]="readOnly"
+        [(image)]="imageDesktop"
+      />
+      <label>
+        O que a arte diz ou mostra
+        <textarea
+          rows="2"
+          placeholder="Ex.: Black Friday: até 40% off em perfumes árabes selecionados."
+          [attr.maxlength]="rules.altMax"
+          [value]="alt()"
+          [attr.aria-invalid]="(tried() && alt().trim().length < 10) || null"
+          (input)="alt.set($any($event.target).value)"
+        ></textarea>
+        <span class="vf__hint">
+          <span>Lido por leitores de tela e pelo Google — escreva o texto da arte.</span>
+          <span>{{ alt().length }}/{{ rules.altMax }}</span>
+        </span>
+      </label>
+
+      <h3>Link</h3>
+      <app-link-picker
+        [tried]="tried()"
+        [disabled]="readOnly"
+        [(preset)]="preset"
+        [(text)]="linkText"
+      />
+
+      <h3>Exibição</h3>
+      <label class="vf__check">
+        <input
+          type="checkbox"
+          [checked]="active()"
+          (change)="active.set($any($event.target).checked)"
+        />
+        Ativo (pode aparecer na home)
+      </label>
+      <div class="vf__dates">
+        <label>
+          De (opcional)
+          <input
+            type="date"
+            [value]="startsOn()"
+            (input)="startsOn.set($any($event.target).value)"
+          />
+        </label>
+        <label>
+          Até (opcional)
+          <input
+            type="date"
+            [min]="startsOn()"
+            [value]="endsOn()"
+            [attr.aria-invalid]="
+              (tried() && !!startsOn() && !!endsOn() && endsOn() < startsOn()) || null
+            "
+            (input)="endsOn.set($any($event.target).value)"
+          />
+        </label>
+      </div>
+      <p class="vf__hint">
+        <span>
+          Situação ao salvar: <strong>{{ statusLabels[status()] }}</strong
+          >. Com período, entra e sai do ar sozinho (dias inteiros).
+        </span>
+      </p>
+    </fieldset>
+
+    @if (!readOnly) {
+      <div class="vf__actions">
+        @if (original) {
+          <button matButton type="button" class="vf__danger" (click)="remove()">
+            <mat-icon>delete</mat-icon> Excluir
+          </button>
+        }
+        <button matButton="filled" type="submit" class="ui-cta">Salvar banner</button>
+      </div>
+    }
+  </form>
+</section>

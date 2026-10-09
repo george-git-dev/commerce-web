@@ -1,0 +1,159 @@
+// Listas da Vitrine (banners e avisos): mesma cara das listas do backoffice.
+.vl {
+  display: grid;
+  gap: 14px;
+}
+
+.vl__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+
+  p {
+    flex: 1 1 260px;
+    margin: 0;
+    font-size: 0.8125rem;
+    color: var(--muted-foreground);
+  }
+
+  .ui-cta {
+    flex: 1 0 auto;
+
+    @media (min-width: 700px) {
+      flex: 0 0 auto;
+    }
+  }
+}
+
+.vl__list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.vl__row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+  font-size: 0.875rem;
+
+  &--fixed {
+    background: var(--muted);
+  }
+}
+
+// Miniatura da arte do celular (4:5).
+.vl__thumb {
+  width: 56px;
+  height: 70px;
+  border-radius: var(--radius-sm);
+  background: var(--muted);
+  object-fit: cover;
+}
+
+.vl__icon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--gold-soft);
+  color: var(--earth);
+}
+
+.vl__main {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  color: inherit;
+  text-decoration: none;
+
+  strong {
+    overflow: hidden;
+    font-weight: 600;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  small {
+    overflow: hidden;
+    font-size: 0.75rem;
+    color: var(--muted-foreground);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+a.vl__main:hover strong,
+button.vl__main:hover strong {
+  text-decoration: underline;
+}
+
+button.vl__main {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+// Situação: ícone + texto (nunca só cor).
+.vl__status {
+  justify-self: start;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--muted);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--muted-foreground);
+
+  &--no-ar {
+    background: color-mix(in oklch, #2f6b45 14%, transparent);
+    color: #2f6b45;
+  }
+
+  &--agendado {
+    background: var(--gold-soft);
+    color: var(--earth);
+  }
+}
+
+// Subir / descer na ordem de exibição.
+.vl__order {
+  display: grid;
+  grid-auto-flow: row;
+  gap: 2px;
+
+  button {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 32px;
+    padding: 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--card);
+    color: var(--foreground);
+    cursor: pointer;
+
+    &:disabled {
+      opacity: 0.35;
+      cursor: default;
+    }
+  }
+}
+
+.vl__empty {
+  margin: 0;
+  color: var(--muted-foreground);
+}

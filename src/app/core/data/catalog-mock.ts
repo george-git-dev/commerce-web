@@ -1,5 +1,5 @@
 import { BODY_CARE_CATEGORIES } from '../config/product-categories';
-import { FREE_SHIPPING_LABEL, STORE_CONFIG } from '../config/store-config';
+import { STORE_CONFIG } from '../config/store-config';
 import { Category } from '../models/category';
 import { Highlight } from '../models/highlight';
 
@@ -12,7 +12,8 @@ export const HIGHLIGHTS_MOCK: readonly Highlight[] = [
   {
     icon: 'local_shipping',
     title: 'Frete grátis',
-    text: `Acima de ${FREE_SHIPPING_LABEL}, para todo o Brasil`,
+    // {freteGratis} vira o valor atual (Configurações da loja, no backoffice).
+    text: 'Acima de {freteGratis}, para todo o Brasil',
   },
   {
     icon: 'lock',

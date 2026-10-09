@@ -3,8 +3,20 @@
     <!-- Duas cópias da lista para o loop ficar contínuo; a segunda é ignorada por leitores de tela. -->
     @for (copy of [0, 1]; track copy) {
       <ul class="announce__list" [attr.aria-hidden]="copy === 1 ? 'true' : null">
-        @for (message of announcements; track $index) {
-          <li>{{ message }}</li>
+        @for (message of announcements(); track $index) {
+          <li>
+            @if (message.link; as link) {
+              <!-- Teclado passa só pelo 1º de cada aviso; as repetições são decorativas. -->
+              <a
+                [routerLink]="link.path"
+                [queryParams]="link.queryParams"
+                [attr.tabindex]="copy === 1 || $index >= items().length ? -1 : null"
+                >{{ message.text }}</a
+              >
+            } @else {
+              {{ message.text }}
+            }
+          </li>
         }
       </ul>
     }

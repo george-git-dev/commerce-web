@@ -6,6 +6,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { HELP_GROUP_LABELS, HELP_PAGES } from '../../core/config/help-pages';
 import { STORE_CONFIG } from '../../core/config/store-config';
+import { StorefrontContent } from '../../core/services/storefront-content';
 
 /** `/ajuda/:pagina` — uma página genérica para ajuda, políticas e contato. */
 @Component({
@@ -20,6 +21,9 @@ export class HelpPageView {
   private readonly paramMap = toSignal(this.route.paramMap, { requireSync: true });
 
   protected readonly store = STORE_CONFIG;
+  /** Troca `{freteGratis}` pelo valor atual nos textos. */
+  protected readonly fill = (text: string) => this.storefront.fill(text);
+  private readonly storefront = inject(StorefrontContent);
   protected readonly page = computed(() =>
     HELP_PAGES.find((page) => page.slug === this.paramMap().get('pagina')),
   );

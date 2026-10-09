@@ -28,7 +28,10 @@ export interface StoreConfig {
   emailHref: string;
   hours: string;
   delivery: string;
-  /** Pedido a partir deste valor (R$) tem o frete econômico grátis. */
+  /**
+   * Valor INICIAL do frete grátis (R$). Quem manda é `StorefrontContent`,
+   * editado no backoffice em Configurações da loja (sem deploy).
+   */
   freeShippingMin: number;
   /** Desconto no Pix (%). 0 = desligado (decisão de 02/10). */
   pixDiscountPercent: number;
@@ -75,9 +78,6 @@ export const LOCAL_DELIVERY = {
   note: 'Sem frete. Combinamos local e horário pelo WhatsApp.',
 } as const;
 
-/** "R$ 599" — valor do frete grátis para textos (faixa, destaques, ajuda). */
-export const FREE_SHIPPING_LABEL = `R$ ${STORE_CONFIG.freeShippingMin.toLocaleString('pt-BR')}`;
-
 /** Perfis da loja, na ordem de exibição (URLs fictícias até o lançamento). */
 export const SOCIAL_LINKS: readonly SocialLink[] = [
   { brand: 'instagram', label: 'Instagram', url: 'https://www.instagram.com/naniperfumes' },
@@ -94,11 +94,4 @@ export const PAYMENT_METHODS: readonly PaymentMethod[] = [
   { label: 'Elo' },
   { label: 'Hipercard' },
   { label: 'Boleto' },
-];
-
-/** Mensagens da faixa rolante no topo do site, na ordem de exibição. */
-export const ANNOUNCEMENTS: readonly string[] = [
-  `Frete grátis acima de ${FREE_SHIPPING_LABEL}`,
-  `Parcele em até ${STORE_CONFIG.maxInstallments}x sem juros`,
-  'Compra segura',
 ];

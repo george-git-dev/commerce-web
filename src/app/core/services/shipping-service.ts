@@ -1,7 +1,8 @@
-import { effect, Injectable, signal } from '@angular/core';
-import { LOCAL_DELIVERY, STORE_CONFIG } from '../config/store-config';
+import { effect, inject, Injectable, signal } from '@angular/core';
+import { LOCAL_DELIVERY } from '../config/store-config';
 import { ShippingOption } from '../models/shipping';
 import { readJson, writeJson } from '../utils/browser-storage';
+import { StorefrontContent } from './storefront-content';
 
 const CEP_STORAGE_KEY = 'nani.shipping-cep.v1';
 
@@ -44,6 +45,7 @@ export function isValidCep(value: string): boolean {
  */
 @Injectable({ providedIn: 'root' })
 export class ShippingService {
+  private readonly storefront = inject(StorefrontContent);
   /** CEP consultado (só dígitos); vazio = ainda não calculado. */
   readonly cep = signal(readJson<string>(CEP_STORAGE_KEY) ?? '');
 
@@ -72,7 +74,8 @@ export class ShippingService {
       : [];
     if (!isValidCep(cep)) return options;
     const [eco, ecoMin, ecoMax, exp, expMin, expMax] = REGION_TABLE[cep[0]];
-    const free = subtotal >= STORE_CONFIG.freeShippingMin;
+    // Valor do frete grátis vem de Configurações da loja (backoffice).
+    const free = subtotal >= this.storefront.freeShippingMin();
     options.push(
       {
         id: 'economico',

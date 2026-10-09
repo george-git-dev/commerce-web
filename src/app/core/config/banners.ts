@@ -2,16 +2,12 @@ import { Banner } from '../models/banner';
 import { CATALOG_QUERY_PARAMS } from './navigation';
 
 /**
- * Banners do carrossel da home, na ordem de exibição.
+ * Banner PADRÃO do carrossel: aparece só quando nenhum banner está no ar
+ * (todos inativos, fora do período ou a API fora do ar), para a home nunca
+ * abrir vazia. Os banners de verdade são cadastrados no backoffice em
+ * Vitrine → Banners, sem deploy.
  *
- * COMO ADICIONAR UM BANNER
- * 1. Coloque as imagens em `public/img/carrossel/` (ex.: banner-3-mobile.webp, banner-3-desktop.webp).
- * 2. Acrescente um bloco nesta lista com id, image, imageDesktop e alt.
- * 3. Opcional: `link` com path e queryParams para o banner levar a uma página
- *    (ex.: { path: '/produtos', queryParams: { [CATALOG_QUERY_PARAMS.deal]: 'true' } }).
- * Para remover: apague o bloco e as imagens.
- *
- * TAMANHO DAS IMAGENS
+ * TAMANHO DAS IMAGENS (vale também para o cadastro no backoffice)
  * - Celular (image):          1080 × 1350 px  — formato vertical 4:5 (obrigatória)
  * - Desktop (imageDesktop):   1920 × 720 px   — formato largo 8:3 (opcional)
  *
@@ -21,20 +17,10 @@ import { CATALOG_QUERY_PARAMS } from './navigation';
  * - Deixe textos e elementos importantes longe das bordas (~5% de margem).
  * - O `alt` descreve o que a arte diz/mostra (ex.: "Até 40% off em perfumes selecionados").
  */
-
-export const BANNERS: readonly Banner[] = [
-  {
-    id: 'lancamentos',
-    image: 'img/carrossel/lancamentos-mobile.webp',
-    imageDesktop: 'img/carrossel/lancamentos-desktop.webp',
-    alt: 'Lançamentos da temporada: fragrâncias árabes que acabaram de chegar.',
-    link: { path: '/produtos', queryParams: { [CATALOG_QUERY_PARAMS.launch]: 'true' } },
-  },
-  {
-    id: 'ofertas',
-    image: 'img/carrossel/ofertas-mobile.webp',
-    imageDesktop: 'img/carrossel/ofertas-desktop.webp',
-    alt: 'Ofertas: até 40% off em perfumes selecionados, por tempo limitado.',
-    link: { path: '/produtos', queryParams: { [CATALOG_QUERY_PARAMS.deal]: 'true' } },
-  },
-];
+export const DEFAULT_BANNER: Banner = {
+  id: 'padrao',
+  image: 'img/carrossel/lancamentos-mobile.webp',
+  imageDesktop: 'img/carrossel/lancamentos-desktop.webp',
+  alt: 'Lançamentos da temporada: fragrâncias árabes que acabaram de chegar.',
+  link: { path: '/produtos', queryParams: { [CATALOG_QUERY_PARAMS.launch]: 'true' } },
+};

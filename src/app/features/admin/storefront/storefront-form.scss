@@ -1,0 +1,135 @@
+// Formulários da Vitrine e de Configurações (banner, aviso, frete grátis).
+h2 {
+  margin: 0;
+  font-size: clamp(1.5rem, 1.2rem + 1.4vw, 2.25rem);
+}
+
+h3 {
+  margin: 0;
+  font-size: 1.0625rem;
+}
+
+.vf {
+  display: grid;
+  gap: 14px;
+  max-width: 880px;
+}
+
+.vf__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  justify-self: start;
+  min-height: 44px;
+  font-size: 0.875rem;
+  color: var(--earth);
+}
+
+.vf__problems {
+  margin: 0;
+  padding: 10px 12px 10px 30px;
+  border-radius: var(--radius-sm);
+  background: color-mix(in oklch, var(--wine) 10%, transparent);
+  color: var(--wine);
+  font-size: 0.875rem;
+}
+
+.vf__card {
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+}
+
+fieldset {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+
+  label {
+    display: grid;
+    gap: 6px;
+    font-size: 0.8125rem;
+    color: var(--muted-foreground);
+  }
+
+  input:not([type='checkbox']):not([type='file']),
+  select,
+  textarea {
+    width: 100%;
+    min-width: 0;
+    min-height: 48px;
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--background);
+    color: var(--foreground);
+    font: inherit;
+    font-size: 1rem;
+
+    &[aria-invalid='true'] {
+      border-color: var(--wine);
+    }
+  }
+
+  textarea {
+    resize: vertical;
+  }
+}
+
+// Dica/contador embaixo do campo.
+.vf__hint {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+
+.vf__check {
+  display: flex !important;
+  align-items: center;
+  gap: 10px !important;
+  min-height: 44px;
+  font-size: 0.9375rem !important;
+  color: var(--foreground) !important;
+
+  input {
+    width: 20px;
+    height: 20px;
+    accent-color: var(--primary);
+  }
+}
+
+// De / Até lado a lado (um embaixo do outro se não couber).
+.vf__dates {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+}
+
+.vf__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 10px;
+
+  .ui-cta {
+    margin-left: auto;
+  }
+}
+
+.vf__danger {
+  color: var(--wine) !important;
+}
+
+@media (min-width: 700px) {
+  .vf__card {
+    padding: 20px;
+  }
+}

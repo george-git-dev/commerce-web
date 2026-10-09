@@ -1,4 +1,4 @@
-import { computed, Injectable, signal } from '@angular/core';
+import { computed, inject, Injectable, signal } from '@angular/core';
 import { CATEGORIES_MOCK, HIGHLIGHTS_MOCK } from '../data/catalog-mock';
 import { MOCK_PRODUCTS } from '../data/mock-products';
 import { RELATED_MOCK } from '../data/related-mock';
@@ -8,6 +8,7 @@ import { Highlight } from '../models/highlight';
 import { Product } from '../models/product';
 import { ReviewPage } from '../models/review';
 import { withHighlights } from '../utils/product-highlights';
+import { StorefrontContent } from './storefront-content';
 
 /** Avaliações por página na página do produto. */
 export const REVIEWS_PAGE_SIZE = 5;
@@ -20,6 +21,7 @@ export const REVIEWS_PAGE_SIZE = 5;
  */
 @Injectable({ providedIn: 'root' })
 export class CatalogService {
+  private readonly storefront = inject(StorefrontContent);
   private readonly categoriesState = signal<readonly Category[]>(CATEGORIES_MOCK);
   private readonly highlightsState = signal<readonly Highlight[]>(HIGHLIGHTS_MOCK);
   // Só produtos publicados chegam à loja; rascunhos ficam para o backoffice.
@@ -28,7 +30,10 @@ export class CatalogService {
   );
 
   readonly categories = this.categoriesState.asReadonly();
-  readonly highlights = this.highlightsState.asReadonly();
+  /** Com o valor atual do frete grátis no texto. */
+  readonly highlights = computed(() =>
+    this.highlightsState().map((item) => ({ ...item, text: this.storefront.fill(item.text) })),
+  );
   /** Com Lançamento e Mais vendido calculados (Fase 2: vêm prontos do back). */
   readonly products = computed(() => withHighlights(this.productsState()));
 

@@ -1,4 +1,4 @@
-import { FREE_SHIPPING_LABEL, STORE_CONFIG } from './store-config';
+import { STORE_CONFIG } from './store-config';
 import { HelpGroup, HelpPage } from '../models/help-page';
 
 const store = STORE_CONFIG;
@@ -57,7 +57,8 @@ export const HELP_PAGES: readonly HelpPage[] = [
       {
         heading: 'Frete grátis',
         paragraphs: [
-          `Compras acima de ${FREE_SHIPPING_LABEL} têm frete grátis para todo o Brasil.`,
+          // {freteGratis} vira o valor atual (Configurações da loja, no backoffice).
+          'Compras acima de {freteGratis} têm frete grátis para todo o Brasil.',
         ],
       },
       {

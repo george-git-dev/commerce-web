@@ -4,6 +4,7 @@ import {
   Component,
   CUSTOM_ELEMENTS_SCHEMA,
   ElementRef,
+  inject,
   signal,
   viewChild,
 } from '@angular/core';
@@ -11,7 +12,7 @@ import { NgTemplateOutlet } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { RouterLink } from '@angular/router';
 import type { SwiperContainer } from 'swiper/element';
-import { BANNERS } from '../../../../core/config/banners';
+import { StorefrontContent } from '../../../../core/services/storefront-content';
 
 @Component({
   selector: 'app-banner-carousel',
@@ -25,7 +26,8 @@ import { BANNERS } from '../../../../core/config/banners';
 export class BannerCarousel {
   private readonly swiperRef = viewChild<ElementRef<SwiperContainer>>('swiper');
 
-  protected readonly banners = BANNERS;
+  /** Banners no ar (cadastrados no backoffice, Vitrine → Banners). */
+  protected readonly banners = inject(StorefrontContent).banners;
   protected readonly playing = signal(true);
 
   constructor() {

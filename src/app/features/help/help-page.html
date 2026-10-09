@@ -18,14 +18,14 @@
           <details class="help__faq">
             <summary>{{ section.heading }}</summary>
             @for (paragraph of section.paragraphs; track $index) {
-              <p>{{ paragraph }}</p>
+              <p>{{ fill(paragraph) }}</p>
             }
           </details>
         } @else {
           <section class="help__section">
             <h2>{{ section.heading }}</h2>
             @for (paragraph of section.paragraphs; track $index) {
-              <p>{{ paragraph }}</p>
+              <p>{{ fill(paragraph) }}</p>
             }
             @if (section.items?.length) {
               <ul>
