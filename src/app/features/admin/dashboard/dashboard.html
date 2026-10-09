@@ -8,96 +8,86 @@
   <app-dashboard-filters />
 
   @let k = data.kpis();
-  @let s = data.sparks();
+  @let profit = k.current.profit;
   <div class="dash__kpis">
+    <app-kpi-card label="Faturamento" icon="payments" [value]="brl(k.current.revenue)" />
+    <app-kpi-card label="Pedidos" icon="receipt_long" [value]="k.current.orders.toString()" />
+    <app-kpi-card label="Ticket médio" icon="sell" [value]="brl(k.current.averageTicket)" />
+    @if (canSeeCost) {
+      <app-kpi-card
+        label="Lucro bruto"
+        icon="savings"
+        [value]="brl(profit.profit)"
+        [note]="profitNote()"
+        [noteWarn]="profit.uncosted > 0"
+      />
+    } @else {
+      <app-kpi-card
+        label="Clientes novos"
+        icon="person_add"
+        [value]="k.current.newCustomers.toString()"
+      />
+    }
+  </div>
+
+  <div class="dash__kpis dash__kpis--small">
     <app-kpi-card
-      label="Faturamento"
-      icon="payments"
-      [value]="brl(k.current.revenue)"
-      [delta]="k.delta.revenue"
-      [spark]="s.revenue"
+      class="kpi--compact"
+      label="Unidades vendidas"
+      icon="local_mall"
+      [value]="k.current.units.toLocaleString('pt-BR')"
     />
+    @if (canSeeCost) {
+      <app-kpi-card
+        class="kpi--compact"
+        label="Clientes novos"
+        icon="person_add"
+        [value]="k.current.newCustomers.toString()"
+      />
+    }
     <app-kpi-card
-      label="Pedidos"
-      icon="receipt_long"
-      [value]="k.current.orders.toString()"
-      [delta]="k.delta.orders"
-      [spark]="s.orders"
-    />
-    <app-kpi-card
-      label="Ticket médio"
-      icon="sell"
-      [value]="brl(k.current.averageTicket)"
-      [delta]="k.delta.averageTicket"
-      [spark]="s.averageTicket"
-    />
-    <app-kpi-card
-      label="Clientes novos"
-      icon="person_add"
-      [value]="k.current.newCustomers.toString()"
-      [delta]="k.delta.newCustomers"
-      [spark]="s.newCustomers"
+      class="kpi--compact"
+      label="Cancelados"
+      icon="cancel"
+      [value]="k.current.cancelled.toLocaleString('pt-BR')"
     />
   </div>
 
   <div class="dash__grid">
-    <article class="dash__card dash__card--wide">
-      <header class="dash__card-head">
-        <h3>Vendas por {{ data.grouping() === 'mes' ? 'mês' : 'dia' }}</h3>
-        <p>Pedidos não cancelados · {{ seriesLabel() }}</p>
-      </header>
-      <app-chart
-        [config]="salesChart()"
-        [label]="'Gráfico de linha das vendas por dia, total ' + brl(k.current.revenue)"
-      />
-      <details class="dash__table">
-        <summary>Ver dados</summary>
-        <table>
-          <thead>
-            <tr>
-              <th scope="col">Dia</th>
-              <th scope="col">Vendas</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (point of data.salesSeries(); track point.label) {
-              <tr>
-                <td>{{ point.label }}</td>
-                <td>{{ point.value | currency: 'BRL' }}</td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      </details>
-    </article>
-
-    <article class="dash__card">
-      <header class="dash__card-head">
-        <h3>Mais vendidos</h3>
-        <p>Unidades no período</p>
-      </header>
-      @if (data.topProducts().length) {
-        <ol class="dash__bars">
-          @for (product of data.topProducts(); track product.slug) {
-            <li>
-              <img [src]="product.image" [alt]="" width="36" height="36" />
-              <span class="dash__bar-text">
-                <span class="dash__bar-label">
-                  {{ product.name }}<strong>{{ product.units }} un.</strong>
-                </span>
-                <span class="dash__bar"
-                  ><span [style.width.%]="(product.units / topMax()) * 100"></span
-                ></span>
-              </span>
-            </li>
+    <article class="dash__card dash__card--sales">
+      <header class="dash__card-head dash__card-head--row">
+        <div>
+          <h3>Desempenho de vendas</h3>
+          <p>Pedidos não cancelados · {{ seriesLabel() }}</p>
+        </div>
+        <div class="dash__group" role="radiogroup" aria-label="Ver por">
+          <span aria-hidden="true">Ver por</span>
+          @for (option of groupings; track option[0]) {
+            <button
+              type="button"
+              role="radio"
+              [attr.aria-checked]="data.grouping() === option[0]"
+              (click)="data.grouping.set(option[0])"
+            >
+              {{ option[1] }}
+            </button>
           }
-        </ol>
-      } @else {
-        <p class="dash__empty">Nenhuma venda no período.</p>
-      }
+        </div>
+      </header>
+      <app-sales-table [rows]="data.salesRows()" [unit]="unitLabels[data.grouping()]" />
     </article>
 
-    <article class="dash__card">
+    <article class="dash__card dash__card--top">
+      <app-top-products [products]="data.productSales()" [formats]="data.formatOptions()" />
+    </article>
+
+    @if (canSeeCost) {
+      <article class="dash__card dash__card--stock">
+        <app-stock-summary [data]="data.stockSummary()" />
+      </article>
+    }
+
+    <article class="dash__card dash__card--status">
       <header class="dash__card-head">
         <h3>Pedidos por status</h3>
         <p>{{ statusTotal() }} pedidos no período</p>
@@ -118,7 +108,7 @@
       </ul>
     </article>
 
-    <article class="dash__card dash__card--wide">
+    <article class="dash__card dash__card--groups">
       <header class="dash__card-head">
         <h3>Vendas por categoria</h3>
         <p>Perfumes por gênero, kits e corpo e banho</p>

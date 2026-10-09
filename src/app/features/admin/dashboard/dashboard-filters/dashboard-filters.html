@@ -37,6 +37,7 @@
           De
           <input
             type="date"
+            [min]="minDay"
             [max]="data.today"
             [value]="data.customFrom()"
             [attr.aria-invalid]="!!data.periodProblem() || null"
@@ -47,6 +48,7 @@
           Até
           <input
             type="date"
+            [min]="minDay"
             [max]="data.today"
             [value]="data.customTo()"
             [attr.aria-invalid]="!!data.periodProblem() || null"
@@ -67,6 +69,17 @@
         <option value="" [selected]="!data.category()">Todas</option>
         @for (item of categories(); track item.id) {
           <option [value]="item.id" [selected]="item.id === data.category()">
+            {{ item.label }}
+          </option>
+        }
+      </select>
+    </label>
+    <label>
+      Formato
+      <select (change)="data.format.set($any($event.target).value)">
+        <option value="" [selected]="!data.format()">Todos</option>
+        @for (item of data.formatOptions(); track item.id) {
+          <option [value]="item.id" [selected]="item.id === data.format()">
             {{ item.label }}
           </option>
         }

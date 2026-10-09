@@ -2,29 +2,43 @@ import { computed, inject, Injectable, signal } from '@angular/core';
 import { Gender, Product } from '../../../core/models/product';
 import { withHighlights } from '../../../core/utils/product-highlights';
 import { hasDeal } from '../../../core/utils/product-pricing';
-import { PENDING_REVIEWS_MOCK } from '../data/admin-orders-mock';
+import { AdminOrderItem, PENDING_REVIEWS_MOCK } from '../data/admin-orders-mock';
 import {
+  cancelledOrders,
+  compareFormats,
+  formatLabel,
+  formatOf,
+  matchesFormat,
+  CostOf,
   customRange,
+  grossProfit,
+  Grouping,
+  yearlySeries,
+  productSales,
+  validOrders,
   customRangeProblem,
   dailySeries,
   DashboardPeriod,
   dayRange,
-  MAX_DAILY_POINTS,
   monthlySeries,
   monthRange,
-  delta,
   filterOrders,
   kpis,
   parseDay,
   periodRange,
   revenueOf,
   salesByGroup,
+  salesRows,
+  unitsOf,
   statusCounts,
-  topProducts,
 } from './admin-metrics';
 import { AdminOrderStore } from './admin-order-store';
 import { AdminProductStore } from './admin-product-store';
 import { AdminPurchaseStore } from './admin-purchase-store';
+import { AdminStockStore } from './admin-stock-store';
+
+/** Produto com estoque e sem venda há este tanto de dias = parado. */
+export const IDLE_DAYS = 30;
 
 /** `aaaa-mm-dd` no fuso local. */
 function isoDay(date: Date): string {
@@ -42,6 +56,8 @@ export class AdminDashboard {
   private readonly store = inject(AdminOrderStore);
   private readonly products = inject(AdminProductStore);
   private readonly purchases = inject(AdminPurchaseStore);
+  private readonly stock = inject(AdminStockStore);
+  private readonly costOf: CostOf = (sku) => this.stock.costBySku()[sku];
   private readonly now = this.store.now;
   readonly today = isoDay(this.now);
 
@@ -82,10 +98,9 @@ export class AdminDashboard {
     }
   });
 
-  /** Gráfico por dia até 62 dias; acima disso, por mês. */
-  readonly grouping = computed<'dia' | 'mes'>(() =>
-    this.range().days > MAX_DAILY_POINTS ? 'mes' : 'dia',
-  );
+  /** Tabela/gráfico por dia até 62 dias; acima disso, por mês. */
+  /** "Ver por" da tabela/gráfico de vendas; vale para qualquer período. */
+  readonly grouping = signal<Grouping>('dia');
 
   // --- Filtros -------------------------------------------------------------
   readonly category = signal('');
@@ -94,9 +109,12 @@ export class AdminDashboard {
   readonly gender = signal<Gender | ''>('');
   readonly brand = signal('');
   readonly supplierId = signal<number | null>(null);
+  /** `frasco`, `decant` (qualquer tamanho), `decant:5` ou categoria (`kit`, `hidratante`…). */
+  readonly format = signal('');
   readonly hasFilters = computed(
     () =>
       !!(
+        this.format() ||
         this.category() ||
         this.highlight() ||
         this.gender() ||
@@ -111,7 +129,32 @@ export class AdminDashboard {
     this.gender.set('');
     this.brand.set('');
     this.supplierId.set(null);
+    this.format.set('');
   }
+
+  /** Formatos à venda hoje: Frasco, Decant (todos), cada tamanho, Kit, Hidratante, Body splash… */
+  readonly formatOptions = computed(() => {
+    const formats = new Set(
+      this.products
+        .products()
+        .filter((p) => p.status === 'publicado')
+        .flatMap((p) =>
+          p.variants.map((v) =>
+            formatOf({ category: p.category, kind: v.kind, volumeMl: v.volumeMl }),
+          ),
+        ),
+    );
+    const sorted = [...formats].sort(compareFormats);
+    const decants = sorted.filter((f) => f.startsWith('decant:'));
+    // Frasco, Decant (todos), cada tamanho e depois kit, hidratante, body splash…
+    const option = (id: string) => ({ id, label: formatLabel(id) });
+    return [
+      ...sorted.filter((f) => f === 'frasco').map(option),
+      ...(decants.length ? [{ id: 'decant', label: 'Decant (todos)' }] : []),
+      ...decants.map(option),
+      ...sorted.filter((f) => f !== 'frasco' && !f.startsWith('decant:')).map(option),
+    ];
+  });
 
   /** Produtos com Lançamento/Mais vendido calculados (situação de hoje). */
   private readonly catalog = computed(() => withHighlights(this.products.products()));
@@ -168,60 +211,108 @@ export class AdminDashboard {
   private readonly orders = computed(() => {
     const category = this.category();
     const gender = this.gender();
+    const format = this.format();
     const slugs = this.allowedSlugs();
     const matches =
-      category || gender || slugs
-        ? (item: { slug: string; category: string; gender: string }) =>
+      category || gender || format || slugs
+        ? (item: AdminOrderItem) =>
             (!category || item.category === category) &&
             (!gender || item.gender === gender) &&
+            matchesFormat(item, format) &&
             (!slugs || slugs.has(item.slug))
         : null;
     return filterOrders(this.store.orders(), matches);
   });
 
+  /** Indicadores do período (sem comparação com período anterior — decidido pelo George). */
   readonly kpis = computed(() => {
-    const { start, end, previousStart, previousEnd } = this.range();
-    const current = kpis(this.orders(), start, end);
-    const previous = kpis(this.orders(), previousStart, previousEnd);
+    const { start, end } = this.range();
+    const orders = this.orders();
+    const valid = validOrders(orders, start, end);
     return {
-      current,
-      delta: {
-        revenue: delta(current.revenue, previous.revenue),
-        orders: delta(current.orders, previous.orders),
-        averageTicket: delta(current.averageTicket, previous.averageTicket),
-        newCustomers: delta(current.newCustomers, previous.newCustomers),
+      current: {
+        ...kpis(orders, start, end),
+        units: unitsOf(valid),
+        profit: grossProfit(valid, this.costOf),
+        cancelled: cancelledOrders(orders, start, end),
       },
     };
   });
 
   /**
-   * Série do gráfico na visão escolhida: por dia (no mínimo 7 dias, para
-   * "Dia" ainda mostrar tendência) ou por mês em períodos longos.
+   * Série da tabela/gráfico no "Ver por": por dia (no mínimo 7 dias, para
+   * ainda mostrar tendência), por mês ou por ano.
    */
   private series(value: Parameters<typeof dailySeries>[3]) {
     const { start, end, days } = this.range();
-    return this.grouping() === 'mes'
-      ? monthlySeries(this.orders(), start, end, value)
-      : dailySeries(this.orders(), end, Math.max(7, days), value);
+    const grouping = this.grouping();
+    if (grouping !== 'dia') {
+      const series = grouping === 'ano' ? yearlySeries : monthlySeries;
+      return series(this.orders(), start, end, value);
+    }
+    return dailySeries(this.orders(), end, Math.max(7, days), value);
   }
 
   readonly salesSeries = computed(() => this.series(revenueOf));
 
-  /** Mini gráficos dos cards (mesma janela do gráfico principal). */
-  readonly sparks = computed(() => {
-    const series = (value: Parameters<typeof dailySeries>[3]) =>
-      this.series(value).map((point) => point.value);
-    return {
-      revenue: series(revenueOf),
-      orders: series((orders) => orders.length),
-      averageTicket: series((orders) => (orders.length ? revenueOf(orders) / orders.length : 0)),
-      newCustomers: series((orders) => orders.filter((order) => order.firstPurchase).length),
-    };
+  /** Tabela de vendas: uma linha por dia, mês ou ano (mesma janela do gráfico). */
+  readonly salesRows = computed(() =>
+    salesRows({
+      revenue: this.series(revenueOf),
+      orders: this.series((orders) => orders.length),
+      units: this.series(unitsOf),
+      newCustomers: this.series((orders) => orders.filter((o) => o.firstPurchase).length),
+    }),
+  );
+
+  /** Vendas por produto, com marca, lucro bruto e margem (sem custo = `null`). */
+  readonly productSales = computed(() => {
+    const { start, end } = this.range();
+    const brands = new Map(this.products.products().map((p) => [p.slug, p.brandName]));
+    return productSales(this.orders(), start, end, this.costOf).map((product) => {
+      const profit = product.cost == null ? null : product.revenue - product.cost;
+      return {
+        ...product,
+        brand: brands.get(product.slug) ?? '',
+        profit: profit == null ? null : Math.round(profit * 100) / 100,
+        margin:
+          profit == null || !product.revenue
+            ? null
+            : Math.round((profit / product.revenue) * 1000) / 10,
+      };
+    });
   });
 
-  readonly topProducts = computed(() => {
-    const { start, end } = this.range();
-    return topProducts(this.orders(), start, end);
+  /**
+   * Resumo do estoque de hoje (não depende do período nem dos filtros):
+   * esgotados e baixos por variante, unidades e valor a custo, e produtos
+   * à venda com estoque que não vendem há {@link IDLE_DAYS} dias.
+   */
+  readonly stockSummary = computed(() => {
+    const rows = this.stock.rows();
+    const since = new Date(this.now.getTime() - IDLE_DAYS * 86_400_000);
+    const sold = new Set(
+      this.store
+        .orders()
+        .filter((order) => order.status !== 'cancelado' && order.createdAt >= since)
+        .flatMap((order) => order.items.map((item) => item.slug)),
+    );
+    const onSale = rows.filter((row) => row.product.status === 'publicado');
+    const idle = new Set(
+      onSale
+        .filter((row) => row.variant.stock > 0 && !sold.has(row.product.slug))
+        .map((row) => row.product.slug),
+    );
+    return {
+      units: rows.reduce((sum, row) => sum + row.variant.stock, 0),
+      value:
+        Math.round(rows.reduce((sum, row) => sum + row.variant.stock * (row.cost ?? 0), 0) * 100) /
+        100,
+      uncosted: rows.filter((row) => row.variant.stock > 0 && row.cost == null).length,
+      low: rows.filter((row) => row.status === 'baixo').length,
+      out: rows.filter((row) => row.status === 'zerado').length,
+      idle: idle.size,
+    };
   });
 
   readonly statusCounts = computed(() => {

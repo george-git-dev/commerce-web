@@ -87,7 +87,7 @@
 
     <h3>Histórico</h3>
     <ol class="sd__history">
-      @for (move of history(); track move.id) {
+      @for (move of visibleHistory(); track move.id) {
         <li>
           <span class="sd__when">{{ move.at | date: 'dd/MM/yyyy HH:mm' }}</span>
           <span class="sd__what">
@@ -113,6 +113,11 @@
         </li>
       }
     </ol>
+    @if (history().length > visibleHistory().length) {
+      <button matButton="outlined" class="sd__more" type="button" (click)="moreHistory()">
+        Ver mais ({{ history().length - visibleHistory().length }})
+      </button>
+    }
   } @else {
     <div class="sd__empty">
       <mat-icon aria-hidden="true">inventory_2</mat-icon>

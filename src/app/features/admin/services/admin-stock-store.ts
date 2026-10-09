@@ -58,6 +58,9 @@ export class AdminStockStore {
   private readonly costs = signal<Readonly<Record<string, number>>>(this.seedCosts());
   private readonly moves = signal<readonly StockMove[]>(this.seed());
 
+  /** Custo médio por SKU (painel: lucro bruto e margem). */
+  readonly costBySku = this.costs.asReadonly();
+
   readonly rows = computed<StockRow[]>(() =>
     this.products.products().flatMap((product) =>
       product.variants.map((variant) => {
@@ -166,10 +169,20 @@ export class AdminStockStore {
     return this.auth.user()?.name ?? 'Equipe';
   }
 
-  /** Custo médio inicial a partir das compras recebidas do mock. */
+  /**
+   * Custo médio inicial: o do saldo de cadastro (FICTÍCIO, 45–64% do preço,
+   * varia por produto para a margem não sair igual) e, por cima, as compras
+   * recebidas do mock. Na Fase 2 a carga do saldo inicial traz o custo real.
+   */
   private seedCosts(): Record<string, number> {
     const costs: Record<string, number> = {};
     const stockSoFar: Record<string, number> = {};
+    this.products.products().forEach((product, index) => {
+      const ratio = 0.45 + ((index * 7) % 20) / 100;
+      for (const variant of product.variants) {
+        costs[variant.id] = Math.round(variant.price * ratio * 100) / 100;
+      }
+    });
     for (const entry of PURCHASES_MOCK.filter((e) => e.status === 'recebido')) {
       for (const item of entry.items) {
         const before = stockSoFar[item.sku] ?? 0;
@@ -182,32 +195,31 @@ export class AdminStockStore {
 
   /**
    * Histórico fictício coerente com o saldo atual: saldo inicial, as compras
-   * recebidas do mock e uma baixa por venda paga (o mock vende o 1º tamanho).
+   * recebidas do mock e uma baixa por venda paga (no SKU vendido).
    */
   private seed(): StockMove[] {
     const orders = [...this.orders.orders()]
       .filter((order) => SOLD.includes(order.status))
       .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
-    const start = new Date(Date.now() - 61 * 86_400_000);
+    // Saldo inicial um dia antes do primeiro pedido do mock.
+    const start = new Date((orders[0]?.createdAt.getTime() ?? Date.now()) - 86_400_000);
     const received = PURCHASES_MOCK.filter((entry) => entry.status === 'recebido');
     const moves: StockMove[] = [];
     for (const product of this.products.products()) {
-      product.variants.forEach((variant, index) => {
+      for (const variant of product.variants) {
         type Event = Omit<StockMove, 'id' | 'sku' | 'balance'>;
         const events: Event[] = [];
-        if (index === 0) {
-          for (const order of orders) {
-            for (const item of order.items.filter((i) => i.slug === product.slug)) {
-              events.push({
-                at: order.createdAt,
-                type: 'venda',
-                quantity: -item.quantity,
-                by: 'Sistema',
-                reason: 'Venda',
-                reference: order.number,
-                link: ['/admin/pedidos', order.number],
-              });
-            }
+        for (const order of orders) {
+          for (const item of order.items.filter((i) => i.sku === variant.id)) {
+            events.push({
+              at: order.createdAt,
+              type: 'venda',
+              quantity: -item.quantity,
+              by: 'Sistema',
+              reason: 'Venda',
+              reference: order.number,
+              link: ['/admin/pedidos', order.number],
+            });
           }
         }
         for (const entry of received) {
@@ -242,7 +254,7 @@ export class AdminStockStore {
           balance += event.quantity;
           moves.push({ ...event, id: moves.length + 1, sku: variant.id, balance });
         }
-      });
+      }
     }
     return moves;
   }

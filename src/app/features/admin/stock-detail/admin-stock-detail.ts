@@ -21,6 +21,9 @@ const MOVE_LABELS: Record<StockMoveType, string> = {
   venda: 'Venda',
 };
 
+/** Movimentações por página no histórico. */
+const HISTORY_PAGE = 20;
+
 /** `/admin/estoque/:sku` — saldo, mínimo, ajuste manual e histórico de um item. */
 @Component({
   selector: 'app-admin-stock-detail',
@@ -47,6 +50,15 @@ export class AdminStockDetail {
     const row = this.row();
     return row ? this.store.history(row.variant.id) : [];
   });
+  /** Histórico mostra 20 por vez ("Ver mais"); volta a 20 ao trocar de item. */
+  protected readonly historyLimit = linkedSignal<string, number>({
+    source: () => this.row()?.variant.id ?? '',
+    computation: () => HISTORY_PAGE,
+  });
+  protected readonly visibleHistory = computed(() => this.history().slice(0, this.historyLimit()));
+  protected moreHistory(): void {
+    this.historyLimit.update((value) => value + HISTORY_PAGE);
+  }
   /** Compras recebidas deste item (comparativo de custo por fornecedor). */
   private readonly purchaseStore = inject(AdminPurchaseStore);
   protected readonly purchases = computed(() => {

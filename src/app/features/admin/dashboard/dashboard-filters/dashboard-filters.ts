@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/c
 import { MatIconModule } from '@angular/material/icon';
 import { Gender } from '../../../../core/models/product';
 import { AdminDashboard } from '../../services/admin-dashboard';
-import { DashboardPeriod, PERIOD_LABELS } from '../../services/admin-metrics';
+import { DashboardPeriod, MIN_DAY, PERIOD_LABELS } from '../../services/admin-metrics';
 import { AdminProductStore } from '../../services/admin-product-store';
 import { AdminPurchaseStore } from '../../services/admin-purchase-store';
 
@@ -20,6 +20,8 @@ export class DashboardFilters {
   protected readonly suppliers = inject(AdminPurchaseStore).suppliers;
 
   protected readonly periods = Object.entries(PERIOD_LABELS) as [DashboardPeriod, string][];
+  /** Data mais antiga aceita no personalizado. */
+  protected readonly minDay = MIN_DAY;
   protected readonly genders: readonly Gender[] = ['Masculino', 'Feminino', 'Unissex'];
   protected readonly categories = this.products.categories;
   protected readonly brands = computed(() =>

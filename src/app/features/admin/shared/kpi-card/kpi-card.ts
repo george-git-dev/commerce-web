@@ -1,7 +1,7 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 
-/** Card de indicador: valor, variação contra o período anterior e mini gráfico. */
+/** Card de indicador: valor do período e nota opcional (ex.: margem). */
 @Component({
   selector: 'app-kpi-card',
   imports: [MatIconModule],
@@ -11,19 +11,8 @@ import { MatIconModule } from '@angular/material/icon';
       <mat-icon aria-hidden="true">{{ icon() }}</mat-icon>
     </div>
     <strong class="kpi__value">{{ value() }}</strong>
-    @if (delta(); as change) {
-      <span class="kpi__delta" [class.kpi__delta--down]="change < 0">
-        <mat-icon aria-hidden="true">{{ change < 0 ? 'south_east' : 'north_east' }}</mat-icon>
-        {{ change > 0 ? '+' : '' }}{{ change.toLocaleString('pt-BR') }}%
-        <small>vs. período anterior</small>
-      </span>
-    } @else {
-      <span class="kpi__delta kpi__delta--none">Sem base para comparar</span>
-    }
-    @if (path()) {
-      <svg class="kpi__spark" viewBox="0 0 100 24" preserveAspectRatio="none" aria-hidden="true">
-        <path [attr.d]="path()" />
-      </svg>
+    @if (note()) {
+      <span class="kpi__note" [class.kpi__note--warn]="noteWarn()">{{ note() }}</span>
     }
   `,
   styles: `
@@ -60,47 +49,29 @@ import { MatIconModule } from '@angular/material/icon';
       overflow-wrap: anywhere;
     }
 
-    .kpi__delta {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 2px 4px;
+    .kpi__note {
       font-size: 0.75rem;
-      font-weight: 600;
-      color: #2f6b45;
+      color: var(--muted-foreground);
 
-      mat-icon {
-        width: 14px;
-        height: 14px;
-        font-size: 14px;
-      }
-
-      small {
-        font-weight: 400;
-        color: var(--muted-foreground);
-      }
-
-      &--down {
-        color: var(--wine);
-      }
-
-      &--none {
-        font-weight: 400;
-        color: var(--muted-foreground);
+      &--warn {
+        color: var(--earth);
       }
     }
 
-    .kpi__spark {
-      width: 100%;
-      height: 24px;
+    // Compacto (indicadores secundários): 3 lado a lado no celular, sem ícone.
+    :host(.kpi--compact) {
+      padding: 12px;
 
-      path {
-        fill: none;
-        stroke: #a67b41;
-        stroke-width: 1.5;
-        vector-effect: non-scaling-stroke;
-        stroke-linejoin: round;
-        stroke-linecap: round;
+      .kpi__head {
+        font-size: 0.75rem;
+
+        mat-icon {
+          display: none;
+        }
+      }
+
+      .kpi__value {
+        font-size: 1.125rem;
       }
     }
   `,
@@ -110,23 +81,8 @@ export class KpiCard {
   readonly label = input.required<string>();
   readonly icon = input.required<string>();
   readonly value = input.required<string>();
-  /** Variação em %; `null` quando o período anterior não tem dados. */
-  readonly delta = input<number | null>(null);
-  readonly spark = input<readonly number[]>([]);
-
-  /** Linha do mini gráfico, normalizada para a caixa 100 × 24. */
-  protected readonly path = computed(() => {
-    const values = this.spark();
-    if (values.length < 2) return '';
-    const max = Math.max(...values);
-    const min = Math.min(...values);
-    const span = max - min || 1;
-    return values
-      .map((value, index) => {
-        const x = (index / (values.length - 1)) * 100;
-        const y = 22 - ((value - min) / span) * 20;
-        return `${index ? 'L' : 'M'}${x.toFixed(1)} ${y.toFixed(1)}`;
-      })
-      .join(' ');
-  });
+  /** Linha abaixo do valor (ex.: "Margem de 34%"). */
+  readonly note = input('');
+  /** Destaca a nota (ex.: lucro parcial por falta de custo). */
+  readonly noteWarn = input(false);
 }

@@ -1,12 +1,18 @@
 import { MOCK_PRODUCTS } from '../../../core/data/mock-products';
 import { OrderStatus, PaymentMethod } from '../../../core/models/order';
-import { Gender, ProductCategory } from '../../../core/models/product';
+import { Gender, ProductCategory, VariantKind } from '../../../core/models/product';
 import { ShippingOption } from '../../../core/models/shipping';
-import { effectivePrice } from '../../../core/utils/product-pricing';
+import { effectivePrice, variantLabel } from '../../../core/utils/product-pricing';
 
 /** Pedido como o backoffice enxerga (formato provável de `GET /admin/orders`). */
 export interface AdminOrderItem {
   slug: string;
+  /** Variante vendida (frasco ou tamanho de decant) — base do custo. */
+  sku: string;
+  kind: VariantKind;
+  volumeMl?: number;
+  /** Rótulo da variante na hora da venda: "Frasco 100 ml", "Decant 5 ml", "Kit". */
+  variant: string;
   name: string;
   image: string;
   category: ProductCategory;
@@ -127,40 +133,79 @@ function statusFor(ageDays: number, roll: number): OrderStatus {
   return roll < 0.3 ? 'aguardando-pagamento' : roll < 0.75 ? 'pago' : 'em-separacao';
 }
 
+/** Pedidos por dia, em média: a loja cresce a cada ano (mock desde 2024). */
+const DAILY_RATE: Record<number, number> = { 2024: 0.6, 2025: 1.1 };
+const CURRENT_RATE = 1.6;
+
+/** Datas fortes do varejo: Dia das Mães (mai), Black Friday (nov) e Natal (dez). */
+const SEASON = [1, 0.9, 1, 1, 1.4, 1, 1, 1.1, 1, 1, 1.6, 1.9];
+
 /**
- * Pedidos FICTÍCIOS dos últimos 60 dias (o painel compara 30 dias com os 30
- * anteriores). Some na Fase 2: os números vêm de `GET /admin/dashboard`.
+ * Pedidos FICTÍCIOS de 1º/01/2024 até hoje — volume crescendo por ano e com
+ * picos sazonais, para ver o painel por dia, mês e ano. Parte dos pedidos é
+ * de cliente que volta (recompra). Some na Fase 2: os números vêm de
+ * `GET /admin/dashboard`.
  */
 export function adminOrdersMock(now = new Date()): AdminOrder[] {
   const random = seeded(2026);
   const products = MOCK_PRODUCTS.filter((product) => product.status === 'publicado');
   const seen = new Set<string>();
+  /** Clientes que já compraram (para sortear recompra). */
+  const known: { index: number; email: string }[] = [];
   const orders: AdminOrder[] = [];
-  let number = 100150;
+  let number = 100000;
 
-  for (let ageDays = 59; ageDays >= 0; ageDays--) {
-    // Mais movimento nos últimos 30 dias (a loja está crescendo).
-    const perDay = Math.floor(random() * (ageDays < 30 ? 3 : 2.2));
+  const first = new Date(2024, 0, 1);
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const totalDays = Math.round((today.getTime() - first.getTime()) / 86_400_000);
+
+  for (let ageDays = totalDays; ageDays >= 0; ageDays--) {
+    const day = new Date(today);
+    day.setDate(today.getDate() - ageDays);
+    const rate = (DAILY_RATE[day.getFullYear()] ?? CURRENT_RATE) * SEASON[day.getMonth()];
+    // Média = `rate` pedidos por dia (0 a 2 × rate).
+    const perDay = Math.floor(random() * (2 * rate + 1));
     for (let n = 0; n < perDay; n++) {
-      const createdAt = new Date(now);
-      createdAt.setDate(now.getDate() - ageDays);
+      const createdAt = new Date(day);
       createdAt.setHours(9 + Math.floor(random() * 12), Math.floor(random() * 60), 0, 0);
       if (createdAt > now) createdAt.setTime(now.getTime() - 60_000 * (n + 1));
 
-      const customerIndex = Math.floor(random() * CUSTOMERS.length);
+      // ~45% é recompra de quem já comprou; o resto, cliente novo.
+      const returning = known.length > 0 && random() < 0.45;
+      const customer = returning
+        ? known[Math.floor(random() * known.length)]
+        : (() => {
+            const index = Math.floor(random() * CUSTOMERS.length);
+            const handle = CUSTOMERS[index][0].split(' ')[0].toLowerCase();
+            return { index, email: `${handle}.${known.length + 1}@exemplo.com.br` };
+          })();
+      if (!returning) known.push(customer);
+      const customerIndex = customer.index;
       const [name, city] = CUSTOMERS[customerIndex];
-      const email = `${name.split(' ')[0].toLowerCase()}@exemplo.com.br`;
+      const email = customer.email;
       const items = Array.from({ length: random() < 0.25 ? 2 : 1 }, () => {
         // Os primeiros produtos do catálogo vendem mais.
         const product = products[Math.floor(random() ** 1.6 * products.length)];
+        // Quem tem decant vende decant em ~55% das vezes (tamanho sorteado).
+        const decants = product.variants.filter((v) => v.kind === 'decant');
+        const variant =
+          decants.length && random() < 0.55
+            ? decants[Math.floor(random() * decants.length)]
+            : product.variants[0];
         return {
           slug: product.slug,
+          sku: variant.id,
+          kind: variant.kind,
+          volumeMl: variant.volumeMl,
+          variant: variantLabel(product, variant),
           name: product.name,
           image: product.images[0] ?? '',
           category: product.category,
           gender: product.gender,
-          quantity: random() < 0.2 ? 2 : 1,
-          unitPrice: effectivePrice(product.variants[0]),
+          // Decant costuma sair em mais de uma unidade (1 a 3).
+          quantity:
+            variant.kind === 'decant' ? 1 + Math.floor(random() * 3) : random() < 0.2 ? 2 : 1,
+          unitPrice: effectivePrice(variant),
         };
       });
       const shipping: ShippingOption['id'] =

@@ -1,4 +1,5 @@
 import { VARIANT_KIND_LABELS } from '../config/fragrance';
+import { categoryInfo } from '../config/product-categories';
 import { Product, ProductVariant, VariantKind } from '../models/product';
 
 /**
@@ -91,6 +92,10 @@ export function discountPercent(variant: ProductVariant): number | null {
 export function variantLabel(product: Product, variant: ProductVariant): string {
   if (variant.kind === 'frasco' && product.category === 'kit') return 'Kit';
   const volume = variant.volumeMl ? ` ${variant.volumeMl} ml` : '';
+  // Corpo e banho (e categorias novas): "Hidratante 200 ml", "Body splash 250 ml".
+  if (variant.kind === 'frasco' && product.category !== 'perfume') {
+    return `${categoryInfo(product.category).label}${volume}`;
+  }
   return `${VARIANT_KIND_LABELS[variant.kind]}${volume}`;
 }
 

@@ -15,6 +15,7 @@ import {
   Chart,
   ChartConfiguration,
   Filler,
+  Legend,
   LinearScale,
   LineController,
   LineElement,
@@ -28,12 +29,15 @@ Chart.register(
   BarElement,
   CategoryScale,
   Filler,
+  Legend,
   LinearScale,
   LineController,
   LineElement,
   PointElement,
   Tooltip,
 );
+// Legenda só onde o gráfico pede (2+ séries); série única não precisa.
+Chart.defaults.plugins.legend.display = false;
 Chart.defaults.font.family = "'DM Sans', system-ui, sans-serif";
 Chart.defaults.color = '#625950';
 

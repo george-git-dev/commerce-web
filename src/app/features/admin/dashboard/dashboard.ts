@@ -4,9 +4,13 @@ import { ChartConfiguration } from 'chart.js';
 import { ORDER_STATUS_LABELS } from '../../../core/models/order';
 import { AuthService } from '../../../core/services/auth-service';
 import { AdminDashboard } from '../services/admin-dashboard';
+import { Grouping, GROUPING_LABELS } from '../services/admin-metrics';
 import { ChartCanvas } from '../shared/chart/chart';
 import { KpiCard } from '../shared/kpi-card/kpi-card';
 import { DashboardFilters } from './dashboard-filters/dashboard-filters';
+import { SalesTable } from './sales-table/sales-table';
+import { StockSummary } from './stock-summary/stock-summary';
+import { TopProducts } from './top-products/top-products';
 
 /** Dourado dos gráficos: um tom abaixo do da marca, para ter contraste ≥ 3:1 no card. */
 const CHART_GOLD = '#a67b41';
@@ -20,10 +24,23 @@ const brlShort = new Intl.NumberFormat('pt-BR', {
   maximumFractionDigits: 1,
 });
 
-/** `/admin` — painel de vendas: indicadores e gráficos, com período e filtros. */
+/**
+ * `/admin` — painel de vendas. Responde, nesta ordem: quanto vendi, quanto
+ * lucrei, como as vendas andaram, o que mais vende e como está o estoque.
+ * Funil, origem das vendas e CAC ficam para depois do MVP (precisam de
+ * rastreamento de eventos e gasto com anúncios).
+ */
 @Component({
   selector: 'app-dashboard',
-  imports: [CurrencyPipe, ChartCanvas, DashboardFilters, KpiCard],
+  imports: [
+    CurrencyPipe,
+    ChartCanvas,
+    DashboardFilters,
+    KpiCard,
+    SalesTable,
+    StockSummary,
+    TopProducts,
+  ],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -35,7 +52,23 @@ export class Dashboard {
   protected readonly statusLabels = ORDER_STATUS_LABELS;
   protected readonly firstName = computed(() => this.auth.user()?.name.split(' ')[0] ?? '');
 
+  /** Custo, lucro e estoque vêm das compras: quem não vê estoque não vê isso. */
+  protected readonly canSeeCost = this.auth.can('stock:view');
+
+  protected readonly groupings = Object.entries(GROUPING_LABELS) as [Grouping, string][];
+  /** Rótulo da 1ª coluna/legenda da tabela de vendas. */
+  protected readonly unitLabels = { dia: 'dia', mes: 'mês', ano: 'ano' } as const;
+
   protected readonly brl = (value: number) => brl.format(value);
+  protected readonly percent = (value: number) => `${value.toLocaleString('pt-BR')}%`;
+
+  /** "Margem de 34,2%" + aviso quando há produto vendido sem custo. */
+  protected readonly profitNote = computed(() => {
+    const { margin, uncosted } = this.data.kpis().current.profit;
+    const base = margin == null ? 'Sem custo registrado' : `Margem de ${this.percent(margin)}`;
+    if (!uncosted || margin == null) return base;
+    return `${base} · parcial: ${uncosted} ${uncosted === 1 ? 'item' : 'itens'} sem custo`;
+  });
 
   /** "01/09 a 30/09" — janela do gráfico de vendas por dia. */
   protected readonly seriesLabel = computed(() => {
@@ -43,59 +76,13 @@ export class Dashboard {
     return `${series[0]?.label} a ${series.at(-1)?.label}`;
   });
 
-  /** Maior valor das listas com barra (para a largura proporcional). */
-  protected readonly topMax = computed(() =>
-    Math.max(1, ...this.data.topProducts().map((p) => p.units)),
-  );
+  /** Maior valor da lista com barra (para a largura proporcional). */
   protected readonly statusMax = computed(() =>
     Math.max(1, ...this.data.statusCounts().map((s) => s.count)),
   );
   protected readonly statusTotal = computed(() =>
     this.data.statusCounts().reduce((sum, s) => sum + s.count, 0),
   );
-
-  protected readonly salesChart = computed<ChartConfiguration>(() => {
-    const series = this.data.salesSeries();
-    return {
-      type: 'line',
-      data: {
-        labels: series.map((point) => point.label),
-        datasets: [
-          {
-            label: 'Vendas',
-            data: series.map((point) => point.value),
-            borderColor: CHART_GOLD,
-            backgroundColor: 'rgba(166, 123, 65, 0.1)',
-            borderWidth: 2,
-            fill: true,
-            // Monótona: a curva não "passa" abaixo de zero entre dias sem venda.
-            cubicInterpolationMode: 'monotone',
-            pointRadius: 0,
-            pointHoverRadius: 5,
-            pointHoverBackgroundColor: CHART_GOLD,
-            pointHoverBorderColor: '#fffdfb',
-            pointHoverBorderWidth: 2,
-          },
-        ],
-      },
-      options: {
-        maintainAspectRatio: false,
-        interaction: { mode: 'index', intersect: false },
-        plugins: {
-          tooltip: { callbacks: { label: (item) => ` ${brl.format(item.parsed.y ?? 0)}` } },
-        },
-        scales: {
-          x: { grid: { display: false }, ticks: { maxTicksLimit: 6, maxRotation: 0 } },
-          y: {
-            beginAtZero: true,
-            border: { display: false },
-            grid: { color: GRID },
-            ticks: { maxTicksLimit: 5, callback: (value) => brlShort.format(Number(value)) },
-          },
-        },
-      },
-    };
-  });
 
   protected readonly groupChart = computed<ChartConfiguration>(() => {
     const groups = this.data.salesByGroup();

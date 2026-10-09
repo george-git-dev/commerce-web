@@ -30,6 +30,12 @@ h3 {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
+
+  // Secundários: 2 ou 3 lado a lado, compactos.
+  &--small {
+    grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+    margin-top: -10px;
+  }
 }
 
 .dash__grid {
@@ -46,6 +52,50 @@ h3 {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: var(--card);
+}
+
+.dash__card-head--row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+// Ver por: Dia · Mês · Ano.
+.dash__group {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--muted);
+
+  > span {
+    padding: 0 8px 0 6px;
+    font-size: 0.75rem;
+    color: var(--muted-foreground);
+  }
+
+  button {
+    min-width: 56px;
+    min-height: 34px;
+    border: 0;
+    border-radius: 4px;
+    background: none;
+    color: var(--muted-foreground);
+    font: inherit;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    cursor: pointer;
+
+    &[aria-checked='true'] {
+      background: var(--card);
+      color: var(--foreground);
+      box-shadow: var(--shadow-sm);
+    }
+  }
 }
 
 .dash__card-head {
@@ -74,14 +124,6 @@ h3 {
     display: flex;
     align-items: center;
     gap: 10px;
-  }
-
-  img {
-    flex-shrink: 0;
-    width: 36px;
-    height: 36px;
-    border-radius: var(--radius-sm);
-    object-fit: cover;
   }
 }
 
@@ -116,11 +158,6 @@ h3 {
     border-radius: 999px;
     background: #a67b41;
   }
-}
-
-.dash__empty {
-  margin: 0;
-  color: var(--muted-foreground);
 }
 
 .dash__table {
@@ -158,28 +195,44 @@ h3 {
   .dash__kpis {
     grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 16px;
+
+    &--small {
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    }
   }
 
+  // Esquerda: vendas e produtos; direita: estoque e status; categorias embaixo.
   .dash__grid {
-    grid-template-columns: 2fr 1fr;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    align-items: start;
   }
 
   .dash__card {
     padding: 20px;
   }
 
-  .dash__card--wide {
+  .dash__card--sales,
+  .dash__card--groups {
     --chart-height: 280px;
   }
 
-  // Segunda linha: categorias (largo) à esquerda, status à direita.
-  .dash__grid > :nth-child(3) {
-    grid-column: 2;
-    grid-row: 2;
+  .dash__card--sales {
+    grid-area: 1 / 1;
   }
 
-  .dash__grid > :nth-child(4) {
-    grid-column: 1;
-    grid-row: 2;
+  .dash__card--top {
+    grid-area: 2 / 1 / span 2;
+  }
+
+  .dash__card--stock {
+    grid-area: 1 / 2;
+  }
+
+  .dash__card--status {
+    grid-area: 2 / 2;
+  }
+
+  .dash__card--groups {
+    grid-area: 3 / 2;
   }
 }

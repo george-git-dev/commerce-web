@@ -82,5 +82,11 @@ describe('product-pricing', () => {
     expect(variantLabel(product([]), variant({ kind: 'decant', volumeMl: 5 }))).toBe('Decant 5 ml');
     expect(variantLabel(product([]), variant({ volumeMl: 100 }))).toBe('Frasco 100 ml');
     expect(variantLabel({ ...product([]), category: 'kit' }, variant({}))).toBe('Kit');
+    expect(
+      variantLabel({ ...product([]), category: 'hidratante' }, variant({ volumeMl: 200 })),
+    ).toBe('Hidratante 200 ml');
+    expect(
+      variantLabel({ ...product([]), category: 'body-splash' }, variant({ volumeMl: 250 })),
+    ).toBe('Body splash 250 ml');
   });
 });

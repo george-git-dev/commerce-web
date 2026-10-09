@@ -1,0 +1,204 @@
+.st {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+
+.st__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+// Tabela · Pizza · Linha · Barras: o mesmo dado, quatro jeitos de ver.
+// Celular: ocupa a largura toda, 4 colunas iguais.
+.st__views {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  flex: 1 1 100%;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--muted);
+
+  button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    min-height: 36px;
+    padding: 0 6px;
+    border: 0;
+    border-radius: 4px;
+    background: none;
+    color: var(--muted-foreground);
+    font: inherit;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    cursor: pointer;
+
+    &[aria-checked='true'] {
+      background: var(--card);
+      color: var(--foreground);
+      box-shadow: var(--shadow-sm);
+    }
+  }
+
+  svg {
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+}
+
+// Planilha: rola de lado no celular, com a coluna do dia fixa.
+.st__scroll {
+  max-height: 420px;
+  overflow: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+
+  &:focus-visible {
+    outline: 2px solid var(--primary);
+  }
+}
+
+table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.875rem;
+  font-variant-numeric: tabular-nums;
+}
+
+th,
+td {
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--border);
+  text-align: right;
+  white-space: nowrap;
+}
+
+thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  padding: 0;
+  background: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+
+  button {
+    width: 100%;
+    padding: 10px 12px;
+    border: 0;
+    background: none;
+    color: var(--foreground);
+    font: inherit;
+    text-align: inherit;
+    cursor: pointer;
+  }
+}
+
+.st__arrow {
+  display: inline-block;
+  width: 0.8em;
+  color: var(--gold);
+}
+
+// Coluna do dia/mês: à esquerda e presa ao rolar de lado.
+th:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: var(--card);
+  text-align: left;
+}
+
+thead th:first-child {
+  z-index: 3;
+  background: var(--muted);
+}
+
+tbody tr:nth-child(even) > * {
+  background: color-mix(in oklch, var(--muted) 45%, var(--card));
+}
+
+tbody tr:hover > * {
+  background: color-mix(in oklch, var(--gold) 10%, var(--card));
+}
+
+.st__zero td {
+  color: var(--muted-foreground);
+}
+
+tfoot > tr > * {
+  position: sticky;
+  bottom: 0;
+  border-top: 2px solid var(--foreground);
+  border-bottom: 0;
+  background: var(--card);
+  font-weight: 700;
+}
+
+.st__caption {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--muted-foreground);
+}
+
+// Dois eixos + legenda: um pouco mais alto que o padrão.
+.st__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.8125rem;
+
+  li {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  // Bolinha na linha, quadradinho nas barras (como a marca do gráfico).
+  span {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+  }
+
+  &--bars span {
+    border-radius: 2px;
+  }
+}
+
+// Muitos dias: o gráfico fica mais largo que a tela e rola de lado.
+.st__chart-scroll {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+}
+
+.st__chart {
+  --chart-height: 320px;
+}
+
+@media (min-width: 700px) {
+  .st__views {
+    display: inline-flex;
+    flex: 0 0 auto;
+
+    button {
+      padding: 0 12px;
+    }
+  }
+}

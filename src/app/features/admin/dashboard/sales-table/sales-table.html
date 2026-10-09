@@ -1,0 +1,98 @@
+<div class="st">
+  <div class="st__bar">
+    <div class="st__views" role="radiogroup" aria-label="Ver como">
+      @for (item of views; track item.id) {
+        <button
+          type="button"
+          role="radio"
+          [attr.aria-checked]="view() === item.id"
+          (click)="view.set(item.id)"
+        >
+          <svg viewBox="0 0 16 16" aria-hidden="true">
+            @switch (item.icon) {
+              @case ('table') {
+                <path d="M2 3h12v10H2zM2 6.5h12M2 10h12M6 3v10" />
+              }
+              @case ('line') {
+                <path d="M2 12l4-4 3 2 5-6" />
+              }
+              @default {
+                <path d="M3 13V8M7 13V4M11 13V9M14 13H2" />
+              }
+            }
+          </svg>
+          {{ item.label }}
+        </button>
+      }
+    </div>
+  </div>
+
+  @if (view() === 'tabela') {
+    <div class="st__scroll" tabindex="0" role="region" aria-label="Tabela de vendas">
+      <table>
+        <thead>
+          <tr>
+            @for (
+              col of [
+                { id: 'label', label: unit() === 'mês' ? 'Mês' : unit() === 'ano' ? 'Ano' : 'Dia' },
+                { id: 'orders', label: 'Pedidos' },
+                { id: 'units', label: 'Unidades' },
+                { id: 'revenue', label: 'Faturamento' },
+                { id: 'averageTicket', label: 'Ticket médio' },
+                { id: 'newCustomers', label: 'Clientes novos' },
+              ];
+              track col.id
+            ) {
+              <th scope="col" [attr.aria-sort]="ariaSort($any(col.id))">
+                <button type="button" (click)="sortBy($any(col.id))">
+                  {{ col.label }}
+                  <span class="st__arrow" aria-hidden="true">
+                    {{ sort().column === col.id ? (sort().desc ? '↓' : '↑') : '' }}
+                  </span>
+                </button>
+              </th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of sorted(); track row.label) {
+            <tr [class.st__zero]="!row.orders">
+              <th scope="row">{{ row.label }}</th>
+              <td>{{ row.orders }}</td>
+              <td>{{ row.units }}</td>
+              <td>{{ row.revenue | currency: 'BRL' }}</td>
+              <td>{{ row.orders ? (row.averageTicket | currency: 'BRL') : '—' }}</td>
+              <td>{{ row.newCustomers }}</td>
+            </tr>
+          }
+        </tbody>
+        <tfoot>
+          @let t = total();
+          <tr>
+            <th scope="row">Total</th>
+            <td>{{ t.orders }}</td>
+            <td>{{ t.units }}</td>
+            <td>{{ t.revenue | currency: 'BRL' }}</td>
+            <td>{{ t.orders ? (t.averageTicket | currency: 'BRL') : '—' }}</td>
+            <td>{{ t.newCustomers }}</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  } @else {
+    <p class="st__caption">{{ caption() }}</p>
+    <ul class="st__legend" [class.st__legend--bars]="view() === 'barras'">
+      @for (item of legend; track item.label) {
+        <li><span [style.background]="item.color"></span>{{ item.label }}</li>
+      }
+    </ul>
+    <div class="st__chart-scroll" tabindex="0" role="region" [attr.aria-label]="chartLabel()">
+      <app-chart
+        class="st__chart"
+        [style.min-width.px]="chartMinWidth()"
+        [config]="chart()"
+        [label]="chartLabel()"
+      />
+    </div>
+  }
+</div>

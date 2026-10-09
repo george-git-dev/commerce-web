@@ -35,7 +35,10 @@
                 <img [src]="item.image" alt="" width="56" height="56" />
                 <span>
                   {{ item.name }}
-                  <small>{{ item.quantity }} × {{ item.unitPrice | currency: 'BRL' }}</small>
+                  <small
+                    >{{ item.variant }} · {{ item.quantity }} ×
+                    {{ item.unitPrice | currency: 'BRL' }}</small
+                  >
                 </span>
                 <strong>{{ item.quantity * item.unitPrice | currency: 'BRL' }}</strong>
               </li>

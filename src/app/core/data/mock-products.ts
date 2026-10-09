@@ -11,7 +11,9 @@ import { Product } from '../models/product';
  *
  * Casos de teste embutidos:
  * - Lattafa Asad: frasco + decants (o de 10 ml esgotado) → botões Frasco/Decant.
- *   No MVP real não haverá decants.
+ * - Também com decant (painel por formato): Khamrah (2, 5 e 10 ml), Yara (2 e 5),
+ *   Fakhar Black, Club de Nuit Intense Man e Hawas Black (5 e 10), Hawas for Him,
+ *   9PM, Bade'e Al Oud e Oud 24 Hours (5) e La Yuqawam (2 e 5).
  * - Em promoção: Lattafa Yara, Afnan Turathi Blue, Maison Alhambra Delilah,
  *   Al Wataniah Sabah Al Ward, Swiss Arabian Casablanca.
  * - Lattafa Bade'e Al Oud Oud for Glory (lançamento): sem avaliações (estado vazio).
@@ -95,6 +97,8 @@ export const MOCK_PRODUCTS: readonly Product[] = [
         promoPrice: 249.9,
         stock: 27,
       },
+      { id: 'lattafa-yara-d2', kind: 'decant', volumeMl: 2, price: 17.9, stock: 15 },
+      { id: 'lattafa-yara-d5', kind: 'decant', volumeMl: 5, price: 32.9, stock: 10 },
     ],
   },
   {
@@ -128,6 +132,9 @@ export const MOCK_PRODUCTS: readonly Product[] = [
     ],
     variants: [
       { id: 'lattafa-khamrah-100', kind: 'frasco', volumeMl: 100, price: 359.9, stock: 22 },
+      { id: 'lattafa-khamrah-d2', kind: 'decant', volumeMl: 2, price: 19.9, stock: 12 },
+      { id: 'lattafa-khamrah-d5', kind: 'decant', volumeMl: 5, price: 39.9, stock: 8 },
+      { id: 'lattafa-khamrah-d10', kind: 'decant', volumeMl: 10, price: 69.9, stock: 4 },
     ],
   },
   {
@@ -162,6 +169,8 @@ export const MOCK_PRODUCTS: readonly Product[] = [
     ],
     variants: [
       { id: 'lattafa-fakhar-black-100', kind: 'frasco', volumeMl: 100, price: 249.9, stock: 19 },
+      { id: 'lattafa-fakhar-black-d5', kind: 'decant', volumeMl: 5, price: 29.9, stock: 10 },
+      { id: 'lattafa-fakhar-black-d10', kind: 'decant', volumeMl: 10, price: 54.9, stock: 5 },
     ],
   },
   {
@@ -200,6 +209,13 @@ export const MOCK_PRODUCTS: readonly Product[] = [
         volumeMl: 100,
         price: 279.9,
         stock: 15,
+      },
+      {
+        id: 'lattafa-bade-e-al-oud-oud-for-glory-d5',
+        kind: 'decant',
+        volumeMl: 5,
+        price: 32.9,
+        stock: 8,
       },
     ],
   },
@@ -240,6 +256,20 @@ export const MOCK_PRODUCTS: readonly Product[] = [
         volumeMl: 105,
         price: 399.9,
         stock: 31,
+      },
+      {
+        id: 'armaf-club-de-nuit-intense-man-d5',
+        kind: 'decant',
+        volumeMl: 5,
+        price: 44.9,
+        stock: 12,
+      },
+      {
+        id: 'armaf-club-de-nuit-intense-man-d10',
+        kind: 'decant',
+        volumeMl: 10,
+        price: 79.9,
+        stock: 6,
       },
     ],
   },
@@ -305,7 +335,10 @@ export const MOCK_PRODUCTS: readonly Product[] = [
       'img/produtos/notas-oud.webp',
       'img/produtos/colecao.webp',
     ],
-    variants: [{ id: 'afnan-9pm-100', kind: 'frasco', volumeMl: 100, price: 329.9, stock: 2 }],
+    variants: [
+      { id: 'afnan-9pm-100', kind: 'frasco', volumeMl: 100, price: 329.9, stock: 2 },
+      { id: 'afnan-9pm-d5', kind: 'decant', volumeMl: 5, price: 36.9, stock: 9 },
+    ],
   },
   {
     id: 109,
@@ -413,6 +446,7 @@ export const MOCK_PRODUCTS: readonly Product[] = [
     ],
     variants: [
       { id: 'rasasi-hawas-for-him-100', kind: 'frasco', volumeMl: 100, price: 389.9, stock: 26 },
+      { id: 'rasasi-hawas-for-him-d5', kind: 'decant', volumeMl: 5, price: 42.9, stock: 7 },
     ],
   },
   {
@@ -447,6 +481,8 @@ export const MOCK_PRODUCTS: readonly Product[] = [
     ],
     variants: [
       { id: 'rasasi-hawas-black-100', kind: 'frasco', volumeMl: 100, price: 409.9, stock: 9 },
+      { id: 'rasasi-hawas-black-d5', kind: 'decant', volumeMl: 5, price: 44.9, stock: 8 },
+      { id: 'rasasi-hawas-black-d10', kind: 'decant', volumeMl: 10, price: 79.9, stock: 4 },
     ],
   },
   {
@@ -480,6 +516,8 @@ export const MOCK_PRODUCTS: readonly Product[] = [
     ],
     variants: [
       { id: 'rasasi-la-yuqawam-75', kind: 'frasco', volumeMl: 75, price: 449.9, stock: 7 },
+      { id: 'rasasi-la-yuqawam-d2', kind: 'decant', volumeMl: 2, price: 24.9, stock: 9 },
+      { id: 'rasasi-la-yuqawam-d5', kind: 'decant', volumeMl: 5, price: 54.9, stock: 6 },
     ],
   },
   {
@@ -741,6 +779,13 @@ export const MOCK_PRODUCTS: readonly Product[] = [
         volumeMl: 100,
         price: 179.9,
         stock: 16,
+      },
+      {
+        id: 'ard-al-zaafaran-oud-24-hours-d5',
+        kind: 'decant',
+        volumeMl: 5,
+        price: 24.9,
+        stock: 10,
       },
     ],
   },
