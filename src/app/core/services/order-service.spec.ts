@@ -40,6 +40,8 @@ describe('ReviewService', () => {
       orderNumber: 'NP100231',
       itemId: 'NP100231-0',
       slug: 'lattafa-asad',
+      productName: 'Asad',
+      variantLabel: 'Frasco 100 ml',
       rating: 5,
       comment: 'Fixação excelente.',
     };

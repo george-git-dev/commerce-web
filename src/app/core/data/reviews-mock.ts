@@ -71,6 +71,10 @@ export const REVIEWS_MOCK: Readonly<Record<string, readonly ProductReview[]>> = 
       rating: 3,
       comment: 'É bom, mas esperava mais fixação.',
       createdAt: '2026-04-26',
+      reply: {
+        text: 'Obrigado pelo retorno, Rodrigo! Dica: aplique também na roupa e na nuca, que a fixação aumenta bastante.',
+        createdAt: '2026-04-28',
+      },
     },
     {
       id: 1,

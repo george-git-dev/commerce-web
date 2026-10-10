@@ -201,3 +201,66 @@
     width: auto;
   }
 }
+
+// Resposta da loja: recuada, com fio dourado, assinada pela loja.
+.review__reply {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-left: 3px solid var(--gold);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  background: var(--muted);
+}
+
+.review__reply-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 6px;
+  margin: 0 0 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--earth);
+
+  mat-icon {
+    width: 16px;
+    height: 16px;
+    font-size: 16px;
+  }
+
+  time {
+    font-weight: 400;
+    color: var(--muted-foreground);
+  }
+}
+
+.review__reply-text {
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+// Ordenação da lista: select nativo (no celular abre a roleta do sistema).
+.reviews__toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 8px;
+
+  label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.8125rem;
+    color: var(--muted-foreground);
+  }
+
+  select {
+    min-width: 0;
+    height: 44px;
+    padding: 0 10px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--card);
+    color: var(--foreground);
+    font: inherit;
+    font-size: 0.875rem;
+  }
+}

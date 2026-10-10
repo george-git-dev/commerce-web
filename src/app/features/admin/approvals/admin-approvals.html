@@ -1,0 +1,167 @@
+<section class="ap" #top>
+  <header class="ap__head">
+    <p class="ap__eyebrow">Gestão da loja</p>
+    <h2>Aprovações</h2>
+    <p class="ap__lead">
+      Avaliações dos clientes: só aparecem no produto depois de aprovadas. A equipe aprova, reprova
+      ou responde — nunca edita o texto do cliente.
+    </p>
+  </header>
+
+  <!-- Hoje só Avaliações; Trocas/Devoluções entram aqui como outra aba. -->
+  <nav class="ap__kind" aria-label="Tipo de aprovação">
+    <span class="ap__kind--on" aria-current="page">
+      Avaliações
+      @if (counts().pendente) {
+        <span class="ap__count">{{ counts().pendente }}</span>
+      }
+    </span>
+  </nav>
+
+  <div class="ap__status" role="tablist" aria-label="Situação">
+    @for (tab of tabs; track tab.id) {
+      <button
+        type="button"
+        role="tab"
+        [attr.aria-selected]="status() === tab.id"
+        [class.ap__tab--on]="status() === tab.id"
+        (click)="status.set(tab.id)"
+      >
+        {{ tab.label }} <span>{{ counts()[tab.id] }}</span>
+      </button>
+    }
+  </div>
+
+  <label class="ap__search">
+    <mat-icon aria-hidden="true">search</mat-icon>
+    <input
+      type="search"
+      placeholder="Produto ou cliente"
+      aria-label="Buscar avaliação"
+      autocomplete="off"
+      [value]="search()"
+      (input)="search.set($any($event.target).value)"
+    />
+  </label>
+
+  @if (page().content.length) {
+    <ul class="ap__list">
+      @for (r of page().content; track r.id) {
+        @let f = flags(r);
+        <li>
+          <article class="ap__card" [class.ap__card--flag]="f.length">
+            <header class="ap__card-head">
+              <span class="ap__product">
+                <strong>{{ r.productName }}</strong>
+                @if (r.variantLabel) {
+                  <small>{{ r.variantLabel }}</small>
+                }
+              </span>
+              <time [attr.datetime]="r.createdAt">{{ r.createdAt | date: 'dd/MM/yyyy' }}</time>
+            </header>
+
+            <app-star-rating [rating]="r.rating" />
+
+            @if (f.length) {
+              <p class="ap__flags" role="note">
+                <mat-icon aria-hidden="true">warning</mat-icon>
+                @for (flag of f; track flag) {
+                  <span>{{ flagLabels[flag] }}</span>
+                }
+                — confira antes de aprovar.
+              </p>
+            }
+
+            <p class="ap__comment">{{ r.comment }}</p>
+            <p class="ap__meta">
+              {{ r.authorName }}
+              @if (r.orderNumber) {
+                · Pedido
+                @if (orderExists(r.orderNumber)) {
+                  <a [routerLink]="['/admin/pedidos', r.orderNumber]">{{ r.orderNumber }}</a>
+                } @else {
+                  {{ r.orderNumber }}
+                }
+              }
+            </p>
+
+            @if (r.moderation; as m) {
+              <p class="ap__moderation">
+                {{ r.status === 'aprovada' ? 'Aprovada' : 'Reprovada' }} por {{ m.by }} em
+                {{ m.at | date: 'dd/MM/yyyy HH:mm' }}
+                @if (m.reason) {
+                  · <strong>Motivo:</strong> {{ m.reason }}
+                }
+              </p>
+            }
+
+            @if (r.reply; as reply) {
+              <div class="ap__reply">
+                <strong>Resposta da loja</strong>
+                <p>{{ reply.text }}</p>
+                <small
+                  >{{ reply.createdAt | date: 'dd/MM/yyyy' }}
+                  @if (r.replyBy) {
+                    · por {{ r.replyBy }} (não aparece na loja)
+                  }
+                </small>
+              </div>
+            }
+
+            @if (moderation.canEdit()) {
+              <div class="ap__actions">
+                @switch (r.status) {
+                  @case ('pendente') {
+                    <button matButton="filled" type="button" (click)="approve(r)">
+                      <mat-icon>check</mat-icon> Aprovar
+                    </button>
+                    <button
+                      matButton="outlined"
+                      type="button"
+                      class="ap__danger"
+                      (click)="reject(r)"
+                    >
+                      <mat-icon>block</mat-icon> Reprovar
+                    </button>
+                  }
+                  @case ('aprovada') {
+                    <button matButton="outlined" type="button" (click)="reply(r)">
+                      <mat-icon>reply</mat-icon> {{ r.reply ? 'Editar resposta' : 'Responder' }}
+                    </button>
+                    @if (r.reply) {
+                      <button matButton type="button" (click)="removeReply(r)">
+                        Remover resposta
+                      </button>
+                    }
+                    <button matButton type="button" class="ap__danger" (click)="reject(r)">
+                      Tirar do ar
+                    </button>
+                  }
+                  @default {
+                    <button matButton="outlined" type="button" (click)="approve(r)">
+                      <mat-icon>check</mat-icon> Aprovar mesmo assim
+                    </button>
+                  }
+                }
+              </div>
+            }
+          </article>
+        </li>
+      }
+    </ul>
+    <app-pager [paging]="paging" [page]="page()" [anchor]="top" noun="avaliações" />
+  } @else {
+    <div class="ap__empty">
+      <mat-icon aria-hidden="true">{{
+        status() === 'pendente' ? 'task_alt' : 'rate_review'
+      }}</mat-icon>
+      <p>
+        {{
+          status() === 'pendente' && !search()
+            ? 'Nenhuma avaliação esperando. Tudo em dia!'
+            : 'Nenhuma avaliação encontrada.'
+        }}
+      </p>
+    </div>
+  }
+</section>

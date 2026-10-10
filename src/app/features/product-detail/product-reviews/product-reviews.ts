@@ -6,17 +6,18 @@ import {
   inject,
   input,
   linkedSignal,
+  signal,
 } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { Product } from '../../../core/models/product';
-import { ProductReview } from '../../../core/models/review';
+import { ProductReview, REVIEW_SORT_LABELS, ReviewSort } from '../../../core/models/review';
 import { CatalogService } from '../../../core/services/catalog-service';
 import { StarRating } from '../../../shared/star-rating/star-rating';
 
 /**
  * Seção "Avaliações" da página do produto: resumo (média, total, barras por
- * nota) e lista paginada com "Ver mais". Só mostra avaliações aprovadas de
+ * nota) e lista paginada com "Ver mais", ordenável (recentes, antigas, nota). Só mostra avaliações aprovadas de
  * compras verificadas — a regra é do back.
  */
 @Component({
@@ -31,15 +32,18 @@ export class ProductReviews {
 
   readonly product = input.required<Product>();
 
-  /** Páginas já carregadas; volta para 1 quando o produto muda. */
-  private readonly pagesLoaded = linkedSignal<Product, number>({
-    source: this.product,
+  protected readonly sortOptions = Object.entries(REVIEW_SORT_LABELS) as [ReviewSort, string][];
+  protected readonly sort = signal<ReviewSort>('recentes');
+
+  /** Páginas já carregadas; volta para 1 quando muda o produto ou a ordem. */
+  private readonly pagesLoaded = linkedSignal<{ product: Product; sort: ReviewSort }, number>({
+    source: () => ({ product: this.product(), sort: this.sort() }),
     computation: () => 1,
   });
 
   private readonly pages = computed(() =>
     Array.from({ length: this.pagesLoaded() }, (_, page) =>
-      this.catalog.reviews(this.product(), page),
+      this.catalog.reviews(this.product(), page, undefined, this.sort()),
     ),
   );
 

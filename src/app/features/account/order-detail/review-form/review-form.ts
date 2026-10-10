@@ -55,6 +55,8 @@ export class ReviewForm {
       orderNumber: this.orderNumber(),
       itemId: this.item().id,
       slug: this.item().slug,
+      productName: this.item().productName,
+      variantLabel: this.item().variantLabel,
       rating: this.rating(),
       comment: this.comment.value.trim(),
     });

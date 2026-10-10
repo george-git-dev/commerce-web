@@ -2,7 +2,8 @@ import { computed, inject, Injectable, signal } from '@angular/core';
 import { Gender, Product } from '../../../core/models/product';
 import { withHighlights } from '../../../core/utils/product-highlights';
 import { hasDeal } from '../../../core/utils/product-pricing';
-import { AdminOrderItem, PENDING_REVIEWS_MOCK } from '../data/admin-orders-mock';
+import { ReviewService } from '../../../core/services/review-service';
+import { AdminOrderItem } from '../data/admin-orders-mock';
 import {
   cancelledOrders,
   compareFormats,
@@ -325,16 +326,6 @@ export class AdminDashboard {
     return salesByGroup(this.orders(), start, end);
   });
 
-  /** Contador do menu "Aprovações" (avaliações + entregas em mãos em aberto). */
-  readonly pendingApprovals = computed(
-    () =>
-      PENDING_REVIEWS_MOCK +
-      this.store
-        .orders()
-        .filter(
-          (order) =>
-            order.shipping === 'em-maos' &&
-            ['pago', 'em-separacao', 'enviado'].includes(order.status),
-        ).length,
-  );
+  /** Contador do menu "Aprovações": avaliações esperando moderação. */
+  readonly pendingApprovals = inject(ReviewService).pendingCount;
 }

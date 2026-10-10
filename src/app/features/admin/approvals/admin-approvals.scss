@@ -1,0 +1,263 @@
+h2 {
+  margin: 0;
+  font-size: clamp(1.75rem, 1.4rem + 1.6vw, 2.5rem);
+}
+
+.ap {
+  display: grid;
+  gap: 14px;
+}
+
+.ap__head {
+  display: grid;
+  gap: 4px;
+}
+
+.ap__eyebrow {
+  margin: 0;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.ap__lead {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+}
+
+.ap__kind {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+
+  span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 14px;
+    font-size: 0.9375rem;
+  }
+}
+
+.ap__kind--on {
+  border-bottom: 2px solid var(--foreground);
+  font-weight: 600;
+}
+
+.ap__count {
+  display: inline-grid !important;
+  place-items: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px !important;
+  border-radius: 999px;
+  background: var(--gold);
+  color: var(--card);
+  font-size: 0.6875rem !important;
+}
+
+// Pendentes · Aprovadas · Reprovadas: rola de lado se não couber.
+.ap__status {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+
+  button {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    gap: 6px;
+    min-height: 40px;
+    padding: 0 14px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--card);
+    color: var(--foreground);
+    font: inherit;
+    font-size: 0.875rem;
+    cursor: pointer;
+
+    span {
+      font-size: 0.75rem;
+      color: var(--muted-foreground);
+    }
+  }
+}
+
+.ap__tab--on {
+  border-color: var(--earth) !important;
+  background: var(--earth) !important;
+  color: var(--card) !important;
+
+  span {
+    color: inherit !important;
+  }
+}
+
+.ap__search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 48px;
+  padding-inline: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--card);
+
+  mat-icon {
+    color: var(--muted-foreground);
+  }
+
+  input {
+    flex: 1;
+    width: 0;
+    border: 0;
+    outline: none;
+    background: none;
+    font: inherit;
+    font-size: 1rem;
+  }
+}
+
+.ap__list {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ap__card {
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+
+  &--flag {
+    border-color: var(--wine);
+  }
+}
+
+.ap__card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+
+  time {
+    flex-shrink: 0;
+    font-size: 0.75rem;
+    color: var(--muted-foreground);
+  }
+}
+
+.ap__product {
+  display: grid;
+  min-width: 0;
+
+  small {
+    font-size: 0.75rem;
+    color: var(--muted-foreground);
+  }
+}
+
+.ap__flags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 6px;
+  margin: 0;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  background: color-mix(in oklch, var(--wine) 10%, transparent);
+  color: var(--wine);
+  font-size: 0.8125rem;
+
+  mat-icon {
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+  }
+
+  span {
+    font-weight: 600;
+  }
+}
+
+.ap__comment {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.ap__meta,
+.ap__moderation {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--muted-foreground);
+
+  a {
+    color: var(--earth);
+  }
+}
+
+.ap__reply {
+  display: grid;
+  gap: 2px;
+  padding: 8px 12px;
+  border-left: 3px solid var(--gold);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  background: var(--muted);
+  font-size: 0.875rem;
+
+  strong {
+    font-size: 0.75rem;
+    color: var(--earth);
+  }
+
+  p {
+    margin: 0;
+  }
+
+  small {
+    font-size: 0.75rem;
+    color: var(--muted-foreground);
+  }
+}
+
+.ap__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 4px;
+
+  button {
+    min-height: 44px;
+  }
+}
+
+.ap__danger {
+  color: var(--wine) !important;
+}
+
+.ap__empty {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  padding: 40px 16px;
+  color: var(--muted-foreground);
+  text-align: center;
+
+  mat-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 40px;
+  }
+
+  p {
+    margin: 0;
+  }
+}

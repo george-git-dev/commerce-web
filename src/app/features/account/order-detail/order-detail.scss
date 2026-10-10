@@ -212,3 +212,24 @@
     padding: 24px;
   }
 }
+
+.od__reviewed--off {
+  color: var(--muted-foreground);
+}
+
+// Resposta da loja à avaliação do cliente.
+.od__reply {
+  display: grid;
+  gap: 2px;
+  margin: 6px 0 0;
+  padding: 8px 12px;
+  border-left: 3px solid var(--gold);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  background: var(--muted);
+  font-size: 0.8125rem;
+
+  strong {
+    font-size: 0.75rem;
+    color: var(--earth);
+  }
+}

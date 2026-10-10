@@ -48,11 +48,33 @@
               </div>
 
               @if (item.status === 'entregue') {
-                @if (reviews.isReviewed(item.number, line.id)) {
-                  <p class="od__reviewed">
-                    <mat-icon aria-hidden="true">check_circle</mat-icon>
-                    Avaliação enviada — aparece no produto após a moderação.
+                @if (reviews.of(item.number, line.id); as review) {
+                  <p class="od__reviewed" [class.od__reviewed--off]="review.status === 'reprovada'">
+                    <mat-icon aria-hidden="true">{{
+                      review.status === 'aprovada'
+                        ? 'check_circle'
+                        : review.status === 'pendente'
+                          ? 'schedule'
+                          : 'block'
+                    }}</mat-icon>
+                    @switch (review.status) {
+                      @case ('pendente') {
+                        Avaliação em análise — aparece no produto depois da moderação.
+                      }
+                      @case ('aprovada') {
+                        Avaliação publicada no produto. Obrigado!
+                      }
+                      @default {
+                        Avaliação não publicada: não segue as regras da loja.
+                      }
+                    }
                   </p>
+                  @if (review.status === 'aprovada' && review.reply; as reply) {
+                    <blockquote class="od__reply">
+                      <strong>Resposta da Nani Perfumes</strong>
+                      {{ reply.text }}
+                    </blockquote>
+                  }
                 } @else {
                   <button matButton="outlined" type="button" (click)="toggleReview(line)">
                     <mat-icon>rate_review</mat-icon>

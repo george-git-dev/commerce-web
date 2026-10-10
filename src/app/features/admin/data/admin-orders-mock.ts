@@ -57,9 +57,6 @@ export interface AdminOrder {
   total: number;
 }
 
-/** Avaliações aguardando moderação (mock até a tela de Aprovações). */
-export const PENDING_REVIEWS_MOCK = 4;
-
 const CUSTOMERS = [
   ['Mariana Oliveira', 'São Paulo, SP'],
   ['Lucas Santos', 'Campinas, SP'],
