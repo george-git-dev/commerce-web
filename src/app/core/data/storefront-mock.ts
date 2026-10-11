@@ -34,7 +34,6 @@ export const ANNOUNCEMENTS_MOCK: readonly Announcement[] = [
   {
     id: 1,
     text: 'Cupom NANI10: 10% de desconto em todo o site',
-    link: { path: '/produtos' },
     active: true,
   },
 ];
