@@ -29,13 +29,40 @@ describe('StorefrontContent', () => {
   });
 
   it('frete grátis: vale na faixa e nos textos; aviso pode ser desligado', () => {
-    content.saveSettings({ freeShippingMin: 450, freeShippingNotice: true });
-    expect(content.announcements()[0].text).toBe('Frete grátis acima de R$ 450');
+    content.saveSettings({
+      freeShipping: { active: true, min: 450, notice: true, link: { path: '/produtos' } },
+    });
+    expect(content.announcements()[0]).toEqual({
+      text: 'Frete grátis acima de R$ 450',
+      link: { path: '/produtos' },
+    });
     expect(content.fill('Acima de {freteGratis}, para todo o Brasil')).toBe(
       'Acima de R$ 450, para todo o Brasil',
     );
-    content.saveSettings({ freeShippingMin: 450, freeShippingNotice: false });
+    content.saveSettings({ freeShipping: { active: true, min: 450, notice: false } });
     expect(content.announcements().some((a) => a.text.startsWith('Frete grátis'))).toBe(false);
+    expect(content.freeShippingMin(), 'aviso desligado, promoção continua').toBe(450);
+  });
+
+  it('frete grátis fora do período ou desligado: frete normal e textos escondidos', () => {
+    content.today.set('2026-10-10');
+    content.saveSettings({
+      freeShipping: {
+        active: true,
+        min: 299,
+        notice: true,
+        startsOn: '2026-11-20',
+        endsOn: '2026-11-30',
+      },
+    });
+    expect(content.freeShippingMin(), 'agendada').toBeNull();
+    expect(content.announcements().some((a) => a.text.startsWith('Frete grátis'))).toBe(false);
+    expect(content.fill('Acima de {freteGratis}')).toBeNull();
+    expect(content.fill('Texto sem promoção')).toBe('Texto sem promoção');
+    content.today.set('2026-11-25');
+    expect(content.freeShippingMin(), 'no período').toBe(299);
+    content.saveSettings({ freeShipping: { active: false, min: 299, notice: true } });
+    expect(content.freeShippingMin(), 'desligada').toBeNull();
   });
 
   it('avisos fora do período ou inativos não aparecem', () => {

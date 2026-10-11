@@ -39,10 +39,25 @@ export interface Announcement {
   endsOn?: string;
 }
 
+/**
+ * Frete grátis como PROMOÇÃO: ligada, com valor mínimo e período opcional.
+ * Fora do período (ou desligada) o frete deixa de ser grátis no carrinho e no
+ * checkout — não é só o aviso que some.
+ */
+export interface FreeShippingPromo {
+  active: boolean;
+  /** Pedido a partir deste valor (R$) tem o frete econômico grátis. */
+  min: number;
+  /** Período opcional (`aaaa-mm-dd`, dias inteiros). Sem data = sem limite. */
+  startsOn?: string;
+  endsOn?: string;
+  /** Mostra "Frete grátis acima de R$ X" como 1º aviso da faixa. */
+  notice: boolean;
+  /** Para onde o aviso leva ao tocar (opcional). */
+  link?: StoreLink;
+}
+
 /** Regras comerciais que a vitrine mostra e o carrinho/checkout usam. */
 export interface StoreSettings {
-  /** Pedido a partir deste valor (R$) tem o frete econômico grátis. */
-  freeShippingMin: number;
-  /** Mostra "Frete grátis acima de R$ X" como 1º aviso da faixa. */
-  freeShippingNotice: boolean;
+  freeShipping: FreeShippingPromo;
 }

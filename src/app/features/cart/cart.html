@@ -23,15 +23,18 @@
             <span>Subtotal</span>
             <span>{{ cart.subtotal() | currency: 'BRL' }}</span>
           </div>
-          <p class="cart__shipping-note">
-            @if (freeShippingByCoupon()) {
-              Frete grátis pelo cupom.
-            } @else if (missingForFreeShipping(); as missing) {
-              Faltam {{ missing | currency: 'BRL' }} para o frete grátis.
-            } @else {
-              Você ganhou frete grátis na entrega econômica.
-            }
-          </p>
+          @let missing = missingForFreeShipping();
+          @if (freeShippingByCoupon() || missing !== null) {
+            <p class="cart__shipping-note">
+              @if (freeShippingByCoupon()) {
+                Frete grátis pelo cupom.
+              } @else if (missing) {
+                Faltam {{ missing | currency: 'BRL' }} para o frete grátis.
+              } @else {
+                Você ganhou frete grátis na entrega econômica.
+              }
+            </p>
+          }
 
           @if (appliedCoupon(); as applied) {
             <div class="cart__coupon-applied" [class.cart__coupon-applied--warn]="couponProblem()">

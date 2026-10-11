@@ -57,10 +57,11 @@ export class OrderSummary {
   readonly shippingPrice = computed(() =>
     this.freeShippingByCoupon() ? 0 : (this.selectedShipping()?.price ?? 0),
   );
-  /** Quanto falta para o frete grátis (0 = já tem). */
-  readonly missingForFreeShipping = computed(() =>
-    Math.max(0, this.storefront.freeShippingMin() - this.subtotal()),
-  );
+  /** Quanto falta para o frete grátis (0 = já tem; `null` = sem promoção agora). */
+  readonly missingForFreeShipping = computed(() => {
+    const min = this.storefront.freeShippingMin();
+    return min == null ? null : Math.max(0, min - this.subtotal());
+  });
 
   /** Forma de pagamento escolhida no checkout (afeta o desconto no Pix). */
   readonly paymentMethod = signal<PaymentMethod | null>(null);

@@ -3,27 +3,33 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { RouterLink } from '@angular/router';
 import { Announcement } from '../../../core/models/storefront';
 import { AuthService } from '../../../core/services/auth-service';
-import { linkToText, SHOW_STATUS_LABELS, showStatus } from '../../../core/utils/storefront-rules';
+import {
+  linkToText,
+  moneyLabel,
+  SHOW_STATUS_LABELS,
+  showStatus,
+} from '../../../core/utils/storefront-rules';
 import { AdminStorefront } from '../services/admin-storefront';
 import {
   AnnouncementDialog,
   AnnouncementDialogData,
   AnnouncementDialogResult,
 } from './announcement-dialog';
+import { FreeShippingDialog } from './free-shipping-dialog';
 import { StorefrontTabs } from './storefront-tabs';
 
 const dayLabel = (iso?: string) => (iso ? iso.split('-').reverse().join('/') : '');
 
 /**
  * `/admin/vitrine/avisos` — mensagens da faixa do topo. O frete grátis entra
- * sozinho em 1º (valor de Configurações da loja); os outros, nesta ordem.
+ * sozinho em 1º (promoção de Configurações; abre no mesmo diálogo); os outros,
+ * nesta ordem. Só promoções e recados — o que é fixo da loja não entra aqui.
  */
 @Component({
   selector: 'app-admin-announcements',
-  imports: [MatButtonModule, MatIconModule, RouterLink, StorefrontTabs],
+  imports: [MatButtonModule, MatIconModule, StorefrontTabs],
   template: `
     <section class="vl">
       <app-storefront-tabs />
@@ -40,13 +46,14 @@ const dayLabel = (iso?: string) => (iso ? iso.split('-').reverse().join('/') : '
       <ol class="vl__list">
         <li class="vl__row vl__row--fixed">
           <span class="vl__icon"><mat-icon aria-hidden="true">local_shipping</mat-icon></span>
-          <a class="vl__main" routerLink="/admin/configuracoes">
-            <strong>Frete grátis acima de {{ store.content.freeShippingLabel() }}</strong>
-            <span class="vl__status" [class]="'vl__status--' + freeShippingStatus()">
-              {{ statusLabels[freeShippingStatus()] }}
+          <button type="button" class="vl__main" (click)="editFreeShipping()">
+            <strong>Frete grátis acima de {{ freeShipping().min }}</strong>
+            <span class="vl__status" [class]="'vl__status--' + freeShipping().status">
+              {{ statusLabels[freeShipping().status] }}
             </span>
-            <small>Automático — valor e liga/desliga em Configurações da loja</small>
-          </a>
+            <small>Automático · {{ freeShipping().period }}</small>
+            <small>{{ freeShipping().link }}</small>
+          </button>
         </li>
         @for (row of rows(); track row.item.id; let first = $first, last = $last) {
           <li class="vl__row">
@@ -94,9 +101,16 @@ export class AdminAnnouncements {
   protected readonly canEdit = inject(AuthService).can('settings:edit');
   protected readonly statusLabels = SHOW_STATUS_LABELS;
 
-  protected readonly freeShippingStatus = computed(() =>
-    this.store.content.settings().freeShippingNotice ? 'no-ar' : 'inativo',
-  );
+  /** Linha do aviso automático: situação considera promoção e aviso ligados. */
+  protected readonly freeShipping = computed(() => {
+    const promo = this.store.content.settings().freeShipping;
+    return {
+      min: moneyLabel(promo.min),
+      status: promo.notice ? showStatus(promo, this.store.content.today()) : ('inativo' as const),
+      period: periodText(promo),
+      link: promo.notice ? linkToText(promo.link) || 'Sem link' : 'Aviso desligado',
+    };
+  });
 
   protected readonly rows = computed(() => {
     const today = this.store.content.today();
@@ -104,12 +118,18 @@ export class AdminAnnouncements {
       item,
       status: showStatus(item, today),
       link: linkToText(item.link),
-      period:
-        item.startsOn || item.endsOn
-          ? `${dayLabel(item.startsOn) || 'Sem início'} a ${dayLabel(item.endsOn) || 'sem fim'}`
-          : 'Sem período (fica até desativar)',
+      period: periodText(item),
     }));
   });
+
+  /** Mesmo padrão dos outros avisos: abre um diálogo (a regra é a das Configurações). */
+  protected editFreeShipping(): void {
+    this.dialog.open(FreeShippingDialog, {
+      width: '520px',
+      maxWidth: 'calc(100vw - 32px)',
+      autoFocus: 'dialog',
+    });
+  }
 
   protected edit(announcement?: Announcement): void {
     if (!this.canEdit) return;
@@ -131,4 +151,10 @@ export class AdminAnnouncements {
         this.snackBar.open('Aviso salvo.', 'Fechar', { duration: 3000 });
       });
   }
+}
+
+function periodText(item: { startsOn?: string; endsOn?: string }): string {
+  return item.startsOn || item.endsOn
+    ? `${dayLabel(item.startsOn) || 'Sem início'} a ${dayLabel(item.endsOn) || 'sem fim'}`
+    : 'Sem período (fica até desativar)';
 }

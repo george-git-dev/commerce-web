@@ -29,11 +29,16 @@ export const BANNERS_MOCK: readonly StoreBanner[] = [
 ];
 
 export const ANNOUNCEMENTS_MOCK: readonly Announcement[] = [
-  { id: 1, text: `Parcele em até ${STORE_CONFIG.maxInstallments}x sem juros`, active: true },
-  { id: 2, text: 'Compra segura', active: true },
+  // Exemplo de recado/promoção. "Parcele" e "Compra segura" saíram: são fixos da
+  // loja (o parcelamento vem da configuração de pagamento), não avisos.
+  {
+    id: 1,
+    text: 'Cupom NANI10: 10% de desconto em todo o site',
+    link: { path: '/produtos' },
+    active: true,
+  },
 ];
 
 export const STORE_SETTINGS_MOCK: StoreSettings = {
-  freeShippingMin: STORE_CONFIG.freeShippingMin,
-  freeShippingNotice: true,
+  freeShipping: { active: true, min: STORE_CONFIG.freeShippingMin, notice: true },
 };

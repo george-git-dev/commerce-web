@@ -21,8 +21,14 @@ export class HelpPageView {
   private readonly paramMap = toSignal(this.route.paramMap, { requireSync: true });
 
   protected readonly store = STORE_CONFIG;
-  /** Troca `{freteGratis}` pelo valor atual nos textos. */
+  /** Troca `{freteGratis}` pelo valor atual; `null` = texto de promoção que não vale agora. */
   protected readonly fill = (text: string) => this.storefront.fill(text);
+  /** Seção com algo para mostrar (itens ou algum parágrafo valendo). */
+  protected readonly visible = (section: {
+    paragraphs?: readonly string[];
+    items?: readonly unknown[];
+  }) =>
+    !!section.items?.length || (section.paragraphs ?? []).some((text) => this.fill(text) != null);
   private readonly storefront = inject(StorefrontContent);
   protected readonly page = computed(() =>
     HELP_PAGES.find((page) => page.slug === this.paramMap().get('pagina')),

@@ -54,12 +54,6 @@ export const ADMIN_NAV: readonly AdminNavItem[] = [
   { label: 'Relatórios', icon: 'insights', path: 'relatorios', permission: 'reports:view' },
 
   { label: 'Auditoria', icon: 'history', path: 'auditoria', permission: 'audit:view' },
-  // Banners do carrossel e avisos da faixa do topo (sem deploy).
+  // Banners, avisos da faixa do topo e configurações da loja (sem deploy).
   { label: 'Vitrine', icon: 'storefront', path: 'vitrine', permission: 'settings:view' },
-  {
-    label: 'Configurações da loja',
-    icon: 'settings',
-    path: 'configuracoes',
-    permission: 'settings:view',
-  },
 ];

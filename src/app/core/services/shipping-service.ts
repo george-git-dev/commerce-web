@@ -74,8 +74,9 @@ export class ShippingService {
       : [];
     if (!isValidCep(cep)) return options;
     const [eco, ecoMin, ecoMax, exp, expMin, expMax] = REGION_TABLE[cep[0]];
-    // Valor do frete grátis vem de Configurações da loja (backoffice).
-    const free = subtotal >= this.storefront.freeShippingMin();
+    // Promoção de frete grátis (Vitrine → Configurações); sem promoção, frete normal.
+    const min = this.storefront.freeShippingMin();
+    const free = min != null && subtotal >= min;
     options.push(
       {
         id: 'economico',

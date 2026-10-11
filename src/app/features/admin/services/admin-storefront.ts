@@ -91,19 +91,15 @@ export class AdminStorefront {
   }
 
   saveSettings(settings: StoreSettings): void {
-    const before = this.content.settings();
+    const before = this.content.settings().freeShipping;
+    const after = settings.freeShipping;
     this.content.saveSettings(settings);
-    this.record('Alterou configurações', 'Configurações', 'loja', [
-      [
-        'Frete grátis acima de',
-        moneyLabel(before.freeShippingMin),
-        moneyLabel(settings.freeShippingMin),
-      ],
-      [
-        'Aviso de frete grátis na faixa',
-        yesNo(before.freeShippingNotice),
-        yesNo(settings.freeShippingNotice),
-      ],
+    this.record('Alterou frete grátis', 'Configurações', 'loja', [
+      ['Frete grátis ativo', yesNo(before.active), yesNo(after.active)],
+      ['Frete grátis acima de', moneyLabel(before.min), moneyLabel(after.min)],
+      ['Período do frete grátis', period(before), period(after)],
+      ['Aviso na faixa', yesNo(before.notice), yesNo(after.notice)],
+      ['Link do aviso', linkToText(before.link), linkToText(after.link)],
     ]);
   }
 

@@ -3,6 +3,7 @@ import {
   bannerImageProblem,
   bannerProblems,
   freeShippingProblem,
+  freeShippingPromoProblems,
   linkFromChoice,
   linkToText,
   moneyLabel,
@@ -90,6 +91,22 @@ describe('regras da vitrine', () => {
     expect(freeShippingProblem('0')).not.toBeNull();
     expect(freeShippingProblem('')).not.toBeNull();
     expect(freeShippingProblem('-10')).not.toBeNull();
+    const ok = { active: true, min: '599', notice: true };
+    expect(freeShippingPromoProblems(ok, { preset: '', text: '' })).toEqual([]);
+    expect(
+      freeShippingPromoProblems(
+        { ...ok, startsOn: '2026-11-30', endsOn: '2026-11-20' },
+        {
+          preset: '',
+          text: '',
+        },
+      ).join(),
+      'período invertido',
+    ).toContain('data final');
+    expect(
+      freeShippingPromoProblems(ok, { preset: 'custom', text: 'https://x.com' }).join(),
+      'link externo',
+    ).toContain('Link');
     expect(moneyLabel(599)).toBe('R$ 599');
     expect(moneyLabel(599.9)).toBe('R$ 599,90');
     expect(bannerImageProblem({ type: 'image/webp', size: 100_000 })).toBeNull();

@@ -33,7 +33,11 @@ export class CatalogService {
   readonly categories = this.categoriesState.asReadonly();
   /** Com o valor atual do frete grátis no texto. */
   readonly highlights = computed(() =>
-    this.highlightsState().map((item) => ({ ...item, text: this.storefront.fill(item.text) })),
+    this.highlightsState().flatMap((item) => {
+      // Destaque do frete grátis some quando a promoção não está valendo.
+      const text = this.storefront.fill(item.text);
+      return text == null ? [] : [{ ...item, text }];
+    }),
   );
   /**
    * Com Lançamento e Mais vendido calculados e a nota média vinda das

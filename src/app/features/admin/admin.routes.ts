@@ -13,7 +13,6 @@ const READY = [
   'auditoria',
   'relatorios',
   'vitrine',
-  'configuracoes',
 ];
 
 /** Rotas do backoffice (`/admin`). Cada tela exige a permissão do seu item de menu. */
@@ -171,11 +170,13 @@ export const ADMIN_ROUTES: Routes = [
           import('./banner-form/admin-banner-form').then((m) => m.AdminBannerForm),
       },
       {
-        path: 'configuracoes',
+        path: 'vitrine/configuracoes',
         title: 'Nani Admin | Configurações da loja',
         canActivate: [permissionGuard('settings:view', '/admin')],
         loadComponent: () => import('./settings/admin-settings').then((m) => m.AdminSettings),
       },
+      // Endereço antigo (menu e auditoria antigos): continua funcionando.
+      { path: 'configuracoes', redirectTo: 'vitrine/configuracoes', pathMatch: 'full' },
       // Telas das próximas sessões: por enquanto, uma página "em construção".
       ...ADMIN_NAV.filter((item) => item.path && !READY.includes(item.path)).map((item) => ({
         path: item.path,

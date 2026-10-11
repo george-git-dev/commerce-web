@@ -39,9 +39,19 @@ export class StorefrontContent {
   readonly settings = this.settingsState.asReadonly();
 
   // --- Loja ----------------------------------------------------------------
-  readonly freeShippingMin = computed(() => this.settingsState().freeShippingMin);
-  /** "R$ 599" — para os textos da loja. */
-  readonly freeShippingLabel = computed(() => moneyLabel(this.freeShippingMin()));
+  /** Promoção de frete grátis valendo hoje (ligada e dentro do período). */
+  readonly freeShippingLive = computed(() =>
+    isLive(this.settingsState().freeShipping, this.today()),
+  );
+  /** Mínimo para o frete grátis; `null` = sem promoção agora (frete normal). */
+  readonly freeShippingMin = computed(() =>
+    this.freeShippingLive() ? this.settingsState().freeShipping.min : null,
+  );
+  /** "R$ 599" — para os textos da loja (vazio sem promoção). */
+  readonly freeShippingLabel = computed(() => {
+    const min = this.freeShippingMin();
+    return min == null ? '' : moneyLabel(min);
+  });
 
   /** Banners no ar hoje, no formato da loja. Nenhum no ar = banner padrão. */
   readonly banners = computed<readonly Banner[]>(() => {
@@ -56,19 +66,27 @@ export class StorefrontContent {
     }));
   });
 
-  /** Faixa do topo: frete grátis (se ligado) + avisos no ar, na ordem. */
+  /** Faixa do topo: frete grátis (valendo e com aviso ligado) + avisos no ar. */
   readonly announcements = computed<readonly LiveAnnouncement[]>(() => {
-    const list: LiveAnnouncement[] = this.settingsState().freeShippingNotice
-      ? [{ text: `Frete grátis acima de ${this.freeShippingLabel()}` }]
-      : [];
+    const promo = this.settingsState().freeShipping;
+    const list: LiveAnnouncement[] =
+      this.freeShippingLive() && promo.notice
+        ? [{ text: `Frete grátis acima de ${this.freeShippingLabel()}`, link: promo.link }]
+        : [];
     for (const item of this.announcementsState()) {
       if (isLive(item, this.today())) list.push({ text: item.text, link: item.link });
     }
     return list;
   });
 
-  /** Troca `{freteGratis}` pelo valor atual (textos de ajuda e destaques). */
-  fill(text: string): string {
+  /**
+   * Troca `{freteGratis}` pelo valor atual (textos de ajuda e destaques).
+   * Sem promoção valendo, texto que fala do frete grátis volta `null` — quem
+   * mostra esconde (não dá para prometer o que não está valendo).
+   */
+  fill(text: string): string | null {
+    if (!text.includes(FREE_SHIPPING_TOKEN)) return text;
+    if (!this.freeShippingLive()) return null;
     return text.split(FREE_SHIPPING_TOKEN).join(this.freeShippingLabel());
   }
 

@@ -1,5 +1,5 @@
 import { CATALOG_QUERY_PARAMS } from '../config/navigation';
-import { Announcement, StoreBanner, StoreLink } from '../models/storefront';
+import { Announcement, FreeShippingPromo, StoreBanner, StoreLink } from '../models/storefront';
 
 /**
  * Regras da vitrine (banners, avisos, frete grátis) em funções puras. O back
@@ -183,6 +183,25 @@ export function freeShippingProblem(value: number | string | null): string | nul
   if (number < FREE_SHIPPING_RULES.min) return 'O valor precisa ser maior que zero.';
   if (number > FREE_SHIPPING_RULES.max) return 'Valor alto demais — confira.';
   return null;
+}
+
+/**
+ * Promoção de frete grátis (lista vazia = pode salvar). `min` vem como texto
+ * do campo; `custom` = link digitado em "Outra página da loja…".
+ */
+export function freeShippingPromoProblems(
+  promo: Omit<FreeShippingPromo, 'min'> & { min: number | string },
+  custom: { preset: string; text: string },
+): string[] {
+  const problems: string[] = [];
+  const value = freeShippingProblem(promo.min);
+  if (value) problems.push(`Valor mínimo: ${value.charAt(0).toLowerCase()}${value.slice(1)}`);
+  const period = periodProblem(promo.startsOn, promo.endsOn);
+  if (period) problems.push(period);
+  if (custom.preset === 'custom' && !parseInternalLink(custom.text)) {
+    problems.push('Link: use um endereço da loja começando com "/".');
+  }
+  return problems;
 }
 
 /** Imagem do banner: tipo e tamanho (o back reprocessa e converte para WEBP). */

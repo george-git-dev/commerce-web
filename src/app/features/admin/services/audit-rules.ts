@@ -74,7 +74,7 @@ export function auditLink(entry: AuditEntry): string | null {
     case 'Avaliação':
       return '/admin/aprovacoes';
     case 'Configurações':
-      return '/admin/configuracoes';
+      return '/admin/vitrine/configuracoes';
     case 'Relatório':
       return '/admin/relatorios';
     default:
