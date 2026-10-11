@@ -146,3 +146,9 @@ export function maskPhone(value: string): string {
   const d = onlyDigits(value);
   return d.length >= 10 ? `(${d.slice(0, 2)}) *****-${d.slice(-4)}` : '';
 }
+
+/** "maria.silva@gmail.com" → "m***@gmail.com" (quem não pode ver dado sensível). */
+export function maskEmail(value: string): string {
+  const [user, domain] = value.split('@');
+  return domain ? `${user.charAt(0)}***@${domain}` : value;
+}

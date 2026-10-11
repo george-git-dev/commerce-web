@@ -14,6 +14,7 @@ import {
   maskCpf,
   maskDocument,
   maskPhone,
+  maskEmail,
 } from './br-format';
 
 describe('br-format', () => {
@@ -76,5 +77,9 @@ describe('telefone e CPF mascarado', () => {
   it('formata CNPJ enquanto digita', () => {
     expect(formatCnpj('11222333000181')).toBe('11.222.333/0001-81');
     expect(formatCnpj('112223')).toBe('11.222.3');
+  });
+
+  it('mascara e-mail', () => {
+    expect(maskEmail('maria.silva@gmail.com')).toBe('m***@gmail.com');
   });
 });

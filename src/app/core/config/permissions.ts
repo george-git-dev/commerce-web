@@ -36,6 +36,7 @@ export type Permission =
   | 'customers:sensitive'
   | 'approvals:view'
   | 'approvals:edit'
+  /** Gerar e baixar relatórios (CSV); e-mail de cliente sai mascarado sem `customers:sensitive`. */
   | 'reports:view'
   | 'team:manage'
   | 'audit:view'

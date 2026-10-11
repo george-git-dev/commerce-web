@@ -1,3 +1,4 @@
+import { toCsv } from '../../../core/utils/csv';
 import { AuditEntry } from './admin-audit';
 
 /** Áreas do filtro: cada uma junta as entidades que a auditoria registra. */
@@ -74,6 +75,8 @@ export function auditLink(entry: AuditEntry): string | null {
       return '/admin/aprovacoes';
     case 'Configurações':
       return '/admin/configuracoes';
+    case 'Relatório':
+      return '/admin/relatorios';
     default:
       return null;
   }
@@ -121,15 +124,8 @@ export function changeText(change: AuditEntry['changes'][number]): string {
   return `${change.field}: ${before}${change.after || '(removido)'}`;
 }
 
-/**
- * CSV para o Excel em português: separador `;`, BOM UTF-8 (acentos certos) e
- * proteção contra fórmula (célula que começa com = + - @ ganha um apóstrofo).
- */
+/** Registros como CSV (ver `toCsv`: Excel em português, sem fórmula). */
 export function auditCsv(list: readonly AuditEntry[]): string {
-  const cell = (value: string) => {
-    const safe = /^[=+\-@\t\r]/.test(value) ? `'${value}` : value;
-    return `"${safe.replace(/"/g, '""')}"`;
-  };
   const pad = (n: number) => String(n).padStart(2, '0');
   const when = (d: Date) =>
     `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
@@ -144,16 +140,18 @@ export function auditCsv(list: readonly AuditEntry[]): string {
     'IP',
     'Dispositivo',
   ];
-  const rows = list.map((entry) => [
-    when(entry.at),
-    entry.by,
-    entry.role,
-    areaOf(entry.entity),
-    entry.action,
-    `${entry.entity} ${entry.entityId}`,
-    entry.changes.map(changeText).join(' | '),
-    entry.origin.ip,
-    entry.origin.device,
-  ]);
-  return '﻿' + [header, ...rows].map((row) => row.map(cell).join(';')).join('\r\n');
+  return toCsv(
+    header,
+    list.map((entry) => [
+      when(entry.at),
+      entry.by,
+      entry.role,
+      areaOf(entry.entity),
+      entry.action,
+      `${entry.entity} ${entry.entityId}`,
+      entry.changes.map(changeText).join(' | '),
+      entry.origin.ip,
+      entry.origin.device,
+    ]),
+  );
 }

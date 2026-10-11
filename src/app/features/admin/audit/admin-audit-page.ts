@@ -4,6 +4,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth-service';
+import { downloadCsv } from '../../../core/utils/csv';
 import { AdminAudit, AuditEntry } from '../services/admin-audit';
 import { AdminOrderStore } from '../services/admin-order-store';
 import {
@@ -135,16 +136,7 @@ export class AdminAuditPage {
   protected exportCsv(): void {
     if (!this.canExport) return;
     const list = this.filtered();
-    const blob = new Blob([auditCsv(list)], { type: 'text/csv;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const anchor = document.createElement('a');
-    anchor.href = url;
-    const today = new Date();
-    const pad = (n: number) => String(n).padStart(2, '0');
-    // Data local (toISOString usaria UTC e viraria o dia à noite).
-    anchor.download = `auditoria-${today.getFullYear()}-${pad(today.getMonth() + 1)}-${pad(today.getDate())}.csv`;
-    anchor.click();
-    URL.revokeObjectURL(url);
+    downloadCsv('auditoria', auditCsv(list));
     this.audit.record({
       by: this.auth.user()?.name ?? 'Equipe',
       action: 'Exportou auditoria (CSV)',
