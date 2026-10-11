@@ -1,0 +1,298 @@
+h2 {
+  margin: 0;
+  font-size: clamp(1.75rem, 1.4rem + 1.6vw, 2.5rem);
+}
+
+.au {
+  display: grid;
+  gap: 14px;
+}
+
+.au__head {
+  display: grid;
+  gap: 10px;
+
+  > div {
+    display: grid;
+    gap: 4px;
+  }
+}
+
+.au__export {
+  justify-self: start;
+  min-height: 44px;
+}
+
+.au__eyebrow {
+  margin: 0;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.au__lead,
+.au__count {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+}
+
+.au__filters {
+  display: grid;
+  gap: 10px;
+}
+
+.au__search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 48px;
+  padding-inline: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--card);
+
+  mat-icon {
+    color: var(--muted-foreground);
+  }
+
+  input {
+    flex: 1;
+    width: 0;
+    border: 0;
+    outline: none;
+    background: none;
+    font: inherit;
+    font-size: 1rem;
+  }
+}
+
+.au__selects {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+
+  label {
+    display: grid;
+    gap: 4px;
+    min-width: 0;
+    font-size: 0.75rem;
+    color: var(--muted-foreground);
+  }
+
+  // "Quem" ocupa a linha toda no celular.
+  label:last-child {
+    grid-column: 1 / -1;
+  }
+
+  select {
+    min-width: 0;
+    height: 44px;
+    padding: 0 8px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--card);
+    color: var(--foreground);
+    font: inherit;
+    font-size: 0.875rem;
+  }
+}
+
+// Planilha: rola de lado no celular, com a data presa à esquerda.
+.au__scroll {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+
+  &:focus-visible {
+    outline: 2px solid var(--primary);
+  }
+}
+
+.au__table {
+  width: 100%;
+  min-width: 940px;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.8125rem;
+
+  th,
+  td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+    vertical-align: top;
+  }
+
+  td small,
+  th small {
+    display: block;
+    color: var(--muted-foreground);
+    font-weight: 400;
+  }
+
+  thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    padding: 0;
+    background: var(--muted);
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+
+    > span,
+    button {
+      display: block;
+      width: 100%;
+      min-height: 40px;
+      padding: 11px 12px;
+      border: 0;
+      background: none;
+      color: var(--foreground);
+      font: inherit;
+      text-align: left;
+    }
+
+    button {
+      cursor: pointer;
+    }
+  }
+
+  // Coluna da data: fica parada ao rolar de lado.
+  tr > :first-child {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    min-width: 96px;
+    border-bottom: 1px solid var(--border);
+    background: var(--card);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  thead tr > :first-child {
+    z-index: 3;
+    background: var(--muted);
+  }
+
+  a {
+    color: var(--earth);
+    font-weight: 600;
+  }
+}
+
+.au__arrow {
+  display: inline-block;
+  width: 0.8em;
+  color: var(--gold);
+}
+
+.au__row {
+  cursor: pointer;
+
+  &:hover > *,
+  &--open > * {
+    background: color-mix(in oklch, var(--gold) 10%, var(--card)) !important;
+  }
+}
+
+.au__change button {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  max-width: 240px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+
+  span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  strong {
+    flex-shrink: 0;
+    color: var(--earth);
+  }
+}
+
+// Detalhe aberto: todas as alterações da linha.
+.au__detail td {
+  position: static !important;
+  background: var(--muted) !important;
+
+  dl {
+    display: grid;
+    gap: 6px;
+    margin: 0;
+  }
+
+  div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px 10px;
+  }
+
+  dt {
+    min-width: 140px;
+    color: var(--muted-foreground);
+  }
+
+  dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+}
+
+.au__before {
+  color: var(--muted-foreground);
+  text-decoration: line-through;
+}
+
+.au__empty {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  padding: 40px 16px;
+  color: var(--muted-foreground);
+  text-align: center;
+
+  mat-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 40px;
+  }
+
+  p {
+    margin: 0;
+  }
+}
+
+@media (min-width: 900px) {
+  .au__head {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+  }
+
+  .au__filters {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+  }
+
+  .au__selects {
+    grid-template-columns: repeat(3, minmax(160px, 1fr));
+
+    label:last-child {
+      grid-column: auto;
+    }
+  }
+}

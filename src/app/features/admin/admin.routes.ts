@@ -10,6 +10,7 @@ const READY = [
   'estoque',
   'clientes',
   'aprovacoes',
+  'auditoria',
   'vitrine',
   'configuracoes',
 ];
@@ -128,6 +129,12 @@ export const ADMIN_ROUTES: Routes = [
         title: 'Nani Admin | Aprovações',
         canActivate: [permissionGuard('approvals:view', '/admin')],
         loadComponent: () => import('./approvals/admin-approvals').then((m) => m.AdminApprovals),
+      },
+      {
+        path: 'auditoria',
+        title: 'Nani Admin | Auditoria',
+        canActivate: [permissionGuard('audit:view', '/admin')],
+        loadComponent: () => import('./audit/admin-audit-page').then((m) => m.AdminAuditPage),
       },
       {
         path: 'vitrine',

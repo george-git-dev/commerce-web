@@ -201,6 +201,7 @@ export class AdminProductStore {
       action: before ? 'Editou produto' : 'Cadastrou produto',
       entity: 'Produto',
       entityId: product.name,
+      link: `/admin/produtos/${product.slug}`,
       changes: before
         ? this.diff(before, product)
         : [{ field: 'Produto', before: '—', after: product.name }],

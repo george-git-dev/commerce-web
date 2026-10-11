@@ -45,20 +45,23 @@ describe('fluxo de status do pedido (admin)', () => {
     TestBed.inject(AuthService).login('admin@email.com', '12345678');
     const store = TestBed.inject(AdminOrderStore);
     const audit = TestBed.inject(AdminAudit);
-    const paid = store.orders().find((order) => order.status === 'pago')!;
+    // O mock depende da data de hoje: pega o que houver em aberto (pago ou em separação).
+    const target = store.orders().find((order) => ['pago', 'em-separacao'].includes(order.status))!;
+    const before = statusLabel(target.status, target.shipping);
 
-    const separated = store.advance(paid.number)!;
-    expect(separated.status).toBe('em-separacao');
-    expect(separated.history.at(-1)?.by).toBe('Admin');
+    const advanced = store.advance(target.number, 'BR123456789BR')!;
+    expect(advanced.status).toBe(target.status === 'pago' ? 'em-separacao' : 'enviado');
+    expect(advanced.history.at(-1)?.by).toBe('Admin');
     expect(audit.entries()[0].changes[0]).toEqual({
       field: 'Status',
-      before: 'Pago',
-      after: 'Em separação',
+      before,
+      after: statusLabel(advanced.status, target.shipping),
     });
 
-    const cancelled = store.cancel(paid.number, 'Cliente desistiu')!;
+    const open = store.orders().find((order) => canCancel(order))!;
+    const cancelled = store.cancel(open.number, 'Cliente desistiu')!;
     expect(cancelled.status).toBe('cancelado');
     expect(cancelled.cancelReason).toBe('Cliente desistiu');
-    expect(store.cancel(paid.number, 'de novo')).toBeUndefined();
+    expect(store.cancel(open.number, 'de novo')).toBeUndefined();
   });
 });

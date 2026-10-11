@@ -1,6 +1,7 @@
 import { inject, Injectable, signal } from '@angular/core';
 import { AuthService } from '../../../core/services/auth-service';
 import { AdminOrder, adminOrdersMock } from '../data/admin-orders-mock';
+import { auditMock } from '../data/audit-mock';
 import { AdminAudit } from './admin-audit';
 import { canCancel, nextStatus, statusLabel } from './admin-order-flow';
 
@@ -17,6 +18,11 @@ export class AdminOrderStore {
   readonly now = new Date();
   private readonly state = signal<readonly AdminOrder[]>(adminOrdersMock(this.now));
   readonly orders = this.state.asReadonly();
+
+  constructor() {
+    // Mock: histórico de auditoria coerente com os pedidos (some na Fase 2).
+    this.audit.seedOnce(auditMock(this.state(), this.now));
+  }
 
   find(number: string | null): AdminOrder | undefined {
     return this.state().find((order) => order.number === number);

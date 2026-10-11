@@ -91,6 +91,7 @@ export class AdminPurchaseStore {
       action: id == null ? 'Cadastrou fornecedor' : 'Editou fornecedor',
       entity: 'Fornecedor',
       entityId: supplier.tradeName || supplier.legalName,
+      link: `/admin/estoque/fornecedores/${supplier.id}`,
       changes: [],
     });
     return supplier.id;
@@ -114,6 +115,7 @@ export class AdminPurchaseStore {
       action: 'Registrou entrada de mercadoria',
       entity: 'Entrada',
       entityId: `NF ${entry.invoice}`,
+      link: `/admin/estoque/entradas/${entry.id}`,
       changes: [],
     });
     if (receiveNow) this.receive(entry.id);
@@ -137,6 +139,7 @@ export class AdminPurchaseStore {
       action: 'Recebeu entrada de mercadoria',
       entity: 'Entrada',
       entityId: `NF ${entry.invoice}`,
+      link: `/admin/estoque/entradas/${entry.id}`,
       changes: entry.items.map((item) => ({
         field: `Estoque ${item.sku}`,
         before: '—',
