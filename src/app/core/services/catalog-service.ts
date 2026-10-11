@@ -7,6 +7,7 @@ import { Highlight } from '../models/highlight';
 import { Product } from '../models/product';
 import { ProductReview, ReviewPage, ReviewSort } from '../models/review';
 import { withHighlights } from '../utils/product-highlights';
+import { PromotionService } from './promotion-service';
 import { ReviewService } from './review-service';
 import { StorefrontContent } from './storefront-content';
 
@@ -23,6 +24,7 @@ export const REVIEWS_PAGE_SIZE = 5;
 export class CatalogService {
   private readonly storefront = inject(StorefrontContent);
   private readonly reviewStore = inject(ReviewService);
+  private readonly promotions = inject(PromotionService);
   private readonly categoriesState = signal<readonly Category[]>(CATEGORIES_MOCK);
   private readonly highlightsState = signal<readonly Highlight[]>(HIGHLIGHTS_MOCK);
   // Só produtos publicados chegam à loja; rascunhos ficam para o backoffice.
@@ -40,13 +42,16 @@ export class CatalogService {
     }),
   );
   /**
-   * Com Lançamento e Mais vendido calculados e a nota média vinda das
-   * avaliações aprovadas (aprovar/reprovar já muda a nota). Fase 2: tudo
+   * Com preço promocional (promoções no ar), Lançamento e Mais vendido
+   * calculados e a nota média vinda das avaliações aprovadas
+   * (aprovar/reprovar já muda a nota). Fase 2: tudo
    * pronto do back.
    */
   readonly products = computed(() =>
     withHighlights(
-      this.productsState().map((product) => {
+      this.productsState().map((raw) => {
+        // Preço promocional vem só das promoções no ar (Promoções, no backoffice).
+        const product = this.promotions.apply(raw);
         const approved = this.reviewStore.approvedFor(product.slug);
         if (!approved.length) return product;
         const total = approved.reduce((sum, review) => sum + review.rating, 0);

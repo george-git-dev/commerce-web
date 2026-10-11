@@ -34,7 +34,6 @@ import {
   DECANT_SIZES_ML,
   draftProblems,
   MIN_DESCRIPTION,
-  validPromo,
   requiredProblems,
   slugify,
   uniqueSlug,
@@ -148,7 +147,6 @@ export class AdminProductForm {
     enabled: [this.original ? !!this.originalBottle : false],
     volumeMl: [this.originalBottle?.volumeMl ?? (null as number | null)],
     price: [this.originalBottle?.price ?? (null as number | null)],
-    promoPrice: [this.originalBottle?.promoPrice ?? (null as number | null)],
   });
   /** Saldo atual de um SKU já cadastrado (pode ter mudado no Estoque). */
   protected currentStock(sku: string | undefined): number {
@@ -266,7 +264,6 @@ export class AdminProductForm {
         kind: 'frasco',
         volumeMl: b.volumeMl ?? undefined,
         price: Number(b.price),
-        promoPrice: b.promoPrice ? Number(b.promoPrice) : undefined,
         stock: this.originalBottle ? this.currentStock(this.originalBottle.id) : 0,
       });
     }
@@ -308,8 +305,7 @@ export class AdminProductForm {
 
   /** Campo obrigatório vazio — só destaca depois de tentar avançar. */
   protected missing(
-    field:
-      'gender' | 'concentration' | 'description' | 'kitItems' | 'volumeMl' | 'price' | 'promoPrice',
+    field: 'gender' | 'concentration' | 'description' | 'kitItems' | 'volumeMl' | 'price',
   ): boolean {
     if (!this.showErrors()) return false;
     const { description, kitItems, gender, concentration } = this.data.getRawValue();
@@ -318,7 +314,6 @@ export class AdminProductForm {
     if (field === 'concentration') return !concentration;
     const value = { ...bottle, description, kitItems }[field];
     if (field === 'description') return `${value}`.trim().length < MIN_DESCRIPTION;
-    if (field === 'promoPrice') return !validPromo(bottle.promoPrice, bottle.price);
     return (
       value == null || `${value}`.trim() === '' || (field !== 'kitItems' && !(Number(value) > 0))
     );

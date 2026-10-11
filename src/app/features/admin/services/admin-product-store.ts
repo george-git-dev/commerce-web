@@ -229,13 +229,6 @@ export class AdminProductStore {
           after: brl(variant.price),
         });
       }
-      if (old.promoPrice !== variant.promoPrice) {
-        changes.push({
-          field: `Promoção ${variant.id}`,
-          before: brl(old.promoPrice),
-          after: brl(variant.promoPrice),
-        });
-      }
       if (old.stock !== variant.stock) {
         changes.push({
           field: `Estoque ${variant.id}`,

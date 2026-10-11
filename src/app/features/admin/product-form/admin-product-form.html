@@ -177,18 +177,10 @@
                   min="0"
                 />
               </label>
-              <label class="f-field f-field--half">
-                Promoção (R$, opcional)
-                <input
-                  formControlName="promoPrice"
-                  [attr.aria-invalid]="missing('promoPrice') || null"
-                  type="number"
-                  inputmode="decimal"
-                  appNonNegative="decimal"
-                  step="0.01"
-                  min="0"
-                />
-              </label>
+              <p class="pf__hint f-field--half">
+                Preço promocional é em <a routerLink="/admin/promocoes">Promoções</a> (com período e
+                limite).
+              </p>
             </div>
           }
         </section>
@@ -311,7 +303,7 @@
           <p class="pf__hint">
             Automáticos, não precisa marcar: <strong>Mais vendido</strong> (os 10 que mais vendem),
             <strong>Lançamento</strong> (os 10 últimos cadastrados) e <strong>Oferta</strong> (com
-            preço promocional).
+            promoção no ar).
           </p>
         </section>
 

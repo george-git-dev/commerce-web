@@ -33,6 +33,8 @@ export const ADMIN_NAV: readonly AdminNavItem[] = [
     shortcut: true,
   },
   { label: 'Produtos', icon: 'inventory_2', path: 'produtos', permission: 'products:view' },
+  // Preço promocional: por itens, categoria, marca ou formato, com período.
+  { label: 'Promoções', icon: 'sell', path: 'promocoes', permission: 'products:view' },
   // Saldo, entradas de mercadoria (compras) e fornecedores, em abas.
   {
     label: 'Estoque e compras',

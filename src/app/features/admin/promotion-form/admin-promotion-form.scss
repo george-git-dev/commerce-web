@@ -1,0 +1,198 @@
+// Peças só da promoção (o resto vem de storefront-form.scss).
+.pf__seg {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+
+  label {
+    display: inline-flex !important;
+    align-items: center;
+    min-height: 40px;
+    padding: 0 14px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    color: var(--foreground) !important;
+    font-size: 0.875rem !important;
+    cursor: pointer;
+
+    &:has(input:focus-visible) {
+      outline: 2px solid var(--gold);
+      outline-offset: 2px;
+    }
+  }
+
+  input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+}
+
+.pf__seg label.pf__seg--on {
+  border-color: var(--earth);
+  background: var(--earth);
+  color: var(--card) !important;
+}
+
+.pf__row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+}
+
+.pf__bulk {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 14px;
+  font-size: 0.8125rem;
+  color: var(--muted-foreground);
+
+  button {
+    min-height: 32px;
+  }
+}
+
+.pf__warn {
+  margin: 0;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  background: color-mix(in oklch, var(--gold) 14%, transparent);
+  color: var(--earth);
+  font-size: 0.8125rem;
+}
+
+.pf__link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--earth);
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.pf__choices {
+  display: grid;
+  max-height: 320px;
+  margin: 0;
+  padding: 0 4px;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  list-style: none;
+
+  li + li {
+    border-top: 1px solid var(--border);
+  }
+}
+
+.pf__choice {
+  display: grid;
+  min-width: 0;
+
+  small {
+    font-size: 0.75rem;
+    color: var(--muted-foreground);
+  }
+}
+
+.pf__preview {
+  display: grid;
+  gap: 10px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
+.pf__items {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 10px;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+  }
+}
+
+.pf__item--off {
+  opacity: 0.6;
+}
+
+.pf__item--loss {
+  border-color: var(--wine) !important;
+
+  .pf__prices small {
+    color: var(--wine);
+  }
+}
+
+.pf__name {
+  display: grid;
+  min-width: 0;
+
+  a {
+    color: inherit;
+    overflow-wrap: anywhere;
+  }
+
+  small {
+    font-size: 0.75rem;
+    color: var(--muted-foreground);
+  }
+}
+
+.pf__prices {
+  display: grid;
+  justify-items: end;
+  text-align: right;
+
+  s {
+    font-size: 0.75rem;
+    color: var(--muted-foreground);
+  }
+
+  small {
+    max-width: 150px;
+    font-size: 0.75rem;
+    color: var(--muted-foreground);
+  }
+}
+
+.pf__confirm {
+  color: var(--wine) !important;
+}
+
+.pf__note {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+}
+
+.pf__limit {
+  display: grid;
+  gap: 4px !important;
+
+  input[type='radio'] {
+    flex: none;
+    width: 20px !important;
+    height: 20px;
+    min-height: 0 !important;
+    margin: 0;
+    padding: 0 !important;
+    accent-color: var(--primary);
+  }
+
+  legend {
+    margin-bottom: 4px;
+    padding: 0;
+    font-size: 0.8125rem;
+    color: var(--muted-foreground);
+  }
+}

@@ -4,7 +4,7 @@ import { AuditEntry } from './admin-audit';
 /** Áreas do filtro: cada uma junta as entidades que a auditoria registra. */
 export const AUDIT_AREAS = {
   pedidos: { label: 'Pedidos', entities: ['Pedido'] },
-  produtos: { label: 'Produtos', entities: ['Produto', 'Marca'] },
+  produtos: { label: 'Produtos e promoções', entities: ['Produto', 'Marca', 'Promoção'] },
   estoque: { label: 'Estoque e compras', entities: ['Estoque', 'Entrada', 'Fornecedor'] },
   clientes: { label: 'Clientes e equipe', entities: ['Cliente'] },
   avaliacoes: { label: 'Avaliações', entities: ['Avaliação'] },

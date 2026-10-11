@@ -30,12 +30,11 @@ describe('regras do cadastro de produto', () => {
     expect(imageProblem({ type: 'image/png', size: 6 * 1024 * 1024 })).toContain('5 MB');
   });
 
-  it('variantes: um frasco, SKU único, preço e promoção válidos', () => {
+  it('variantes: um frasco, SKU único e preço válido (promoção é em Promoções)', () => {
     expect(variantProblems([variant()], [])).toEqual([]);
     expect(variantProblems([], [])).toHaveLength(1);
     expect(variantProblems([variant(), variant({ id: 'asad-2' })], [])[0]).toContain('um frasco');
     expect(variantProblems([variant()], ['asad-100'])[0]).toContain('outro produto');
-    expect(variantProblems([variant({ promoPrice: 299.9 })], [])[0]).toContain('promocional');
     expect(variantProblems([variant({ stock: -1 })], [])[0]).toContain('estoque');
   });
 
@@ -67,10 +66,8 @@ describe('regras do cadastro de produto', () => {
     // Estoque não é do cadastro: entra por compra/ajuste em Estoque e compras.
     const noPrice = { ...draft.bottle, price: '' };
     expect(requiredProblems(1, { ...draft, bottle: noPrice })).toHaveLength(1);
-    const negative = { ...draft.bottle, volumeMl: -100, price: 0, promoPrice: -5 };
-    expect(requiredProblems(1, { ...draft, bottle: negative })).toHaveLength(3);
-    const promoHigh = { ...draft.bottle, promoPrice: 299.9 };
-    expect(requiredProblems(1, { ...draft, bottle: promoHigh })[0]).toContain('promoção');
+    const negative = { ...draft.bottle, volumeMl: -100, price: 0 };
+    expect(requiredProblems(1, { ...draft, bottle: negative })).toHaveLength(2);
     const negativeDecant = [{ checked: true, price: -10 }];
     expect(requiredProblems(1, { ...draft, decants: negativeDecant })).toHaveLength(1);
     expect(

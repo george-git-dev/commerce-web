@@ -7,6 +7,7 @@ import { AdminLayout } from './layout/admin-layout';
 const READY = [
   'pedidos',
   'produtos',
+  'promocoes',
   'estoque',
   'clientes',
   'aprovacoes',
@@ -58,6 +59,27 @@ export const ADMIN_ROUTES: Routes = [
         canActivate: [permissionGuard('products:view', '/admin')],
         loadComponent: () =>
           import('./product-form/admin-product-form').then((m) => m.AdminProductForm),
+      },
+      {
+        path: 'promocoes',
+        title: 'Nani Admin | Promoções',
+        canActivate: [permissionGuard('products:view', '/admin')],
+        loadComponent: () =>
+          import('./promotions/admin-promotions').then((m) => m.AdminPromotionsPage),
+      },
+      {
+        path: 'promocoes/nova',
+        title: 'Nani Admin | Nova promoção',
+        canActivate: [permissionGuard('products:edit', '/admin/promocoes')],
+        loadComponent: () =>
+          import('./promotion-form/admin-promotion-form').then((m) => m.AdminPromotionForm),
+      },
+      {
+        path: 'promocoes/:id',
+        title: 'Nani Admin | Promoção',
+        canActivate: [permissionGuard('products:view', '/admin')],
+        loadComponent: () =>
+          import('./promotion-form/admin-promotion-form').then((m) => m.AdminPromotionForm),
       },
       {
         path: 'estoque',

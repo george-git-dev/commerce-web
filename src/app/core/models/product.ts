@@ -35,7 +35,10 @@ export interface ProductVariant {
   volumeMl?: number;
   /** Preço cheio, em reais. */
   price: number;
-  /** Preço promocional; quando existe, é o que o cliente paga e `price` aparece riscado. */
+  /**
+   * Preço promocional CALCULADO pelas promoções no ar (menu Promoções); não se
+   * edita no produto. Quando existe, é o que o cliente paga e `price` aparece riscado.
+   */
   promoPrice?: number;
   /** Unidades disponíveis. 0 = "Esgotado" só neste tamanho. */
   stock: number;

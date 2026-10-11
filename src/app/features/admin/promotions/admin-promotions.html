@@ -1,0 +1,61 @@
+<section class="pr" #top>
+  <header class="pr__head">
+    <div>
+      <p class="pr__eyebrow">Gestão da loja</p>
+      <h2>Promoções</h2>
+      <p class="pr__lead">
+        Desconto por itens, categoria, marca ou formato, com período e limite. Promoções não
+        acumulam: vale a de maior desconto.
+      </p>
+    </div>
+    @if (store.canEdit()) {
+      <a matButton="filled" class="ui-cta" routerLink="/admin/promocoes/nova">
+        <mat-icon>add</mat-icon> Nova promoção
+      </a>
+    }
+  </header>
+
+  <div class="pr__chips" role="tablist" aria-label="Situação">
+    @for (item of filters; track item.id) {
+      <button
+        type="button"
+        role="tab"
+        [attr.aria-selected]="filter() === item.id"
+        [class.pr__chip--on]="filter() === item.id"
+        (click)="filter.set(item.id)"
+      >
+        {{ item.label }} <span>{{ counts()[item.id] }}</span>
+      </button>
+    }
+  </div>
+
+  @if (page().content.length) {
+    <ul class="pr__list">
+      @for (row of page().content; track row.promo.id) {
+        <li>
+          <a class="pr__row" [routerLink]="['/admin/promocoes', row.promo.id]">
+            <span class="pr__main">
+              <strong>{{ row.promo.name }}</strong>
+              <small>{{ row.summary }}</small>
+              <small
+                >{{ row.period }}
+                @if (row.limit) {
+                  · {{ row.limit }}
+                }
+              </small>
+            </span>
+            <span class="pr__status" [class]="'pr__status pr__status--' + row.status">
+              {{ row.statusLabel }}
+            </span>
+          </a>
+        </li>
+      }
+    </ul>
+    <app-pager [paging]="paging" [page]="page()" [anchor]="top" noun="promoções" />
+  } @else {
+    <p class="pr__empty">
+      <mat-icon aria-hidden="true">sell</mat-icon>
+      Nenhuma promoção aqui.
+    </p>
+  }
+</section>

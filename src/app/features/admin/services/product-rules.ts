@@ -56,11 +56,6 @@ export function variantProblems(
   if (variants.some((variant) => !(variant.price > 0))) {
     problems.push('Todo preço precisa ser maior que zero.');
   }
-  if (
-    variants.some((variant) => variant.promoPrice != null && variant.promoPrice >= variant.price)
-  ) {
-    problems.push('O preço promocional precisa ser menor que o preço cheio.');
-  }
   if (variants.some((variant) => !Number.isInteger(variant.stock) || variant.stock < 0)) {
     problems.push('O estoque precisa ser um número inteiro, zero ou mais.');
   }
@@ -83,7 +78,6 @@ export interface ProductDraft {
     enabled: boolean;
     volumeMl: number | string | null;
     price: number | string | null;
-    promoPrice?: number | string | null;
   };
   /** Estoque não entra aqui: só por compra/envase/ajuste (Estoque e compras). */
   decants: readonly { checked: boolean; price: number | string | null }[];
@@ -106,11 +100,6 @@ type Field = number | string | null;
 const filled = (value: Field) => value != null && `${value}`.trim() !== '';
 /** Preço/volume: preenchido e maior que zero (negativo e zero não valem). */
 const positive = (value: Field) => filled(value) && Number(value) > 0;
-
-/** Promoção é opcional; se preenchida, maior que zero e menor que o preço. */
-export function validPromo(promo: Field, price: Field): boolean {
-  return !filled(promo) || (positive(promo) && Number(promo) < Number(price));
-}
 
 /**
  * Campos obrigatórios de cada etapa do cadastro (0 Dados, 1 Variantes,
@@ -144,10 +133,6 @@ export function requiredProblems(step: number, d: ProductDraft): string[] {
       if (d.bottle.enabled) {
         add(!positive(d.bottle.volumeMl), 'Informe o volume do frasco (maior que zero).');
         add(!positive(d.bottle.price), 'Informe o preço do frasco (maior que zero).');
-        add(
-          !validPromo(d.bottle.promoPrice ?? null, d.bottle.price),
-          'A promoção precisa ser maior que zero e menor que o preço.',
-        );
       }
       add(
         checked.some((size) => !positive(size.price)),
