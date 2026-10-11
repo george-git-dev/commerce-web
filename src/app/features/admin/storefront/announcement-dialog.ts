@@ -2,14 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { MatButtonModule } from '@angular/material/button';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { Announcement } from '../../../core/models/storefront';
-import {
-  ANNOUNCEMENT_MAX,
-  announcementProblems,
-  linkFromChoice,
-  linkToText,
-  presetOf,
-} from '../../../core/utils/storefront-rules';
-import { LinkPicker } from './link-picker';
+import { ANNOUNCEMENT_MAX, announcementProblems } from '../../../core/utils/storefront-rules';
 
 export interface AnnouncementDialogData {
   announcement?: Announcement;
@@ -18,10 +11,13 @@ export interface AnnouncementDialogData {
 /** Resultado: dados para salvar, `'excluir'` ou `undefined` (desistiu). */
 export type AnnouncementDialogResult = Omit<Announcement, 'id'> | 'excluir';
 
-/** Criar/editar um aviso da faixa do topo (texto curto, link, ativo, período). */
+/**
+ * Criar/editar um aviso da faixa do topo: só texto curto, ativo e período
+ * (sem data = fica até desativar). Sem link e sem ordem — aparecem todos os no ar.
+ */
 @Component({
   selector: 'app-announcement-dialog',
-  imports: [LinkPicker, MatButtonModule, MatDialogModule],
+  imports: [MatButtonModule, MatDialogModule],
   template: `
     <h2 mat-dialog-title>{{ data.announcement ? 'Editar aviso' : 'Novo aviso' }}</h2>
     <form (submit)="$event.preventDefault(); confirm()" novalidate>
@@ -44,7 +40,6 @@ export type AnnouncementDialogResult = Omit<Announcement, 'id'> | 'excluir';
               <span>{{ text().length }}/{{ max }}</span>
             </span>
           </label>
-          <app-link-picker [tried]="tried()" [(preset)]="preset" [(text)]="linkText" />
           <label class="vf__check">
             <input
               type="checkbox"
@@ -116,10 +111,6 @@ export class AnnouncementDialog {
 
   private readonly original = this.data.announcement;
   protected readonly text = signal(this.original?.text ?? '');
-  protected readonly preset = signal(presetOf(this.original?.link));
-  protected readonly linkText = signal(
-    presetOf(this.original?.link) === 'custom' ? linkToText(this.original?.link) : '',
-  );
   protected readonly active = signal(this.original?.active ?? true);
   protected readonly startsOn = signal(this.original?.startsOn ?? '');
   protected readonly endsOn = signal(this.original?.endsOn ?? '');
@@ -127,14 +118,11 @@ export class AnnouncementDialog {
 
   private readonly draft = computed<Omit<Announcement, 'id'>>(() => ({
     text: this.text().trim(),
-    link: linkFromChoice(this.preset(), this.linkText()),
     active: this.active(),
     startsOn: this.startsOn() || undefined,
     endsOn: this.endsOn() || undefined,
   }));
-  protected readonly problems = computed(() =>
-    announcementProblems(this.draft(), { preset: this.preset(), text: this.linkText() }),
-  );
+  protected readonly problems = computed(() => announcementProblems(this.draft()));
 
   protected confirm(): void {
     this.tried.set(true);

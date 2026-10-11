@@ -2,16 +2,15 @@ import { computed, Injectable, signal } from '@angular/core';
 import { DEFAULT_BANNER } from '../config/banners';
 import { ANNOUNCEMENTS_MOCK, BANNERS_MOCK, STORE_SETTINGS_MOCK } from '../data/storefront-mock';
 import { Banner } from '../models/banner';
-import { Announcement, StoreBanner, StoreLink, StoreSettings } from '../models/storefront';
+import { Announcement, StoreBanner, StoreSettings } from '../models/storefront';
 import { isLive, isoDay, moneyLabel } from '../utils/storefront-rules';
 
 /** Marca no texto que vira o valor do frete grátis ("acima de {freteGratis}"). */
 export const FREE_SHIPPING_TOKEN = '{freteGratis}';
 
-/** Aviso da faixa já pronto para a loja (texto puro + link interno opcional). */
+/** Aviso da faixa já pronto para a loja (só texto). */
 export interface LiveAnnouncement {
   text: string;
-  link?: StoreLink;
 }
 
 /**
@@ -71,10 +70,10 @@ export class StorefrontContent {
     const promo = this.settingsState().freeShipping;
     const list: LiveAnnouncement[] =
       this.freeShippingLive() && promo.notice
-        ? [{ text: `Frete grátis acima de ${this.freeShippingLabel()}`, link: promo.link }]
+        ? [{ text: `Frete grátis acima de ${this.freeShippingLabel()}` }]
         : [];
     for (const item of this.announcementsState()) {
-      if (isLive(item, this.today())) list.push({ text: item.text, link: item.link });
+      if (isLive(item, this.today())) list.push({ text: item.text });
     }
     return list;
   });
@@ -122,10 +121,6 @@ export class StorefrontContent {
 
   removeAnnouncement(id: number): void {
     this.announcementsState.update((list) => list.filter((item) => item.id !== id));
-  }
-
-  moveAnnouncement(id: number, step: -1 | 1): void {
-    this.announcementsState.update((list) => move(list, id, step));
   }
 
   saveSettings(settings: StoreSettings): void {

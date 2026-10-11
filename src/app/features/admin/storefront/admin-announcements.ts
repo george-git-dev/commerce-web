@@ -5,12 +5,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Announcement } from '../../../core/models/storefront';
 import { AuthService } from '../../../core/services/auth-service';
-import {
-  linkToText,
-  moneyLabel,
-  SHOW_STATUS_LABELS,
-  showStatus,
-} from '../../../core/utils/storefront-rules';
+import { moneyLabel, SHOW_STATUS_LABELS, showStatus } from '../../../core/utils/storefront-rules';
 import { AdminStorefront } from '../services/admin-storefront';
 import {
   AnnouncementDialog,
@@ -24,8 +19,9 @@ const dayLabel = (iso?: string) => (iso ? iso.split('-').reverse().join('/') : '
 
 /**
  * `/admin/vitrine/avisos` — mensagens da faixa do topo. O frete grátis entra
- * sozinho em 1º (promoção de Configurações; abre no mesmo diálogo); os outros,
- * nesta ordem. Só promoções e recados — o que é fixo da loja não entra aqui.
+ * sozinho em 1º (promoção de Configurações; abre no mesmo diálogo); os outros
+ * entram todos, só texto, valendo pelo período. Só promoções e recados — o que
+ * é fixo da loja não entra aqui.
  */
 @Component({
   selector: 'app-admin-announcements',
@@ -35,7 +31,8 @@ const dayLabel = (iso?: string) => (iso ? iso.split('-').reverse().join('/') : '
       <app-storefront-tabs />
       <div class="vl__bar">
         <p>
-          A faixa do topo da loja mostra os avisos <strong>No ar</strong>, nesta ordem, rolando.
+          A faixa do topo mostra, rolando, todos os avisos <strong>No ar</strong> — só texto. Com
+          datas, aparece só no período; sem datas, fica até desativar.
         </p>
         @if (canEdit) {
           <button matButton="filled" class="ui-cta" type="button" (click)="edit()">
@@ -52,10 +49,9 @@ const dayLabel = (iso?: string) => (iso ? iso.split('-').reverse().join('/') : '
               {{ statusLabels[freeShipping().status] }}
             </span>
             <small>Automático · {{ freeShipping().period }}</small>
-            <small>{{ freeShipping().link }}</small>
           </button>
         </li>
-        @for (row of rows(); track row.item.id; let first = $first, last = $last) {
+        @for (row of rows(); track row.item.id) {
           <li class="vl__row">
             <span class="vl__icon"><mat-icon aria-hidden="true">campaign</mat-icon></span>
             <button type="button" class="vl__main" [disabled]="!canEdit" (click)="edit(row.item)">
@@ -64,28 +60,7 @@ const dayLabel = (iso?: string) => (iso ? iso.split('-').reverse().join('/') : '
                 {{ statusLabels[row.status] }}
               </span>
               <small>{{ row.period }}</small>
-              <small>{{ row.link || 'Sem link' }}</small>
             </button>
-            @if (canEdit) {
-              <span class="vl__order">
-                <button
-                  type="button"
-                  [disabled]="first"
-                  [attr.aria-label]="'Subir aviso ' + row.item.text"
-                  (click)="store.moveAnnouncement(row.item.id, -1)"
-                >
-                  <mat-icon aria-hidden="true">keyboard_arrow_up</mat-icon>
-                </button>
-                <button
-                  type="button"
-                  [disabled]="last"
-                  [attr.aria-label]="'Descer aviso ' + row.item.text"
-                  (click)="store.moveAnnouncement(row.item.id, 1)"
-                >
-                  <mat-icon aria-hidden="true">keyboard_arrow_down</mat-icon>
-                </button>
-              </span>
-            }
           </li>
         }
       </ol>
@@ -108,7 +83,6 @@ export class AdminAnnouncements {
       min: moneyLabel(promo.min),
       status: promo.notice ? showStatus(promo, this.store.content.today()) : ('inativo' as const),
       period: periodText(promo),
-      link: promo.notice ? linkToText(promo.link) || 'Sem link' : 'Aviso desligado',
     };
   });
 
@@ -117,7 +91,6 @@ export class AdminAnnouncements {
     return this.store.content.allAnnouncements().map((item) => ({
       item,
       status: showStatus(item, today),
-      link: linkToText(item.link),
       period: periodText(item),
     }));
   });

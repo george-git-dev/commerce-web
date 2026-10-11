@@ -30,12 +30,9 @@ describe('StorefrontContent', () => {
 
   it('frete grátis: vale na faixa e nos textos; aviso pode ser desligado', () => {
     content.saveSettings({
-      freeShipping: { active: true, min: 450, notice: true, link: { path: '/produtos' } },
+      freeShipping: { active: true, min: 450, notice: true },
     });
-    expect(content.announcements()[0]).toEqual({
-      text: 'Frete grátis acima de R$ 450',
-      link: { path: '/produtos' },
-    });
+    expect(content.announcements()[0]).toEqual({ text: 'Frete grátis acima de R$ 450' });
     expect(content.fill('Acima de {freteGratis}, para todo o Brasil')).toBe(
       'Acima de R$ 450, para todo o Brasil',
     );

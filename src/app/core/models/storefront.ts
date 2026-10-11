@@ -29,11 +29,13 @@ export interface StoreBanner {
   endsOn?: string;
 }
 
-/** Mensagem da faixa rolante do topo. */
+/**
+ * Mensagem da faixa rolante do topo: só texto (a faixa não leva a lugar
+ * nenhum). Aparecem todos os que estão no ar; o período decide quando.
+ */
 export interface Announcement {
   id: number;
   text: string;
-  link?: StoreLink;
   active: boolean;
   startsOn?: string;
   endsOn?: string;
@@ -53,8 +55,6 @@ export interface FreeShippingPromo {
   endsOn?: string;
   /** Mostra "Frete grátis acima de R$ X" como 1º aviso da faixa. */
   notice: boolean;
-  /** Para onde o aviso leva ao tocar (opcional). */
-  link?: StoreLink;
 }
 
 /** Regras comerciais que a vitrine mostra e o carrinho/checkout usam. */

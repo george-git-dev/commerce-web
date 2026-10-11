@@ -157,10 +157,7 @@ export function bannerProblems(
 }
 
 /** Problemas do aviso (lista vazia = pode salvar). */
-export function announcementProblems(
-  announcement: Omit<Announcement, 'id'>,
-  custom: { preset: string; text: string },
-): string[] {
+export function announcementProblems(announcement: Omit<Announcement, 'id'>): string[] {
   const problems: string[] = [];
   const text = announcement.text.trim();
   if (text.length < 3) problems.push('Escreva o aviso (mínimo 3 letras).');
@@ -168,9 +165,6 @@ export function announcementProblems(
     problems.push(`Aviso com no máximo ${ANNOUNCEMENT_MAX} caracteres (cabe no celular).`);
   }
   if (/[<>]/.test(text)) problems.push('O aviso é só texto: sem os sinais < e >.');
-  if (custom.preset === 'custom' && !parseInternalLink(custom.text)) {
-    problems.push('Link: use um endereço da loja começando com "/".');
-  }
   const period = periodProblem(announcement.startsOn, announcement.endsOn);
   if (period) problems.push(period);
   return problems;
@@ -185,22 +179,15 @@ export function freeShippingProblem(value: number | string | null): string | nul
   return null;
 }
 
-/**
- * Promoção de frete grátis (lista vazia = pode salvar). `min` vem como texto
- * do campo; `custom` = link digitado em "Outra página da loja…".
- */
+/** Promoção de frete grátis (lista vazia = pode salvar). `min` vem como texto do campo. */
 export function freeShippingPromoProblems(
   promo: Omit<FreeShippingPromo, 'min'> & { min: number | string },
-  custom: { preset: string; text: string },
 ): string[] {
   const problems: string[] = [];
   const value = freeShippingProblem(promo.min);
   if (value) problems.push(`Valor mínimo: ${value.charAt(0).toLowerCase()}${value.slice(1)}`);
   const period = periodProblem(promo.startsOn, promo.endsOn);
   if (period) problems.push(period);
-  if (custom.preset === 'custom' && !parseInternalLink(custom.text)) {
-    problems.push('Link: use um endereço da loja começando com "/".');
-  }
   return problems;
 }
 

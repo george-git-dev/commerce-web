@@ -72,7 +72,6 @@ export class AdminStorefront {
     const savedId = this.content.saveAnnouncement(id, data);
     this.record(before ? 'Alterou aviso' : 'Criou aviso', 'Aviso', savedId, [
       ['Texto', before?.text ?? '', data.text],
-      ['Link', linkToText(before?.link), linkToText(data.link)],
       ['Ativo', before ? yesNo(before.active) : '', yesNo(data.active)],
       ['Período', before ? period(before) : '', period(data)],
     ]);
@@ -86,10 +85,6 @@ export class AdminStorefront {
     this.record('Excluiu aviso', 'Aviso', id, [['Texto', before.text, '']]);
   }
 
-  moveAnnouncement(id: number, step: -1 | 1): void {
-    this.content.moveAnnouncement(id, step);
-  }
-
   saveSettings(settings: StoreSettings): void {
     const before = this.content.settings().freeShipping;
     const after = settings.freeShipping;
@@ -99,7 +94,6 @@ export class AdminStorefront {
       ['Frete grátis acima de', moneyLabel(before.min), moneyLabel(after.min)],
       ['Período do frete grátis', period(before), period(after)],
       ['Aviso na faixa', yesNo(before.notice), yesNo(after.notice)],
-      ['Link do aviso', linkToText(before.link), linkToText(after.link)],
     ]);
   }
 

@@ -81,9 +81,9 @@ describe('regras da vitrine', () => {
 
   it('aviso: texto curto, sem HTML', () => {
     const ok = { text: 'Cupom BEMVINDA: 10% na 1ª compra', active: true };
-    expect(announcementProblems(ok, noLink)).toEqual([]);
-    expect(announcementProblems({ ...ok, text: 'a'.repeat(71) }, noLink)).toHaveLength(1);
-    expect(announcementProblems({ ...ok, text: '<b>oi</b>' }, noLink)).toHaveLength(1);
+    expect(announcementProblems(ok)).toEqual([]);
+    expect(announcementProblems({ ...ok, text: 'a'.repeat(71) })).toHaveLength(1);
+    expect(announcementProblems({ ...ok, text: '<b>oi</b>' })).toHaveLength(1);
   });
 
   it('frete grátis e imagem', () => {
@@ -92,21 +92,12 @@ describe('regras da vitrine', () => {
     expect(freeShippingProblem('')).not.toBeNull();
     expect(freeShippingProblem('-10')).not.toBeNull();
     const ok = { active: true, min: '599', notice: true };
-    expect(freeShippingPromoProblems(ok, { preset: '', text: '' })).toEqual([]);
+    expect(freeShippingPromoProblems(ok)).toEqual([]);
     expect(
-      freeShippingPromoProblems(
-        { ...ok, startsOn: '2026-11-30', endsOn: '2026-11-20' },
-        {
-          preset: '',
-          text: '',
-        },
-      ).join(),
+      freeShippingPromoProblems({ ...ok, startsOn: '2026-11-30', endsOn: '2026-11-20' }).join(),
       'período invertido',
     ).toContain('data final');
-    expect(
-      freeShippingPromoProblems(ok, { preset: 'custom', text: 'https://x.com' }).join(),
-      'link externo',
-    ).toContain('Link');
+    expect(freeShippingPromoProblems({ ...ok, min: '0' }).join(), 'valor').toContain('Valor');
     expect(moneyLabel(599)).toBe('R$ 599');
     expect(moneyLabel(599.9)).toBe('R$ 599,90');
     expect(bannerImageProblem({ type: 'image/webp', size: 100_000 })).toBeNull();

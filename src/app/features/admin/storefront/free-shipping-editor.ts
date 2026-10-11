@@ -12,25 +12,21 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthService } from '../../../core/services/auth-service';
 import {
   freeShippingPromoProblems,
-  linkFromChoice,
-  linkToText,
   moneyLabel,
-  presetOf,
   SHOW_STATUS_LABELS,
   showStatus,
 } from '../../../core/utils/storefront-rules';
 import { NonNegative } from '../../../shared/input-mask/non-negative';
 import { AdminStorefront } from '../services/admin-storefront';
-import { LinkPicker } from './link-picker';
 
 /**
- * Formulário da promoção de frete grátis (ativo, valor mínimo, período, aviso
- * na faixa e link). O MESMO formulário aparece na aba Configurações e no
+ * Formulário da promoção de frete grátis (ativo, valor mínimo, período e aviso
+ * na faixa). O MESMO formulário aparece na aba Configurações e no
  * diálogo da aba Avisos — os dois gravam a mesma regra.
  */
 @Component({
   selector: 'app-free-shipping-editor',
-  imports: [LinkPicker, MatButtonModule, NonNegative],
+  imports: [MatButtonModule, NonNegative],
   template: `
     <form class="fs" (submit)="$event.preventDefault(); save()" novalidate>
       <p class="fs__status" [class]="'fs__status fs__status--' + status()">
@@ -89,9 +85,6 @@ import { LinkPicker } from './link-picker';
           />
           Mostrar o aviso na faixa do topo
         </label>
-        @if (notice()) {
-          <app-link-picker [tried]="tried()" [(preset)]="preset" [(text)]="linkText" />
-        }
       </fieldset>
       @if (tried() && problems().length) {
         <ul class="vf__problems" role="alert">
@@ -163,10 +156,6 @@ export class FreeShippingEditor {
   protected readonly startsOn = signal(this.current.startsOn ?? '');
   protected readonly endsOn = signal(this.current.endsOn ?? '');
   protected readonly notice = signal(this.current.notice);
-  protected readonly preset = signal(presetOf(this.current.link));
-  protected readonly linkText = signal(
-    presetOf(this.current.link) === 'custom' ? linkToText(this.current.link) : '',
-  );
   protected readonly tried = signal(false);
 
   private readonly draft = computed(() => ({
@@ -175,14 +164,8 @@ export class FreeShippingEditor {
     startsOn: this.startsOn() || undefined,
     endsOn: this.endsOn() || undefined,
     notice: this.notice(),
-    link: this.notice() ? linkFromChoice(this.preset(), this.linkText()) : undefined,
   }));
-  protected readonly problems = computed(() =>
-    freeShippingPromoProblems(this.draft(), {
-      preset: this.notice() ? this.preset() : '',
-      text: this.linkText(),
-    }),
-  );
+  protected readonly problems = computed(() => freeShippingPromoProblems(this.draft()));
   protected readonly preview = computed(() => {
     const number = Number(this.value());
     return Number.isFinite(number) && number > 0 ? moneyLabel(Math.round(number * 100) / 100) : '—';

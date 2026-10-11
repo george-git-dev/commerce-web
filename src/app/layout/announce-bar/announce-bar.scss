@@ -36,12 +36,6 @@
   li {
     white-space: nowrap;
 
-    // Aviso com link: mesmo visual do texto (sem sublinhado); o toque continua levando à página.
-    a {
-      color: inherit;
-      text-decoration: none;
-    }
-
     // Estrela da logo como separador (inclusive entre o fim de uma cópia e o começo da outra).
     &::after {
       content: '✦';

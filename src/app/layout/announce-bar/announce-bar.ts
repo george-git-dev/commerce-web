@@ -1,11 +1,9 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
-import { RouterLink } from '@angular/router';
 import { StorefrontContent } from '../../core/services/storefront-content';
 
 /** Faixa de anúncios no topo do header, rolando de ponta a ponta. */
 @Component({
   selector: 'app-announce-bar',
-  imports: [RouterLink],
   templateUrl: './announce-bar.html',
   styleUrl: './announce-bar.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
