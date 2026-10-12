@@ -28,6 +28,12 @@
         <dd>− {{ summary.discount() | currency: 'BRL' }}</dd>
       </div>
     }
+    @if (summary.coupon() && summary.couponProblem()) {
+      <div class="sum__warn">
+        <dt>Cupom {{ summary.coupon()?.code }} não aplicado</dt>
+        <dd>{{ summary.couponProblem() }}</dd>
+      </div>
+    }
     @if (summary.pixDiscount()) {
       <div class="sum__off">
         <dt>Desconto no Pix</dt>

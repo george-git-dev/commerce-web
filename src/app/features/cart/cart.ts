@@ -6,6 +6,7 @@ import { RouterLink } from '@angular/router';
 import { CartStore } from '../../core/services/cart-store';
 import { CouponService } from '../../core/services/coupon-service';
 import { OrderSummary } from '../../core/services/order-summary';
+import { couponDescription } from '../../core/utils/coupon-rules';
 import { EmptyState } from '../../shared/empty-state/empty-state';
 import { CartLineItem } from './cart-line-item/cart-line-item';
 import { ShippingCalculator } from './shipping-calculator/shipping-calculator';
@@ -39,6 +40,10 @@ export class Cart {
   protected readonly couponError = signal('');
   protected readonly appliedCoupon = this.summary.coupon;
   protected readonly couponProblem = this.summary.couponProblem;
+  protected readonly couponText = computed(() => {
+    const coupon = this.appliedCoupon();
+    return coupon ? couponDescription(coupon) : '';
+  });
 
   // Valores vêm do `OrderSummary` — os mesmos que o checkout mostra.
   protected readonly shippingOptions = this.summary.shippingOptions;
@@ -54,7 +59,7 @@ export class Cart {
   );
 
   protected applyCoupon(): void {
-    const result = this.coupons.apply(this.coupon(), this.cart.subtotal());
+    const result = this.coupons.apply(this.coupon());
     if (result.ok) {
       this.coupon.set('');
       this.couponError.set('');

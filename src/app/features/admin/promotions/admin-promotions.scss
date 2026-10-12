@@ -1,40 +1,49 @@
-h2 {
-  margin: 0;
-  font-size: clamp(1.75rem, 1.4rem + 1.6vw, 2.5rem);
-}
-
 .pr {
   display: grid;
   gap: 14px;
 }
 
-.pr__head {
-  display: grid;
-  gap: 12px;
-
-  > div {
-    display: grid;
-    gap: 4px;
-  }
-
-  a {
-    justify-self: start;
-  }
-}
-
-.pr__eyebrow {
-  margin: 0;
-  font-size: 0.6875rem;
-  font-weight: 600;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--gold);
+.pr__new {
+  justify-self: start;
 }
 
 .pr__lead {
   margin: 0;
   font-size: 0.875rem;
   color: var(--muted-foreground);
+}
+
+.pr__search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--card);
+  color: var(--muted-foreground);
+
+  input {
+    flex: 1;
+    min-width: 0;
+    border: 0;
+    background: none;
+    color: var(--foreground);
+    font: inherit;
+    font-size: 1rem;
+    outline: none;
+  }
+
+  &:focus-within {
+    border-color: var(--gold);
+  }
+}
+
+// Código do cupom: monoespaçado e com espaçamento, como o cliente digita.
+.pr__code {
+  font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace;
+  letter-spacing: 0.06em;
 }
 
 .pr__chips {
@@ -125,7 +134,8 @@ h2 {
     color: var(--earth);
   }
 
-  &--agendada {
+  &--agendada,
+  &--agendado {
     color: var(--earth);
   }
 }
@@ -139,11 +149,4 @@ h2 {
   border: 1px dashed var(--border);
   border-radius: var(--radius);
   color: var(--muted-foreground);
-}
-
-@media (min-width: 700px) {
-  .pr__head {
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-items: end;
-  }
 }

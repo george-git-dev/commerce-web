@@ -41,6 +41,20 @@ export class OrderService {
     return order;
   }
 
+  /**
+   * A conta já fez pedido na loja (para cupom de 1ª compra). Mock: conta só os
+   * pedidos criados nesta sessão — os de exemplo aparecem para todo mundo.
+   * Fase 2: o back conta os pedidos não cancelados da conta.
+   */
+  /** E-mail da conta logada (dono dos pedidos). */
+  ownerEmail(): string {
+    return this.auth.user()?.email ?? '';
+  }
+
+  hasPlaced(email: string): boolean {
+    return (this.created()[email] ?? []).some((order) => order.status !== 'cancelado');
+  }
+
   find(number: string | null): Order | undefined {
     return this.orders().find((order) => order.number === number);
   }

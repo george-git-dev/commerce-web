@@ -6,6 +6,7 @@ import { AdminPromotions } from '../services/admin-promotions';
 import { ListMemory } from '../services/list-memory';
 import { Pager } from '../shared/pager/pager';
 import { Paging } from '../shared/pager/paging';
+import { PromotionsTabs } from './promotions-tabs';
 
 type Filter = 'todas' | 'no-ar' | 'agendada' | 'fora';
 
@@ -30,7 +31,7 @@ const day = (iso?: string) => (iso ? iso.split('-').reverse().join('/') : '');
  */
 @Component({
   selector: 'app-admin-promotions',
-  imports: [MatButtonModule, MatIconModule, RouterLink, Pager],
+  imports: [MatButtonModule, MatIconModule, RouterLink, Pager, PromotionsTabs],
   templateUrl: './admin-promotions.html',
   styleUrl: './admin-promotions.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

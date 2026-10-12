@@ -90,6 +90,17 @@
   color: var(--earth);
 }
 
+// Cupom aplicado no carrinho que não vale mais (ex.: já usado por esta conta).
+.sum__rows .sum__warn {
+  display: grid;
+  gap: 2px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  background: color-mix(in oklch, var(--wine) 8%, transparent);
+  color: var(--wine);
+  font-size: 0.8125rem;
+}
+
 .sum__rows .sum__total {
   margin-top: 8px;
   padding-top: 12px;

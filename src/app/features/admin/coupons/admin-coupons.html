@@ -1,0 +1,64 @@
+<section class="pr" #top>
+  <app-promotions-tabs />
+  @if (store.canEdit()) {
+    <a matButton="filled" class="ui-cta pr__new" routerLink="/admin/promocoes/cupons/novo">
+      <mat-icon>add</mat-icon> Novo cupom
+    </a>
+  }
+  <p class="pr__lead">
+    O cliente digita o código no carrinho. Por padrão o cupom não desconta de item já em oferta.
+  </p>
+
+  <label class="pr__search">
+    <mat-icon aria-hidden="true">search</mat-icon>
+    <input
+      type="search"
+      placeholder="Buscar código"
+      aria-label="Buscar código"
+      [value]="search()"
+      (input)="search.set($any($event.target).value)"
+    />
+  </label>
+
+  <div class="pr__chips" role="tablist" aria-label="Situação">
+    @for (item of filters; track item.id) {
+      <button
+        type="button"
+        role="tab"
+        [attr.aria-selected]="filter() === item.id"
+        [class.pr__chip--on]="filter() === item.id"
+        (click)="filter.set(item.id)"
+      >
+        {{ item.label }} <span>{{ counts()[item.id] }}</span>
+      </button>
+    }
+  </div>
+
+  @if (page().content.length) {
+    <ul class="pr__list">
+      @for (row of page().content; track row.coupon.id) {
+        <li>
+          <a class="pr__row" [routerLink]="['/admin/promocoes/cupons', row.coupon.id]">
+            <span class="pr__main">
+              <strong class="pr__code">{{ row.coupon.code }}</strong>
+              <small>{{ row.summary }}</small>
+              <small>
+                {{ row.period }} · {{ row.uses }}
+                @if (row.coupon.discountGiven) {
+                  · {{ row.coupon.discountGiven | currency: 'BRL' }} em desconto
+                }
+              </small>
+            </span>
+            <span [class]="'pr__status pr__status--' + row.status">{{ row.statusLabel }}</span>
+          </a>
+        </li>
+      }
+    </ul>
+    <app-pager [paging]="paging" [page]="page()" [anchor]="top" noun="cupons" />
+  } @else {
+    <p class="pr__empty">
+      <mat-icon aria-hidden="true">confirmation_number</mat-icon>
+      Nenhum cupom aqui.
+    </p>
+  }
+</section>

@@ -68,6 +68,26 @@ export const ADMIN_ROUTES: Routes = [
           import('./promotions/admin-promotions').then((m) => m.AdminPromotionsPage),
       },
       {
+        path: 'promocoes/cupons',
+        title: 'Nani Admin | Cupons',
+        canActivate: [permissionGuard('products:view', '/admin')],
+        loadComponent: () => import('./coupons/admin-coupons').then((m) => m.AdminCouponsPage),
+      },
+      {
+        path: 'promocoes/cupons/novo',
+        title: 'Nani Admin | Novo cupom',
+        canActivate: [permissionGuard('products:edit', '/admin/promocoes/cupons')],
+        loadComponent: () =>
+          import('./coupon-form/admin-coupon-form').then((m) => m.AdminCouponForm),
+      },
+      {
+        path: 'promocoes/cupons/:id',
+        title: 'Nani Admin | Cupom',
+        canActivate: [permissionGuard('products:view', '/admin')],
+        loadComponent: () =>
+          import('./coupon-form/admin-coupon-form').then((m) => m.AdminCouponForm),
+      },
+      {
         path: 'promocoes/nova',
         title: 'Nani Admin | Nova promoção',
         canActivate: [permissionGuard('products:edit', '/admin/promocoes')],

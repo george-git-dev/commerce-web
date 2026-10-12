@@ -53,6 +53,8 @@ export class ReviewStep {
       return;
     }
     const isCard = this.payment.method === 'cartao';
+    // Cupom que deixou de valer (ex.: já usado por esta conta) não vai no pedido.
+    const coupon = this.summary.couponProblem() ? null : this.summary.coupon();
     // Mock: o pedido nasce no front. Na Fase 2 vai para `POST /orders` (itens,
     // endereço, frete escolhido, cupom e token do cartão) e o back recalcula tudo.
     const order = this.orders.place({
@@ -81,13 +83,18 @@ export class ReviewStep {
         cardLast4: isCard ? this.cardLast4 : undefined,
         cardBrand: isCard ? (cardBrand(this.payment.cardNumber) ?? undefined) : undefined,
       },
-      couponCode: this.summary.coupon()?.code,
+      couponCode: coupon?.code,
       subtotal: this.summary.subtotal(),
       discount: this.summary.discount(),
       pixDiscount: this.summary.pixDiscount(),
       shippingPrice: this.summary.shippingPrice(),
       total: this.summary.total(),
     });
+    if (coupon) {
+      // Mock: conta o uso aqui. Fase 2: o back conta na mesma transação do pedido.
+      const given = coupon.kind === 'shipping' ? shipping.price : this.summary.discount();
+      this.coupons.recordUse(coupon.code, this.orders.ownerEmail(), given);
+    }
     this.cart.clear();
     this.coupons.remove();
     this.router.navigate(['/pedido', order.number], { replaceUrl: true });

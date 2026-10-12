@@ -49,11 +49,12 @@ export class OrderSummary {
 
   /** Cupom aplicado que deixou de valer (ex.: a quantidade baixou do mínimo). */
   readonly couponProblem = computed(() => {
-    const coupon = this.coupon();
-    return coupon ? this.coupons.problem(coupon, this.subtotal()) : null;
+    return this.coupons.problem(this.coupon());
   });
-  readonly discount = computed(() => this.coupons.productDiscount(this.coupon(), this.subtotal()));
-  readonly freeShippingByCoupon = computed(() => this.coupon()?.kind === 'shipping');
+  readonly discount = computed(() => this.coupons.productDiscount(this.coupon()));
+  readonly freeShippingByCoupon = computed(
+    () => this.coupon()?.kind === 'shipping' && !this.couponProblem(),
+  );
   readonly shippingPrice = computed(() =>
     this.freeShippingByCoupon() ? 0 : (this.selectedShipping()?.price ?? 0),
   );

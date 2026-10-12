@@ -187,12 +187,45 @@
     margin: 0;
     padding: 0 !important;
     accent-color: var(--primary);
-  }
-
+  }
+
   legend {
     margin-bottom: 4px;
     padding: 0;
     font-size: 0.8125rem;
     color: var(--muted-foreground);
+  }
+}
+
+// Cupom: código e números do uso.
+.cf__code {
+  font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace !important;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.cf__stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+
+  div {
+    display: grid;
+    gap: 2px;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--card);
+  }
+
+  dt {
+    font-size: 0.75rem;
+    color: var(--muted-foreground);
+  }
+
+  dd {
+    margin: 0;
+    font-weight: 600;
   }
 }

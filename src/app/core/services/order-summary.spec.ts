@@ -19,7 +19,7 @@ describe('OrderSummary', () => {
 
   it('soma subtotal, desconto do cupom e frete escolhido', () => {
     TestBed.inject(ShippingService).cep.set('01310100');
-    TestBed.inject(CouponService).apply('NANI10', summary.subtotal());
+    TestBed.inject(CouponService).apply('NANI10');
     summary.shippingId.set('expresso');
 
     const expected = summary.subtotal() - summary.discount() + summary.selectedShipping()!.price;

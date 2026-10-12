@@ -1,76 +1,139 @@
-import { effect, Injectable, signal } from '@angular/core';
-import { Coupon } from '../models/coupon';
+import { computed, effect, inject, Injectable, signal } from '@angular/core';
+import { COUPONS_MOCK } from '../data/coupons-mock';
+import { Coupon, CouponDraft } from '../models/coupon';
 import { readJson, writeJson } from '../utils/browser-storage';
+import { couponDiscount, couponProblem, normalizeCode } from '../utils/coupon-rules';
+import { isoDay } from '../utils/storefront-rules';
+import { AuthService } from './auth-service';
+import { CartStore } from './cart-store';
+import { OrderService } from './order-service';
 
 const COUPON_STORAGE_KEY = 'nani.coupon.v1';
-
-/** Cupons fictícios para testar os cálculos. Na Fase 2 quem valida é o back. */
-const COUPONS_MOCK: readonly Coupon[] = [
-  { code: 'NANI10', description: '10% de desconto nos produtos', kind: 'percent', value: 10 },
-  {
-    code: 'BEMVINDO30',
-    description: 'R$ 30 de desconto em compras a partir de R$ 200',
-    kind: 'fixed',
-    value: 30,
-    minSubtotal: 200,
-  },
-  {
-    code: 'FRETEGRATIS',
-    description: 'Frete grátis em qualquer entrega',
-    kind: 'shipping',
-    value: 0,
-  },
-];
 
 export type CouponResult = { ok: true; coupon: Coupon } | { ok: false; message: string };
 
 /**
- * Cupom aplicado na sessão. Hoje valida contra o mock; na Fase 2 vira
- * `POST /cart/coupon` e o desconto final é calculado no back (nunca confiar no front).
+ * Cupons: cadastro (mock em memória, editado pelo backoffice via
+ * `AdminCoupons`) e o cupom aplicado na sessão. No navegador fica só o
+ * CÓDIGO; regras e valores vêm do cadastro. Fase 2: `POST /cart/coupon` é
+ * prévia e o back recalcula o desconto e conta o uso no `POST /orders`.
  */
 @Injectable({ providedIn: 'root' })
 export class CouponService {
-  /** Volta só o código salvo e só se ainda existir; o mínimo é reavaliado no carrinho. */
-  readonly applied = signal<Coupon | null>(
-    COUPONS_MOCK.find((coupon) => coupon.code === readJson<string>(COUPON_STORAGE_KEY)) ?? null,
-  );
+  private readonly cart = inject(CartStore);
+  private readonly auth = inject(AuthService);
+  private readonly orders = inject(OrderService);
+
+  private readonly state = signal<readonly Coupon[]>(COUPONS_MOCK);
+  /** Quem usou cada cupom (código → e-mail → vezes). Fase 2: tabela `coupon_usage`. */
+  private readonly usage = signal<Readonly<Record<string, Readonly<Record<string, number>>>>>({
+    BEMVINDO30: { 'maria@email.com': 1 },
+  });
+  private readonly appliedCode = signal<string | null>(readJson<string>(COUPON_STORAGE_KEY));
+
+  readonly all = this.state.asReadonly();
+  /** Hoje (`aaaa-mm-dd`). Fase 2: o back decide. */
+  readonly today = signal(isoDay(new Date()));
+
+  /** Cupom aplicado (lido do cadastro: se a equipe mudar, a loja já vê a regra nova). */
+  readonly applied = computed(() => this.find(this.appliedCode()) ?? null);
+
+  /** Carrinho atual: subtotal e quanto dele está fora de oferta. */
+  private readonly cartTotals = computed(() => ({
+    subtotal: this.cart.subtotal(),
+    promoFree: this.cart
+      .items()
+      .filter((line) => line.variant.promoPrice == null)
+      .reduce((sum, line) => sum + line.variant.price * line.quantity, 0),
+  }));
 
   constructor() {
-    effect(() => writeJson(COUPON_STORAGE_KEY, this.applied()?.code ?? null));
+    effect(() => writeJson(COUPON_STORAGE_KEY, this.appliedCode()));
   }
 
-  apply(rawCode: string, subtotal: number): CouponResult {
-    const code = rawCode.trim().toUpperCase();
+  find(code: string | null): Coupon | undefined {
+    return code ? this.state().find((coupon) => coupon.code === code) : undefined;
+  }
+
+  apply(rawCode: string): CouponResult {
+    const code = normalizeCode(rawCode);
     if (!code) return { ok: false, message: 'Digite o código do cupom.' };
-    const coupon = COUPONS_MOCK.find((item) => item.code === code);
+    const coupon = this.find(code);
     if (!coupon) return { ok: false, message: 'Cupom inválido ou expirado.' };
-    const problem = this.problem(coupon, subtotal);
+    const problem = this.problemFor(coupon);
     if (problem) return { ok: false, message: problem };
-    this.applied.set(coupon);
+    this.appliedCode.set(code);
     return { ok: true, coupon };
   }
 
   remove(): void {
-    this.applied.set(null);
+    this.appliedCode.set(null);
   }
 
-  /** Motivo de o cupom não valer para este subtotal (ou `null` se vale). */
-  problem(coupon: Coupon, subtotal: number): string | null {
-    if (coupon.minSubtotal && subtotal < coupon.minSubtotal) {
-      const min = coupon.minSubtotal.toLocaleString('pt-BR', {
-        style: 'currency',
-        currency: 'BRL',
-      });
-      return `Este cupom vale para compras a partir de ${min}.`;
-    }
-    return null;
+  /** Motivo de o cupom não valer para a compra atual (ou `null` se vale). */
+  problem(coupon: Coupon | null): string | null {
+    return coupon ? this.problemFor(coupon) : null;
   }
 
-  /** Desconto sobre os produtos (R$), sem passar do subtotal. */
-  productDiscount(coupon: Coupon | null, subtotal: number): number {
-    if (!coupon || this.problem(coupon, subtotal)) return 0;
-    if (coupon.kind === 'percent') return Math.round(subtotal * coupon.value) / 100;
-    if (coupon.kind === 'fixed') return Math.min(coupon.value, subtotal);
-    return 0;
+  /** Desconto nos produtos (R$) da compra atual; 0 se o cupom não vale. */
+  productDiscount(coupon: Coupon | null): number {
+    if (!coupon || this.problemFor(coupon)) return 0;
+    return couponDiscount(coupon, this.eligible(coupon));
+  }
+
+  /** Pedido criado com o cupom: conta o uso (no back, na mesma transação do pedido). */
+  recordUse(code: string, email: string, discount: number): void {
+    this.state.update((list) =>
+      list.map((c) =>
+        c.code === code
+          ? {
+              ...c,
+              uses: c.uses + 1,
+              discountGiven: Math.round((c.discountGiven + discount) * 100) / 100,
+            }
+          : c,
+      ),
+    );
+    this.usage.update((all) => ({
+      ...all,
+      [code]: { ...all[code], [email]: (all[code]?.[email] ?? 0) + 1 },
+    }));
+  }
+
+  // --- Cadastro (backoffice) ---------------------------------------------------
+
+  save(id: number | null, draft: CouponDraft): number {
+    const nextId = id ?? Math.max(0, ...this.state().map((c) => c.id)) + 1;
+    this.state.update((list) =>
+      id == null
+        ? [...list, { ...draft, id: nextId, uses: 0, discountGiven: 0 }]
+        : list.map((c) => (c.id === id ? { ...c, ...draft, id } : c)),
+    );
+    return nextId;
+  }
+
+  delete(id: number): void {
+    this.state.update((list) => list.filter((c) => c.id !== id));
+  }
+
+  private eligible(coupon: Coupon): number {
+    const totals = this.cartTotals();
+    return coupon.allowOnPromo ? totals.subtotal : totals.promoFree;
+  }
+
+  /** Sem login, limite por cliente e 1ª compra ficam para o checkout (que exige login). */
+  private problemFor(coupon: Coupon): string | null {
+    const user = this.auth.user();
+    return couponProblem(coupon, {
+      today: this.today(),
+      subtotal: this.cartTotals().subtotal,
+      eligibleSubtotal: this.eligible(coupon),
+      customer: user
+        ? {
+            usedThisCoupon: this.usage()[coupon.code]?.[user.email] ?? 0,
+            hasPurchased: this.orders.hasPlaced(user.email),
+          }
+        : null,
+    });
   }
 }

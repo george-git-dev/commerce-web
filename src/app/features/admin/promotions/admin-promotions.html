@@ -1,19 +1,14 @@
 <section class="pr" #top>
-  <header class="pr__head">
-    <div>
-      <p class="pr__eyebrow">Gestão da loja</p>
-      <h2>Promoções</h2>
-      <p class="pr__lead">
-        Desconto por itens, categoria, marca ou formato, com período e limite. Promoções não
-        acumulam: vale a de maior desconto.
-      </p>
-    </div>
-    @if (store.canEdit()) {
-      <a matButton="filled" class="ui-cta" routerLink="/admin/promocoes/nova">
-        <mat-icon>add</mat-icon> Nova promoção
-      </a>
-    }
-  </header>
+  <app-promotions-tabs />
+  @if (store.canEdit()) {
+    <a matButton="filled" class="ui-cta pr__new" routerLink="/admin/promocoes/nova">
+      <mat-icon>add</mat-icon> Nova promoção
+    </a>
+  }
+  <p class="pr__lead">
+    Desconto por itens, categoria, marca ou formato, com período e limite. Promoções não acumulam:
+    vale a de maior desconto.
+  </p>
 
   <div class="pr__chips" role="tablist" aria-label="Situação">
     @for (item of filters; track item.id) {
