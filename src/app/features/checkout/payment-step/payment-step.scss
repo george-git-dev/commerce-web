@@ -80,3 +80,52 @@
     color: var(--gold);
   }
 }
+
+// Crédito na loja (só aparece com saldo) e aviso de pedido coberto.
+.pay__credit {
+  display: grid;
+  gap: 8px;
+}
+
+.pay__credit-check {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  cursor: pointer;
+
+  input {
+    flex: none;
+    width: 20px;
+    height: 20px;
+    margin: 0;
+    accent-color: var(--primary);
+  }
+
+  span {
+    display: grid;
+  }
+
+  small {
+    font-size: 0.8125rem;
+    color: var(--muted-foreground);
+  }
+}
+
+.pay__credit-note {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--earth);
+}
+
+.pay__covered {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: var(--earth);
+
+  mat-icon {
+    color: var(--gold);
+  }
+}

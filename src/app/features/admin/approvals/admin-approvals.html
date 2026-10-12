@@ -1,22 +1,9 @@
 <section class="ap" #top>
-  <header class="ap__head">
-    <p class="ap__eyebrow">Gestão da loja</p>
-    <h2>Aprovações</h2>
-    <p class="ap__lead">
-      Avaliações dos clientes: só aparecem no produto depois de aprovadas. A equipe aprova, reprova
-      ou responde — nunca edita o texto do cliente.
-    </p>
-  </header>
-
-  <!-- Hoje só Avaliações; Trocas/Devoluções entram aqui como outra aba. -->
-  <nav class="ap__kind" aria-label="Tipo de aprovação">
-    <span class="ap__kind--on" aria-current="page">
-      Avaliações
-      @if (counts().pendente) {
-        <span class="ap__count">{{ counts().pendente }}</span>
-      }
-    </span>
-  </nav>
+  <app-approvals-tabs />
+  <p class="ap__lead">
+    Avaliações dos clientes: só aparecem no produto depois de aprovadas. A equipe aprova, reprova ou
+    responde — nunca edita o texto do cliente.
+  </p>
 
   <div class="ap__status" role="tablist" aria-label="Situação">
     @for (tab of tabs; track tab.id) {

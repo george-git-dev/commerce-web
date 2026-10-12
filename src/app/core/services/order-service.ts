@@ -30,7 +30,9 @@ export class OrderService {
       number: `NP${String(Date.now()).slice(-6)}`,
       createdAt: new Date().toISOString(),
       // Cartão aprovado na hora no mock; Pix e boleto aguardam o pagamento.
-      status: draft.payment.method === 'cartao' ? 'pago' : 'aguardando-pagamento',
+      // Pedido todo pago com crédito na loja: não há o que esperar.
+      status:
+        draft.payment.method === 'cartao' || draft.total === 0 ? 'pago' : 'aguardando-pagamento',
     };
     // A liberação de entrega em mãos vale para um pedido só.
     if (order.shipping.id === 'em-maos') this.auth.consumeInHandsDelivery();

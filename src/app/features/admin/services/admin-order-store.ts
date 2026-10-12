@@ -1,5 +1,6 @@
 import { inject, Injectable, signal } from '@angular/core';
 import { AuthService } from '../../../core/services/auth-service';
+import { CommissionService } from '../../../core/services/commission-service';
 import { CouponService } from '../../../core/services/coupon-service';
 import { PromotionService } from '../../../core/services/promotion-service';
 import { AdminOrder, adminOrdersMock } from '../data/admin-orders-mock';
@@ -17,6 +18,7 @@ export class AdminOrderStore {
   private readonly auth = inject(AuthService);
   private readonly audit = inject(AdminAudit);
   private readonly coupons = inject(CouponService);
+  private readonly commissions = inject(CommissionService);
   private readonly promotions = inject(PromotionService);
 
   readonly now = new Date();
@@ -44,6 +46,8 @@ export class AdminOrderStore {
       history: [...order.history, { status: next, at: new Date(), by: this.who() }],
     };
     this.save(updated);
+    // Entregue: a comissão de afiliado (se houver) começa a contar o prazo.
+    if (next === 'entregue') this.commissions.markDelivered(number);
     this.audit.record({
       by: this.who(),
       action: 'Alterou status do pedido',
@@ -90,6 +94,9 @@ export class AdminOrderStore {
   /** Devolve o uso do cupom e as unidades das promoções do pedido (para a auditoria). */
   private releaseDiscounts(order: AdminOrder): { field: string; before: string; after: string }[] {
     const changes: { field: string; before: string; after: string }[] = [];
+    if (this.commissions.cancelByOrder(order.number)) {
+      changes.push({ field: 'Comissão de afiliado', before: 'Pendente', after: 'Cancelada' });
+    }
     if (order.coupon) {
       this.coupons.releaseUse(order.coupon.code, order.customer.email, order.coupon.discount);
       changes.push({

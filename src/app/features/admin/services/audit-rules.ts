@@ -8,6 +8,7 @@ export const AUDIT_AREAS = {
   estoque: { label: 'Estoque e compras', entities: ['Estoque', 'Entrada', 'Fornecedor'] },
   clientes: { label: 'Clientes e equipe', entities: ['Cliente'] },
   avaliacoes: { label: 'Avaliações', entities: ['Avaliação'] },
+  afiliados: { label: 'Afiliados', entities: ['Afiliado', 'Pagamento de afiliado'] },
   vitrine: { label: 'Vitrine e configurações', entities: ['Banner', 'Aviso', 'Configurações'] },
 } as const;
 
@@ -73,6 +74,10 @@ export function auditLink(entry: AuditEntry): string | null {
       return '/admin/vitrine/avisos';
     case 'Avaliação':
       return '/admin/aprovacoes';
+    case 'Afiliado':
+      return '/admin/aprovacoes/afiliados';
+    case 'Pagamento de afiliado':
+      return '/admin/afiliados';
     case 'Configurações':
       return '/admin/vitrine/configuracoes';
     case 'Relatório':

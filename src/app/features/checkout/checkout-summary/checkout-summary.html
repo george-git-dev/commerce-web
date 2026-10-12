@@ -50,6 +50,12 @@
         }
       </dd>
     </div>
+    @if (summary.creditApplied()) {
+      <div class="sum__off">
+        <dt>Crédito na loja</dt>
+        <dd>− {{ summary.creditApplied() | currency: 'BRL' }}</dd>
+      </div>
+    }
     <div class="sum__total">
       <dt>Total</dt>
       <dd>{{ summary.total() | currency: 'BRL' }}</dd>

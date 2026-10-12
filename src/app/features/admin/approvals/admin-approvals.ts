@@ -1,4 +1,5 @@
 import { DatePipe } from '@angular/common';
+import { ApprovalsTabs } from './approvals-tabs';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
@@ -43,7 +44,7 @@ const normalize = (text: string) =>
  */
 @Component({
   selector: 'app-admin-approvals',
-  imports: [DatePipe, MatButtonModule, MatIconModule, RouterLink, StarRating, Pager],
+  imports: [DatePipe, MatButtonModule, MatIconModule, RouterLink, StarRating, Pager, ApprovalsTabs],
   templateUrl: './admin-approvals.html',
   styleUrl: './admin-approvals.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

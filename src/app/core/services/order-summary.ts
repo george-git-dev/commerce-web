@@ -6,6 +6,7 @@ import { CartStore } from './cart-store';
 import { AuthService } from './auth-service';
 import { CouponService } from './coupon-service';
 import { ShippingService } from './shipping-service';
+import { StoreCredit } from './store-credit';
 import { StorefrontContent } from './storefront-content';
 
 const round2 = (value: number) => Math.round(value * 100) / 100;
@@ -22,6 +23,7 @@ export class OrderSummary {
   private readonly coupons = inject(CouponService);
   private readonly auth = inject(AuthService);
   private readonly storefront = inject(StorefrontContent);
+  private readonly credit = inject(StoreCredit);
 
   readonly subtotal = this.cart.subtotal;
   readonly coupon = this.coupons.applied;
@@ -72,7 +74,19 @@ export class OrderSummary {
       : 0,
   );
 
-  readonly total = computed(() =>
+  /** Antes do crédito na loja. */
+  readonly totalBeforeCredit = computed(() =>
     round2(this.subtotal() - this.discount() - this.pixDiscount() + this.shippingPrice()),
   );
+
+  /** Saldo de crédito na loja da conta (0 sem login). */
+  readonly creditAvailable = this.credit.myBalance;
+  /** O cliente marcou "usar meu crédito" no pagamento. */
+  readonly useCredit = signal(false);
+  /** Quanto do crédito abate este pedido (até o total). */
+  readonly creditApplied = computed(() =>
+    this.useCredit() ? round2(Math.min(this.creditAvailable(), this.totalBeforeCredit())) : 0,
+  );
+
+  readonly total = computed(() => round2(this.totalBeforeCredit() - this.creditApplied()));
 }

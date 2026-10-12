@@ -1,0 +1,112 @@
+<section class="aff">
+  <header class="aff__hero">
+    <div class="ui-container aff__hero-inner">
+      <p class="ui-eyebrow">Programa de afiliados</p>
+      <h1>Indique a Nani e ganhe a cada venda</h1>
+      <p class="aff__lead">
+        Divulgue os perfumes árabes da Nani com um cupom só seu: seus seguidores ganham um desconto
+        exclusivo e você ganha comissão em cada venda.
+      </p>
+      <div class="aff__ctas">
+        <a
+          matButton="filled"
+          class="ui-cta"
+          [routerLink]="cta().link"
+          [queryParams]="cta().params"
+          >{{ cta().label }}</a
+        >
+        <button matButton type="button" class="aff__how-link" (click)="scrollToHow()">
+          Como funciona
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="ui-container aff__body">
+    <ul class="aff__numbers" aria-label="Vantagens">
+      <li>
+        <mat-icon aria-hidden="true">sell</mat-icon>
+        <strong>Desconto exclusivo</strong>
+        <span>para quem compra com o seu cupom</span>
+      </li>
+      <li>
+        <mat-icon aria-hidden="true">savings</mat-icon>
+        <strong>Comissão por venda</strong>
+        <span>sobre os produtos de cada pedido entregue</span>
+      </li>
+      <li>
+        <mat-icon aria-hidden="true">account_balance_wallet</mat-icon>
+        <strong>Você escolhe como receber</strong>
+        <span>Pix na sua conta ou crédito na loja com bônus</span>
+      </li>
+    </ul>
+
+    <section id="como-funciona" class="aff__steps" aria-labelledby="como-funciona-title">
+      <h2 id="como-funciona-title">Como funciona</h2>
+      <ol>
+        <li>
+          <mat-icon aria-hidden="true">person_add</mat-icon>
+          <div>
+            <h3>Crie sua conta</h3>
+            <p>O cadastro é o mesmo de quem compra na loja.</p>
+          </div>
+        </li>
+        <li>
+          <mat-icon aria-hidden="true">assignment</mat-icon>
+          <div>
+            <h3>Peça para participar</h3>
+            <p>Conte onde você divulga e informe a chave Pix para receber.</p>
+          </div>
+        </li>
+        <li>
+          <mat-icon aria-hidden="true">confirmation_number</mat-icon>
+          <div>
+            <h3>Receba seu cupom</h3>
+            <p>Aprovado o pedido, você ganha um cupom com o seu nome, como JULIA5.</p>
+          </div>
+        </li>
+        <li>
+          <mat-icon aria-hidden="true">payments</mat-icon>
+          <div>
+            <h3>Divulgue e ganhe</h3>
+            <p>
+              A comissão é liberada {{ program.holdDays }} dias depois da entrega do pedido. Todo
+              mês você escolhe: Pix ou crédito na loja com bônus.
+            </p>
+          </div>
+        </li>
+      </ol>
+    </section>
+
+    <section class="aff__rules" aria-labelledby="regras-title">
+      <h2 id="regras-title">Bom saber</h2>
+      <ul>
+        <li>A comissão é sobre o valor dos produtos já com desconto, sem o frete.</li>
+        <li>
+          Seus seguidores pagam como quiserem (cartão, Pix ou boleto). O Pix é só a forma como a
+          Nani paga a sua comissão.
+        </li>
+        <li>
+          Pedido cancelado ou devolvido não gera comissão (por isso ela só é liberada depois do
+          prazo de arrependimento).
+        </li>
+        <li>Seu cupom não vale para você mesmo e não soma com outros cupons.</li>
+        <li>
+          Você acompanha vendas e comissões em Minha conta. Valores e regras completas estão nos
+          termos.
+        </li>
+      </ul>
+      <p class="aff__terms">
+        Leia os
+        <a routerLink="/ajuda/programa-de-afiliados">termos do programa de afiliados</a>.
+      </p>
+    </section>
+
+    <div class="aff__final">
+      <h2>Pronto para começar?</h2>
+      <a matButton="filled" class="ui-cta" [routerLink]="cta().link" [queryParams]="cta().params">{{
+        cta().label
+      }}</a>
+    </div>
+  </div>
+</section>

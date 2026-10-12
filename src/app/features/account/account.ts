@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { StoreCredit } from '../../core/services/store-credit';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { Router, RouterLink } from '@angular/router';
@@ -28,11 +29,28 @@ export class Account {
     this.router.navigateByUrl('/');
   }
 
+  private readonly credit = inject(StoreCredit);
+
+  /** "Crédito na loja" só aparece para quem já teve crédito. */
+  private readonly baseCards = computed<readonly AccountCard[]>(() =>
+    this.credit.mine().length
+      ? [
+          ...this.cards,
+          {
+            icon: 'account_balance_wallet',
+            title: 'Crédito na loja',
+            description: `Saldo de ${this.credit.myBalance().toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} para usar nas compras.`,
+            link: '/minha-conta/credito',
+          },
+        ]
+      : this.cards,
+  );
+
   /** Equipe ganha o atalho para o backoffice. */
   protected readonly visibleCards = computed(() =>
     this.auth.isStaff()
       ? [
-          ...this.cards,
+          ...this.baseCards(),
           {
             icon: 'admin_panel_settings',
             title: 'Backoffice',
@@ -40,7 +58,7 @@ export class Account {
             link: '/admin',
           },
         ]
-      : this.cards,
+      : this.baseCards(),
   );
 
   private readonly cards: readonly AccountCard[] = [
@@ -67,6 +85,12 @@ export class Account {
       title: 'Dados pessoais',
       description: 'Atualize nome, celular e senha.',
       link: '/minha-conta/dados',
+    },
+    {
+      icon: 'handshake',
+      title: 'Afiliado',
+      description: 'Divulgue a Nani com seu cupom e ganhe a cada venda.',
+      link: '/minha-conta/afiliado',
     },
   ];
 }

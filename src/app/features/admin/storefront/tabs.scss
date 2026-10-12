@@ -61,3 +61,17 @@ h2 {
     flex: 0 0 auto;
   }
 }
+
+// Contador de pendentes dentro da aba.
+.tabs__count {
+  display: inline-grid;
+  place-items: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--gold);
+  color: var(--card);
+  font-size: 0.6875rem;
+  font-weight: 600;
+}

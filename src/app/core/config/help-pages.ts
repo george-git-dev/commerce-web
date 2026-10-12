@@ -1,3 +1,4 @@
+import { AFFILIATE_PROGRAM } from './affiliate';
 import { STORE_CONFIG } from './store-config';
 import { HelpGroup, HelpPage } from '../models/help-page';
 
@@ -177,6 +178,50 @@ export const HELP_PAGES: readonly HelpPage[] = [
         heading: 'O que significam família olfativa e notas?',
         paragraphs: [
           'A família olfativa é o "estilo" do perfume (oriental, floral, amadeirado…). As notas mostram como ele evolui na pele: as de topo aparecem primeiro, as de coração em seguida e as de fundo são as que ficam por mais tempo.',
+        ],
+      },
+    ],
+  },
+  {
+    slug: 'programa-de-afiliados',
+    title: 'Programa de afiliados',
+    group: 'politicas',
+    summary: 'Regras para divulgar a Nani com cupom próprio e receber comissão.',
+    updatedAt: '2026-10-12',
+    sections: [
+      {
+        heading: 'Quem pode participar',
+        paragraphs: [
+          `Qualquer pessoa maior de 18 anos com cadastro na loja pode pedir para participar. A ${store.legalName} analisa cada pedido e pode recusar sem precisar justificar em detalhe; quem não for aprovado pode pedir de novo depois de 30 dias.`,
+        ],
+      },
+      {
+        heading: 'Cupom e comissão',
+        items: [
+          `Cupom próprio com ${AFFILIATE_PROGRAM.buyerDiscountPercent}% de desconto para quem compra (não vale em itens já em oferta e não soma com outros cupons).`,
+          `Comissão de ${AFFILIATE_PROGRAM.commissionPercent}% sobre o valor dos produtos do pedido, já com o desconto e sem o frete.`,
+          `A comissão é liberada ${AFFILIATE_PROGRAM.holdDays} dias depois da entrega (prazo de arrependimento). Pedido cancelado, devolvido ou estornado não gera comissão.`,
+          `Todo mês o afiliado escolhe como receber o que foi liberado: por Pix (a partir de R$ ${AFFILIATE_PROGRAM.minPayout}; a chave Pix precisa estar no nome do afiliado) ou em crédito na loja com bônus de ${AFFILIATE_PROGRAM.storeCreditBonusPercent}% (sem valor mínimo).`,
+          `O crédito na loja vale por ${AFFILIATE_PROGRAM.storeCreditValidityMonths} meses, é usado no checkout para abater o valor de pedidos e não pode ser trocado por dinheiro.`,
+          'Os clientes pagam os pedidos normalmente (cartão, Pix ou boleto); o Pix acima é só o pagamento da comissão ao afiliado.',
+        ],
+      },
+      {
+        heading: 'O que não pode',
+        items: [
+          'Usar o próprio cupom ou pedir para parentes comprarem só para gerar comissão.',
+          'Anunciar em links patrocinados usando a marca Nani Perfumes, criar perfis que se passem pela loja ou prometer descontos e prazos que a loja não oferece.',
+          'Divulgar o cupom com spam, em grupos sem permissão ou com conteúdo enganoso.',
+        ],
+        paragraphs: [
+          'O descumprimento pode encerrar a participação e cancelar comissões ainda não pagas.',
+        ],
+      },
+      {
+        heading: 'Dados e impostos',
+        paragraphs: [
+          'Guardamos só o necessário para o programa (perfil de divulgação e chave Pix), conforme a Política de Privacidade. A chave Pix nunca aparece inteira para a equipe sem necessidade.',
+          'Os valores recebidos são renda do afiliado. Para pagamentos, a loja pode pedir recibo ou nota fiscal (MEI), conforme a legislação.',
         ],
       },
     ],

@@ -59,6 +59,26 @@ export const routes: Routes = [
     loadComponent: () => import('./features/account/profile/profile').then((m) => m.Profile),
   },
   {
+    path: 'seja-afiliado',
+    title: 'Nani Perfumes | Seja afiliado',
+    loadComponent: () =>
+      import('./features/affiliate/affiliate-landing').then((m) => m.AffiliateLanding),
+  },
+  {
+    path: 'minha-conta/afiliado',
+    title: 'Nani Perfumes | Programa de afiliados',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/account/affiliate/affiliate-area').then((m) => m.AffiliateArea),
+  },
+  {
+    path: 'minha-conta/credito',
+    title: 'Nani Perfumes | Crédito na loja',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/account/store-credit/store-credit-page').then((m) => m.StoreCreditPage),
+  },
+  {
     path: 'minha-conta/excluir-conta',
     title: 'Nani Perfumes | Excluir conta',
     canActivate: [authGuard],

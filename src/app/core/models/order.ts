@@ -94,5 +94,7 @@ export interface Order {
   discount: number;
   pixDiscount: number;
   shippingPrice: number;
+  /** Crédito na loja usado (abate o total; volta se o pedido for cancelado). */
+  storeCredit?: number;
   total: number;
 }

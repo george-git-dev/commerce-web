@@ -1,0 +1,52 @@
+<section class="scp ui-section ui-section--page">
+  <div class="ui-container scp__inner">
+    <nav class="scp__crumb" aria-label="Trilha de navegação">
+      <a routerLink="/minha-conta">Minha conta</a>
+      <mat-icon aria-hidden="true">chevron_right</mat-icon>
+      <span aria-current="page">Crédito na loja</span>
+    </nav>
+    <h1>Crédito na loja</h1>
+
+    <div class="scp__balance">
+      <p>Saldo disponível</p>
+      <strong>{{ credit.myBalance() | currency: 'BRL' }}</strong>
+      <small>Use no pagamento: marque "Usar meu crédito na loja" ao finalizar a compra.</small>
+    </div>
+
+    <section class="scp__card" aria-labelledby="scp-extrato">
+      <h2 id="scp-extrato">Extrato</h2>
+      @if (credit.mine().length) {
+        <ul>
+          @for (e of credit.mine(); track e.id) {
+            <li>
+              <span>
+                <strong>{{ labels[e.kind] }}</strong>
+                <small>
+                  {{ e.at | date: 'dd/MM/yyyy' }}
+                  @if (e.orderNumber) {
+                    · pedido {{ e.orderNumber }}
+                  }
+                  @if (e.expiresAt) {
+                    · vale até {{ e.expiresAt | date: 'dd/MM/yyyy' }}
+                  }
+                </small>
+              </span>
+              <span [class.scp__in]="e.amount > 0" [class.scp__out]="e.amount < 0">
+                {{ e.amount > 0 ? '+' : '−' }}
+                {{ (e.amount < 0 ? -e.amount : e.amount) | currency: 'BRL' }}
+              </span>
+            </li>
+          }
+        </ul>
+      } @else {
+        <p class="scp__hint">
+          Você ainda não tem crédito. Afiliados podem receber a comissão em crédito com bônus —
+          <a routerLink="/seja-afiliado">saiba mais</a>.
+        </p>
+      }
+      <p class="scp__hint">
+        O crédito não pode ser trocado por dinheiro e vence na data indicada em cada entrada.
+      </p>
+    </section>
+  </div>
+</section>

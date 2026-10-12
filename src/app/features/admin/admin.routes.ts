@@ -10,6 +10,7 @@ const READY = [
   'promocoes',
   'estoque',
   'clientes',
+  'afiliados',
   'aprovacoes',
   'auditoria',
   'relatorios',
@@ -171,6 +172,20 @@ export const ADMIN_ROUTES: Routes = [
         title: 'Nani Admin | Aprovações',
         canActivate: [permissionGuard('approvals:view', '/admin')],
         loadComponent: () => import('./approvals/admin-approvals').then((m) => m.AdminApprovals),
+      },
+      {
+        path: 'afiliados',
+        title: 'Nani Admin | Afiliados',
+        canActivate: [permissionGuard('affiliates:view', '/admin')],
+        loadComponent: () =>
+          import('./affiliates/admin-affiliate-payouts').then((m) => m.AdminAffiliatePayouts),
+      },
+      {
+        path: 'aprovacoes/afiliados',
+        title: 'Nani Admin | Afiliados',
+        canActivate: [permissionGuard('approvals:view', '/admin')],
+        loadComponent: () =>
+          import('./approvals/admin-affiliates-page').then((m) => m.AdminAffiliatesPage),
       },
       {
         path: 'relatorios',

@@ -47,6 +47,7 @@ export class AdminCoupons {
     if (coupon.minSubtotal) parts.push(`mín. ${brl(coupon.minSubtotal)}`);
     if (coupon.firstPurchaseOnly) parts.push('1ª compra');
     if (coupon.kind !== 'shipping' && coupon.allowOnPromo) parts.push('vale em oferta');
+    if (coupon.affiliateEmail) parts.push('cupom de afiliado');
     return parts.join(' · ');
   }
 

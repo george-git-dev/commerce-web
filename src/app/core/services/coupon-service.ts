@@ -157,6 +157,7 @@ export class CouponService {
         ? {
             usedThisCoupon: this.usage()[coupon.code]?.[user.email] ?? 0,
             hasPurchased: this.orders.hasPlaced(user.email),
+            isOwner: coupon.affiliateEmail === user.email,
           }
         : null,
     });

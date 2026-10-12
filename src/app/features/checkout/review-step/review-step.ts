@@ -1,4 +1,6 @@
 import { CurrencyPipe } from '@angular/common';
+import { CommissionService } from '../../../core/services/commission-service';
+import { StoreCredit } from '../../../core/services/store-credit';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { Router, RouterLink } from '@angular/router';
@@ -27,6 +29,8 @@ export class ReviewStep {
   protected readonly cart = inject(CartStore);
   private readonly orders = inject(OrderService);
   private readonly coupons = inject(CouponService);
+  private readonly credit = inject(StoreCredit);
+  private readonly commissions = inject(CommissionService);
   private readonly router = inject(Router);
 
   private readonly delivery = this.state.delivery.getRawValue();
@@ -88,12 +92,24 @@ export class ReviewStep {
       discount: this.summary.discount(),
       pixDiscount: this.summary.pixDiscount(),
       shippingPrice: this.summary.shippingPrice(),
+      storeCredit: this.summary.creditApplied() || undefined,
       total: this.summary.total(),
     });
+    const email = this.orders.ownerEmail();
+    if (order.storeCredit) this.credit.use(email, order.storeCredit, order.number);
+    if (coupon?.affiliateEmail) {
+      // Mock: a comissão nasce aqui. Fase 2: o back grava no `POST /orders`.
+      this.commissions.register({
+        number: order.number,
+        couponCode: coupon.code,
+        affiliateEmail: coupon.affiliateEmail,
+        base: Math.round((order.subtotal - order.discount) * 100) / 100,
+      });
+    }
     if (coupon) {
       // Mock: conta o uso aqui. Fase 2: o back conta na mesma transação do pedido.
       const given = coupon.kind === 'shipping' ? shipping.price : this.summary.discount();
-      this.coupons.recordUse(coupon.code, this.orders.ownerEmail(), given);
+      this.coupons.recordUse(coupon.code, email, given);
     }
     this.cart.clear();
     this.coupons.remove();

@@ -38,6 +38,10 @@ export type Permission =
   | 'approvals:edit'
   /** Gerar e baixar relatórios (CSV); e-mail de cliente sai mascarado sem `customers:sensitive`. */
   | 'reports:view'
+  /** Ver afiliados, comissões e pagamentos (chave Pix só com `customers:sensitive`). */
+  | 'affiliates:view'
+  /** Fechar o mês e marcar Pix de comissão como pago. */
+  | 'affiliates:pay'
   | 'team:manage'
   | 'audit:view'
   | 'settings:view'
@@ -53,6 +57,7 @@ const VIEWER: readonly Permission[] = [
   'suppliers:view',
   'customers:view',
   'reports:view',
+  'affiliates:view',
   'audit:view',
   'settings:view',
 ];
@@ -68,6 +73,7 @@ const ADMIN: readonly Permission[] = [
   'customers:sensitive',
   'approvals:view',
   'approvals:edit',
+  'affiliates:pay',
   'settings:edit',
 ];
 

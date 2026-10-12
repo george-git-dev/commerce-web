@@ -56,7 +56,7 @@ export interface CouponContext {
   /** Subtotal dos itens em que o cupom pode descontar (sem os de oferta, se for o caso). */
   eligibleSubtotal: number;
   /** `null` = sem login (limite por cliente e 1ª compra conferidos no checkout). */
-  customer: { usedThisCoupon: number; hasPurchased: boolean } | null;
+  customer: { usedThisCoupon: number; hasPurchased: boolean; isOwner?: boolean } | null;
 }
 
 /** Motivo de o cupom não valer agora (ou `null`). Mensagens para o cliente. */
@@ -72,6 +72,7 @@ export function couponProblem(coupon: Coupon, ctx: CouponContext): string | null
     return 'Este cupom não vale para itens que já estão em oferta.';
   }
   if (ctx.customer) {
+    if (ctx.customer.isOwner) return 'Você não pode usar o seu próprio cupom de afiliado.';
     if (coupon.firstPurchaseOnly && ctx.customer.hasPurchased) {
       return 'Este cupom é só para a primeira compra.';
     }

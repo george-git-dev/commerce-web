@@ -23,7 +23,7 @@ type PaymentField = keyof CheckoutState['payment']['controls'];
 })
 export class PaymentStep {
   private readonly state = inject(CheckoutState);
-  private readonly summary = inject(OrderSummary);
+  protected readonly summary = inject(OrderSummary);
 
   protected readonly form = this.state.payment;
   protected readonly config = STORE_CONFIG;
@@ -83,6 +83,8 @@ export class PaymentStep {
   }
 
   protected next(): void {
+    // Crédito cobre tudo: não há forma de pagamento (nem cartão para validar).
+    if (this.summary.total() === 0) this.form.controls.method.setValue('pix');
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;

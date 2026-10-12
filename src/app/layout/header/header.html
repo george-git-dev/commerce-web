@@ -21,6 +21,7 @@
       @for (link of navLinks; track link.label) {
         <a [routerLink]="link.path" [queryParams]="link.queryParams ?? null">{{ link.label }}</a>
       }
+      <a routerLink="/seja-afiliado" class="nav__affiliate">Seja afiliado</a>
     </nav>
 
     <div class="bar__actions">
@@ -112,5 +113,12 @@
         {{ link.label }}
       </a>
     }
+    <a routerLink="/seja-afiliado" class="mobile-menu__affiliate" (click)="closeMenu()">
+      <mat-icon aria-hidden="true">handshake</mat-icon>
+      <span>
+        Seja afiliado
+        <small>Ganhe a cada venda com o seu cupom</small>
+      </span>
+    </a>
   </nav>
 </div>

@@ -45,6 +45,8 @@ export const ADMIN_NAV: readonly AdminNavItem[] = [
     shortcut: true,
   },
   { label: 'Clientes', icon: 'group', path: 'clientes', permission: 'customers:view' },
+  // Afiliados aprovados, comissões e pagamentos (os pedidos ficam em Aprovações).
+  { label: 'Afiliados', icon: 'handshake', path: 'afiliados', permission: 'affiliates:view' },
   {
     label: 'Aprovações',
     icon: 'task_alt',

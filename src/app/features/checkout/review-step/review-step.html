@@ -49,11 +49,19 @@
     <button type="button" class="rev__edit" (click)="state.goTo(2)">Alterar</button>
   </header>
   <p class="rev__text">
-    <strong>{{ methodLabel }}</strong>
-    @if (payment.method === 'cartao') {
-      <br />
-      Final {{ cardLast4 }} · {{ payment.installments }}x de
-      {{ summary.total() / payment.installments | currency: 'BRL' }} sem juros
+    @if (summary.creditApplied()) {
+      Crédito na loja: {{ summary.creditApplied() | currency: 'BRL' }}
+      @if (summary.total() > 0) {
+        <br />
+      }
+    }
+    @if (summary.total() > 0) {
+      <strong>{{ methodLabel }}</strong>
+      @if (payment.method === 'cartao') {
+        <br />
+        Final {{ cardLast4 }} · {{ payment.installments }}x de
+        {{ summary.total() / payment.installments | currency: 'BRL' }} sem juros
+      }
     }
   </p>
 </section>

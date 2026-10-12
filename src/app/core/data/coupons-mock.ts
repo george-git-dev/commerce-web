@@ -86,4 +86,17 @@ export const COUPONS_MOCK: readonly Coupon[] = [
     uses: 57,
     discountGiven: 2154.3,
   },
+  {
+    id: 7,
+    code: 'JULIA5',
+    kind: 'percent',
+    value: 5,
+    perCustomer: 1,
+    firstPurchaseOnly: false,
+    allowOnPromo: false,
+    active: true,
+    affiliateEmail: 'julia.afiliada@email.com',
+    uses: 23,
+    discountGiven: 356.2,
+  },
 ];

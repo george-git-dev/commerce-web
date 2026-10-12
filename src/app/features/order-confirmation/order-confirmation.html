@@ -7,29 +7,36 @@
         Número do pedido: <strong>{{ item.number }}</strong>
       </p>
 
-      @switch (item.payment.method) {
-        @case ('pix') {
-          <app-pix-payment class="done__box" />
-        }
-        @case ('boleto') {
-          <div class="done__box">
-            <h2>Boleto gerado</h2>
-            <p>O boleto vence em 3 dias úteis. O pedido é separado após a compensação.</p>
-            <button matButton="filled" class="ui-cta" type="button" disabled>
-              <mat-icon>download</mat-icon>
-              Baixar boleto (em breve)
-            </button>
-          </div>
-        }
-        @default {
-          <div class="done__box">
-            <h2>Pagamento aprovado</h2>
-            <p>
-              {{ item.payment.cardBrand ?? 'Cartão' }} final {{ item.payment.cardLast4 }} ·
-              {{ item.payment.installments }}x de
-              {{ item.total / (item.payment.installments ?? 1) | currency: 'BRL' }}
-            </p>
-          </div>
+      @if (item.total === 0) {
+        <div class="done__box">
+          <h2>Pago com crédito na loja</h2>
+          <p>{{ item.storeCredit | currency: 'BRL' }} do seu crédito cobriram todo o pedido.</p>
+        </div>
+      } @else {
+        @switch (item.payment.method) {
+          @case ('pix') {
+            <app-pix-payment class="done__box" />
+          }
+          @case ('boleto') {
+            <div class="done__box">
+              <h2>Boleto gerado</h2>
+              <p>O boleto vence em 3 dias úteis. O pedido é separado após a compensação.</p>
+              <button matButton="filled" class="ui-cta" type="button" disabled>
+                <mat-icon>download</mat-icon>
+                Baixar boleto (em breve)
+              </button>
+            </div>
+          }
+          @default {
+            <div class="done__box">
+              <h2>Pagamento aprovado</h2>
+              <p>
+                {{ item.payment.cardBrand ?? 'Cartão' }} final {{ item.payment.cardLast4 }} ·
+                {{ item.payment.installments }}x de
+                {{ item.total / (item.payment.installments ?? 1) | currency: 'BRL' }}
+              </p>
+            </div>
+          }
         }
       }
 

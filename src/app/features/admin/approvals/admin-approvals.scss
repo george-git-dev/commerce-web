@@ -1,61 +1,12 @@
-h2 {
-  margin: 0;
-  font-size: clamp(1.75rem, 1.4rem + 1.6vw, 2.5rem);
-}
-
 .ap {
   display: grid;
   gap: 14px;
-}
-
-.ap__head {
-  display: grid;
-  gap: 4px;
-}
-
-.ap__eyebrow {
-  margin: 0;
-  font-size: 0.6875rem;
-  font-weight: 600;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--gold);
 }
 
 .ap__lead {
   margin: 0;
   font-size: 0.875rem;
   color: var(--muted-foreground);
-}
-
-.ap__kind {
-  display: flex;
-  border-bottom: 1px solid var(--border);
-
-  span {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 10px 14px;
-    font-size: 0.9375rem;
-  }
-}
-
-.ap__kind--on {
-  border-bottom: 2px solid var(--foreground);
-  font-weight: 600;
-}
-
-.ap__count {
-  display: inline-grid !important;
-  place-items: center;
-  min-width: 20px;
-  height: 20px;
-  padding: 0 6px !important;
-  border-radius: 999px;
-  background: var(--gold);
-  color: var(--card);
-  font-size: 0.6875rem !important;
 }
 
 // Pendentes · Aprovadas · Reprovadas: rola de lado se não couber.

@@ -29,6 +29,8 @@ export interface Coupon {
   /** Desconta também de itens que já estão em promoção (padrão: não). */
   allowOnPromo: boolean;
   active: boolean;
+  /** Cupom de afiliado: conta da pessoa (a venda gera comissão; ela não usa o próprio). */
+  affiliateEmail?: string;
   /** Usos até agora (pedidos criados com o cupom). */
   uses: number;
   /** Desconto total já dado (R$). */

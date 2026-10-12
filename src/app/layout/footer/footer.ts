@@ -53,6 +53,7 @@ export class Footer {
         { label: 'Nossa história', path: '/', fragment: HOME_SECTION_IDS.story },
         { label: 'Minha conta', path: '/minha-conta' },
         { label: 'Favoritos', path: '/favoritos' },
+        { label: 'Seja afiliado', path: '/seja-afiliado' },
         ...helpLinks('institucional'),
       ],
     },
