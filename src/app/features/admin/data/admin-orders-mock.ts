@@ -102,7 +102,12 @@ const STREETS = [
 ];
 
 /** Caminho até o status atual, com datas a partir da compra. */
-function historyFor(status: OrderStatus, createdAt: Date, now: Date): AdminOrderEvent[] {
+function historyFor(
+  status: OrderStatus,
+  createdAt: Date,
+  now: Date,
+  inHands: boolean,
+): AdminOrderEvent[] {
   const at = (hours: number) =>
     new Date(Math.min(createdAt.getTime() + hours * 3_600_000, now.getTime()));
   if (status === 'cancelado') {
@@ -111,15 +116,12 @@ function historyFor(status: OrderStatus, createdAt: Date, now: Date): AdminOrder
       { status: 'cancelado', at: at(30), by: 'Sistema' },
     ];
   }
-  const flow: OrderStatus[] = [
-    'aguardando-pagamento',
-    'pago',
-    'em-separacao',
-    'enviado',
-    'entregue',
-  ];
-  const hours = [0, 0.2, 20, 44, 120];
-  const by = ['Sistema', 'Sistema', 'George', 'George', 'George'];
+  // Entrega em mãos não é enviada: Pronto para entrega → Entregue.
+  const flow: OrderStatus[] = inHands
+    ? ['aguardando-pagamento', 'pago', 'em-separacao', 'pronto-envio', 'entregue']
+    : ['aguardando-pagamento', 'pago', 'em-separacao', 'pronto-envio', 'enviado', 'entregue'];
+  const hours = inHands ? [0, 0.2, 20, 30, 72] : [0, 0.2, 20, 30, 44, 120];
+  const by = ['Sistema', 'Sistema', 'George', 'George', 'George', 'George'];
   return flow
     .slice(0, flow.indexOf(status) + 1)
     .map((step, index) => ({ status: step, at: at(hours[index]), by: by[index] }));
@@ -218,11 +220,21 @@ export function adminOrdersMock(now = new Date()): AdminOrder[] {
       const payment: PaymentMethod =
         random() < 0.55 ? 'pix' : random() < 0.85 ? 'cartao' : 'boleto';
 
-      const status = statusFor(ageDays, random());
+      const rolled = statusFor(ageDays, random());
+      // Sem novo sorteio (mantém o mock estável): parte dos "em separação" já está embalada;
+      // entrega em mãos nunca fica "enviado".
+      const status: OrderStatus =
+        shipping === 'em-maos' && rolled === 'enviado'
+          ? 'pronto-envio'
+          : rolled === 'em-separacao' && number % 2 === 0
+            ? 'pronto-envio'
+            : rolled;
       const [cityName, state] = city.split(', ');
       const shipped = ['enviado', 'entregue'].includes(status) && shipping !== 'em-maos';
       // Mock: alguns pedidos ainda abertos usaram o NANI10 (sem mexer no sorteio).
-      const open = ['aguardando-pagamento', 'pago', 'em-separacao'].includes(status);
+      const open = ['aguardando-pagamento', 'pago', 'em-separacao', 'pronto-envio'].includes(
+        status,
+      );
       const coupon =
         open && (number + 1) % 3 === 0
           ? { code: 'NANI10', discount: Math.round(subtotal * 10) / 100 }
@@ -255,7 +267,7 @@ export function adminOrdersMock(now = new Date()): AdminOrder[] {
               },
         trackingCode: shipped ? `BR${String(100000000 + number * 7).slice(-9)}BR` : undefined,
         cancelReason: status === 'cancelado' ? 'Pagamento não confirmado no prazo.' : undefined,
-        history: historyFor(status, createdAt, now),
+        history: historyFor(status, createdAt, now, shipping === 'em-maos'),
         subtotal: Math.round(subtotal * 100) / 100,
         coupon,
         shippingPrice: freight,

@@ -57,6 +57,7 @@ const OPEN_STATUSES: readonly OrderStatus[] = [
   'aguardando-pagamento',
   'pago',
   'em-separacao',
+  'pronto-envio',
   'enviado',
 ];
 

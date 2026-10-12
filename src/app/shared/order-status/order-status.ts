@@ -24,6 +24,7 @@ import { ORDER_STATUS_LABELS, OrderStatus } from '../../core/models/order';
     }
 
     :host(.status--enviado),
+    :host(.status--pronto-envio),
     :host(.status--em-separacao),
     :host(.status--pago) {
       background: color-mix(in oklch, var(--earth) 18%, transparent);
@@ -45,5 +46,13 @@ export class OrderStatusChip {
   readonly status = input.required<OrderStatus>();
   /** Texto próprio (ex.: no admin, "Pronto para entrega" na entrega em mãos). */
   readonly text = input<string>();
-  protected readonly label = computed(() => this.text() ?? ORDER_STATUS_LABELS[this.status()]);
+  /** Entrega em mãos: "Pronto para envio" aparece como "Pronto para entrega". */
+  readonly inHands = input(false);
+  protected readonly label = computed(
+    () =>
+      this.text() ??
+      (this.inHands() && this.status() === 'pronto-envio'
+        ? 'Pronto para entrega'
+        : ORDER_STATUS_LABELS[this.status()]),
+  );
 }

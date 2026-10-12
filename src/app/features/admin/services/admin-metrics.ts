@@ -444,6 +444,7 @@ export const STATUS_ORDER: readonly OrderStatus[] = [
   'aguardando-pagamento',
   'pago',
   'em-separacao',
+  'pronto-envio',
   'enviado',
   'entregue',
   'cancelado',

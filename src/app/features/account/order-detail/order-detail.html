@@ -9,7 +9,7 @@
 
       <header class="od__head">
         <h1>Pedido {{ item.number }}</h1>
-        <app-order-status [status]="item.status" />
+        <app-order-status [status]="item.status" [inHands]="item.shipping.id === 'em-maos'" />
       </header>
       <p class="od__date">Feito em {{ item.createdAt | date: "dd/MM/yyyy 'às' HH:mm" }}</p>
 

@@ -44,14 +44,17 @@ export class OrderDetail {
   /** Etapas da linha do tempo, marcando até onde o pedido já chegou. */
   protected readonly timeline = computed(() => {
     const status = this.order()?.status;
-    const current = ORDER_TIMELINE.findIndex((step) => step.status === status);
     const inHands = this.order()?.shipping.id === 'em-maos';
-    return ORDER_TIMELINE.map((step, index) => ({
-      ...step,
-      // Entrega em mãos não tem transportadora: "Enviado" vira "Pronto para entrega".
-      label: inHands && step.status === 'enviado' ? 'Pronto para entrega' : step.label,
-      done: index <= current,
-    }));
+    // Entrega em mãos não é enviada: "Pronto para entrega" e depois "Entregue".
+    const steps = inHands
+      ? ORDER_TIMELINE.filter((step) => step.status !== 'enviado').map((step) =>
+          step.status === 'pronto-envio' ? { ...step, label: 'Pronto para entrega' } : step,
+        )
+      : ORDER_TIMELINE;
+    const current = steps.findIndex(
+      (step) => step.status === (inHands && status === 'enviado' ? 'pronto-envio' : status),
+    );
+    return steps.map((step, index) => ({ ...step, done: index <= current }));
   });
 
   protected toggleReview(item: OrderItem): void {

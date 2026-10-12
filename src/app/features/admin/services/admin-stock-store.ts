@@ -39,7 +39,7 @@ export interface StockRow {
 }
 
 /** Pedidos que já baixaram estoque (pago em diante, menos cancelado). */
-const SOLD = ['pago', 'em-separacao', 'enviado', 'entregue'];
+const SOLD = ['pago', 'em-separacao', 'pronto-envio', 'enviado', 'entregue'];
 
 /**
  * Estoque do backoffice (mock em memória). O saldo mora na variante do

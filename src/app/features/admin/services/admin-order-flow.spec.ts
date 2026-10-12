@@ -15,29 +15,34 @@ import { AdminOrderStore } from './admin-order-store';
 const base = { shipping: 'economico' } as AdminOrder;
 
 describe('fluxo de status do pedido (admin)', () => {
-  it('pagamento só pelo gateway; depois separação → envio → entrega', () => {
+  it('pagamento só pelo gateway; depois separação → pronto → envio → entrega', () => {
     expect(nextStatus({ ...base, status: 'aguardando-pagamento' })).toBeNull();
     expect(nextStatus({ ...base, status: 'pago' })).toBe('em-separacao');
-    expect(nextStatus({ ...base, status: 'em-separacao' })).toBe('enviado');
+    expect(nextStatus({ ...base, status: 'em-separacao' })).toBe('pronto-envio');
+    expect(nextStatus({ ...base, status: 'pronto-envio' })).toBe('enviado');
     expect(nextStatus({ ...base, status: 'enviado' })).toBe('entregue');
     expect(nextStatus({ ...base, status: 'entregue' })).toBeNull();
   });
 
   it('cancelar só antes de enviar; rastreio só para transportadora', () => {
-    expect(canCancel({ ...base, status: 'em-separacao' })).toBe(true);
+    expect(canCancel({ ...base, status: 'pronto-envio' })).toBe(true);
     expect(canCancel({ ...base, status: 'enviado' })).toBe(false);
-    expect(needsTracking({ ...base, status: 'em-separacao' })).toBe(true);
-    expect(needsTracking({ ...base, status: 'em-separacao', shipping: 'em-maos' })).toBe(false);
+    expect(needsTracking({ ...base, status: 'em-separacao' })).toBe(false);
+    expect(needsTracking({ ...base, status: 'pronto-envio' })).toBe(true);
+    expect(needsTracking({ ...base, status: 'pronto-envio', shipping: 'em-maos' })).toBe(false);
     expect(isValidTracking('aa123456789br')).toBe(true);
     expect(isValidTracking('123')).toBe(false);
   });
 
-  it('entrega em mãos: "Pronto para entrega" no lugar de "Enviado"', () => {
-    expect(statusLabel('enviado', 'em-maos')).toBe('Pronto para entrega');
-    expect(statusLabel('enviado', 'economico')).toBe('Enviado');
-    expect(advanceLabel({ ...base, status: 'em-separacao', shipping: 'em-maos' })).toBe(
-      'Pronto para entrega',
-    );
+  it('entrega em mãos: "Pronto para entrega" e depois entregue (sem envio)', () => {
+    const inHands = { ...base, shipping: 'em-maos' } as AdminOrder;
+    expect(statusLabel('pronto-envio', 'em-maos')).toBe('Pronto para entrega');
+    expect(statusLabel('pronto-envio', 'economico')).toBe('Pronto para envio');
+    expect(statusLabel('pago', 'economico')).toBe('Pagamento confirmado');
+    expect(advanceLabel({ ...inHands, status: 'em-separacao' })).toBe('Pronto para entrega');
+    expect(nextStatus({ ...inHands, status: 'pronto-envio' })).toBe('entregue');
+    expect(advanceLabel({ ...base, status: 'em-separacao' })).toBe('Pronto para envio');
+    expect(advanceLabel({ ...base, status: 'pronto-envio' })).toBe('Marcar como enviado');
   });
 
   it('a loja avança e cancela pedidos e registra na auditoria', () => {
@@ -50,7 +55,7 @@ describe('fluxo de status do pedido (admin)', () => {
     const before = statusLabel(target.status, target.shipping);
 
     const advanced = store.advance(target.number, 'BR123456789BR')!;
-    expect(advanced.status).toBe(target.status === 'pago' ? 'em-separacao' : 'enviado');
+    expect(advanced.status).toBe(target.status === 'pago' ? 'em-separacao' : 'pronto-envio');
     expect(advanced.history.at(-1)?.by).toBe('Admin');
     expect(audit.entries()[0].changes[0]).toEqual({
       field: 'Status',

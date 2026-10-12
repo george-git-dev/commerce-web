@@ -28,12 +28,20 @@ export interface BillingInfo {
 }
 
 export type OrderStatus =
-  'aguardando-pagamento' | 'pago' | 'em-separacao' | 'enviado' | 'entregue' | 'cancelado';
+  | 'aguardando-pagamento'
+  | 'pago'
+  | 'em-separacao'
+  /** Embalado, esperando o Correio/coleta (entrega em mãos: "Pronto para entrega"). */
+  | 'pronto-envio'
+  | 'enviado'
+  | 'entregue'
+  | 'cancelado';
 
 export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
   'aguardando-pagamento': 'Aguardando pagamento',
-  pago: 'Pagamento aprovado',
+  pago: 'Pagamento confirmado',
   'em-separacao': 'Em separação',
+  'pronto-envio': 'Pronto para envio',
   enviado: 'Enviado',
   entregue: 'Entregue',
   cancelado: 'Cancelado',
@@ -42,8 +50,9 @@ export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
 /** Etapas da linha do tempo, na ordem (cancelado fica de fora). */
 export const ORDER_TIMELINE: readonly { status: OrderStatus; label: string }[] = [
   { status: 'aguardando-pagamento', label: 'Pedido recebido' },
-  { status: 'pago', label: 'Pagamento aprovado' },
+  { status: 'pago', label: 'Pagamento confirmado' },
   { status: 'em-separacao', label: 'Em separação' },
+  { status: 'pronto-envio', label: 'Pronto para envio' },
   { status: 'enviado', label: 'Enviado' },
   { status: 'entregue', label: 'Entregue' },
 ];
