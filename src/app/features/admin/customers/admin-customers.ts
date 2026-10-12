@@ -71,6 +71,8 @@ export class AdminCustomers {
           return directory.canReceiveInHands(customer.email);
         case 'equipe':
           return directory.staffRolesOf(customer.email).length > 0;
+        case 'afiliados':
+          return directory.isAffiliate(customer.email);
         default:
           return true;
       }
@@ -91,6 +93,7 @@ export class AdminCustomers {
       blocked: !!d.blockOf(c.email),
       inHands: d.canReceiveInHands(c.email),
       staff: d.staffRolesOf(c.email).length > 0,
+      affiliate: d.isAffiliate(c.email),
     };
   }
 }

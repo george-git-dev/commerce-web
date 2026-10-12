@@ -5,6 +5,35 @@ import { RegisteredAccount } from '../services/customer-rules';
  * clientes): o cliente da entrega em mãos e a equipe de teste. Some na Fase 2.
  */
 export const REGISTERED_MOCK: readonly RegisteredAccount[] = [
+  // Afiliados de teste (ver `core/data/affiliates-mock.ts`).
+  {
+    name: 'Júlia Andrade',
+    email: 'julia.afiliada@email.com',
+    city: 'Belo Horizonte, MG',
+    phone: '(31) 98111-2233',
+    createdAt: new Date(2026, 1, 10),
+  },
+  {
+    name: 'Carla Mendes',
+    email: 'carla.mendes@email.com',
+    city: 'Curitiba, PR',
+    phone: '(41) 98222-3344',
+    createdAt: new Date(2026, 8, 30),
+  },
+  {
+    name: 'Marina Lopes',
+    email: 'marina.lopes@email.com',
+    city: 'Recife, PE',
+    phone: '(81) 98333-4455',
+    createdAt: new Date(2026, 4, 5),
+  },
+  {
+    name: 'Pedro Alves',
+    email: 'pedro.alves@email.com',
+    city: 'Campinas, SP',
+    phone: '(19) 98444-5566',
+    createdAt: new Date(2026, 6, 18),
+  },
   {
     name: 'Vizinho da Loja',
     email: 'vizinho@email.com',

@@ -1,3 +1,5 @@
+import { AccountDirectory } from './account-directory';
+import { hasPermission } from '../config/permissions';
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { AFFILIATES_MOCK } from '../data/affiliates-mock';
 import { ActionResult } from '../models/auth';
@@ -19,6 +21,7 @@ const DAY = 86_400_000;
 export class AffiliateService {
   private readonly auth = inject(AuthService);
   private readonly program = inject(AffiliateProgram);
+  private readonly directory = inject(AccountDirectory);
   private readonly state = signal<readonly Affiliate[]>(AFFILIATES_MOCK);
 
   readonly all = this.state.asReadonly();
@@ -48,7 +51,7 @@ export class AffiliateService {
     const user = this.auth.user();
     if (!user) return 'Entre na sua conta.';
     if (!this.program.live()) return 'O programa de afiliados está pausado no momento.';
-    if ((user.roles ?? []).some((role) => role !== 'ROLE_CUSTOMER')) {
+    if (hasPermission(user.roles, 'admin:access')) {
       return 'Contas da equipe não participam do programa de afiliados.';
     }
     const mine = this.mine();
@@ -134,5 +137,10 @@ export class AffiliateService {
     >,
   ): void {
     this.state.update((list) => list.map((a) => (a.id === id ? { ...a, ...change } : a)));
+    // Aprovado ganha `ROLE_AFFILIATE`; não aprovado fica só cliente.
+    if (change.status) {
+      const affiliate = this.state().find((a) => a.id === id);
+      if (affiliate) this.directory.setAffiliate(affiliate.email, change.status === 'aprovado');
+    }
   }
 }

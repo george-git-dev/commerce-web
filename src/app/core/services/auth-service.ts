@@ -232,8 +232,12 @@ export class AuthService {
   ownDeletionBlock(openOrders: number): string | null {
     const user = this.state();
     if (!user) return 'Entre na sua conta.';
-    if ((user.roles ?? []).some((role) => role !== 'ROLE_CUSTOMER')) {
+    if (hasPermission(user.roles, 'admin:access')) {
       return 'Conta da equipe não é excluída por aqui. Fale com o administrador da loja.';
+    }
+    // Comissões e pagamentos têm registro (e pode haver valor a receber).
+    if (hasPermission(user.roles, 'affiliate:area')) {
+      return 'Você é afiliado: fale com a loja para encerrar a participação antes de excluir a conta.';
     }
     if (openOrders) {
       return openOrders === 1

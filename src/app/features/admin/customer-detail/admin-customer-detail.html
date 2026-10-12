@@ -26,6 +26,11 @@
               <mat-icon aria-hidden="true">handshake</mat-icon> Entrega em mãos no próximo pedido
             </span>
           }
+          @if (affiliate()) {
+            <a class="cd__tag cd__tag--link" routerLink="/admin/afiliados"
+              ><mat-icon aria-hidden="true">sell</mat-icon> Afiliado</a
+            >
+          }
           @for (role of staffRoles(); track role) {
             <span class="cd__tag"
               ><mat-icon aria-hidden="true">badge</mat-icon> {{ roleLabels[role] }}</span

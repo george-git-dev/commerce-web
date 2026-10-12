@@ -8,7 +8,7 @@
     <h1>Programa de afiliados</h1>
 
     @let m = mine();
-    @if (m?.status === 'aprovado') {
+    @if (m?.status === 'aprovado' && isAffiliate()) {
       @if (!live()) {
         <div class="f-card afa__paused" role="status">
           <mat-icon aria-hidden="true">pause_circle</mat-icon>
@@ -153,6 +153,14 @@
           }
         </section>
       }
+    } @else if (m?.status === 'aprovado') {
+      <div class="f-card afa__status">
+        <mat-icon aria-hidden="true">check_circle</mat-icon>
+        <div>
+          <h2>Pedido aprovado</h2>
+          <p>Saia e entre de novo na sua conta para liberar a sua área de afiliado.</p>
+        </div>
+      </div>
     } @else if (m?.status === 'pendente') {
       <div class="f-card afa__status">
         <mat-icon aria-hidden="true">hourglass_top</mat-icon>

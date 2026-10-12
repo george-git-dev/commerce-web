@@ -96,6 +96,11 @@ export class AdminCustomerDetail {
     return customer ? this.store.passwordProblem(customer) : null;
   });
 
+  protected readonly affiliate = computed(() => {
+    const customer = this.customer();
+    return !!customer && this.store.directory.isAffiliate(customer.email);
+  });
+
   protected readonly staffRoles = computed(() => {
     const customer = this.customer();
     return customer ? this.store.directory.staffRolesOf(customer.email) : [];

@@ -1,5 +1,5 @@
 import { inject, Injectable, signal } from '@angular/core';
-import { ROLE_LABELS } from '../../../core/config/permissions';
+import { ROLE_LABELS, STAFF_ROLES } from '../../../core/config/permissions';
 import { AuthService } from '../../../core/services/auth-service';
 
 /** De onde veio a ação (no back: IP da requisição e user agent). */
@@ -49,7 +49,7 @@ export class AdminAudit {
    * excluiu a própria conta na loja) — o padrão é agora e o perfil de quem está logado.
    */
   record(entry: Omit<AuditEntry, 'at' | 'role' | 'origin'> & { at?: Date; role?: string }): void {
-    const roles = (this.auth.user()?.roles ?? []).filter((role) => role !== 'ROLE_CUSTOMER');
+    const roles = (this.auth.user()?.roles ?? []).filter((role) => STAFF_ROLES.includes(role));
     const mobile = /Mobi|Android|iPhone/i.test(globalThis.navigator?.userAgent ?? '');
     const full: AuditEntry = {
       ...entry,

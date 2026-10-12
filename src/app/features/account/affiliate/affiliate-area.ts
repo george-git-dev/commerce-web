@@ -10,6 +10,7 @@ import { AffiliateProgram } from '../../../core/services/affiliate-program';
 import { CouponService } from '../../../core/services/coupon-service';
 import { PAYOUT_METHOD_LABELS, PayoutMethod } from '../../../core/models/commission';
 import { AffiliateService } from '../../../core/services/affiliate-service';
+import { AuthService } from '../../../core/services/auth-service';
 import { CommissionService } from '../../../core/services/commission-service';
 import {
   COMMISSION_STATUS_LABELS,
@@ -44,6 +45,9 @@ export class AffiliateArea {
   protected readonly pitchMax = PITCH_MAX;
 
   protected readonly mine = this.affiliates.mine;
+  /** `ROLE_AFFILIATE` (ganha ao ser aprovado; vem do back no token/`GET /me`). */
+  private readonly auth = inject(AuthService);
+  protected readonly isAffiliate = computed(() => this.auth.can('affiliate:area'));
   /** Participação valendo agora (programa no ar, ativa e dentro do período). */
   protected readonly live = computed(() => {
     const mine = this.mine();

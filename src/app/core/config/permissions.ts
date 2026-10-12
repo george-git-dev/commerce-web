@@ -3,23 +3,32 @@
  *
  * Um usuário pode ter vários perfis (ex.: CUSTOMER + VIEWER). Todo cadastro
  * nasce com `ROLE_CUSTOMER`; sem ela não há compra. Funcionário é um cliente a
- * quem um admin acrescentou outro perfil pelo backoffice.
+ * quem um admin acrescentou outro perfil pelo backoffice. Afiliado é um cliente
+ * que ganhou `ROLE_AFFILIATE` ao ter o pedido de afiliação aprovado (equipe e
+ * afiliado não se misturam).
  *
  * ⚠ No front isto só esconde menus, botões e rotas. Quem barra de verdade é o
  * back (`@PreAuthorize` por permissão, mesma tabela). A divisão abaixo é a
  * PROPOSTA INICIAL — o que cada perfil pode fazer ainda será decidido (roadmap).
  */
-export type Role = 'ROLE_SUPER_ADMIN' | 'ROLE_ADMIN' | 'ROLE_VIEWER' | 'ROLE_CUSTOMER';
+export type Role =
+  'ROLE_SUPER_ADMIN' | 'ROLE_ADMIN' | 'ROLE_VIEWER' | 'ROLE_AFFILIATE' | 'ROLE_CUSTOMER';
+
+/** Perfis da equipe (dão acesso ao backoffice). */
+export const STAFF_ROLES: readonly Role[] = ['ROLE_SUPER_ADMIN', 'ROLE_ADMIN', 'ROLE_VIEWER'];
 
 export const ROLE_LABELS: Record<Role, string> = {
   ROLE_SUPER_ADMIN: 'Super admin',
   ROLE_ADMIN: 'Admin',
   ROLE_VIEWER: 'Visualizador',
+  ROLE_AFFILIATE: 'Afiliado',
   ROLE_CUSTOMER: 'Cliente',
 };
 
 export type Permission =
   | 'shop:checkout'
+  /** Área do afiliado aprovado: cupom, vendas, comissões, forma de recebimento e comprovantes. */
+  | 'affiliate:area'
   | 'admin:access'
   | 'dashboard:view'
   | 'orders:view'
@@ -79,6 +88,7 @@ const ADMIN: readonly Permission[] = [
 
 export const ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
   ROLE_CUSTOMER: ['shop:checkout'],
+  ROLE_AFFILIATE: ['affiliate:area'],
   ROLE_VIEWER: VIEWER,
   ROLE_ADMIN: ADMIN,
   ROLE_SUPER_ADMIN: [...ADMIN, 'team:manage'],

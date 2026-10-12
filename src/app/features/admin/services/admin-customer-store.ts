@@ -116,6 +116,7 @@ export class AdminCustomerStore {
       self: this.isSelf(customer),
       blocked: !!this.directory.blockOf(customer.email),
       roles: this.directory.staffRolesOf(customer.email),
+      affiliate: this.directory.isAffiliate(customer.email),
     });
   }
 

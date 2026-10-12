@@ -6,7 +6,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { filter, map } from 'rxjs';
-import { ROLE_LABELS } from '../../../core/config/permissions';
+import { ROLE_LABELS, STAFF_ROLES } from '../../../core/config/permissions';
 import { AffiliateService } from '../../../core/services/affiliate-service';
 import { AuthService } from '../../../core/services/auth-service';
 import { ReviewService } from '../../../core/services/review-service';
@@ -60,7 +60,7 @@ export class AdminLayout {
   protected readonly roleLabel = computed(
     () =>
       (this.auth.user()?.roles ?? [])
-        .filter((role) => role !== 'ROLE_CUSTOMER')
+        .filter((role) => STAFF_ROLES.includes(role))
         .map((role) => ROLE_LABELS[role])
         .join(' · ') || 'Equipe',
   );

@@ -55,7 +55,7 @@
             <span class="cl__main">
               <strong>{{ c.name }}</strong>
               <small>{{ c.anonymized ? 'Dados pessoais excluídos (LGPD)' : c.email }}</small>
-              @if (t.blocked || t.inHands || t.staff) {
+              @if (t.blocked || t.inHands || t.staff || t.affiliate) {
                 <span class="cl__tags">
                   @if (t.blocked) {
                     <span class="cl__tag cl__tag--blocked">
@@ -65,6 +65,11 @@
                   @if (t.inHands) {
                     <span class="cl__tag"
                       ><mat-icon aria-hidden="true">handshake</mat-icon> Entrega em mãos</span
+                    >
+                  }
+                  @if (t.affiliate) {
+                    <span class="cl__tag"
+                      ><mat-icon aria-hidden="true">sell</mat-icon> Afiliado</span
                     >
                   }
                   @if (t.staff) {

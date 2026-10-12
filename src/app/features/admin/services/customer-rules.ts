@@ -88,7 +88,7 @@ export function deletionReasonProblem(reason: string): string | null {
 }
 
 export type CustomerFilter =
-  'todos' | 'recentes' | 'sem-compra' | 'bloqueados' | 'em-maos' | 'equipe';
+  'todos' | 'recentes' | 'sem-compra' | 'bloqueados' | 'em-maos' | 'equipe' | 'afiliados';
 
 export const CUSTOMER_FILTER_LABELS: Record<CustomerFilter, string> = {
   todos: 'Todos',
@@ -97,6 +97,7 @@ export const CUSTOMER_FILTER_LABELS: Record<CustomerFilter, string> = {
   bloqueados: 'Bloqueados',
   'em-maos': 'Entrega em mãos liberada',
   equipe: 'Equipe (acesso ao backoffice)',
+  afiliados: 'Afiliados',
 };
 
 /**
@@ -117,6 +118,8 @@ export interface AccessContext {
   self: boolean;
   blocked: boolean;
   roles: readonly Role[];
+  /** Tem `ROLE_AFFILIATE`: equipe e afiliado não se misturam. */
+  affiliate?: boolean;
 }
 
 /** Por que não dá para mudar o acesso desta conta (null = pode). */
@@ -125,6 +128,7 @@ export function accessChangeProblem(ctx: AccessContext): string | null {
   if (ctx.roles.includes('ROLE_SUPER_ADMIN'))
     return 'Super admin só é alterado direto no sistema, não por esta tela.';
   if (ctx.blocked) return 'Conta bloqueada: desbloqueie antes de dar acesso.';
+  if (ctx.affiliate) return 'Afiliado não faz parte da equipe.';
   return null;
 }
 

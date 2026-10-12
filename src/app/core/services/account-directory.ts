@@ -6,6 +6,7 @@ import {
   IN_HANDS_MOCK_EMAILS,
   STAFF_MOCK,
 } from '../data/customers-mock';
+import { AFFILIATES_MOCK } from '../data/affiliates-mock';
 
 /** Bloqueio de uma conta: motivo, quem e quando (o cliente não vê o motivo). */
 export interface AccountBlock {
@@ -49,10 +50,36 @@ export class AccountDirectory {
   private readonly deletions = signal<Readonly<Record<string, AccountDeletion>>>({});
   private readonly resetEmails = signal<Readonly<Record<string, EmailStatus>>>({});
   private readonly googleOnly = new Set(GOOGLE_MOCK_EMAILS);
+  /** Contas com `ROLE_AFFILIATE` (ganha ao ter o pedido de afiliação aprovado). */
+  private readonly affiliates = signal<ReadonlySet<string>>(
+    new Set(AFFILIATES_MOCK.filter((a) => a.status === 'aprovado').map((a) => a.email)),
+  );
 
   /** Perfis da conta (todo cadastro tem `ROLE_CUSTOMER`). */
   rolesOf(email: string): Role[] {
-    return ['ROLE_CUSTOMER', ...(this.staff()[email] ?? [])];
+    return [
+      'ROLE_CUSTOMER',
+      ...(this.isAffiliate(email) ? (['ROLE_AFFILIATE'] as const) : []),
+      ...(this.staff()[email] ?? []),
+    ];
+  }
+
+  isAffiliate(email: string): boolean {
+    return this.affiliates().has(email);
+  }
+
+  /**
+   * Dá ou tira `ROLE_AFFILIATE` (aprovar o pedido dá; pausar NÃO tira — a pessoa
+   * continua vendo e recebendo o que ganhou). Vale no próximo login.
+   * Fase 2: `customer_role` gravada na mesma transação da aprovação.
+   */
+  setAffiliate(email: string, on: boolean): void {
+    this.affiliates.update((set) => {
+      const next = new Set(set);
+      if (on) next.add(email);
+      else next.delete(email);
+      return next;
+    });
   }
 
   /** Perfis além de cliente (vazio = não é da equipe). */
