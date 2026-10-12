@@ -32,6 +32,13 @@ export class PromotionService {
     return nextId;
   }
 
+  /** Pedido cancelado antes do envio: as unidades voltam para o limite da promoção. */
+  release(id: number, quantity: number): void {
+    this.state.update((list) =>
+      list.map((p) => (p.id === id ? { ...p, sold: Math.max(0, p.sold - quantity) } : p)),
+    );
+  }
+
   remove(id: number): void {
     this.state.update((list) => list.filter((p) => p.id !== id));
   }

@@ -1,5 +1,7 @@
 import { inject, Injectable, signal } from '@angular/core';
 import { AuthService } from '../../../core/services/auth-service';
+import { CouponService } from '../../../core/services/coupon-service';
+import { PromotionService } from '../../../core/services/promotion-service';
 import { AdminOrder, adminOrdersMock } from '../data/admin-orders-mock';
 import { auditMock } from '../data/audit-mock';
 import { AdminAudit } from './admin-audit';
@@ -14,6 +16,8 @@ import { canCancel, nextStatus, statusLabel } from './admin-order-flow';
 export class AdminOrderStore {
   private readonly auth = inject(AuthService);
   private readonly audit = inject(AdminAudit);
+  private readonly coupons = inject(CouponService);
+  private readonly promotions = inject(PromotionService);
 
   readonly now = new Date();
   private readonly state = signal<readonly AdminOrder[]>(adminOrdersMock(this.now));
@@ -67,6 +71,8 @@ export class AdminOrderStore {
       history: [...order.history, { status: 'cancelado', at: new Date(), by: this.who() }],
     };
     this.save(updated);
+    // Cancelar só acontece antes do envio: cupom e unidades de promoção voltam.
+    const released = this.releaseDiscounts(order);
     this.audit.record({
       by: this.who(),
       action: 'Cancelou pedido',
@@ -75,9 +81,33 @@ export class AdminOrderStore {
       changes: [
         { field: 'Status', before: statusLabel(order.status, order.shipping), after: 'Cancelado' },
         { field: 'Motivo', before: '—', after: reason.trim() },
+        ...released,
       ],
     });
     return updated;
+  }
+
+  /** Devolve o uso do cupom e as unidades das promoções do pedido (para a auditoria). */
+  private releaseDiscounts(order: AdminOrder): { field: string; before: string; after: string }[] {
+    const changes: { field: string; before: string; after: string }[] = [];
+    if (order.coupon) {
+      this.coupons.releaseUse(order.coupon.code, order.customer.email, order.coupon.discount);
+      changes.push({
+        field: 'Cupom',
+        before: `${order.coupon.code} usado`,
+        after: 'Uso devolvido',
+      });
+    }
+    for (const item of order.items) {
+      if (item.promotionId == null) continue;
+      this.promotions.release(item.promotionId, item.quantity);
+      changes.push({
+        field: 'Promoção',
+        before: `${item.quantity} un. de ${item.sku}`,
+        after: 'Unidades devolvidas ao limite',
+      });
+    }
+    return changes;
   }
 
   /**

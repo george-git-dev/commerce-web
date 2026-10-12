@@ -19,6 +19,8 @@ export interface AdminOrderItem {
   gender: Gender;
   quantity: number;
   unitPrice: number;
+  /** Promoção que deu o preço (conta no limite de unidades dela). */
+  promotionId?: number;
 }
 
 export interface AdminOrderAddress {
@@ -53,6 +55,8 @@ export interface AdminOrder {
   cancelReason?: string;
   history: readonly AdminOrderEvent[];
   subtotal: number;
+  /** Cupom usado: código e desconto dado (R$) — snapshot, como o back grava. */
+  coupon?: { code: string; discount: number };
   shippingPrice: number;
   total: number;
 }
@@ -217,6 +221,12 @@ export function adminOrdersMock(now = new Date()): AdminOrder[] {
       const status = statusFor(ageDays, random());
       const [cityName, state] = city.split(', ');
       const shipped = ['enviado', 'entregue'].includes(status) && shipping !== 'em-maos';
+      // Mock: alguns pedidos ainda abertos usaram o NANI10 (sem mexer no sorteio).
+      const open = ['aguardando-pagamento', 'pago', 'em-separacao'].includes(status);
+      const coupon =
+        open && (number + 1) % 3 === 0
+          ? { code: 'NANI10', discount: Math.round(subtotal * 10) / 100 }
+          : undefined;
 
       orders.push({
         number: `NP${++number}`,
@@ -247,8 +257,9 @@ export function adminOrdersMock(now = new Date()): AdminOrder[] {
         cancelReason: status === 'cancelado' ? 'Pagamento não confirmado no prazo.' : undefined,
         history: historyFor(status, createdAt, now),
         subtotal: Math.round(subtotal * 100) / 100,
+        coupon,
         shippingPrice: freight,
-        total: Math.round((subtotal + freight) * 100) / 100,
+        total: Math.round((subtotal - (coupon?.discount ?? 0) + freight) * 100) / 100,
       });
       seen.add(email);
     }

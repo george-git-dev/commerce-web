@@ -100,6 +100,31 @@ export class CouponService {
     }));
   }
 
+  /**
+   * Pedido cancelado ANTES do envio (pagamento não confirmado, cartão recusado,
+   * loja cancelou): devolve o uso — total e do cliente — e o desconto dado.
+   * Devolução depois da entrega não chama isto (o cupom foi usado de verdade).
+   * Fase 2: na mesma transação do cancelamento; `coupon_usage` marcado como estornado.
+   */
+  releaseUse(code: string, email: string, discount: number): void {
+    const round = (n: number) => Math.max(0, Math.round(n * 100) / 100);
+    this.state.update((list) =>
+      list.map((c) =>
+        c.code === code
+          ? {
+              ...c,
+              uses: Math.max(0, c.uses - 1),
+              discountGiven: round(c.discountGiven - discount),
+            }
+          : c,
+      ),
+    );
+    this.usage.update((all) => {
+      const used = all[code]?.[email] ?? 0;
+      return used ? { ...all, [code]: { ...all[code], [email]: used - 1 } } : all;
+    });
+  }
+
   // --- Cadastro (backoffice) ---------------------------------------------------
 
   save(id: number | null, draft: CouponDraft): number {

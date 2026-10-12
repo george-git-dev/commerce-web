@@ -49,6 +49,12 @@
               <dt>Subtotal</dt>
               <dd>{{ o.subtotal | currency: 'BRL' }}</dd>
             </div>
+            @if (o.coupon; as coupon) {
+              <div>
+                <dt>Cupom {{ coupon.code }}</dt>
+                <dd>− {{ coupon.discount | currency: 'BRL' }}</dd>
+              </div>
+            }
             <div>
               <dt>Frete</dt>
               <dd>{{ o.shippingPrice ? (o.shippingPrice | currency: 'BRL') : 'Grátis' }}</dd>

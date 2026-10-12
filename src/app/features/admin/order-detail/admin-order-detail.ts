@@ -121,13 +121,14 @@ export class AdminOrderDetail {
     const order = this.order();
     if (!order) return;
     const paid = order.status !== 'aguardando-pagamento';
+    const coupon = order.coupon ? ` O uso do cupom ${order.coupon.code} volta para o cliente.` : '';
     this.dialog
       .open(ActionDialog, {
         data: {
           title: `Cancelar pedido ${order.number}`,
           message: paid
-            ? 'O pagamento será estornado pelo gateway e os itens voltam ao estoque. Não dá para desfazer.'
-            : 'Os itens voltam ao estoque. Não dá para desfazer.',
+            ? `O pagamento será estornado pelo gateway e os itens voltam ao estoque.${coupon} Não dá para desfazer.`
+            : `Os itens voltam ao estoque.${coupon} Não dá para desfazer.`,
           confirmLabel: 'Cancelar pedido',
           danger: true,
           field: {
