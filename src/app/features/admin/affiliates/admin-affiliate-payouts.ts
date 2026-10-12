@@ -15,10 +15,13 @@ import { AdminOrderStore } from '../services/admin-order-store';
 import { ListMemory } from '../services/list-memory';
 import { AffiliateRequests } from './affiliate-requests';
 import { PayoutDialog } from './payout-dialog';
+import { EditAffiliateDialog } from './edit-affiliate-dialog';
+import { ProgramSettings } from './program-settings';
+import { AdminAffiliates } from '../services/admin-affiliates';
 import { Pager } from '../shared/pager/pager';
 import { Paging } from '../shared/pager/paging';
 
-type Tab = 'pedidos' | 'afiliados' | 'comissoes' | 'pagamentos';
+type Tab = 'pedidos' | 'afiliados' | 'comissoes' | 'pagamentos' | 'configuracoes';
 type AffiliateFilter = 'todos' | 'a-pagar' | 'pix' | 'credito' | 'sem-vendas';
 type AffiliateSort = 'vendas' | 'a-pagar' | 'nome' | 'recentes';
 
@@ -36,6 +39,8 @@ const AFFILIATE_SORTS: readonly { id: AffiliateSort; label: string }[] = [
   { id: 'nome', label: 'Nome (A–Z)' },
   { id: 'recentes', label: 'Aprovados mais recentes' },
 ];
+
+const br = (iso: string) => iso.split('-').reverse().join('/');
 
 function createState() {
   const tab = signal<Tab>('afiliados');
@@ -71,6 +76,7 @@ function createState() {
     RouterLink,
     Pager,
     AffiliateRequests,
+    ProgramSettings,
   ],
   templateUrl: './admin-affiliate-payouts.html',
   styleUrl: './admin-affiliate-payouts.scss',
@@ -78,6 +84,7 @@ function createState() {
 })
 export class AdminAffiliatePayouts {
   protected readonly store = inject(AdminCommissions);
+  protected readonly manage = inject(AdminAffiliates);
   private readonly orders = inject(AdminOrderStore);
   private readonly dialog = inject(MatDialog);
   private readonly snackBar = inject(MatSnackBar);
@@ -106,6 +113,7 @@ export class AdminAffiliatePayouts {
     { id: 'afiliados', label: 'Afiliados' },
     { id: 'comissoes', label: 'Comissões' },
     { id: 'pagamentos', label: 'Pagamentos' },
+    { id: 'configuracoes', label: 'Configurações' },
   ];
 
   /** Afiliados aprovados com busca (nome, @, cupom), filtro e ordem. */
@@ -178,6 +186,30 @@ export class AdminAffiliatePayouts {
 
   protected orderExists(number: string): boolean {
     return !!this.orders.find(number);
+  }
+
+  /** Situação da participação: no ar, pausado ou fora do período. */
+  protected situation(affiliate: Affiliate): string | null {
+    if (!affiliate.active) return 'Pausado';
+    const today = new Date().toISOString().slice(0, 10);
+    if (affiliate.startsOn && today < affiliate.startsOn)
+      return 'Começa em ' + br(affiliate.startsOn);
+    if (affiliate.endsOn && today > affiliate.endsOn) return 'Período encerrado';
+    return null;
+  }
+
+  protected discountOf(affiliate: Affiliate): number | null {
+    return this.manage.couponOf(affiliate)?.value ?? null;
+  }
+
+  protected edit(affiliate: Affiliate): void {
+    this.dialog
+      .open(EditAffiliateDialog, { data: affiliate, width: '520px', maxWidth: '94vw' })
+      .afterClosed()
+      .subscribe((done?: boolean) => {
+        if (!done) return;
+        this.snackBar.open(`${affiliate.name} atualizado.`, 'Fechar', { duration: 3500 });
+      });
   }
 
   protected pay(affiliate: Affiliate): void {

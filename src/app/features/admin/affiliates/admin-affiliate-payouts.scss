@@ -355,3 +355,44 @@ h2 {
     align-items: end;
   }
 }
+
+// Programa fora do ar.
+.afp__paused {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: var(--radius);
+  background: color-mix(in oklch, var(--wine) 10%, transparent);
+  color: var(--wine);
+  font-size: 0.875rem;
+
+  mat-icon {
+    flex: none;
+  }
+}
+
+.afp__link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+// "Pausado" / "Período encerrado" ao lado do nome.
+.afp__off {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: color-mix(in oklch, var(--wine) 12%, transparent);
+  color: var(--wine);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  vertical-align: middle;
+}

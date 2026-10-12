@@ -177,3 +177,20 @@
     text-align: center;
   }
 }
+
+// Programa fora do ar.
+.aff__paused {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin: 0 0 16px;
+  padding: 10px 14px;
+  border-radius: var(--radius);
+  background: color-mix(in oklch, var(--wine) 12%, var(--background));
+  color: var(--wine);
+  font-size: 0.9375rem;
+
+  mat-icon {
+    flex: none;
+  }
+}

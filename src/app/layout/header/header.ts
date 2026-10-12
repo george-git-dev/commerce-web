@@ -1,3 +1,4 @@
+import { AffiliateProgram } from '../../core/services/affiliate-program';
 import { ChangeDetectionStrategy, Component, HostListener, inject, signal } from '@angular/core';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatButtonModule } from '@angular/material/button';
@@ -30,6 +31,8 @@ export class Header {
   // (inclusive monitores ultrawide); senão sobra espaço vazio à direita durante o loop.
   protected readonly navLinks = NAV_LINKS;
   protected readonly auth = inject(AuthService);
+  /** Programa de afiliados fora do ar: "Seja afiliado" some. */
+  protected readonly affiliateProgram = inject(AffiliateProgram);
   protected readonly cart = inject(CartStore);
   protected readonly favorites = inject(FavoritesStore);
   protected readonly ambientSound = inject(AmbientSoundService);

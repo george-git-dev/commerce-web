@@ -2,6 +2,7 @@ import { computed, inject, Injectable, signal } from '@angular/core';
 import { commissionsMock } from '../data/commissions-mock';
 import { Commission, Payout, PayoutReceipt } from '../models/commission';
 import { commissionAmount, payoutPreview } from '../utils/commission-rules';
+import { AffiliateProgram } from './affiliate-program';
 import { AffiliateService } from './affiliate-service';
 import { AuthService } from './auth-service';
 import { StoreCredit } from './store-credit';
@@ -18,6 +19,7 @@ export class CommissionService {
   private readonly auth = inject(AuthService);
   private readonly affiliates = inject(AffiliateService);
   private readonly credit = inject(StoreCredit);
+  private readonly program = inject(AffiliateProgram);
   private readonly seed = commissionsMock();
   private readonly commissionState = signal<readonly Commission[]>(this.seed.commissions);
   private readonly payoutState = signal<readonly Payout[]>(this.seed.payouts);
@@ -48,7 +50,7 @@ export class CommissionService {
     base: number;
   }): void {
     const affiliate = this.affiliates.approvedBy(order.affiliateEmail);
-    if (!affiliate || order.base <= 0) return;
+    if (!affiliate || !this.affiliates.isLive(affiliate) || order.base <= 0) return;
     if (this.commissionState().some((c) => c.orderNumber === order.number)) return;
     this.commissionState.update((list) => [
       ...list,
@@ -91,7 +93,13 @@ export class CommissionService {
     const affiliate = this.affiliates.approvedBy(email);
     if (!affiliate) return null;
     const now = new Date();
-    const plan = payoutPreview(this.commissionState(), email, affiliate.payoutMethod, this.now());
+    const plan = payoutPreview(
+      this.commissionState(),
+      email,
+      affiliate.payoutMethod,
+      this.now(),
+      this.program.settings(),
+    );
     if (!plan.commissionIds.length || plan.belowMinimum) return null;
     if (plan.method === 'pix' && !receipt) return null;
     const id = Math.max(0, ...this.payoutState().map((p) => p.id)) + 1;

@@ -1,5 +1,4 @@
 import { computed, inject, Injectable } from '@angular/core';
-import { AFFILIATE_PROGRAM } from '../../../core/config/affiliate';
 import { Affiliate } from '../../../core/models/affiliate';
 import {
   Commission,
@@ -7,6 +6,7 @@ import {
   Payout,
   PayoutReceipt,
 } from '../../../core/models/commission';
+import { AffiliateProgram } from '../../../core/services/affiliate-program';
 import { AffiliateService } from '../../../core/services/affiliate-service';
 import { AuthService } from '../../../core/services/auth-service';
 import { CommissionService } from '../../../core/services/commission-service';
@@ -36,7 +36,8 @@ export class AdminCommissions {
   private readonly auth = inject(AuthService);
   private readonly audit = inject(AdminAudit);
 
-  readonly program = AFFILIATE_PROGRAM;
+  private readonly programService = inject(AffiliateProgram);
+  readonly program = this.programService.settings;
   readonly commissions = this.service.commissions;
   readonly payouts = this.service.payouts;
   readonly now = this.service.now;
@@ -64,6 +65,7 @@ export class AdminCommissions {
         const valid = list.filter((c) => c.state !== 'cancelada');
         return {
           affiliate: a,
+          live: this.affiliates.isLive(a),
           sales: valid.length,
           revenue: Math.round(valid.reduce((s, c) => s + c.base, 0) * 100) / 100,
           totals: commissionTotals(list, now),
@@ -88,7 +90,13 @@ export class AdminCommissions {
 
   /** O que este afiliado tem para receber agora (pela forma que ele escolheu). */
   preview(affiliate: Affiliate) {
-    return payoutPreview(this.commissions(), affiliate.email, affiliate.payoutMethod, this.now());
+    return payoutPreview(
+      this.commissions(),
+      affiliate.email,
+      affiliate.payoutMethod,
+      this.now(),
+      this.program(),
+    );
   }
 
   /** Chave Pix inteira para quem vai pagar (só com `affiliates:pay`). */

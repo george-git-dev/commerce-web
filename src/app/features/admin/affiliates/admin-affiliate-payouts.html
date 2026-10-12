@@ -4,14 +4,27 @@
       <p class="afp__eyebrow">Gestão da loja</p>
       <h2>Afiliados</h2>
       <p class="afp__lead">
-        Comissão de {{ store.program.commissionPercent }}% liberada
-        {{ store.program.holdDays }} dias depois da entrega. Pix a partir de R$
-        {{ store.program.minPayout }} ou crédito na loja com +{{
-          store.program.storeCreditBonusPercent
+        Comissão padrão de {{ store.program().commissionPercent }}% liberada
+        {{ store.program().holdDays }} dias depois da entrega. Pix a partir de R$
+        {{ store.program().minPayout }} ou crédito na loja com +{{
+          store.program().storeCreditBonusPercent
         }}%.
       </p>
     </div>
   </header>
+
+  @if (!manage.programLive()) {
+    <p class="afp__paused" role="status">
+      <mat-icon>pause_circle</mat-icon>
+      <span>
+        <strong>Programa fora do ar.</strong> "Seja afiliado" não aparece na loja e os cupons dos
+        afiliados não valem. Comissões já ganhas continuam sendo pagas.
+        <button type="button" class="afp__link" (click)="tab.set('configuracoes')">
+          Configurações
+        </button>
+      </span>
+    </p>
+  }
 
   @let t = store.totals();
   <dl class="afp__kpis">
@@ -110,7 +123,12 @@
             <li class="afp__card">
               <div class="afp__card-head">
                 <span>
-                  <strong>{{ row.affiliate.name }}</strong>
+                  <strong>
+                    {{ row.affiliate.name }}
+                    @if (situation(row.affiliate); as s) {
+                      <span class="afp__off">{{ s }}</span>
+                    }
+                  </strong>
                   <small>{{ row.affiliate.channel }} · {{ row.affiliate.profile }}</small>
                 </span>
                 @if (row.affiliate.couponCode; as code) {
@@ -118,6 +136,12 @@
                 }
               </div>
               <dl class="afp__facts">
+                <div>
+                  <dt>Comissão / desconto</dt>
+                  <dd>
+                    {{ row.affiliate.commissionPercent }}% / {{ discountOf(row.affiliate) ?? '—' }}%
+                  </dd>
+                </div>
                 <div>
                   <dt>Vendas</dt>
                   <dd>{{ row.sales }} · {{ row.revenue | currency: 'BRL' }}</dd>
@@ -150,11 +174,18 @@
                     <strong>{{ plan.paidAmount | currency: 'BRL' }}</strong> a receber por
                     {{ store.methodLabel(row.affiliate) }}
                     @if (plan.belowMinimum) {
-                      <small>abaixo do mínimo de R$ {{ store.program.minPayout }} — acumula</small>
+                      <small
+                        >abaixo do mínimo de R$ {{ store.program().minPayout }} — acumula</small
+                      >
                     }
                   </span>
                 } @else {
                   <span class="afp__muted">Nada liberado para pagar agora.</span>
+                }
+                @if (manage.canManage()) {
+                  <button matButton type="button" (click)="edit(row.affiliate)">
+                    <mat-icon>edit</mat-icon> Editar
+                  </button>
                 }
                 @if (store.canPay()) {
                   <button
@@ -250,6 +281,9 @@
       } @else {
         <p class="afp__empty">Nenhum pagamento ainda.</p>
       }
+    }
+    @case ('configuracoes') {
+      <app-program-settings />
     }
   }
 </section>

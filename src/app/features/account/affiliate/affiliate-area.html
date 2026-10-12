@@ -9,29 +9,39 @@
 
     @let m = mine();
     @if (m?.status === 'aprovado') {
-      <div class="f-card afa__coupon">
-        <p class="afa__label">Seu cupom</p>
-        <app-coupon-ticket class="afa__ticket" size="lg" [code]="m!.couponCode!" />
-        <p class="afa__desc">
-          Quem usa ganha {{ program.buyerDiscountPercent }}% de desconto; você recebe
-          {{ m!.commissionPercent }}% de cada venda, liberado {{ program.holdDays }} dias depois da
-          entrega.
-        </p>
-        <div class="afa__actions">
-          <button matButton="filled" class="ui-cta" type="button" (click)="copy(m!.couponCode!)">
-            <mat-icon>content_copy</mat-icon> Copiar cupom
-          </button>
-          <a matButton="outlined" [href]="shareHref()" target="_blank" rel="noopener">
-            <mat-icon>share</mat-icon> Enviar no WhatsApp
-          </a>
+      @if (!live()) {
+        <div class="f-card afa__paused" role="status">
+          <mat-icon aria-hidden="true">pause_circle</mat-icon>
+          <span>
+            <strong>Sua participação está pausada.</strong>
+            O cupom não vale por enquanto e novas vendas não geram comissão. O que você já ganhou
+            continua aqui e será pago normalmente.
+          </span>
         </div>
-      </div>
+      } @else {
+        <div class="f-card afa__coupon">
+          <p class="afa__label">Seu cupom</p>
+          <app-coupon-ticket class="afa__ticket" size="lg" [code]="m!.couponCode!" />
+          <p class="afa__desc">
+            Quem usa ganha {{ discount() }}% de desconto; você recebe {{ m!.commissionPercent }}% de
+            cada venda, liberado {{ program().holdDays }} dias depois da entrega.
+          </p>
+          <div class="afa__actions">
+            <button matButton="filled" class="ui-cta" type="button" (click)="copy(m!.couponCode!)">
+              <mat-icon>content_copy</mat-icon> Copiar cupom
+            </button>
+            <a matButton="outlined" [href]="shareHref()" target="_blank" rel="noopener">
+              <mat-icon>share</mat-icon> Enviar no WhatsApp
+            </a>
+          </div>
+        </div>
+      }
       @let t = totals();
       <dl class="afa__kpis">
         <div>
           <dt>Pendente</dt>
           <dd>{{ t.pendente | currency: 'BRL' }}</dd>
-          <small>aguardando entrega + {{ program.holdDays }} dias</small>
+          <small>aguardando entrega + {{ program().holdDays }} dias</small>
         </div>
         <div>
           <dt>Liberado</dt>
@@ -58,7 +68,8 @@
             <span>
               <strong>Pix</strong>
               <small
-                >Na sua chave, a partir de R$ {{ program.minPayout }} (abaixo disso acumula).</small
+                >Na sua chave, a partir de R$ {{ program().minPayout }} (abaixo disso
+                acumula).</small
               >
               @if (t.liberada) {
                 <small class="afa__value">Hoje: {{ preview().pix | currency: 'BRL' }}</small>
@@ -73,9 +84,9 @@
               (change)="setMethod('credito')"
             />
             <span>
-              <strong>Crédito na loja +{{ program.storeCreditBonusPercent }}%</strong>
+              <strong>Crédito na loja +{{ program().storeCreditBonusPercent }}%</strong>
               <small
-                >Sem mínimo, vale {{ program.storeCreditValidityMonths }} meses, usado no
+                >Sem mínimo, vale {{ program().storeCreditValidityMonths }} meses, usado no
                 checkout.</small
               >
               @if (t.liberada) {
@@ -182,8 +193,8 @@
       @if (showForm()) {
         <p class="afa__intro">
           Divulgue a Nani com um cupom próprio: seus seguidores ganham
-          {{ program.buyerDiscountPercent }}% de desconto e você recebe
-          {{ program.commissionPercent }}% de cada venda.
+          {{ program().buyerDiscountPercent }}% de desconto e você recebe
+          {{ program().commissionPercent }}% de cada venda.
           <a routerLink="/seja-afiliado">Saiba como funciona</a>.
         </p>
         <form class="f-card afa__form" (submit)="$event.preventDefault(); submit()" novalidate>

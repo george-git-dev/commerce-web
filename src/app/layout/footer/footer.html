@@ -24,7 +24,7 @@
       </div>
     </div>
 
-    @for (group of groups; track group.title) {
+    @for (group of groups(); track group.title) {
       <details class="footer__group" [open]="wide()">
         <summary>
           <h4>{{ group.title }}</h4>

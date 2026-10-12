@@ -1,10 +1,10 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
-import { AFFILIATE_PROGRAM } from '../config/affiliate';
 import { AFFILIATES_MOCK } from '../data/affiliates-mock';
 import { ActionResult } from '../models/auth';
 import { Affiliate, AffiliateDraft } from '../models/affiliate';
 import { PayoutMethod } from '../models/commission';
 import { affiliateDraftProblems, REAPPLY_AFTER_DAYS } from '../utils/affiliate-rules';
+import { AffiliateProgram } from './affiliate-program';
 import { AuthService } from './auth-service';
 
 const DAY = 86_400_000;
@@ -18,6 +18,7 @@ const DAY = 86_400_000;
 @Injectable({ providedIn: 'root' })
 export class AffiliateService {
   private readonly auth = inject(AuthService);
+  private readonly program = inject(AffiliateProgram);
   private readonly state = signal<readonly Affiliate[]>(AFFILIATES_MOCK);
 
   readonly all = this.state.asReadonly();
@@ -46,6 +47,7 @@ export class AffiliateService {
   applyBlock(now = new Date()): string | null {
     const user = this.auth.user();
     if (!user) return 'Entre na sua conta.';
+    if (!this.program.live()) return 'O programa de afiliados está pausado no momento.';
     if ((user.roles ?? []).some((role) => role !== 'ROLE_CUSTOMER')) {
       return 'Contas da equipe não participam do programa de afiliados.';
     }
@@ -78,8 +80,9 @@ export class AffiliateService {
         acceptedTermsAt: now,
         createdAt: now,
         status: 'pendente',
-        commissionPercent: AFFILIATE_PROGRAM.commissionPercent,
+        commissionPercent: this.program.settings().commissionPercent,
         payoutMethod: 'pix',
+        active: true,
       },
     ]);
     return { ok: true };
@@ -92,6 +95,22 @@ export class AffiliateService {
     this.decide(mine.id, { payoutMethod: method });
   }
 
+  /** A participação desta pessoa está valendo agora (programa no ar + ativa + período). */
+  isLive(affiliate: Affiliate | undefined): boolean {
+    if (!affiliate || affiliate.status !== 'aprovado' || !affiliate.active) return false;
+    if (!this.program.live()) return false;
+    const today = this.program.today();
+    return (
+      (!affiliate.startsOn || affiliate.startsOn <= today) &&
+      (!affiliate.endsOn || affiliate.endsOn >= today)
+    );
+  }
+
+  /** Cupom/comissão desta conta valem agora? */
+  participating(email: string): boolean {
+    return this.isLive(this.approvedBy(email));
+  }
+
   /** Afiliado aprovado pelo e-mail (para comissão e fechamento). */
   approvedBy(email: string): Affiliate | undefined {
     return this.state().find((a) => a.email === email && a.status === 'aprovado');
@@ -101,7 +120,17 @@ export class AffiliateService {
   decide(
     id: number,
     change: Partial<
-      Pick<Affiliate, 'status' | 'couponCode' | 'commissionPercent' | 'decision' | 'payoutMethod'>
+      Pick<
+        Affiliate,
+        | 'status'
+        | 'couponCode'
+        | 'commissionPercent'
+        | 'decision'
+        | 'payoutMethod'
+        | 'active'
+        | 'startsOn'
+        | 'endsOn'
+      >
     >,
   ): void {
     this.state.update((list) => list.map((a) => (a.id === id ? { ...a, ...change } : a)));

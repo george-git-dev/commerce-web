@@ -4,6 +4,7 @@ import { Coupon, CouponDraft } from '../models/coupon';
 import { readJson, writeJson } from '../utils/browser-storage';
 import { couponDiscount, couponProblem, normalizeCode } from '../utils/coupon-rules';
 import { isoDay } from '../utils/storefront-rules';
+import { AffiliateService } from './affiliate-service';
 import { AuthService } from './auth-service';
 import { CartStore } from './cart-store';
 import { OrderService } from './order-service';
@@ -23,6 +24,7 @@ export class CouponService {
   private readonly cart = inject(CartStore);
   private readonly auth = inject(AuthService);
   private readonly orders = inject(OrderService);
+  private readonly affiliates = inject(AffiliateService);
 
   private readonly state = signal<readonly Coupon[]>(COUPONS_MOCK);
   /** Quem usou cada cupom (código → e-mail → vezes). Fase 2: tabela `coupon_usage`. */
@@ -148,6 +150,10 @@ export class CouponService {
 
   /** Sem login, limite por cliente e 1ª compra ficam para o checkout (que exige login). */
   private problemFor(coupon: Coupon): string | null {
+    // Cupom de afiliado só vale com o programa no ar e a participação ativa.
+    if (coupon.affiliateEmail && !this.affiliates.participating(coupon.affiliateEmail)) {
+      return 'Cupom inválido ou expirado.';
+    }
     const user = this.auth.user();
     return couponProblem(coupon, {
       today: this.today(),

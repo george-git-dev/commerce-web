@@ -198,11 +198,12 @@ export const HELP_PAGES: readonly HelpPage[] = [
       {
         heading: 'Cupom e comissão',
         items: [
-          `Cupom próprio com ${AFFILIATE_PROGRAM.buyerDiscountPercent}% de desconto para quem compra (não vale em itens já em oferta e não soma com outros cupons).`,
-          `Comissão de ${AFFILIATE_PROGRAM.commissionPercent}% sobre o valor dos produtos do pedido, já com o desconto e sem o frete.`,
+          'Cupom próprio com desconto para quem compra (não vale em itens já em oferta e não soma com outros cupons). O percentual do desconto e o da comissão aparecem na sua área de afiliado e podem ser ajustados pela loja; a mudança vale só para vendas novas.',
+          'A comissão é calculada sobre o valor dos produtos do pedido, já com o desconto e sem o frete.',
           `A comissão é liberada ${AFFILIATE_PROGRAM.holdDays} dias depois da entrega (prazo de arrependimento). Pedido cancelado, devolvido ou estornado não gera comissão.`,
-          `Todo mês o afiliado escolhe como receber o que foi liberado: por Pix (a partir de R$ ${AFFILIATE_PROGRAM.minPayout}; a chave Pix precisa estar no nome do afiliado) ou em crédito na loja com bônus de ${AFFILIATE_PROGRAM.storeCreditBonusPercent}% (sem valor mínimo).`,
+          'O afiliado escolhe como receber o que foi liberado: por Pix (a partir do valor mínimo informado na área do afiliado; a chave Pix precisa estar no nome do afiliado) ou em crédito na loja com bônus (sem valor mínimo).',
           `O crédito na loja vale por ${AFFILIATE_PROGRAM.storeCreditValidityMonths} meses, é usado no checkout para abater o valor de pedidos e não pode ser trocado por dinheiro.`,
+          'A loja pode pausar o programa ou a participação de um afiliado. Enquanto pausado, o cupom não vale e novas vendas não geram comissão; o que já foi ganho continua sendo pago.',
           'Os clientes pagam os pedidos normalmente (cartão, Pix ou boleto); o Pix acima é só o pagamento da comissão ao afiliado.',
         ],
       },

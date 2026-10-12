@@ -7,14 +7,18 @@
         Divulgue os perfumes árabes da Nani com um cupom só seu: seus seguidores ganham um desconto
         exclusivo e você ganha comissão em cada venda.
       </p>
+      @if (paused()) {
+        <p class="aff__paused" role="status">
+          <mat-icon aria-hidden="true">pause_circle</mat-icon>
+          O programa está pausado no momento — não estamos recebendo novos afiliados.
+        </p>
+      }
       <div class="aff__ctas">
-        <a
-          matButton="filled"
-          class="ui-cta"
-          [routerLink]="cta().link"
-          [queryParams]="cta().params"
-          >{{ cta().label }}</a
-        >
+        @if (cta(); as c) {
+          <a matButton="filled" class="ui-cta" [routerLink]="c.link" [queryParams]="c.params">{{
+            c.label
+          }}</a>
+        }
         <button matButton type="button" class="aff__how-link" (click)="scrollToHow()">
           Como funciona
         </button>
@@ -70,7 +74,7 @@
           <div>
             <h3>Divulgue e ganhe</h3>
             <p>
-              A comissão é liberada {{ program.holdDays }} dias depois da entrega do pedido. Todo
+              A comissão é liberada {{ program().holdDays }} dias depois da entrega do pedido. Todo
               mês você escolhe: Pix ou crédito na loja com bônus.
             </p>
           </div>
@@ -102,11 +106,16 @@
       </p>
     </section>
 
-    <div class="aff__final">
-      <h2>Pronto para começar?</h2>
-      <a matButton="filled" class="ui-cta" [routerLink]="cta().link" [queryParams]="cta().params">{{
-        cta().label
-      }}</a>
-    </div>
+    @if (!paused()) {
+      @let c = cta();
+      @if (c) {
+        <div class="aff__final">
+          <h2>Pronto para começar?</h2>
+          <a matButton="filled" class="ui-cta" [routerLink]="c.link" [queryParams]="c.params">{{
+            c.label
+          }}</a>
+        </div>
+      }
+    }
   </div>
 </section>

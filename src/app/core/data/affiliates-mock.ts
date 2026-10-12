@@ -17,6 +17,7 @@ export const AFFILIATES_MOCK: readonly Affiliate[] = [
     couponCode: 'JULIA5',
     commissionPercent: AFFILIATE_PROGRAM.commissionPercent,
     payoutMethod: 'pix',
+    active: true,
     decision: { by: 'George', at: new Date(2026, 8, 21, 9, 30) },
   },
   {
@@ -32,6 +33,7 @@ export const AFFILIATES_MOCK: readonly Affiliate[] = [
     status: 'pendente',
     commissionPercent: AFFILIATE_PROGRAM.commissionPercent,
     payoutMethod: 'pix',
+    active: true,
   },
   {
     id: 3,
@@ -47,6 +49,7 @@ export const AFFILIATES_MOCK: readonly Affiliate[] = [
     couponCode: 'MARINA5',
     commissionPercent: AFFILIATE_PROGRAM.commissionPercent,
     payoutMethod: 'credito',
+    active: true,
     decision: { by: 'George', at: new Date(2026, 9, 2, 10, 0) },
   },
   {
@@ -63,6 +66,7 @@ export const AFFILIATES_MOCK: readonly Affiliate[] = [
     couponCode: 'PEDRO5',
     commissionPercent: AFFILIATE_PROGRAM.commissionPercent,
     payoutMethod: 'pix',
+    active: true,
     decision: { by: 'George', at: new Date(2026, 9, 6, 11, 0) },
   },
 ];

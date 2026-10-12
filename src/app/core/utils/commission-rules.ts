@@ -45,10 +45,12 @@ export function commissionTotals(list: readonly Commission[], now: Date) {
 }
 
 /** O que a pessoa recebe: Pix = valor; crédito = valor + bônus. */
-export function paidAmount(amount: number, method: PayoutMethod): number {
-  return method === 'credito'
-    ? round2(amount * (1 + AFFILIATE_PROGRAM.storeCreditBonusPercent / 100))
-    : round2(amount);
+export function paidAmount(
+  amount: number,
+  method: PayoutMethod,
+  bonusPercent: number = AFFILIATE_PROGRAM.storeCreditBonusPercent,
+): number {
+  return method === 'credito' ? round2(amount * (1 + bonusPercent / 100)) : round2(amount);
 }
 
 /**
@@ -60,6 +62,7 @@ export function payoutPreview(
   email: string,
   method: PayoutMethod,
   now: Date,
+  rules: { minPayout: number; storeCreditBonusPercent: number } = AFFILIATE_PROGRAM,
 ) {
   const list = commissions.filter(
     (c) => c.affiliateEmail === email && commissionStatus(c, now) === 'liberada',
@@ -68,9 +71,9 @@ export function payoutPreview(
   return {
     method,
     amount,
-    paidAmount: paidAmount(amount, method),
+    paidAmount: paidAmount(amount, method, rules.storeCreditBonusPercent),
     commissionIds: list.map((c) => c.id),
-    belowMinimum: method === 'pix' && amount < AFFILIATE_PROGRAM.minPayout,
+    belowMinimum: method === 'pix' && amount < rules.minPayout,
   };
 }
 

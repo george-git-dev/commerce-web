@@ -5,11 +5,9 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { RouterLink } from '@angular/router';
-import {
-  AFFILIATE_CHANNELS,
-  AFFILIATE_PROGRAM,
-  AffiliateChannel,
-} from '../../../core/config/affiliate';
+import { AFFILIATE_CHANNELS, AffiliateChannel } from '../../../core/config/affiliate';
+import { AffiliateProgram } from '../../../core/services/affiliate-program';
+import { CouponService } from '../../../core/services/coupon-service';
 import { PAYOUT_METHOD_LABELS, PayoutMethod } from '../../../core/models/commission';
 import { AffiliateService } from '../../../core/services/affiliate-service';
 import { CommissionService } from '../../../core/services/commission-service';
@@ -39,12 +37,24 @@ import {
 export class AffiliateArea {
   protected readonly affiliates = inject(AffiliateService);
   private readonly snackBar = inject(MatSnackBar);
-  protected readonly program = AFFILIATE_PROGRAM;
+  protected readonly program = inject(AffiliateProgram).settings;
+  private readonly coupons = inject(CouponService);
   protected readonly channels = AFFILIATE_CHANNELS;
   protected readonly labels = AFFILIATE_STATUS_LABELS;
   protected readonly pitchMax = PITCH_MAX;
 
   protected readonly mine = this.affiliates.mine;
+  /** Participação valendo agora (programa no ar, ativa e dentro do período). */
+  protected readonly live = computed(() => {
+    const mine = this.mine();
+    return !!mine && this.affiliates.isLive(mine);
+  });
+  /** Desconto do cupom dele (pode ser diferente do padrão). */
+  protected readonly discount = computed(
+    () =>
+      this.coupons.find(this.mine()?.couponCode ?? null)?.value ??
+      this.program().buyerDiscountPercent,
+  );
   private readonly commissionService = inject(CommissionService);
   protected readonly statusLabels = COMMISSION_STATUS_LABELS;
   protected readonly methodLabels = PAYOUT_METHOD_LABELS;
@@ -65,7 +75,7 @@ export class AffiliateArea {
   /** Quanto o liberado vira em cada forma (para a escolha). */
   protected readonly preview = computed(() => ({
     pix: paidAmount(this.totals().liberada, 'pix'),
-    credito: paidAmount(this.totals().liberada, 'credito'),
+    credito: paidAmount(this.totals().liberada, 'credito', this.program().storeCreditBonusPercent),
   }));
 
   protected readonly isCredit = (p: { method: PayoutMethod }) => p.method === 'credito';
@@ -74,7 +84,7 @@ export class AffiliateArea {
     this.affiliates.setPayoutMethod(method);
     this.snackBar.open(
       method === 'credito'
-        ? `Próximo pagamento em crédito na loja (+${this.program.storeCreditBonusPercent}%).`
+        ? `Próximo pagamento em crédito na loja (+${this.program().storeCreditBonusPercent}%).`
         : 'Próximo pagamento por Pix.',
       'Fechar',
       { duration: 3000 },
@@ -109,7 +119,7 @@ export class AffiliateArea {
   protected readonly shareHref = computed(() => {
     const code = this.mine()?.couponCode;
     if (!code) return '';
-    const text = `Use o meu cupom ${code} e ganhe ${this.program.buyerDiscountPercent}% de desconto em perfumes árabes na Nani Perfumes: ${globalThis.location?.origin ?? ''}`;
+    const text = `Use o meu cupom ${code} e ganhe ${this.discount()}% de desconto em perfumes árabes na Nani Perfumes: ${globalThis.location?.origin ?? ''}`;
     return `https://wa.me/?text=${encodeURIComponent(text)}`;
   });
 

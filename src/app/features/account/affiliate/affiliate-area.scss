@@ -320,3 +320,22 @@ textarea {
     font-size: 18px;
   }
 }
+
+// Participação pausada (afiliado ou programa).
+.afa__paused {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  color: var(--wine);
+  background: color-mix(in oklch, var(--wine) 8%, var(--card));
+
+  mat-icon {
+    flex: none;
+  }
+
+  span {
+    display: grid;
+    gap: 4px;
+    font-size: 0.9375rem;
+  }
+}

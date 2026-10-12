@@ -29,7 +29,7 @@ import { AdminCommissions } from '../services/admin-commissions';
           <dt>Forma escolhida</dt>
           <dd>
             {{
-              isPix ? 'Pix' : 'Crédito na loja (+' + store.program.storeCreditBonusPercent + '%)'
+              isPix ? 'Pix' : 'Crédito na loja (+' + store.program().storeCreditBonusPercent + '%)'
             }}
           </dd>
         </div>
@@ -72,7 +72,7 @@ import { AdminCommissions } from '../services/admin-commissions';
         <p class="pd__credit">
           Lança <strong>{{ plan.paidAmount | currency: 'BRL' }}</strong> de crédito na conta de
           {{ data.name }} (R$ {{ plan.amount.toFixed(2).replace('.', ',') }} + bônus). Vale
-          {{ store.program.storeCreditValidityMonths }} meses; não precisa de comprovante.
+          {{ store.program().storeCreditValidityMonths }} meses; não precisa de comprovante.
         </p>
       }
     </mat-dialog-content>

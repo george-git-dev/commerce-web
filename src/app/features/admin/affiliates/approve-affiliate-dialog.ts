@@ -13,8 +13,8 @@ import { AdminAffiliates } from '../services/admin-affiliates';
     <form (submit)="$event.preventDefault(); confirm()" novalidate>
       <mat-dialog-content>
         <p>
-          Cria o cupom de {{ store.program.buyerDiscountPercent }}% para os seguidores e a comissão
-          de {{ data.commissionPercent }}% em cada venda entregue.
+          Cria o cupom de {{ store.program().buyerDiscountPercent }}% para os seguidores e a
+          comissão de {{ data.commissionPercent }}% em cada venda entregue.
         </p>
         <label class="aa__field">
           Código do cupom

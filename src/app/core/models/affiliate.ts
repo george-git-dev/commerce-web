@@ -27,6 +27,11 @@ export interface Affiliate {
   couponCode?: string;
   /** Comissão (%) deste afiliado. */
   commissionPercent: number;
+  /** Participação ligada (a equipe pode pausar). Pausado: cupom não vale, sem comissão. */
+  active: boolean;
+  /** Período opcional da participação (`aaaa-mm-dd`). */
+  startsOn?: string;
+  endsOn?: string;
   /** Como quer receber no próximo fechamento (padrão: Pix). */
   payoutMethod: PayoutMethod;
   decision?: { by: string; at: Date; reason?: string };

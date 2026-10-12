@@ -1,5 +1,6 @@
 import { BreakpointObserver } from '@angular/cdk/layout';
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { AffiliateProgram } from '../../core/services/affiliate-program';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { MatIconModule } from '@angular/material/icon';
 import { RouterLink } from '@angular/router';
@@ -46,18 +47,22 @@ export class Footer {
     { initialValue: false },
   );
 
-  protected readonly groups: readonly { title: string; links: readonly FooterLink[] }[] = [
-    {
-      title: HELP_GROUP_LABELS.institucional,
-      links: [
-        { label: 'Nossa história', path: '/', fragment: HOME_SECTION_IDS.story },
-        { label: 'Minha conta', path: '/minha-conta' },
-        { label: 'Favoritos', path: '/favoritos' },
-        { label: 'Seja afiliado', path: '/seja-afiliado' },
-        ...helpLinks('institucional'),
-      ],
-    },
-    { title: HELP_GROUP_LABELS.suporte, links: helpLinks('suporte') },
-    { title: HELP_GROUP_LABELS.politicas, links: helpLinks('politicas') },
-  ];
+  private readonly affiliateLive = inject(AffiliateProgram).live;
+
+  protected readonly groups = computed<readonly { title: string; links: readonly FooterLink[] }[]>(
+    () => [
+      {
+        title: HELP_GROUP_LABELS.institucional,
+        links: [
+          { label: 'Nossa história', path: '/', fragment: HOME_SECTION_IDS.story },
+          { label: 'Minha conta', path: '/minha-conta' },
+          { label: 'Favoritos', path: '/favoritos' },
+          ...(this.affiliateLive() ? [{ label: 'Seja afiliado', path: '/seja-afiliado' }] : []),
+          ...helpLinks('institucional'),
+        ],
+      },
+      { title: HELP_GROUP_LABELS.suporte, links: helpLinks('suporte') },
+      { title: HELP_GROUP_LABELS.politicas, links: helpLinks('politicas') },
+    ],
+  );
 }
