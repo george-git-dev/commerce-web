@@ -1,6 +1,6 @@
 import { Injectable, computed, effect, inject, signal, untracked } from '@angular/core';
 import { Product } from '../models/product';
-import { readJson, writeJson } from '../utils/browser-storage';
+import { readJson, removeKey, writeJson } from '../utils/browser-storage';
 import { AuthService } from './auth-service';
 import { CatalogService } from './catalog-service';
 
@@ -54,6 +54,13 @@ export class FavoritesStore {
       const slugs = this.items().map((product) => product.slug);
       if (email) writeJson(favoritesKey(email), slugs);
     });
+  }
+
+  /** Conta excluída: some a lista salva dela neste navegador. */
+  forgetAccount(email: string): void {
+    this.owner.set(null);
+    this.items.set([]);
+    removeKey(favoritesKey(email));
   }
 
   isFavorite(productId: number): boolean {

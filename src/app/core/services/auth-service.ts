@@ -214,6 +214,65 @@ export class AuthService {
     return this.start({ name: 'Cliente Google', email: 'cliente.google@gmail.com' });
   }
 
+  /** Conta que entra só pelo Google (sem senha na loja): confirma digitando o e-mail. */
+  isGoogleOnly(): boolean {
+    const user = this.state();
+    return !!user && this.directory.isGoogleOnly(user.email);
+  }
+
+  /**
+   * "Excluir minha conta" (LGPD). Pedidos ficam guardados sem dado pessoal;
+   * login, favoritos e endereços deixam de existir; o e-mail fica livre.
+   * `openOrders` vem de quem chama (pedidos da conta em andamento).
+   * Mock: a senha não é conferida (só o formato), como na troca de senha.
+   * Fase 2: `DELETE /me` com a senha — o back confere (BCrypt), anonimiza na
+   * mesma transação que o admin usa, derruba sessões/tokens e envia e-mail.
+   */
+  /** Trava que não depende da confirmação: conta da equipe ou pedido em andamento. */
+  ownDeletionBlock(openOrders: number): string | null {
+    const user = this.state();
+    if (!user) return 'Entre na sua conta.';
+    if ((user.roles ?? []).some((role) => role !== 'ROLE_CUSTOMER')) {
+      return 'Conta da equipe não é excluída por aqui. Fale com o administrador da loja.';
+    }
+    if (openOrders) {
+      return openOrders === 1
+        ? 'Você tem um pedido em andamento. Poderá excluir a conta quando ele for entregue ou cancelado.'
+        : `Você tem ${openOrders} pedidos em andamento. Poderá excluir a conta quando forem entregues ou cancelados.`;
+    }
+    return null;
+  }
+
+  /** Motivo de não poder excluir a conta agora (ou `null`). */
+  ownDeletionProblem(confirmation: string, openOrders: number): string | null {
+    const block = this.ownDeletionBlock(openOrders);
+    if (block) return block;
+    const user = this.state()!;
+    if (this.directory.isGoogleOnly(user.email)) {
+      if (confirmation.trim().toLowerCase() !== user.email) {
+        return 'Digite o seu e-mail exatamente como está na conta.';
+      }
+    } else if (confirmation.length < MIN_PASSWORD_LENGTH) {
+      return 'Senha incorreta.';
+    }
+    return null;
+  }
+
+  deleteOwnAccount(confirmation: string, reason: string, openOrders: number): ActionResult {
+    const problem = this.ownDeletionProblem(confirmation, openOrders);
+    if (problem) return { ok: false, message: problem };
+    const user = this.state()!;
+    this.directory.markDeleted(user.email, {
+      customerId: 0,
+      reason: reason.trim() || 'Não informado',
+      by: 'Cliente (própria conta)',
+      at: new Date(),
+      pending: true,
+    });
+    this.logout();
+    return { ok: true };
+  }
+
   logout(): void {
     this.state.set(null);
     storeUser(null);

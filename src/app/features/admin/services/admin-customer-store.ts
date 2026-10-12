@@ -1,4 +1,4 @@
-import { computed, inject, Injectable } from '@angular/core';
+import { computed, effect, inject, Injectable, untracked } from '@angular/core';
 import { ROLE_LABELS } from '../../../core/config/permissions';
 import { AccountDirectory } from '../../../core/services/account-directory';
 import { AuthService } from '../../../core/services/auth-service';
@@ -34,13 +34,43 @@ export class AdminCustomerStore {
   private readonly accounts = computed(() =>
     REGISTERED_MOCK.map((account) => {
       const deletion = this.directory.deletionOf(account.email);
-      return deletion
+      return deletion && !deletion.pending
         ? { ...account, ...anonymizedIdentity(deletion.customerId), phone: '', city: '—' }
         : account;
     }),
   );
 
   readonly customers = computed(() => buildCustomers(this.orders.orders(), this.accounts()));
+
+  constructor() {
+    // Mock: aplica as exclusões que o cliente fez em Minha conta (Fase 2: o
+    // `DELETE /me` anonimiza tudo na hora, no back).
+    effect(() => {
+      const pending = this.directory.pendingSelfDeletions();
+      if (pending.length) untracked(() => this.applySelfDeletions(pending));
+    });
+  }
+
+  private applySelfDeletions(
+    pending: readonly (readonly [string, { reason: string; at: Date }])[],
+  ): void {
+    for (const [email, deletion] of pending) {
+      const customer = this.customers().find((c) => c.email === email);
+      const id = customer?.id ?? 0;
+      if (customer) this.orders.anonymizeCustomer(email, anonymizedIdentity(id));
+      this.directory.confirmDeletion(email, id);
+      // Auditoria sem dado pessoal: só o código e o motivo.
+      this.audit.record({
+        by: 'Cliente',
+        role: 'Cliente',
+        at: deletion.at,
+        action: 'Cliente excluiu a própria conta',
+        entity: 'Cliente',
+        entityId: id ? String(id) : '—',
+        changes: [{ field: 'Motivo', before: '', after: deletion.reason }],
+      });
+    }
+  }
 
   find(id: number | null): AdminCustomer | undefined {
     return id == null ? undefined : this.customers().find((customer) => customer.id === id);

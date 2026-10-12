@@ -51,6 +51,17 @@ export class OrderService {
     return this.auth.user()?.email ?? '';
   }
 
+  /**
+   * Pedidos da conta ainda em andamento (nem entregues nem cancelados) — trava
+   * o "Excluir minha conta". Mock: só os criados nesta sessão (os de exemplo
+   * aparecem para todo mundo). Fase 2: o back confere no `DELETE /me`.
+   */
+  openPlacedCount(email: string): number {
+    return (this.created()[email] ?? []).filter(
+      (order) => order.status !== 'entregue' && order.status !== 'cancelado',
+    ).length;
+  }
+
   hasPlaced(email: string): boolean {
     return (this.created()[email] ?? []).some((order) => order.status !== 'cancelado');
   }

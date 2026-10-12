@@ -44,13 +44,17 @@ export class AdminAudit {
   private readonly log = signal<readonly AuditEntry[]>([]);
   readonly entries = this.log.asReadonly();
 
-  record(entry: Omit<AuditEntry, 'at' | 'role' | 'origin'>): void {
+  /**
+   * `at`/`role` só para ações que não são da pessoa logada (ex.: o cliente
+   * excluiu a própria conta na loja) — o padrão é agora e o perfil de quem está logado.
+   */
+  record(entry: Omit<AuditEntry, 'at' | 'role' | 'origin'> & { at?: Date; role?: string }): void {
     const roles = (this.auth.user()?.roles ?? []).filter((role) => role !== 'ROLE_CUSTOMER');
     const mobile = /Mobi|Android|iPhone/i.test(globalThis.navigator?.userAgent ?? '');
     const full: AuditEntry = {
       ...entry,
-      at: new Date(),
-      role: roles.map((role) => ROLE_LABELS[role]).join(', ') || '—',
+      at: entry.at ?? new Date(),
+      role: entry.role ?? (roles.map((role) => ROLE_LABELS[role]).join(', ') || '—'),
       origin: { ip: mockIp(entry.by), device: mobile ? 'Celular' : 'Computador' },
     };
     this.log.update((list) => [full, ...list]);

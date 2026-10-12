@@ -1,0 +1,135 @@
+@use '../../../shared/forms/form';
+
+@include form.styles;
+
+.del__inner {
+  display: grid;
+  gap: 16px;
+  max-width: 760px;
+
+  h1 {
+    margin: 0;
+  }
+
+  // Itens do grid não podem crescer além da tela (e-mail longo, select).
+  > * {
+    min-width: 0;
+  }
+}
+
+.del__crumb {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.8125rem;
+  color: var(--muted-foreground);
+
+  mat-icon {
+    width: 16px;
+    height: 16px;
+    font-size: 16px;
+  }
+}
+
+.del__card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  min-width: 0;
+  gap: 14px;
+
+  h2 {
+    margin: 0;
+  }
+
+  > * {
+    min-width: 0;
+  }
+
+  // `.f-field` ocupa 6 colunas (feito para `.f-grid`); aqui é uma coluna só.
+  .f-field {
+    grid-column: auto;
+  }
+
+  select,
+  input:not([type='checkbox']) {
+    width: 100%;
+    min-width: 0;
+  }
+}
+
+.del__list {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.9375rem;
+
+  li {
+    display: grid;
+    grid-template-columns: 22px minmax(0, 1fr);
+    gap: 10px;
+    overflow-wrap: anywhere;
+  }
+
+  mat-icon {
+    width: 22px;
+    height: 22px;
+    font-size: 22px;
+    color: var(--muted-foreground);
+  }
+}
+
+.del__blocked {
+  display: flex;
+  gap: 8px;
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  background: color-mix(in oklch, var(--gold) 14%, transparent);
+  color: var(--earth);
+  font-size: 0.9375rem;
+
+  mat-icon {
+    flex: none;
+  }
+}
+
+.del__hint {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+
+.del__check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  font-size: 0.9375rem;
+  cursor: pointer;
+
+  input {
+    flex: none;
+    width: 20px;
+    height: 20px;
+    margin: 0;
+    accent-color: var(--primary);
+  }
+}
+
+.del__check--strong {
+  font-weight: 600;
+}
+
+.del__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.del__danger {
+  background: var(--wine) !important;
+  color: var(--card) !important;
+}

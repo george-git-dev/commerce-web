@@ -1,0 +1,116 @@
+<section class="del ui-section ui-section--page">
+  <div class="ui-container del__inner">
+    <nav class="del__crumb" aria-label="Trilha de navegação">
+      <a routerLink="/minha-conta">Minha conta</a>
+      <mat-icon aria-hidden="true">chevron_right</mat-icon>
+      <a routerLink="/minha-conta/dados">Dados pessoais</a>
+      <mat-icon aria-hidden="true">chevron_right</mat-icon>
+      <span aria-current="page">Excluir conta</span>
+    </nav>
+    <h1>Excluir minha conta</h1>
+
+    <div class="f-card del__card">
+      <h2>O que acontece</h2>
+      <ul class="del__list">
+        <li>
+          <mat-icon aria-hidden="true">block</mat-icon>
+          <span
+            >Você não consegue mais entrar com <strong>{{ email }}</strong
+            >. Seus favoritos e endereços salvos são apagados.</span
+          >
+        </li>
+        <li>
+          <mat-icon aria-hidden="true">receipt_long</mat-icon>
+          <span
+            >Seus pedidos continuam guardados pela loja (obrigação fiscal e do Código de Defesa do
+            Consumidor), mas <strong>sem</strong> nome, e-mail, telefone, CPF ou endereço.</span
+          >
+        </li>
+        <li>
+          <mat-icon aria-hidden="true">mail</mat-icon>
+          <span
+            >O e-mail fica livre: se quiser voltar, é só criar uma conta nova (começa do
+            zero).</span
+          >
+        </li>
+        <li>
+          <mat-icon aria-hidden="true">warning</mat-icon>
+          <span><strong>Não dá para desfazer.</strong></span>
+        </li>
+      </ul>
+    </div>
+
+    @if (blocked(); as message) {
+      <p class="del__blocked" role="status">
+        <mat-icon aria-hidden="true">info</mat-icon>
+        {{ message }}
+      </p>
+      <a matButton="outlined" routerLink="/minha-conta/pedidos">Ver meus pedidos</a>
+    } @else {
+      <form class="f-card del__card" (submit)="$event.preventDefault(); submit()" novalidate>
+        <h2>Confirmar exclusão</h2>
+        <label class="f-field">
+          Por que você está saindo? (opcional)
+          <select [value]="reason()" (change)="reason.set($any($event.target).value)">
+            <option value="">Prefiro não dizer</option>
+            @for (item of reasons; track item) {
+              <option [value]="item">{{ item }}</option>
+            }
+          </select>
+        </label>
+
+        @if (googleOnly) {
+          <label class="f-field">
+            Digite seu e-mail para confirmar
+            <input
+              type="email"
+              autocomplete="off"
+              [placeholder]="email"
+              [value]="confirmation()"
+              (input)="confirmation.set($any($event.target).value); error.set(null)"
+            />
+            <small class="del__hint"
+              >Sua conta entra pelo Google, então não tem senha na loja.</small
+            >
+          </label>
+        } @else {
+          <label class="f-field">
+            Sua senha
+            <input
+              [type]="showPassword() ? 'text' : 'password'"
+              autocomplete="current-password"
+              [value]="confirmation()"
+              (input)="confirmation.set($any($event.target).value); error.set(null)"
+            />
+          </label>
+          <label class="del__check">
+            <input
+              type="checkbox"
+              [checked]="showPassword()"
+              (change)="showPassword.set($any($event.target).checked)"
+            />
+            Mostrar senha
+          </label>
+        }
+
+        <label class="del__check del__check--strong">
+          <input
+            type="checkbox"
+            [checked]="understood()"
+            (change)="understood.set($any($event.target).checked); error.set(null)"
+          />
+          Entendo que a exclusão é definitiva.
+        </label>
+
+        @if (error(); as message) {
+          <p class="f-error" role="alert">{{ message }}</p>
+        }
+
+        <div class="del__actions">
+          <a matButton routerLink="/minha-conta/dados">Voltar</a>
+          <button matButton="filled" type="submit" class="del__danger">Excluir minha conta</button>
+        </div>
+      </form>
+    }
+  </div>
+</section>

@@ -1,4 +1,4 @@
-import { Injectable, signal } from '@angular/core';
+import { computed, Injectable, signal } from '@angular/core';
 import { Role } from '../config/permissions';
 import {
   EMAIL_FAILS_MOCK,
@@ -20,6 +20,12 @@ export interface AccountDeletion {
   reason: string;
   by: string;
   at: Date;
+  /**
+   * Pedida pelo próprio cliente (Minha conta) e ainda não aplicada nos pedidos
+   * do backoffice — mock: o `AdminCustomerStore` aplica e grava a auditoria.
+   * Fase 2: `DELETE /me` anonimiza tudo na hora, numa transação.
+   */
+  pending?: boolean;
 }
 
 /** Último e-mail de redefinição de senha (o back registra o retorno do provedor). */
@@ -98,6 +104,18 @@ export class AccountDirectory {
     const status = { ok: !EMAIL_FAILS_MOCK.includes(email), at: new Date() };
     this.resetEmails.update((all) => ({ ...all, [email]: status }));
     return status;
+  }
+
+  /** Exclusões feitas pelo cliente que o backoffice ainda não aplicou (mock). */
+  readonly pendingSelfDeletions = computed(() =>
+    Object.entries(this.deletions()).filter(([, deletion]) => deletion.pending),
+  );
+
+  /** Backoffice aplicou a exclusão pedida pelo cliente (com o código dele). */
+  confirmDeletion(email: string, customerId: number): void {
+    this.deletions.update((all) =>
+      all[email] ? { ...all, [email]: { ...all[email], customerId, pending: false } } : all,
+    );
   }
 
   deletionOf(email: string): AccountDeletion | undefined {

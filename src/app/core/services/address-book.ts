@@ -97,6 +97,15 @@ export class AddressBook {
     this.write((list) => withDefault(list, id));
   }
 
+  /** Conta excluída: os endereços salvos dela somem. Fase 2: parte do `DELETE /me`. */
+  forgetAccount(email: string): void {
+    this.books.update((books) => {
+      const next = { ...books };
+      delete next[email];
+      return next;
+    });
+  }
+
   private write(change: (list: readonly SavedAddress[]) => SavedAddress[]): void {
     const email = this.auth.user()?.email;
     if (!email) return;

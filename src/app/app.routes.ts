@@ -59,6 +59,13 @@ export const routes: Routes = [
     loadComponent: () => import('./features/account/profile/profile').then((m) => m.Profile),
   },
   {
+    path: 'minha-conta/excluir-conta',
+    title: 'Nani Perfumes | Excluir conta',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/account/delete-account/delete-account').then((m) => m.DeleteAccount),
+  },
+  {
     path: 'minha-conta/enderecos',
     title: 'Nani Perfumes | Meus endereços',
     canActivate: [authGuard],

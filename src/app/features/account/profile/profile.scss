@@ -78,3 +78,15 @@ input[readonly] {
     padding: 24px;
   }
 }
+
+// Discreto, no fim da página (não é ação do dia a dia).
+.profile__delete {
+  margin: 28px 0 0;
+  font-size: 0.8125rem;
+  color: var(--muted-foreground);
+
+  a {
+    color: var(--wine);
+    text-decoration: underline;
+  }
+}
