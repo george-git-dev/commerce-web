@@ -18,19 +18,6 @@
     }
   </header>
 
-  @if (pendingRequests(); as count) {
-    <a class="afp__requests" routerLink="/admin/aprovacoes/afiliados">
-      <mat-icon aria-hidden="true">person_add</mat-icon>
-      <span>
-        <strong>
-          {{ count }} {{ count === 1 ? 'pessoa quer' : 'pessoas querem' }} virar afiliado
-        </strong>
-        <small>Aprovar ou recusar em Aprovações → Afiliados</small>
-      </span>
-      <mat-icon aria-hidden="true">chevron_right</mat-icon>
-    </a>
-  }
-
   @let t = store.totals();
   <dl class="afp__kpis">
     <div>
@@ -65,11 +52,16 @@
         (click)="tab.set(item.id)"
       >
         {{ item.label }}
+        @if (item.id === 'pedidos' && pendingRequests()) {
+          <span class="afp__count" [attr.aria-label]="pendingRequests() + ' pendentes'">{{
+            pendingRequests()
+          }}</span>
+        }
       </button>
     }
   </nav>
 
-  @if (tab() !== 'afiliados') {
+  @if (tab() === 'comissoes' || tab() === 'pagamentos') {
     <label class="afp__filter">
       Afiliado
       <select [value]="affiliate()" (change)="affiliate.set($any($event.target).value)">
@@ -84,6 +76,9 @@
   }
 
   @switch (tab()) {
+    @case ('pedidos') {
+      <app-affiliate-requests />
+    }
     @case ('afiliados') {
       @if (store.rows().length) {
         <ul class="afp__list">

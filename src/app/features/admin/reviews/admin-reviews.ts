@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { ApprovalsTabs } from './approvals-tabs';
+import { StorefrontTabs } from '../storefront/storefront-tabs';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
@@ -38,18 +38,26 @@ const normalize = (text: string) =>
     .toLowerCase();
 
 /**
- * `/admin/aprovacoes` — moderação de avaliações (preparada para receber
- * Trocas/Devoluções como outra aba). Pendentes por ordem de chegada (mais
+ * `/admin/vitrine/avaliacoes` — moderação das avaliações dos clientes (aba da
+ * Vitrine). Pendentes por ordem de chegada (mais
  * antigas primeiro); aprovadas e reprovadas, mais recentes primeiro.
  */
 @Component({
-  selector: 'app-admin-approvals',
-  imports: [DatePipe, MatButtonModule, MatIconModule, RouterLink, StarRating, Pager, ApprovalsTabs],
-  templateUrl: './admin-approvals.html',
-  styleUrl: './admin-approvals.scss',
+  selector: 'app-admin-reviews',
+  imports: [
+    DatePipe,
+    MatButtonModule,
+    MatIconModule,
+    RouterLink,
+    StarRating,
+    Pager,
+    StorefrontTabs,
+  ],
+  templateUrl: './admin-reviews.html',
+  styleUrl: './admin-reviews.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AdminApprovals {
+export class AdminReviews {
   protected readonly moderation = inject(ReviewModeration);
   private readonly orders = inject(AdminOrderStore);
   private readonly dialog = inject(MatDialog);

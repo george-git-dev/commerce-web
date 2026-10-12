@@ -283,28 +283,16 @@ h2 {
   }
 }
 
-// Atalho para os pedidos de afiliação (aprovação fica em Aprovações).
-.afp__requests {
-  display: grid;
-  grid-template-columns: 24px minmax(0, 1fr) 24px;
-  align-items: center;
-  gap: 10px;
-  padding: 12px 14px;
-  border: 1px solid var(--gold);
-  border-radius: var(--radius);
-  background: color-mix(in oklch, var(--gold) 10%, transparent);
-  color: var(--foreground);
-
-  span {
-    display: grid;
-  }
-
-  small {
-    font-size: 0.8125rem;
-    color: var(--muted-foreground);
-  }
-
-  mat-icon {
-    color: var(--earth);
-  }
+.afp__count {
+  display: inline-grid;
+  place-items: center;
+  min-width: 20px;
+  height: 20px;
+  margin-left: 6px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--gold);
+  color: var(--card);
+  font-size: 0.6875rem;
+  font-weight: 600;
 }

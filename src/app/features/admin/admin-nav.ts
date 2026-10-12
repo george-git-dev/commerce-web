@@ -11,8 +11,8 @@ export interface AdminNavItem {
   permission: Permission;
   /** Também na barra de atalhos de baixo (celular). */
   shortcut?: boolean;
-  /** Mostra o contador de pendências de aprovação. */
-  badge?: boolean;
+  /** Contador de pendências: avaliações (Vitrine) ou pedidos de afiliado (Afiliados). */
+  badge?: 'reviews' | 'affiliates';
 }
 
 /** Menu do backoffice, na ordem de exibição. */
@@ -45,19 +45,24 @@ export const ADMIN_NAV: readonly AdminNavItem[] = [
     shortcut: true,
   },
   { label: 'Clientes', icon: 'group', path: 'clientes', permission: 'customers:view' },
-  // Afiliados aprovados, comissões e pagamentos (os pedidos ficam em Aprovações).
-  { label: 'Afiliados', icon: 'handshake', path: 'afiliados', permission: 'affiliates:view' },
+  // Pedidos para ser afiliado, afiliados, comissões e pagamentos.
   {
-    label: 'Aprovações',
-    icon: 'task_alt',
-    path: 'aprovacoes',
-    permission: 'approvals:view',
-    shortcut: true,
-    badge: true,
+    label: 'Afiliados',
+    icon: 'handshake',
+    path: 'afiliados',
+    permission: 'affiliates:view',
+    badge: 'affiliates',
   },
   { label: 'Relatórios', icon: 'insights', path: 'relatorios', permission: 'reports:view' },
 
   { label: 'Auditoria', icon: 'history', path: 'auditoria', permission: 'audit:view' },
-  // Banners, avisos da faixa do topo e configurações da loja (sem deploy).
-  { label: 'Vitrine', icon: 'storefront', path: 'vitrine', permission: 'settings:view' },
+  // Banners, avisos da faixa, avaliações dos clientes e configurações da loja (sem deploy).
+  {
+    label: 'Vitrine',
+    icon: 'storefront',
+    path: 'vitrine',
+    permission: 'settings:view',
+    shortcut: true,
+    badge: 'reviews',
+  },
 ];

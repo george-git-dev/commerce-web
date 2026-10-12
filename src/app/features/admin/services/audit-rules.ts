@@ -73,9 +73,9 @@ export function auditLink(entry: AuditEntry): string | null {
     case 'Aviso':
       return '/admin/vitrine/avisos';
     case 'Avaliação':
-      return '/admin/aprovacoes';
+      return '/admin/vitrine/avaliacoes';
     case 'Afiliado':
-      return '/admin/aprovacoes/afiliados';
+      return '/admin/afiliados';
     case 'Pagamento de afiliado':
       return '/admin/afiliados';
     case 'Configurações':

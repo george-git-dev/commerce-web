@@ -12,10 +12,11 @@ import { AdminCommissions } from '../services/admin-commissions';
 import { AdminOrderStore } from '../services/admin-order-store';
 import { ListMemory } from '../services/list-memory';
 import { ActionDialog, ActionDialogData } from '../shared/action-dialog/action-dialog';
+import { AffiliateRequests } from './affiliate-requests';
 import { Pager } from '../shared/pager/pager';
 import { Paging } from '../shared/pager/paging';
 
-type Tab = 'afiliados' | 'comissoes' | 'pagamentos';
+type Tab = 'pedidos' | 'afiliados' | 'comissoes' | 'pagamentos';
 
 function createState() {
   const tab = signal<Tab>('afiliados');
@@ -30,13 +31,21 @@ function createState() {
 }
 
 /**
- * `/admin/afiliados` — afiliados aprovados (vendas e totais), comissões e
- * pagamentos (fechar o mês, marcar Pix pago). Pedidos de afiliação ficam em
- * Aprovações → Afiliados.
+ * `/admin/afiliados` — pedidos para entrar no programa (aprovar/recusar),
+ * afiliados aprovados (vendas e totais), comissões e pagamentos (fechar o mês,
+ * marcar Pix pago).
  */
 @Component({
   selector: 'app-admin-affiliate-payouts',
-  imports: [CurrencyPipe, DatePipe, MatButtonModule, MatIconModule, RouterLink, Pager],
+  imports: [
+    CurrencyPipe,
+    DatePipe,
+    MatButtonModule,
+    MatIconModule,
+    RouterLink,
+    Pager,
+    AffiliateRequests,
+  ],
   templateUrl: './admin-affiliate-payouts.html',
   styleUrl: './admin-affiliate-payouts.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -47,7 +56,7 @@ export class AdminAffiliatePayouts {
   private readonly dialog = inject(MatDialog);
   private readonly snackBar = inject(MatSnackBar);
   private readonly state = inject(ListMemory).get('afiliados-pagamentos', createState);
-  /** Pedidos de afiliação esperando decisão (ficam em Aprovações). */
+  /** Pedidos de afiliação esperando decisão (aba Pedidos). */
   protected readonly pendingRequests = inject(AffiliateService).pendingCount;
   protected readonly tab = this.state.tab;
   protected readonly status = this.state.status;
@@ -62,6 +71,7 @@ export class AdminAffiliatePayouts {
     'cancelada',
   ];
   protected readonly tabs: readonly { id: Tab; label: string }[] = [
+    { id: 'pedidos', label: 'Pedidos' },
     { id: 'afiliados', label: 'Afiliados' },
     { id: 'comissoes', label: 'Comissões' },
     { id: 'pagamentos', label: 'Pagamentos' },
@@ -89,6 +99,11 @@ export class AdminAffiliatePayouts {
       ),
   );
   protected readonly payoutPage = computed(() => this.paging.of(this.payouts()));
+
+  constructor() {
+    // Tem gente esperando aprovação: abre direto na aba de pedidos.
+    if (this.pendingRequests()) this.tab.set('pedidos');
+  }
 
   protected orderExists(number: string): boolean {
     return !!this.orders.find(number);

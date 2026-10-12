@@ -1,9 +1,12 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
+import { AuthService } from '../../../core/services/auth-service';
+import { ReviewService } from '../../../core/services/review-service';
 
 /**
  * Abas da Vitrine: Banners (carrossel da home) · Avisos (faixa do topo) ·
- * Configurações (frete grátis e, depois, contato, redes e dados da empresa).
+ * Avaliações (moderação do que os clientes escrevem) · Configurações (frete
+ * grátis e aviso na faixa).
  * Segredo (chave de gateway, frete, e-mail) nunca vem para cá: fica no back.
  */
 @Component({
@@ -26,6 +29,18 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
       <a routerLink="/admin/vitrine/avisos" routerLinkActive="tabs--on" ariaCurrentWhenActive="page"
         >Avisos</a
       >
+      @if (canModerate()) {
+        <a
+          routerLink="/admin/vitrine/avaliacoes"
+          routerLinkActive="tabs--on"
+          ariaCurrentWhenActive="page"
+        >
+          Avaliações
+          @if (reviews.pendingCount(); as count) {
+            <span class="tabs__count" [attr.aria-label]="count + ' pendentes'">{{ count }}</span>
+          }
+        </a>
+      }
       <a
         routerLink="/admin/vitrine/configuracoes"
         routerLinkActive="tabs--on"
@@ -37,4 +52,9 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
   styleUrl: './tabs.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class StorefrontTabs {}
+export class StorefrontTabs {
+  protected readonly reviews = inject(ReviewService);
+  /** Avaliações: moderação tem permissão própria (`approvals:view`). */
+  private readonly auth = inject(AuthService);
+  protected readonly canModerate = computed(() => this.auth.can('approvals:view'));
+}

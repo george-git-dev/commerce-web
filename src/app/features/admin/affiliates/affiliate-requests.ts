@@ -13,7 +13,6 @@ import { ListMemory } from '../services/list-memory';
 import { ActionDialog, ActionDialogData } from '../shared/action-dialog/action-dialog';
 import { Pager } from '../shared/pager/pager';
 import { Paging } from '../shared/pager/paging';
-import { ApprovalsTabs } from './approvals-tabs';
 import { ApproveAffiliateDialog } from './approve-affiliate-dialog';
 
 const TABS: readonly { id: AffiliateStatus; label: string }[] = [
@@ -28,19 +27,19 @@ function createState() {
   return { status, search, paging: new Paging(() => `${status()}|${search()}`) };
 }
 
-/** `/admin/aprovacoes/afiliados` — pedidos para entrar no programa de afiliados. */
+/** Aba "Pedidos" de Afiliados: quem pediu para entrar no programa (aprovar cria o cupom). */
 @Component({
-  selector: 'app-admin-affiliates-page',
-  imports: [DatePipe, MatButtonModule, MatIconModule, RouterLink, Pager, ApprovalsTabs],
-  templateUrl: './admin-affiliates-page.html',
-  styleUrl: './admin-approvals.scss',
+  selector: 'app-affiliate-requests',
+  imports: [DatePipe, MatButtonModule, MatIconModule, RouterLink, Pager],
+  templateUrl: './affiliate-requests.html',
+  styleUrl: '../reviews/admin-reviews.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AdminAffiliatesPage {
+export class AffiliateRequests {
   protected readonly store = inject(AdminAffiliates);
   private readonly dialog = inject(MatDialog);
   private readonly snackBar = inject(MatSnackBar);
-  private readonly state = inject(ListMemory).get('afiliados', createState);
+  private readonly state = inject(ListMemory).get('afiliados-pedidos', createState);
   protected readonly tabs = TABS;
   protected readonly labels = AFFILIATE_STATUS_LABELS;
   protected readonly status = this.state.status;

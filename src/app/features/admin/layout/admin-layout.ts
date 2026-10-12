@@ -7,9 +7,10 @@ import { MatSidenavModule } from '@angular/material/sidenav';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { filter, map } from 'rxjs';
 import { ROLE_LABELS } from '../../../core/config/permissions';
+import { AffiliateService } from '../../../core/services/affiliate-service';
 import { AuthService } from '../../../core/services/auth-service';
-import { ADMIN_NAV } from '../admin-nav';
-import { AdminDashboard } from '../services/admin-dashboard';
+import { ReviewService } from '../../../core/services/review-service';
+import { AdminNavItem, ADMIN_NAV } from '../admin-nav';
 
 /**
  * Moldura do backoffice. Celular: barra no topo, menu em gaveta e atalhos fixos
@@ -32,7 +33,14 @@ import { AdminDashboard } from '../services/admin-dashboard';
 export class AdminLayout {
   private readonly router = inject(Router);
   protected readonly auth = inject(AuthService);
-  protected readonly pendingApprovals = inject(AdminDashboard).pendingApprovals;
+  private readonly reviews = inject(ReviewService);
+  private readonly affiliates = inject(AffiliateService);
+
+  /** Pendências por item do menu (só para quem pode decidir/ver aquilo). */
+  protected readonly badges = computed<Record<NonNullable<AdminNavItem['badge']>, number>>(() => ({
+    reviews: this.auth.can('approvals:view') ? this.reviews.pendingCount() : 0,
+    affiliates: this.auth.can('affiliates:view') ? this.affiliates.pendingCount() : 0,
+  }));
 
   protected readonly desktop = toSignal(
     inject(BreakpointObserver)

@@ -1,9 +1,7 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
-import { AffiliateService } from '../../../core/services/affiliate-service';
 import { Gender, Product } from '../../../core/models/product';
 import { withHighlights } from '../../../core/utils/product-highlights';
 import { hasDeal } from '../../../core/utils/product-pricing';
-import { ReviewService } from '../../../core/services/review-service';
 import { AdminOrderItem } from '../data/admin-orders-mock';
 import {
   cancelledOrders,
@@ -326,10 +324,4 @@ export class AdminDashboard {
     const { start, end } = this.range();
     return salesByGroup(this.orders(), start, end);
   });
-
-  /** Contador do menu "Aprovações": avaliações esperando moderação. */
-  private readonly pendingReviews = inject(ReviewService).pendingCount;
-  private readonly pendingAffiliates = inject(AffiliateService).pendingCount;
-  /** Contador do menu Aprovações: avaliações + pedidos de afiliado. */
-  readonly pendingApprovals = computed(() => this.pendingReviews() + this.pendingAffiliates());
 }

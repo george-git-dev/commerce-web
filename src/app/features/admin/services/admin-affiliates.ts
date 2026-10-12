@@ -9,7 +9,7 @@ import { COUPON_CODE_RE, normalizeCode } from '../../../core/utils/coupon-rules'
 import { AdminAudit } from './admin-audit';
 
 /**
- * Afiliados no backoffice (aba em Aprovações). Aprovar cria o cupom próprio
+ * Pedidos de afiliação no backoffice (aba Pedidos em Afiliados). Aprovar cria o cupom próprio
  * (X% para quem compra, ligado à conta); reprovar exige motivo. Só com
  * `approvals:edit`; chave Pix inteira só com `customers:sensitive`.
  * Fase 2 (B7): `POST /admin/affiliates/{id}/approve|reject` — o back cria o
@@ -68,7 +68,7 @@ export class AdminAffiliates {
       action: 'Aprovou afiliado',
       entity: 'Afiliado',
       entityId: affiliate.profile,
-      link: '/admin/aprovacoes/afiliados',
+      link: '/admin/afiliados',
       changes: [
         { field: 'Situação', before: 'Em análise', after: 'Aprovado' },
         { field: 'Cupom', before: '', after: `${code} (${this.program.buyerDiscountPercent}%)` },
@@ -90,7 +90,7 @@ export class AdminAffiliates {
       action: 'Reprovou afiliado',
       entity: 'Afiliado',
       entityId: affiliate.profile,
-      link: '/admin/aprovacoes/afiliados',
+      link: '/admin/afiliados',
       changes: [
         { field: 'Situação', before: 'Em análise', after: 'Não aprovado' },
         { field: 'Motivo', before: '', after: reason.trim() },

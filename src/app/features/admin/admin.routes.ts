@@ -11,7 +11,6 @@ const READY = [
   'estoque',
   'clientes',
   'afiliados',
-  'aprovacoes',
   'auditoria',
   'relatorios',
   'vitrine',
@@ -168,24 +167,11 @@ export const ADMIN_ROUTES: Routes = [
           import('./customer-detail/admin-customer-detail').then((m) => m.AdminCustomerDetail),
       },
       {
-        path: 'aprovacoes',
-        title: 'Nani Admin | Aprovações',
-        canActivate: [permissionGuard('approvals:view', '/admin')],
-        loadComponent: () => import('./approvals/admin-approvals').then((m) => m.AdminApprovals),
-      },
-      {
         path: 'afiliados',
         title: 'Nani Admin | Afiliados',
         canActivate: [permissionGuard('affiliates:view', '/admin')],
         loadComponent: () =>
           import('./affiliates/admin-affiliate-payouts').then((m) => m.AdminAffiliatePayouts),
-      },
-      {
-        path: 'aprovacoes/afiliados',
-        title: 'Nani Admin | Afiliados',
-        canActivate: [permissionGuard('approvals:view', '/admin')],
-        loadComponent: () =>
-          import('./approvals/admin-affiliates-page').then((m) => m.AdminAffiliatesPage),
       },
       {
         path: 'relatorios',
@@ -204,6 +190,12 @@ export const ADMIN_ROUTES: Routes = [
         title: 'Nani Admin | Vitrine',
         canActivate: [permissionGuard('settings:view', '/admin')],
         loadComponent: () => import('./storefront/admin-banners').then((m) => m.AdminBanners),
+      },
+      {
+        path: 'vitrine/avaliacoes',
+        title: 'Nani Admin | Avaliações',
+        canActivate: [permissionGuard('approvals:view', '/admin/vitrine')],
+        loadComponent: () => import('./reviews/admin-reviews').then((m) => m.AdminReviews),
       },
       {
         path: 'vitrine/avisos',
@@ -232,8 +224,10 @@ export const ADMIN_ROUTES: Routes = [
         canActivate: [permissionGuard('settings:view', '/admin')],
         loadComponent: () => import('./settings/admin-settings').then((m) => m.AdminSettings),
       },
-      // Endereço antigo (menu e auditoria antigos): continua funcionando.
+      // Endereços antigos (menu e auditoria antigos): continuam funcionando.
       { path: 'configuracoes', redirectTo: 'vitrine/configuracoes', pathMatch: 'full' },
+      { path: 'aprovacoes', redirectTo: 'vitrine/avaliacoes', pathMatch: 'full' },
+      { path: 'aprovacoes/afiliados', redirectTo: 'afiliados', pathMatch: 'full' },
       // Telas das próximas sessões: por enquanto, uma página "em construção".
       ...ADMIN_NAV.filter((item) => item.path && !READY.includes(item.path)).map((item) => ({
         path: item.path,
