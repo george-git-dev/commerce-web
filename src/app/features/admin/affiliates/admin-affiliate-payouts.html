@@ -89,7 +89,9 @@
                   <strong>{{ row.affiliate.name }}</strong>
                   <small>{{ row.affiliate.channel }} · {{ row.affiliate.profile }}</small>
                 </span>
-                <span class="afp__code">{{ row.affiliate.couponCode }}</span>
+                @if (row.affiliate.couponCode; as code) {
+                  <app-coupon-ticket class="afp__ticket" [code]="code" />
+                }
               </div>
               <dl class="afp__facts">
                 <div>

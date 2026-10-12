@@ -1,4 +1,5 @@
 import { CurrencyPipe, DatePipe } from '@angular/common';
+import { CouponTicket } from '../../../shared/coupon-ticket/coupon-ticket';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -30,7 +31,7 @@ import {
  */
 @Component({
   selector: 'app-affiliate-area',
-  imports: [CurrencyPipe, DatePipe, MatButtonModule, MatIconModule, RouterLink],
+  imports: [CouponTicket, CurrencyPipe, DatePipe, MatButtonModule, MatIconModule, RouterLink],
   templateUrl: './affiliate-area.html',
   styleUrl: './affiliate-area.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

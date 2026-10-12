@@ -1,4 +1,5 @@
 import { CurrencyPipe, DatePipe } from '@angular/common';
+import { CouponTicket } from '../../../shared/coupon-ticket/coupon-ticket';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
@@ -38,6 +39,7 @@ function createState() {
 @Component({
   selector: 'app-admin-affiliate-payouts',
   imports: [
+    CouponTicket,
     CurrencyPipe,
     DatePipe,
     MatButtonModule,

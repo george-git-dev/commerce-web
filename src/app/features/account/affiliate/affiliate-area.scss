@@ -134,13 +134,9 @@ textarea {
   color: var(--gold);
 }
 
-.afa__code {
-  margin: 0;
-  font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace;
-  font-size: clamp(1.75rem, 1.3rem + 2vw, 2.5rem);
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  overflow-wrap: anywhere;
+// Ticket do cupom (grande) com um respiro em volta.
+.afa__ticket {
+  margin: 4px 0;
 }
 
 .afa__desc {

@@ -1,4 +1,5 @@
 import { CurrencyPipe } from '@angular/common';
+import { CouponTicket } from '../../../shared/coupon-ticket/coupon-ticket';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -30,7 +31,15 @@ const isOn = (status: string) => status === 'no-ar' || status === 'agendado';
 /** `/admin/promocoes/cupons` — cupons que o cliente digita no carrinho. */
 @Component({
   selector: 'app-admin-coupons',
-  imports: [CurrencyPipe, MatButtonModule, MatIconModule, RouterLink, Pager, PromotionsTabs],
+  imports: [
+    CouponTicket,
+    CurrencyPipe,
+    MatButtonModule,
+    MatIconModule,
+    RouterLink,
+    Pager,
+    PromotionsTabs,
+  ],
   templateUrl: './admin-coupons.html',
   styleUrl: '../promotions/admin-promotions.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

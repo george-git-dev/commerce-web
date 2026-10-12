@@ -11,7 +11,7 @@
     @if (m?.status === 'aprovado') {
       <div class="f-card afa__coupon">
         <p class="afa__label">Seu cupom</p>
-        <p class="afa__code">{{ m!.couponCode }}</p>
+        <app-coupon-ticket class="afa__ticket" size="lg" [code]="m!.couponCode!" />
         <p class="afa__desc">
           Quem usa ganha {{ program.buyerDiscountPercent }}% de desconto; você recebe
           {{ m!.commissionPercent }}% de cada venda, liberado {{ program.holdDays }} dias depois da

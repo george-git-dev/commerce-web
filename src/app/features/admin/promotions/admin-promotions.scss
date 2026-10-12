@@ -40,10 +40,9 @@
   }
 }
 
-// Código do cupom: monoespaçado e com espaçamento, como o cliente digita.
-.pr__code {
-  font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace;
-  letter-spacing: 0.06em;
+.pr__ticket {
+  justify-self: start;
+  margin-bottom: 2px;
 }
 
 .pr__chips {

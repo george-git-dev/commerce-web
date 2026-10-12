@@ -40,7 +40,7 @@
         <li>
           <a class="pr__row" [routerLink]="['/admin/promocoes/cupons', row.coupon.id]">
             <span class="pr__main">
-              <strong class="pr__code">{{ row.coupon.code }}</strong>
+              <app-coupon-ticket class="pr__ticket" [code]="row.coupon.code" />
               <small>{{ row.summary }}</small>
               <small>
                 {{ row.period }} · {{ row.uses }}
