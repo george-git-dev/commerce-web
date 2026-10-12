@@ -6,6 +6,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { RouterLink } from '@angular/router';
 import { CommissionStatus, Payout } from '../../../core/models/commission';
+import { AffiliateService } from '../../../core/services/affiliate-service';
 import { COMMISSION_STATUS_LABELS } from '../../../core/utils/commission-rules';
 import { AdminCommissions } from '../services/admin-commissions';
 import { AdminOrderStore } from '../services/admin-order-store';
@@ -46,6 +47,8 @@ export class AdminAffiliatePayouts {
   private readonly dialog = inject(MatDialog);
   private readonly snackBar = inject(MatSnackBar);
   private readonly state = inject(ListMemory).get('afiliados-pagamentos', createState);
+  /** Pedidos de afiliação esperando decisão (ficam em Aprovações). */
+  protected readonly pendingRequests = inject(AffiliateService).pendingCount;
   protected readonly tab = this.state.tab;
   protected readonly status = this.state.status;
   protected readonly affiliate = this.state.affiliate;

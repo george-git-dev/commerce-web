@@ -8,7 +8,7 @@
         {{ store.program.holdDays }} dias depois da entrega. Pix a partir de R$
         {{ store.program.minPayout }} ou crédito na loja com +{{
           store.program.storeCreditBonusPercent
-        }}%. Pedidos para entrar: <a routerLink="/admin/aprovacoes/afiliados">Aprovações</a>.
+        }}%.
       </p>
     </div>
     @if (store.canPay()) {
@@ -17,6 +17,19 @@
       </button>
     }
   </header>
+
+  @if (pendingRequests(); as count) {
+    <a class="afp__requests" routerLink="/admin/aprovacoes/afiliados">
+      <mat-icon aria-hidden="true">person_add</mat-icon>
+      <span>
+        <strong>
+          {{ count }} {{ count === 1 ? 'pessoa quer' : 'pessoas querem' }} virar afiliado
+        </strong>
+        <small>Aprovar ou recusar em Aprovações → Afiliados</small>
+      </span>
+      <mat-icon aria-hidden="true">chevron_right</mat-icon>
+    </a>
+  }
 
   @let t = store.totals();
   <dl class="afp__kpis">
