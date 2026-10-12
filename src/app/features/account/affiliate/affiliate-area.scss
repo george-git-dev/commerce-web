@@ -302,3 +302,21 @@ textarea {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+.afa__receipt {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 36px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--earth);
+  white-space: nowrap;
+  text-decoration: underline;
+
+  mat-icon {
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+  }
+}

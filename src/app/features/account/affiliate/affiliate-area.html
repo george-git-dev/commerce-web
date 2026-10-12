@@ -36,7 +36,7 @@
         <div>
           <dt>Liberado</dt>
           <dd>{{ t.liberada | currency: 'BRL' }}</dd>
-          <small>entra no próximo fechamento</small>
+          <small>aguardando o pagamento da loja</small>
         </div>
         <div>
           <dt>Recebido</dt>
@@ -84,7 +84,7 @@
             </span>
           </label>
         </div>
-        <p class="afa__hint">Vale para o próximo fechamento (todo mês).</p>
+        <p class="afa__hint">Vale para o próximo pagamento.</p>
       </section>
 
       <section class="f-card afa__sales" aria-labelledby="afa-sales">
@@ -125,12 +125,15 @@
                   <strong
                     >{{ p.paidAmount | currency: 'BRL' }} · {{ methodLabels[p.method] }}</strong
                   >
-                  <small>Fechado em {{ p.createdAt | date: 'dd/MM/yyyy' }}</small>
+                  <small>Pago em {{ p.paidAt | date: 'dd/MM/yyyy' }}</small>
                 </span>
-                <span
-                  [class]="'afa__badge afa__badge--' + (p.status === 'pago' ? 'paga' : 'pendente')"
-                  >{{ p.status === 'pago' ? 'Pago' : 'A pagar' }}</span
-                >
+                @if (p.receipt; as r) {
+                  <a class="afa__receipt" [href]="r.url" target="_blank" rel="noopener">
+                    <mat-icon aria-hidden="true">receipt</mat-icon> Comprovante
+                  </a>
+                } @else {
+                  <span class="afa__badge afa__badge--paga">Pago</span>
+                }
               </li>
             }
           </ul>

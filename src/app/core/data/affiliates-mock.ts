@@ -1,7 +1,7 @@
 import { AFFILIATE_PROGRAM } from '../config/affiliate';
 import { Affiliate } from '../models/affiliate';
 
-/** Afiliados FICTÍCIOS (um em análise e um aprovado). Somem na Fase 2. */
+/** Afiliados FICTÍCIOS (um em análise e três aprovados). Somem na Fase 2. */
 export const AFFILIATES_MOCK: readonly Affiliate[] = [
   {
     id: 1,
@@ -32,5 +32,37 @@ export const AFFILIATES_MOCK: readonly Affiliate[] = [
     status: 'pendente',
     commissionPercent: AFFILIATE_PROGRAM.commissionPercent,
     payoutMethod: 'pix',
+  },
+  {
+    id: 3,
+    email: 'marina.lopes@email.com',
+    name: 'Marina Lopes',
+    channel: 'YouTube',
+    profile: '@marinacheira',
+    pitch: 'Canal de resenhas de perfumes árabes com vídeos semanais.',
+    pixKey: 'marina.lopes@email.com',
+    acceptedTermsAt: new Date(2026, 9, 1, 14, 0),
+    createdAt: new Date(2026, 9, 1, 14, 0),
+    status: 'aprovado',
+    couponCode: 'MARINA5',
+    commissionPercent: AFFILIATE_PROGRAM.commissionPercent,
+    payoutMethod: 'credito',
+    decision: { by: 'George', at: new Date(2026, 9, 2, 10, 0) },
+  },
+  {
+    id: 4,
+    email: 'pedro.alves@email.com',
+    name: 'Pedro Alves',
+    channel: 'WhatsApp',
+    profile: 'Grupo Perfumes do Pedro',
+    pitch: 'Grupo de WhatsApp com 600 pessoas que compram perfumes importados.',
+    pixKey: '11912345678',
+    acceptedTermsAt: new Date(2026, 9, 5, 9, 30),
+    createdAt: new Date(2026, 9, 5, 9, 30),
+    status: 'aprovado',
+    couponCode: 'PEDRO5',
+    commissionPercent: AFFILIATE_PROGRAM.commissionPercent,
+    payoutMethod: 'pix',
+    decision: { by: 'George', at: new Date(2026, 9, 6, 11, 0) },
   },
 ];

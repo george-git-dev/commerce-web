@@ -1,17 +1,17 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { commissionsMock } from '../data/commissions-mock';
-import { Commission, Payout } from '../models/commission';
-import { commissionAmount, planPayouts } from '../utils/commission-rules';
+import { Commission, Payout, PayoutReceipt } from '../models/commission';
+import { commissionAmount, payoutPreview } from '../utils/commission-rules';
 import { AffiliateService } from './affiliate-service';
 import { AuthService } from './auth-service';
 import { StoreCredit } from './store-credit';
 
 /**
  * Comissões e pagamentos de afiliados (mock em memória). A comissão nasce com
- * o pedido feito com cupom de afiliado; a entrega libera depois do prazo; o
- * fechamento gera os pagamentos (Pix a pagar ou crédito na loja na hora).
- * Fase 2: gravada no `POST /orders`, liberada por job diário; fechamento e
- * "marcar como pago" em `/admin/affiliates/payouts` (idempotentes).
+ * o pedido feito com cupom de afiliado; a entrega libera depois do prazo; a
+ * equipe paga por afiliado (Pix com comprovante ou crédito na loja na hora).
+ * Fase 2: gravada no `POST /orders`, liberada por job diário; pagamento em
+ * `POST /admin/affiliates/{id}/payouts` (multipart com o comprovante; idempotente).
  */
 @Injectable({ providedIn: 'root' })
 export class CommissionService {
@@ -82,52 +82,39 @@ export class CommissionService {
     return changed;
   }
 
-  /** Fecha: cria os pagamentos das comissões liberadas. Devolve o que foi gerado. */
-  close(): { created: Payout[]; carried: { affiliateEmail: string; amount: number }[] } {
-    const now = this.now();
-    const { plans, carried } = planPayouts(
-      this.commissionState(),
-      (email) => this.affiliates.approvedBy(email)?.payoutMethod ?? 'pix',
-      now,
-    );
-    const created: Payout[] = [];
-    let nextId = Math.max(0, ...this.payoutState().map((p) => p.id)) + 1;
-    for (const plan of plans) {
-      const id = nextId++;
-      const credit = plan.method === 'credito';
-      const payout: Payout = {
-        id,
-        affiliateEmail: plan.affiliateEmail,
-        affiliateName: this.affiliates.approvedBy(plan.affiliateEmail)?.name ?? plan.affiliateEmail,
-        createdAt: now,
-        method: plan.method,
-        amount: plan.amount,
-        paidAmount: plan.paidAmount,
-        status: credit ? 'pago' : 'a-pagar',
-        paidAt: credit ? now : undefined,
-        paidBy: credit ? 'Crédito automático' : undefined,
-        commissionIds: plan.commissionIds,
-      };
-      if (credit) this.credit.addCommission(plan.affiliateEmail, plan.paidAmount, id);
-      created.push(payout);
-    }
-    const paid = new Map(
-      created.flatMap((p) => p.commissionIds.map((cid) => [cid, p.id] as const)),
-    );
+  /**
+   * Paga as comissões liberadas de UM afiliado: Pix (com comprovante, feito
+   * fora do sistema) ou crédito na loja (lançado na hora, com bônus).
+   * Idempotente: o que já foi pago não entra de novo.
+   */
+  pay(email: string, by: string, receipt?: PayoutReceipt): Payout | null {
+    const affiliate = this.affiliates.approvedBy(email);
+    if (!affiliate) return null;
+    const now = new Date();
+    const plan = payoutPreview(this.commissionState(), email, affiliate.payoutMethod, this.now());
+    if (!plan.commissionIds.length || plan.belowMinimum) return null;
+    if (plan.method === 'pix' && !receipt) return null;
+    const id = Math.max(0, ...this.payoutState().map((p) => p.id)) + 1;
+    const payout: Payout = {
+      id,
+      affiliateEmail: email,
+      affiliateName: affiliate.name,
+      createdAt: now,
+      method: plan.method,
+      amount: plan.amount,
+      paidAmount: plan.paidAmount,
+      paidAt: now,
+      paidBy: by,
+      receipt: plan.method === 'pix' ? receipt : undefined,
+      commissionIds: plan.commissionIds,
+    };
+    if (plan.method === 'credito') this.credit.addCommission(email, plan.paidAmount, id);
+    const ids = new Set(plan.commissionIds);
     this.commissionState.update((list) =>
-      list.map((c) => (paid.has(c.id) ? { ...c, state: 'paga', payoutId: paid.get(c.id) } : c)),
+      list.map((c) => (ids.has(c.id) ? { ...c, state: 'paga', payoutId: id } : c)),
     );
-    this.payoutState.update((list) => [...list, ...created]);
-    return { created, carried };
-  }
-
-  /** Pix feito fora do sistema: marca como pago. */
-  markPaid(payoutId: number, by: string): Payout | undefined {
-    const payout = this.payoutState().find((p) => p.id === payoutId);
-    if (!payout || payout.status === 'pago') return undefined;
-    const updated: Payout = { ...payout, status: 'pago', paidAt: new Date(), paidBy: by };
-    this.payoutState.update((list) => list.map((p) => (p.id === payoutId ? updated : p)));
-    return updated;
+    this.payoutState.update((list) => [...list, payout]);
+    return payout;
   }
 
   private update(orderNumber: string, change: (c: Commission) => Commission): void {

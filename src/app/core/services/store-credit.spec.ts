@@ -31,19 +31,18 @@ describe('crédito na loja e fechamento', () => {
     expect(credit.use('julia.afiliada@email.com', balance + 1, 'NP1')).toBe(false);
   });
 
-  it('fechar com crédito: comissões viram pagas e o saldo entra com +10%', () => {
-    const auth = TestBed.inject(AuthService);
-    auth.login('julia.afiliada@email.com', '12345678');
+  it('pagar em crédito: comissões viram pagas e o saldo entra com +10%', () => {
+    TestBed.inject(AuthService).login('julia.afiliada@email.com', '12345678');
     const service = TestBed.inject(CommissionService);
     const credit = TestBed.inject(StoreCredit);
     TestBed.inject(AffiliateService).setPayoutMethod('credito');
     const before = credit.myBalance();
-    const { created } = service.close();
-    expect(created.length).toBe(1);
-    expect(created[0].method).toBe('credito');
-    expect(created[0].paidAmount).toBeCloseTo(created[0].amount * 1.1, 2);
-    expect(credit.myBalance()).toBeCloseTo(before + created[0].paidAmount, 2);
-    // fechar de novo não paga duas vezes
-    expect(service.close().created.length).toBe(0);
+    const payout = service.pay('julia.afiliada@email.com', 'George')!;
+    expect(payout.method).toBe('credito');
+    expect(payout.receipt).toBeUndefined();
+    expect(payout.paidAmount).toBeCloseTo(payout.amount * 1.1, 2);
+    expect(credit.myBalance()).toBeCloseTo(before + payout.paidAmount, 2);
+    // pagar de novo não paga duas vezes
+    expect(service.pay('julia.afiliada@email.com', 'George')).toBeNull();
   });
 });

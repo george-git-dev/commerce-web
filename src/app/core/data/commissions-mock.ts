@@ -79,7 +79,6 @@ export function commissionsMock(now = new Date()) {
       method,
       amount,
       paidAmount: paidAmount(amount, method),
-      status: 'pago',
       paidAt: at,
       paidBy: 'George',
       commissionIds: ids,

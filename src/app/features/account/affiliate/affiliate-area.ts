@@ -59,9 +59,7 @@ export class AffiliateArea {
   );
   /** Recebido de fato: Pix feitos e créditos lançados. */
   protected readonly received = computed(() =>
-    this.payouts()
-      .filter((p) => p.status === 'pago')
-      .reduce((sum, p) => Math.round((sum + p.paidAmount) * 100) / 100, 0),
+    this.payouts().reduce((sum, p) => Math.round((sum + p.paidAmount) * 100) / 100, 0),
   );
   protected readonly salesShown = signal(10);
   /** Quanto o liberado vira em cada forma (para a escolha). */
@@ -76,8 +74,8 @@ export class AffiliateArea {
     this.affiliates.setPayoutMethod(method);
     this.snackBar.open(
       method === 'credito'
-        ? `Próximo fechamento em crédito na loja (+${this.program.storeCreditBonusPercent}%).`
-        : 'Próximo fechamento por Pix.',
+        ? `Próximo pagamento em crédito na loja (+${this.program.storeCreditBonusPercent}%).`
+        : 'Próximo pagamento por Pix.',
       'Fechar',
       { duration: 3000 },
     );

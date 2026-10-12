@@ -30,7 +30,16 @@ export const PAYOUT_METHOD_LABELS: Record<PayoutMethod, string> = {
   credito: 'Crédito na loja',
 };
 
-/** Pagamento de comissões a um afiliado (um por fechamento). */
+/** Comprovante do Pix anexado pela loja (PDF ou imagem). Fase 2: S3 privado + URL temporária. */
+export interface PayoutReceipt {
+  name: string;
+  type: string;
+  size: number;
+  /** Mock: URL local do arquivo (só nesta sessão). */
+  url: string;
+}
+
+/** Pagamento das comissões liberadas de UM afiliado (feito pela equipe, um por vez). */
 export interface Payout {
   id: number;
   affiliateEmail: string;
@@ -41,10 +50,10 @@ export interface Payout {
   amount: number;
   /** O que a pessoa recebe: igual no Pix; com bônus no crédito na loja. */
   paidAmount: number;
-  /** Crédito na loja é lançado na hora (pago); Pix fica a pagar até a equipe marcar. */
-  status: 'a-pagar' | 'pago';
-  paidAt?: Date;
-  paidBy?: string;
+  paidAt: Date;
+  paidBy: string;
+  /** Comprovante do Pix (obrigatório no Pix; crédito na loja não tem). */
+  receipt?: PayoutReceipt;
   commissionIds: readonly number[];
 }
 

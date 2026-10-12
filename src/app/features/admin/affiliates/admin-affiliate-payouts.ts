@@ -6,35 +6,59 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { RouterLink } from '@angular/router';
-import { CommissionStatus, Payout } from '../../../core/models/commission';
+import { Affiliate } from '../../../core/models/affiliate';
+import { CommissionStatus } from '../../../core/models/commission';
 import { AffiliateService } from '../../../core/services/affiliate-service';
 import { COMMISSION_STATUS_LABELS } from '../../../core/utils/commission-rules';
 import { AdminCommissions } from '../services/admin-commissions';
 import { AdminOrderStore } from '../services/admin-order-store';
 import { ListMemory } from '../services/list-memory';
-import { ActionDialog, ActionDialogData } from '../shared/action-dialog/action-dialog';
 import { AffiliateRequests } from './affiliate-requests';
+import { PayoutDialog } from './payout-dialog';
 import { Pager } from '../shared/pager/pager';
 import { Paging } from '../shared/pager/paging';
 
 type Tab = 'pedidos' | 'afiliados' | 'comissoes' | 'pagamentos';
+type AffiliateFilter = 'todos' | 'a-pagar' | 'pix' | 'credito' | 'sem-vendas';
+type AffiliateSort = 'vendas' | 'a-pagar' | 'nome' | 'recentes';
+
+const AFFILIATE_FILTERS: readonly { id: AffiliateFilter; label: string }[] = [
+  { id: 'todos', label: 'Todos' },
+  { id: 'a-pagar', label: 'Com valor a pagar' },
+  { id: 'pix', label: 'Recebe por Pix' },
+  { id: 'credito', label: 'Recebe em crédito' },
+  { id: 'sem-vendas', label: 'Sem vendas' },
+];
+
+const AFFILIATE_SORTS: readonly { id: AffiliateSort; label: string }[] = [
+  { id: 'vendas', label: 'Mais vendas (R$)' },
+  { id: 'a-pagar', label: 'Maior valor a pagar' },
+  { id: 'nome', label: 'Nome (A–Z)' },
+  { id: 'recentes', label: 'Aprovados mais recentes' },
+];
 
 function createState() {
   const tab = signal<Tab>('afiliados');
   const status = signal<CommissionStatus | 'todas'>('todas');
   const affiliate = signal('');
+  const search = signal('');
+  const show = signal<AffiliateFilter>('todos');
+  const sort = signal<AffiliateSort>('vendas');
   return {
     tab,
     status,
     affiliate,
-    paging: new Paging(() => `${tab()}|${status()}|${affiliate()}`),
+    search,
+    show,
+    sort,
+    paging: new Paging(() => `${tab()}|${status()}|${affiliate()}|${search()}|${show()}|${sort()}`),
   };
 }
 
 /**
  * `/admin/afiliados` — pedidos para entrar no programa (aprovar/recusar),
- * afiliados aprovados (vendas e totais), comissões e pagamentos (fechar o mês,
- * marcar Pix pago).
+ * afiliados aprovados (vendas, totais e "Fazer pagamento" por afiliado),
+ * comissões e pagamentos (com o comprovante do Pix).
  */
 @Component({
   selector: 'app-admin-affiliate-payouts',
@@ -61,6 +85,11 @@ export class AdminAffiliatePayouts {
   /** Pedidos de afiliação esperando decisão (aba Pedidos). */
   protected readonly pendingRequests = inject(AffiliateService).pendingCount;
   protected readonly tab = this.state.tab;
+  protected readonly search = this.state.search;
+  protected readonly show = this.state.show;
+  protected readonly sort = this.state.sort;
+  protected readonly affiliateFilters = AFFILIATE_FILTERS;
+  protected readonly affiliateSorts = AFFILIATE_SORTS;
   protected readonly status = this.state.status;
   protected readonly affiliate = this.state.affiliate;
   protected readonly paging = this.state.paging;
@@ -79,6 +108,50 @@ export class AdminAffiliatePayouts {
     { id: 'pagamentos', label: 'Pagamentos' },
   ];
 
+  /** Afiliados aprovados com busca (nome, @, cupom), filtro e ordem. */
+  protected readonly affiliates = computed(() => {
+    const term = this.search().trim().toLocaleLowerCase('pt-BR');
+    const show = this.show();
+    const rows = this.store
+      .rows()
+      .map((row) => ({ ...row, toPay: this.store.preview(row.affiliate).paidAmount }))
+      .filter(
+        (row) =>
+          !term ||
+          `${row.affiliate.name} ${row.affiliate.profile} ${row.affiliate.couponCode ?? ''}`
+            .toLocaleLowerCase('pt-BR')
+            .includes(term),
+      )
+      .filter((row) => {
+        switch (show) {
+          case 'a-pagar':
+            return row.toPay > 0;
+          case 'pix':
+          case 'credito':
+            return row.affiliate.payoutMethod === show;
+          case 'sem-vendas':
+            return row.sales === 0;
+          default:
+            return true;
+        }
+      });
+    const byName = (a: string, b: string) => a.localeCompare(b, 'pt-BR');
+    switch (this.sort()) {
+      case 'a-pagar':
+        return rows.sort((a, b) => b.toPay - a.toPay);
+      case 'nome':
+        return rows.sort((a, b) => byName(a.affiliate.name, b.affiliate.name));
+      case 'recentes':
+        return rows.sort(
+          (a, b) =>
+            (b.affiliate.decision?.at.getTime() ?? 0) - (a.affiliate.decision?.at.getTime() ?? 0),
+        );
+      default:
+        return rows.sort((a, b) => b.revenue - a.revenue);
+    }
+  });
+  protected readonly affiliatePage = computed(() => this.paging.of(this.affiliates()));
+
   protected readonly commissions = computed(() => {
     const status = this.status();
     const email = this.affiliate();
@@ -90,15 +163,11 @@ export class AdminAffiliatePayouts {
   });
   protected readonly commissionPage = computed(() => this.paging.of(this.commissions()));
 
-  /** A pagar primeiro; depois os mais recentes. */
+  /** Mais recentes primeiro. */
   protected readonly payouts = computed(() =>
     [...this.store.payouts()]
       .filter((p) => !this.affiliate() || p.affiliateEmail === this.affiliate())
-      .sort(
-        (a, b) =>
-          Number(b.status === 'a-pagar') - Number(a.status === 'a-pagar') ||
-          b.createdAt.getTime() - a.createdAt.getTime(),
-      ),
+      .sort((a, b) => b.paidAt.getTime() - a.paidAt.getTime()),
   );
   protected readonly payoutPage = computed(() => this.paging.of(this.payouts()));
 
@@ -111,49 +180,15 @@ export class AdminAffiliatePayouts {
     return !!this.orders.find(number);
   }
 
-  protected close(): void {
-    const preview = this.store.closingPreview();
-    const data: ActionDialogData = {
-      title: 'Fechar comissões liberadas?',
-      message: preview.count
-        ? `${preview.count} comissões liberadas (${preview.amount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}) viram pagamentos: quem escolheu crédito na loja recebe na hora (+${this.store.program.storeCreditBonusPercent}%); quem escolheu Pix fica "a pagar". Pix abaixo de R$ ${this.store.program.minPayout} acumula para o próximo fechamento.`
-        : 'Não há comissões liberadas agora.',
-      confirmLabel: 'Fechar',
-    };
-    if (!preview.count) {
-      this.snackBar.open('Não há comissões liberadas para fechar.', 'Fechar', { duration: 3000 });
-      return;
-    }
+  protected pay(affiliate: Affiliate): void {
     this.dialog
-      .open(ActionDialog, { data, width: '460px' })
+      .open(PayoutDialog, { data: affiliate, width: '480px', maxWidth: '94vw' })
       .afterClosed()
-      .subscribe((ok) => {
-        if (!ok) return;
-        const result = this.store.close();
-        if (!result) return;
-        const carried = result.carried.length
-          ? ` ${result.carried.length} afiliado(s) com Pix abaixo do mínimo ficaram para o próximo.`
-          : '';
-        this.snackBar.open(`${result.created.length} pagamento(s) gerado(s).${carried}`, 'Fechar', {
-          duration: 5000,
+      .subscribe((done?: boolean) => {
+        if (!done) return;
+        this.snackBar.open(`Pagamento de ${affiliate.name} registrado.`, 'Fechar', {
+          duration: 3500,
         });
-        this.tab.set('pagamentos');
-      });
-  }
-
-  protected markPaid(payout: Payout): void {
-    const data: ActionDialogData = {
-      title: `Pix de ${payout.paidAmount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} feito?`,
-      message: `Confirme só depois de fazer o Pix para ${payout.affiliateName} (chave ${this.store.pixOf(payout.affiliateEmail)}). Fica registrado com seu nome.`,
-      confirmLabel: 'Marcar como pago',
-    };
-    this.dialog
-      .open(ActionDialog, { data, width: '440px' })
-      .afterClosed()
-      .subscribe((ok) => {
-        if (ok && this.store.markPaid(payout)) {
-          this.snackBar.open('Pagamento marcado como pago.', 'Fechar', { duration: 3000 });
-        }
       });
   }
 }

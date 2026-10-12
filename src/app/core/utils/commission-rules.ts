@@ -51,47 +51,38 @@ export function paidAmount(amount: number, method: PayoutMethod): number {
     : round2(amount);
 }
 
-export interface PayoutPlan {
-  affiliateEmail: string;
-  method: PayoutMethod;
-  amount: number;
-  paidAmount: number;
-  commissionIds: number[];
+/**
+ * O que um afiliado tem para receber agora: comissões liberadas ainda não
+ * pagas. Pix abaixo do mínimo não paga (acumula); crédito não tem mínimo.
+ */
+export function payoutPreview(
+  commissions: readonly Commission[],
+  email: string,
+  method: PayoutMethod,
+  now: Date,
+) {
+  const list = commissions.filter(
+    (c) => c.affiliateEmail === email && commissionStatus(c, now) === 'liberada',
+  );
+  const amount = round2(list.reduce((sum, c) => sum + c.amount, 0));
+  return {
+    method,
+    amount,
+    paidAmount: paidAmount(amount, method),
+    commissionIds: list.map((c) => c.id),
+    belowMinimum: method === 'pix' && amount < AFFILIATE_PROGRAM.minPayout,
+  };
 }
 
-/**
- * Fechamento: junta as comissões LIBERADAS ainda não pagas, por afiliado.
- * Pix abaixo do mínimo fica para o próximo fechamento (acumula); crédito não
- * tem mínimo. Idempotente: comissão paga não entra de novo.
- */
-export function planPayouts(
-  commissions: readonly Commission[],
-  methodOf: (email: string) => PayoutMethod,
-  now: Date,
-): { plans: PayoutPlan[]; carried: { affiliateEmail: string; amount: number }[] } {
-  const byAffiliate = new Map<string, Commission[]>();
-  for (const c of commissions) {
-    if (commissionStatus(c, now) !== 'liberada') continue;
-    byAffiliate.set(c.affiliateEmail, [...(byAffiliate.get(c.affiliateEmail) ?? []), c]);
-  }
-  const plans: PayoutPlan[] = [];
-  const carried: { affiliateEmail: string; amount: number }[] = [];
-  for (const [email, list] of byAffiliate) {
-    const amount = round2(list.reduce((sum, c) => sum + c.amount, 0));
-    const method = methodOf(email);
-    if (method === 'pix' && amount < AFFILIATE_PROGRAM.minPayout) {
-      carried.push({ affiliateEmail: email, amount });
-      continue;
-    }
-    plans.push({
-      affiliateEmail: email,
-      method,
-      amount,
-      paidAmount: paidAmount(amount, method),
-      commissionIds: list.map((c) => c.id),
-    });
-  }
-  return { plans, carried };
+/** Comprovante: PDF ou imagem, até 5 MB. */
+export const RECEIPT_TYPES = ['application/pdf', 'image/jpeg', 'image/png', 'image/webp'];
+export const RECEIPT_MAX_BYTES = 5 * 1024 * 1024;
+
+export function receiptProblem(file: { type: string; size: number } | null): string | null {
+  if (!file) return 'Anexe o comprovante do Pix (PDF ou imagem).';
+  if (!RECEIPT_TYPES.includes(file.type)) return 'Comprovante em PDF, JPG, PNG ou WEBP.';
+  if (file.size > RECEIPT_MAX_BYTES) return 'Comprovante com no máximo 5 MB.';
+  return null;
 }
 
 /**

@@ -1,5 +1,11 @@
 import { Commission, CreditEntry } from '../models/commission';
-import { commissionStatus, creditBalance, paidAmount, planPayouts } from './commission-rules';
+import {
+  commissionStatus,
+  creditBalance,
+  paidAmount,
+  payoutPreview,
+  receiptProblem,
+} from './commission-rules';
 
 const DAY = 86_400_000;
 const now = new Date(2026, 9, 12);
@@ -33,7 +39,7 @@ describe('comissões', () => {
     expect(paidAmount(100, 'credito')).toBe(110);
   });
 
-  it('fechamento: Pix abaixo de R$ 50 acumula; crédito não tem mínimo; pagas não entram', () => {
+  it('pagamento por afiliado: só liberadas e não pagas; Pix abaixo de R$ 50 não paga', () => {
     const delivered = new Date(now.getTime() - 10 * DAY);
     const list = [
       c(1, { deliveredAt: delivered, amount: 30 }),
@@ -41,17 +47,24 @@ describe('comissões', () => {
       c(3, { deliveredAt: delivered, amount: 40, state: 'paga' }),
       c(4, { amount: 99 }), // pendente
     ];
-    const { plans, carried } = planPayouts(list, (e) => (e === 'b@x.com' ? 'credito' : 'pix'), now);
-    expect(carried).toEqual([{ affiliateEmail: 'a@x.com', amount: 30 }]);
-    expect(plans).toEqual([
-      {
-        affiliateEmail: 'b@x.com',
-        method: 'credito',
-        amount: 15,
-        paidAmount: 16.5,
-        commissionIds: [2],
-      },
-    ]);
+    const pix = payoutPreview(list, 'a@x.com', 'pix', now);
+    expect(pix).toEqual({
+      method: 'pix',
+      amount: 30,
+      paidAmount: 30,
+      commissionIds: [1],
+      belowMinimum: true,
+    });
+    const credit = payoutPreview(list, 'b@x.com', 'credito', now);
+    expect(credit.paidAmount).toBe(16.5);
+    expect(credit.belowMinimum).toBe(false);
+  });
+
+  it('comprovante: PDF ou imagem até 5 MB', () => {
+    expect(receiptProblem(null)).toMatch(/Anexe/);
+    expect(receiptProblem({ type: 'application/pdf', size: 1000 })).toBeNull();
+    expect(receiptProblem({ type: 'text/plain', size: 10 })).toMatch(/PDF/);
+    expect(receiptProblem({ type: 'image/png', size: 6 * 1024 * 1024 })).toMatch(/5 MB/);
   });
 
   it('saldo de crédito ignora entrada vencida', () => {

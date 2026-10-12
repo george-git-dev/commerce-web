@@ -1,21 +1,32 @@
 import { computed, inject, Injectable } from '@angular/core';
 import { AFFILIATE_PROGRAM } from '../../../core/config/affiliate';
-import { Commission, PAYOUT_METHOD_LABELS, Payout } from '../../../core/models/commission';
+import { Affiliate } from '../../../core/models/affiliate';
+import {
+  Commission,
+  PAYOUT_METHOD_LABELS,
+  Payout,
+  PayoutReceipt,
+} from '../../../core/models/commission';
 import { AffiliateService } from '../../../core/services/affiliate-service';
 import { AuthService } from '../../../core/services/auth-service';
 import { CommissionService } from '../../../core/services/commission-service';
 import { StoreCredit } from '../../../core/services/store-credit';
 import { maskPixKey } from '../../../core/utils/affiliate-rules';
-import { commissionStatus, commissionTotals } from '../../../core/utils/commission-rules';
+import {
+  commissionStatus,
+  commissionTotals,
+  payoutPreview,
+  receiptProblem,
+} from '../../../core/utils/commission-rules';
 import { AdminAudit } from './admin-audit';
 
 const brl = (n: number) => n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
 /**
  * Afiliados no backoffice: totais por afiliado, comissões e pagamentos.
- * Ver: `affiliates:view`; fechar e marcar Pix pago: `affiliates:pay`.
+ * Ver: `affiliates:view`; pagar (por afiliado): `affiliates:pay`.
  * Fase 2 (B7): `GET /admin/affiliates/commissions|payouts`,
- * `POST /admin/affiliates/payouts/close` e `/{id}/paid` (idempotentes, auditados).
+ * `POST /admin/affiliates/{id}/payouts` (multipart com comprovante; idempotente, auditado).
  */
 @Injectable({ providedIn: 'root' })
 export class AdminCommissions {
@@ -38,13 +49,8 @@ export class AdminCommissions {
 
   readonly totals = computed(() => {
     const t = commissionTotals(this.commissions(), this.now());
-    const sum = (status: Payout['status']) =>
-      Math.round(
-        this.payouts()
-          .filter((p) => p.status === status)
-          .reduce((total, p) => total + p.paidAmount, 0) * 100,
-      ) / 100;
-    return { ...t, toPay: sum('a-pagar'), paid: sum('pago') };
+    const paid = this.payouts().reduce((total, p) => total + p.paidAmount, 0);
+    return { ...t, paid: Math.round(paid * 100) / 100 };
   });
 
   /** Afiliados aprovados com vendas, totais e como querem receber. */
@@ -76,56 +82,44 @@ export class AdminCommissions {
     return this.canSeePix() ? key : maskPixKey(key);
   }
 
-  methodLabel(payout: Pick<Payout, 'method'>): string {
-    return PAYOUT_METHOD_LABELS[payout.method];
+  methodLabel(item: { method: Payout['method'] } | { payoutMethod: Payout['method'] }): string {
+    return PAYOUT_METHOD_LABELS['method' in item ? item.method : item.payoutMethod];
   }
 
-  /** Prévia do fechamento (o que vai ser gerado agora). */
-  readonly closingPreview = computed(() => {
-    const liberated = this.commissions().filter((c) => this.status(c) === 'liberada');
-    return {
-      count: liberated.length,
-      amount: Math.round(liberated.reduce((s, c) => s + c.amount, 0) * 100) / 100,
-    };
-  });
+  /** O que este afiliado tem para receber agora (pela forma que ele escolheu). */
+  preview(affiliate: Affiliate) {
+    return payoutPreview(this.commissions(), affiliate.email, affiliate.payoutMethod, this.now());
+  }
 
-  close() {
+  /** Chave Pix inteira para quem vai pagar (só com `affiliates:pay`). */
+  pixToPay(affiliate: Affiliate): string {
+    return this.canPay() ? affiliate.pixKey : maskPixKey(affiliate.pixKey);
+  }
+
+  pay(affiliate: Affiliate, receipt?: PayoutReceipt): Payout | null {
     if (!this.canPay()) return null;
-    const result = this.service.close();
-    for (const payout of result.created) {
-      this.audit.record({
-        by: this.who(),
-        action:
-          payout.method === 'credito' ? 'Pagou comissão em crédito' : 'Gerou pagamento de comissão',
-        entity: 'Pagamento de afiliado',
-        entityId: payout.affiliateName,
-        link: '/admin/afiliados',
-        changes: [
-          {
-            field: 'Comissões',
-            before: '',
-            after: `${payout.commissionIds.length} (${brl(payout.amount)})`,
-          },
-          { field: PAYOUT_METHOD_LABELS[payout.method], before: '', after: brl(payout.paidAmount) },
-        ],
-      });
-    }
-    return result;
-  }
-
-  markPaid(payout: Payout): boolean {
-    if (!this.canPay()) return false;
-    const updated = this.service.markPaid(payout.id, this.who());
-    if (!updated) return false;
+    if (affiliate.payoutMethod === 'pix' && receiptProblem(receipt ?? null)) return null;
+    const payout = this.service.pay(affiliate.email, this.who(), receipt);
+    if (!payout) return null;
     this.audit.record({
       by: this.who(),
-      action: 'Marcou Pix de comissão como pago',
+      action: payout.method === 'credito' ? 'Pagou comissão em crédito' : 'Pagou comissão por Pix',
       entity: 'Pagamento de afiliado',
       entityId: payout.affiliateName,
       link: '/admin/afiliados',
-      changes: [{ field: 'Pix', before: `A pagar ${brl(payout.paidAmount)}`, after: 'Pago' }],
+      changes: [
+        {
+          field: 'Comissões',
+          before: '',
+          after: `${payout.commissionIds.length} (${brl(payout.amount)})`,
+        },
+        { field: PAYOUT_METHOD_LABELS[payout.method], before: '', after: brl(payout.paidAmount) },
+        ...(payout.receipt
+          ? [{ field: 'Comprovante', before: '', after: payout.receipt.name }]
+          : []),
+      ],
     });
-    return true;
+    return payout;
   }
 
   private who(): string {

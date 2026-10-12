@@ -11,11 +11,6 @@
         }}%.
       </p>
     </div>
-    @if (store.canPay()) {
-      <button matButton="filled" type="button" class="ui-cta" (click)="close()">
-        <mat-icon>task_alt</mat-icon> Fechar comissões liberadas
-      </button>
-    }
   </header>
 
   @let t = store.totals();
@@ -28,12 +23,7 @@
     <div>
       <dt>Liberado</dt>
       <dd>{{ t.liberada | currency: 'BRL' }}</dd>
-      <small>entra no próximo fechamento</small>
-    </div>
-    <div>
-      <dt>Pix a pagar</dt>
-      <dd>{{ t.toPay | currency: 'BRL' }}</dd>
-      <small>já fechado</small>
+      <small>pronto para pagar</small>
     </div>
     <div>
       <dt>Pago</dt>
@@ -80,9 +70,43 @@
       <app-affiliate-requests />
     }
     @case ('afiliados') {
-      @if (store.rows().length) {
+      <div class="afp__tools">
+        <label class="afp__search">
+          <mat-icon aria-hidden="true">search</mat-icon>
+          <input
+            type="search"
+            placeholder="Nome, @ ou cupom"
+            aria-label="Buscar afiliado"
+            autocomplete="off"
+            [value]="search()"
+            (input)="search.set($any($event.target).value)"
+          />
+        </label>
+        <label class="afp__filter afp__sort">
+          Ordenar por
+          <select [value]="sort()" (change)="sort.set($any($event.target).value)">
+            @for (o of affiliateSorts; track o.id) {
+              <option [value]="o.id" [selected]="o.id === sort()">{{ o.label }}</option>
+            }
+          </select>
+        </label>
+      </div>
+      <div class="afp__chips" role="tablist" aria-label="Filtrar afiliados">
+        @for (f of affiliateFilters; track f.id) {
+          <button
+            type="button"
+            role="tab"
+            [attr.aria-selected]="show() === f.id"
+            [class.afp__chip--on]="show() === f.id"
+            (click)="show.set(f.id)"
+          >
+            {{ f.label }}
+          </button>
+        }
+      </div>
+      @if (affiliatePage().content.length) {
         <ul class="afp__list">
-          @for (row of store.rows(); track row.affiliate.id) {
+          @for (row of affiliatePage().content; track row.affiliate.id) {
             <li class="afp__card">
               <div class="afp__card-head">
                 <span>
@@ -112,18 +136,49 @@
                 <div>
                   <dt>Recebe por</dt>
                   <dd>
-                    {{ store.methodLabel({ method: row.affiliate.payoutMethod }) }}
+                    {{ store.methodLabel(row.affiliate) }}
                     @if (row.credit) {
                       · saldo {{ row.credit | currency: 'BRL' }}
                     }
                   </dd>
                 </div>
               </dl>
+              @let plan = store.preview(row.affiliate);
+              <div class="afp__pay">
+                @if (plan.commissionIds.length) {
+                  <span>
+                    <strong>{{ plan.paidAmount | currency: 'BRL' }}</strong> a receber por
+                    {{ store.methodLabel(row.affiliate) }}
+                    @if (plan.belowMinimum) {
+                      <small>abaixo do mínimo de R$ {{ store.program.minPayout }} — acumula</small>
+                    }
+                  </span>
+                } @else {
+                  <span class="afp__muted">Nada liberado para pagar agora.</span>
+                }
+                @if (store.canPay()) {
+                  <button
+                    matButton="outlined"
+                    type="button"
+                    [disabled]="!plan.commissionIds.length || plan.belowMinimum"
+                    (click)="pay(row.affiliate)"
+                  >
+                    <mat-icon>payments</mat-icon> Fazer pagamento
+                  </button>
+                }
+              </div>
             </li>
           }
         </ul>
+        <app-pager [paging]="paging" [page]="affiliatePage()" [anchor]="top" noun="afiliados" />
       } @else {
-        <p class="afp__empty">Nenhum afiliado aprovado ainda.</p>
+        <p class="afp__empty">
+          {{
+            store.rows().length
+              ? 'Nenhum afiliado com esse filtro.'
+              : 'Nenhum afiliado aprovado ainda.'
+          }}
+        </p>
       }
     }
     @case ('comissoes') {
@@ -171,33 +226,20 @@
       @if (payoutPage().content.length) {
         <ul class="afp__list">
           @for (p of payoutPage().content; track p.id) {
-            <li class="afp__row" [class.afp__row--due]="p.status === 'a-pagar'">
+            <li class="afp__row">
               <span class="afp__main">
                 <strong>{{ p.paidAmount | currency: 'BRL' }} · {{ store.methodLabel(p) }}</strong>
                 <small>
-                  {{ p.affiliateName }} · fechado em {{ p.createdAt | date: 'dd/MM/yyyy' }} ·
-                  {{ p.commissionIds.length }} comissões ({{ p.amount | currency: 'BRL' }})
+                  {{ p.affiliateName }} · {{ p.paidAt | date: 'dd/MM/yyyy' }} · por {{ p.paidBy }}
                 </small>
-                @if (p.method === 'pix') {
-                  <small>Chave Pix: {{ store.pixOf(p.affiliateEmail) }}</small>
-                }
-                @if (p.paidAt) {
-                  <small>
-                    Pago em {{ p.paidAt | date: 'dd/MM/yyyy' }}
-                    @if (p.paidBy) {
-                      · {{ p.paidBy }}
-                    }
-                  </small>
-                }
+                <small
+                  >{{ p.commissionIds.length }} comissões ({{ p.amount | currency: 'BRL' }})</small
+                >
               </span>
-              @if (p.status === 'a-pagar') {
-                @if (store.canPay()) {
-                  <button matButton="outlined" type="button" (click)="markPaid(p)">
-                    Marcar como pago
-                  </button>
-                } @else {
-                  <span class="afp__status afp__status--pendente">A pagar</span>
-                }
+              @if (p.receipt; as r) {
+                <a matButton="outlined" [href]="r.url" target="_blank" rel="noopener">
+                  <mat-icon>receipt</mat-icon> Comprovante
+                </a>
               } @else {
                 <span class="afp__status afp__status--paga">Pago</span>
               }
