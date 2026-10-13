@@ -60,19 +60,21 @@
             <button
               matButton="filled"
               class="ui-cta"
-              [disabled]="!inStock()"
+              [disabled]="!inStock() || buying.running()"
+              [attr.aria-busy]="buying.running()"
               (click)="buyNow(item)"
             >
-              Comprar agora
+              {{ buying.running() ? 'Aguarde…' : 'Comprar agora' }}
             </button>
             <button
               matButton="outlined"
               class="ui-cta"
-              [disabled]="!inStock()"
+              [disabled]="!inStock() || adding.running()"
+              [attr.aria-busy]="adding.running()"
               (click)="addSelected(item)"
             >
               <mat-icon>shopping_bag</mat-icon>
-              Adicionar ao carrinho
+              {{ adding.running() ? 'Adicionando…' : 'Adicionar ao carrinho' }}
             </button>
             <button
               matIconButton

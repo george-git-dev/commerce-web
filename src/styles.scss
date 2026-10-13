@@ -265,3 +265,10 @@ textarea {
     padding-block: 24px 72px;
   }
 }
+
+// Aviso de erro (Notifier): fundo vinho para diferenciar do aviso de sucesso.
+.snack--error {
+  --mat-snack-bar-container-color: var(--wine);
+  --mat-snack-bar-supporting-text-color: #fff;
+  --mat-snack-bar-button-color: #ffd88a;
+}

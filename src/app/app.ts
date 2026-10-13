@@ -3,11 +3,12 @@ import { ChangeDetectionStrategy, Component, inject, OnDestroy, OnInit } from '@
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { filter, map } from 'rxjs';
+import { ConnectionBanner } from './layout/connection-banner/connection-banner';
 import { Footer } from './layout/footer/footer';
 import { Header } from './layout/header/header';
 
 @Component({
-  imports: [RouterOutlet, Header, Footer],
+  imports: [RouterOutlet, Header, Footer, ConnectionBanner],
   selector: 'app-root',
   styleUrl: './app.scss',
   templateUrl: './app.html',

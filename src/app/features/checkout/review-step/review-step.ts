@@ -1,3 +1,5 @@
+import { ShopApi } from '../../../core/services/shop-api';
+import { Busy } from '../../../shared/busy/busy';
 import { CurrencyPipe } from '@angular/common';
 import { CommissionService } from '../../../core/services/commission-service';
 import { StoreCredit } from '../../../core/services/store-credit';
@@ -32,6 +34,7 @@ export class ReviewStep {
   private readonly credit = inject(StoreCredit);
   private readonly commissions = inject(CommissionService);
   private readonly router = inject(Router);
+  private readonly api = inject(ShopApi);
 
   private readonly delivery = this.state.delivery.getRawValue();
   protected readonly recipient = this.delivery.recipient;
@@ -50,12 +53,26 @@ export class ReviewStep {
   protected readonly variantLabel = variantLabel;
   protected readonly effectivePrice = effectivePrice;
 
+  /** "Confirmar pedido" ocupado até o back responder (sem pedido duplicado por clique repetido). */
+  protected readonly placing = new Busy();
+
   protected confirm(): void {
     const shipping = this.summary.selectedShipping();
     if (!shipping) {
       this.state.goTo(1);
       return;
     }
+    // Erro/timeout: o aviso vem do interceptor, o botão volta e nada é perdido
+    // (sacola e dados continuam). `POST` nunca é repetido sozinho.
+    this.placing.run(
+      this.api.placeOrder(
+        this.cart.items().map((line) => ({ variantId: line.variant.id, quantity: line.quantity })),
+      ),
+      () => this.finish(shipping),
+    );
+  }
+
+  private finish(shipping: NonNullable<ReturnType<OrderSummary['selectedShipping']>>): void {
     const isCard = this.payment.method === 'cartao';
     // Cupom que deixou de valer (ex.: já usado por esta conta) não vai no pedido.
     const coupon = this.summary.couponProblem() ? null : this.summary.coupon();

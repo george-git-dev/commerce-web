@@ -1,9 +1,9 @@
+import { CartActions } from '../../core/services/cart-actions';
 import { NgTemplateOutlet } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router } from '@angular/router';
 import { OCCASION_LABELS, OLFACTORY_FAMILIES, OlfactoryFamily } from '../../core/config/fragrance';
 import { CATALOG_QUERY_PARAMS } from '../../core/config/navigation';
@@ -13,7 +13,6 @@ import {
   parseCategories,
   PRODUCT_CATEGORIES,
 } from '../../core/config/product-categories';
-import { CartStore } from '../../core/services/cart-store';
 import { CatalogService } from '../../core/services/catalog-service';
 import { FavoritesStore } from '../../core/services/favorites-store';
 import { FavoriteAction } from '../../core/services/favorite-action';
@@ -30,7 +29,6 @@ import {
   hasKind,
   isAvailable,
   lowestPrice,
-  variantLabel,
 } from '../../core/utils/product-pricing';
 import { EmptyState } from '../../shared/empty-state/empty-state';
 import { ProductCard } from '../../shared/product-card/product-card';
@@ -66,10 +64,9 @@ function toPrice(value: string | null): number | null {
 export class Catalog {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
-  private readonly cart = inject(CartStore);
+  private readonly cartActions = inject(CartActions);
   private readonly favorites = inject(FavoritesStore);
   private readonly favoriteAction = inject(FavoriteAction);
-  private readonly snackBar = inject(MatSnackBar);
   private readonly catalog = inject(CatalogService);
 
   protected readonly params = CATALOG_QUERY_PARAMS;
@@ -345,12 +342,7 @@ export class Catalog {
   }
 
   protected onAddToCart({ product, variant }: ProductSelection): void {
-    this.cart.add(product, variant);
-    this.snackBar.open(
-      `${product.name} (${variantLabel(product, variant)}) foi adicionado ao carrinho.`,
-      'Fechar',
-      { duration: 3000 },
-    );
+    this.cartActions.add(product, variant);
   }
 
   protected onToggleFavorite(product: Product): void {

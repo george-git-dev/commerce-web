@@ -1,14 +1,14 @@
+import { CartActions } from '../../core/services/cart-actions';
+import { Busy } from '../../shared/busy/busy';
 import { CurrencyPipe, DOCUMENT } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, linkedSignal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CATALOG_QUERY_PARAMS } from '../../core/config/navigation';
 import { categoryInfo } from '../../core/config/product-categories';
 import { Product, ProductSelection, ProductVariant, VariantKind } from '../../core/models/product';
-import { CartStore } from '../../core/services/cart-store';
 import { CatalogService } from '../../core/services/catalog-service';
 import { FavoritesStore } from '../../core/services/favorites-store';
 import { FavoriteAction } from '../../core/services/favorite-action';
@@ -17,7 +17,6 @@ import {
   discountPercent,
   effectivePrice,
   variantKinds,
-  variantLabel,
 } from '../../core/utils/product-pricing';
 import { ProductCard } from '../../shared/product-card/product-card';
 import { StarRating } from '../../shared/star-rating/star-rating';
@@ -53,13 +52,15 @@ import { VariantPicker } from './variant-picker/variant-picker';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProductDetail {
+  private readonly cartActions = inject(CartActions);
+  /** Botões ocupados enquanto o back confirma (sem clique repetido, sem espera eterna). */
+  protected readonly adding = new Busy();
+  protected readonly buying = new Busy();
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly catalog = inject(CatalogService);
-  private readonly cart = inject(CartStore);
   private readonly favorites = inject(FavoritesStore);
   private readonly favoriteAction = inject(FavoriteAction);
-  private readonly snackBar = inject(MatSnackBar);
   private readonly document = inject(DOCUMENT);
 
   private readonly paramMap = toSignal(this.route.paramMap, { requireSync: true });
@@ -140,18 +141,12 @@ export class ProductDetail {
   protected buyNow(product: Product): void {
     const variant = this.variant();
     if (!variant) return;
-    this.cart.add(product, variant);
-    this.router.navigate(['/carrinho']);
+    this.cartActions.add(product, variant, this.buying, () => this.router.navigate(['/carrinho']));
   }
 
   /** Também recebe o "Adicionar" dos cards de relacionados. */
   protected addToCart({ product, variant }: ProductSelection): void {
-    this.cart.add(product, variant);
-    this.snackBar.open(
-      `${product.name} (${variantLabel(product, variant)}) foi adicionado ao carrinho.`,
-      'Fechar',
-      { duration: 3000 },
-    );
+    this.cartActions.add(product, variant, this.adding);
   }
 
   protected toggleFavorite(product: Product): void {

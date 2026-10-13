@@ -96,7 +96,14 @@
 
 <div class="f-actions">
   <button matButton="outlined" class="ui-cta" type="button" (click)="state.goTo(2)">Voltar</button>
-  <button matButton="filled" class="ui-cta" type="button" (click)="confirm()">
-    Confirmar pedido
+  <button
+    matButton="filled"
+    class="ui-cta"
+    type="button"
+    [disabled]="placing.running()"
+    [attr.aria-busy]="placing.running()"
+    (click)="confirm()"
+  >
+    {{ placing.running() ? 'Enviando pedido…' : 'Confirmar pedido' }}
   </button>
 </div>
