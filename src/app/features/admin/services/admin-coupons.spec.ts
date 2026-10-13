@@ -50,3 +50,33 @@ describe('cupons (admin)', () => {
     expect(store.find(id)).toBeUndefined();
   });
 });
+
+describe('cupons (admin): resumo e permissão', () => {
+  beforeEach(() => localStorage.clear());
+
+  it('resumo lista as regras do cupom; situação legível', () => {
+    TestBed.inject(AuthService).login('admin@email.com', '12345678');
+    const store = TestBed.inject(AdminCoupons);
+    const text = store.summary({
+      ...draft,
+      minSubtotal: 200,
+      firstPurchaseOnly: true,
+      allowOnPromo: true,
+      affiliateEmail: 'a@b.com',
+    });
+    expect(text).toContain('mín.');
+    expect(text).toContain('1ª compra');
+    expect(text).toContain('vale em oferta');
+    expect(text).toContain('cupom de afiliado');
+    expect(store.statusLabel(store.all()[0])).toBeTruthy();
+  });
+
+  it('visualizador não cria nem exclui', () => {
+    TestBed.inject(AuthService).login('viewer@email.com', '12345678');
+    const store = TestBed.inject(AdminCoupons);
+    expect(store.save(null, draft)).toBe(0);
+    const unused = store.all().find((c) => c.uses === 0)!;
+    expect(store.remove(unused.id)).toBe(false);
+    expect(TestBed.inject(CouponService).find(unused.code)).toBeTruthy();
+  });
+});

@@ -48,3 +48,48 @@ describe('promoções (admin)', () => {
     expect(TestBed.inject(AdminAudit).entries()[0].action).toBe('Excluiu promoção');
   });
 });
+
+describe('promoções (admin): opções, situação e edição', () => {
+  beforeEach(() => localStorage.clear());
+
+  const draft = {
+    name: 'Decants 10%',
+    active: true,
+    target: { kind: 'formato', format: 'decant' },
+    discount: { kind: 'percent', value: 10 },
+  } as const;
+
+  it('opções vêm do catálogo publicado; situação e resumo', () => {
+    TestBed.inject(AuthService).login('admin@email.com', '12345678');
+    const store = TestBed.inject(AdminPromotions);
+    const { categories, brands, formats } = store.options();
+    expect(categories.length).toBeGreaterThan(0);
+    expect(brands).toEqual([...brands].sort((a, b) => a.localeCompare(b, 'pt-BR')));
+    expect(formats.map((f) => f.id).slice(0, 2)).toEqual(['frasco', 'decant']);
+    const promo = store.all()[0];
+    expect(store.statusLabel(promo)).toBeTruthy();
+    expect(store.summary(promo)).toContain('·');
+  });
+
+  it('editar audita só o que mudou (limite de unidades); visualizador não mexe', () => {
+    const auth = TestBed.inject(AuthService);
+    auth.login('admin@email.com', '12345678');
+    const store = TestBed.inject(AdminPromotions);
+    const id = store.save(null, draft as never);
+    store.save(id, { ...draft, unitLimit: 10, untilSoldOut: true } as never);
+    const audit = TestBed.inject(AdminAudit).entries()[0];
+    expect(audit.action).toBe('Alterou promoção');
+    expect(audit.changes).toEqual([
+      expect.objectContaining({ field: 'Quantidade com desconto', before: 'sem limite' }),
+    ]);
+    store.save(id, { ...draft, unitLimit: 5 } as never);
+    expect(TestBed.inject(AdminAudit).entries()[0].changes[0].after).toBe('5');
+
+    auth.logout();
+    auth.login('viewer@email.com', '12345678');
+    expect(store.save(id, { ...draft, name: 'Outro' } as never)).toBe(id);
+    expect(store.save(null, draft as never)).toBe(0);
+    store.remove(id);
+    expect(store.find(id)?.name).toBe('Decants 10%');
+  });
+});
