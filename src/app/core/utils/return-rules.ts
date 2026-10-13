@@ -71,9 +71,12 @@ export function deadlineProblem(
   return null;
 }
 
-/** Devoluções que ainda contam (não recusadas). */
+/**
+ * Devoluções que ainda contam para as quantidades: todas menos as recusadas na
+ * análise do pedido. Recusada após avaliar o produto conta (não dá para pedir de novo).
+ */
 export function activeReturns(list: readonly ReturnRequest[]): ReturnRequest[] {
-  return list.filter((r) => r.status !== 'recusada');
+  return list.filter((r) => r.status !== 'recusada' || r.decision?.afterReview);
 }
 
 /** Quantas unidades de cada item ainda podem ser devolvidas. */

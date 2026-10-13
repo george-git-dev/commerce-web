@@ -1,3 +1,4 @@
+import { returnableQuantity } from '../../../core/utils/return-rules';
 import { TestBed } from '@angular/core/testing';
 import { AuthService } from '../../../core/services/auth-service';
 import { CatalogService } from '../../../core/services/catalog-service';
@@ -85,5 +86,25 @@ describe('devoluções', () => {
     const pending = admin.all().find((r) => r.status === 'solicitada');
     if (pending) expect(admin.approve(pending)).toBe(false);
     expect(admin.canEdit()).toBe(false);
+  });
+
+  it('recusa após avaliar o produto: sem estorno, sem estoque e não dá para pedir de novo', () => {
+    const auth = TestBed.inject(AuthService);
+    auth.login('admin@email.com', '12345678');
+    const admin = TestBed.inject(AdminReturns);
+    const stock = TestBed.inject(AdminStockStore);
+    const request = admin.all().find((r) => r.status === 'solicitada')!;
+    const sku = request.items[0].sku!;
+    const before = stock.row(sku)!.variant.stock;
+    admin.approve(request);
+    const approved = admin.all().find((r) => r.id === request.id)!;
+    expect(admin.refuseAfterReview(approved, 'ok')).toBe(false); // motivo curto
+    expect(admin.refuseAfterReview(approved, 'Frasco aberto e usado.')).toBe(true);
+    const refused = admin.all().find((r) => r.id === request.id)!;
+    expect(refused.status).toBe('recusada');
+    expect(refused.decision?.afterReview).toBe(true);
+    expect(stock.row(sku)!.variant.stock).toBe(before);
+    expect(returnableQuantity({ id: refused.items[0].itemId, quantity: 1 }, [refused])).toBe(0);
+    expect(TestBed.inject(AdminAudit).entries()[0].action).toBe('Recusou devolução após avaliação');
   });
 });

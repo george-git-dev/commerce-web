@@ -75,10 +75,18 @@
               </p>
             }
             @case ('recusada') {
+              @let d = r.decision;
               <p>
-                Devolução não aceita.
-                @if (r.decision?.reason; as reason) {
-                  <strong>Motivo:</strong> {{ reason }}
+                @if (d?.afterReview) {
+                  Avaliamos o produto e a devolução não foi aceita, então não há estorno.
+                } @else {
+                  Devolução não aceita.
+                }
+                @if (d?.reason) {
+                  <strong>Motivo:</strong> {{ d?.reason }}
+                }
+                @if (d?.afterReview) {
+                  Vamos combinar com você pelo WhatsApp o reenvio do produto.
                 }
               </p>
             }

@@ -112,6 +112,27 @@ export class AdminReturnsPage {
     this.confirm(data, (reason) => this.store.refuse(r, String(reason)), 'Devolução recusada.');
   }
 
+  protected refuseAfterReview(r: ReturnRequest): void {
+    const data: ActionDialogData = {
+      title: `Recusar após avaliação · ${r.orderNumber}`,
+      message:
+        'Sem estorno e sem entrada no estoque. O produto volta para o cliente — combine o reenvio pelo WhatsApp. O cliente vê o motivo em Meus pedidos.',
+      confirmLabel: 'Recusar devolução',
+      danger: true,
+      field: {
+        label: 'Motivo',
+        placeholder: 'Ex.: frasco aberto e usado (mais de 10% consumido)',
+        error: 'Escreva o motivo (mínimo 5 caracteres).',
+        validator: (control) => ((control.value ?? '').trim().length >= 5 ? null : { min: true }),
+      },
+    };
+    this.confirm(
+      data,
+      (reason) => this.store.refuseAfterReview(r, String(reason)),
+      'Devolução recusada após avaliação.',
+    );
+  }
+
   protected complete(r: ReturnRequest): void {
     this.dialog
       .open(CompleteReturnDialog, { data: r, width: '520px', maxWidth: '94vw' })

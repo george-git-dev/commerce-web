@@ -83,15 +83,29 @@
           </ul>
 
           <p class="rt__refund">
-            Estorno: <strong>{{ r.refundAmount | currency: 'BRL' }}</strong> ·
-            {{ methodLabels[r.payment] }}
+            @switch (r.status) {
+              @case ('concluida') {
+                Estornado:
+              }
+              @case ('recusada') {
+                Sem estorno (seria
+              }
+              @default {
+                Estorno se aprovado:
+              }
+            }
+            <strong>{{ r.refundAmount | currency: 'BRL' }}</strong
+            >{{ r.status === 'recusada' ? ')' : '' }} · {{ methodLabels[r.payment] }}
             @if (r.wholeOrder) {
               <small>(pedido inteiro, com frete)</small>
             }
           </p>
 
           @if (r.status === 'recusada' && r.decision; as d) {
-            <p class="rt__meta">Recusada por {{ d.by }}: {{ d.reason }}</p>
+            <p class="rt__meta">
+              {{ d.afterReview ? 'Recusada após avaliar o produto' : 'Recusada' }} por {{ d.by }}:
+              {{ d.reason }}
+            </p>
           }
           @if (r.completion; as c) {
             <p class="rt__meta">
@@ -110,6 +124,9 @@
                 </button>
                 <button matButton="filled" type="button" (click)="approve(r)">Aprovar</button>
               } @else {
+                <button matButton type="button" class="rt__danger" (click)="refuseAfterReview(r)">
+                  Recusar após avaliação
+                </button>
                 <button matButton="filled" type="button" (click)="complete(r)">
                   <mat-icon>inventory</mat-icon> Produto recebido · concluir
                 </button>

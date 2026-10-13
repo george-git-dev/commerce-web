@@ -27,7 +27,7 @@ export type ReturnStatus = 'solicitada' | 'aprovada' | 'recusada' | 'concluida';
 export const RETURN_STATUS_LABELS: Record<ReturnStatus, string> = {
   solicitada: 'Solicitada',
   aprovada: 'Aguardando o produto',
-  recusada: 'Recusada',
+  recusada: 'Não aceita',
   concluida: 'Concluída',
 };
 
@@ -76,7 +76,11 @@ export interface ReturnRequest {
   shippingRefund: number;
   payment: PaymentMethod;
   status: ReturnStatus;
-  decision?: { by: string; at: Date; reason?: string };
+  /**
+   * Aprovação ou recusa. `afterReview`: recusada depois que o produto chegou e foi
+   * avaliado (ex.: aberto/usado) — o produto volta para o cliente e não há estorno.
+   */
+  decision?: { by: string; at: Date; reason?: string; afterReview?: boolean };
   completion?: {
     by: string;
     at: Date;

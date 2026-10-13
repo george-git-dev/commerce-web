@@ -82,6 +82,25 @@ export class AdminReturns {
     return true;
   }
 
+  /**
+   * Produto chegou mas não passou na avaliação (aberto, usado, sem itens, avaria
+   * não confirmada): recusa com motivo, sem estorno e sem mexer no estoque. O
+   * produto volta para o cliente (reenvio combinado pelo WhatsApp).
+   */
+  refuseAfterReview(request: ReturnRequest, reason: string): boolean {
+    const text = reason.trim();
+    if (!this.canEdit() || request.status !== 'aprovada' || text.length < 5) return false;
+    this.returns.update(request.id, {
+      status: 'recusada',
+      decision: { by: this.who(), at: new Date(), reason: text, afterReview: true },
+    });
+    this.record('Recusou devolução após avaliação', request, [
+      { field: 'Situação', before: 'Aguardando o produto', after: 'Recusada após avaliação' },
+      { field: 'Motivo', before: '', after: text },
+    ]);
+    return true;
+  }
+
   /** Problemas para concluir (lista vazia = pode). */
   completeProblems(request: ReturnRequest, received: readonly ReturnReceipt[], refunded: boolean) {
     const problems: string[] = [];
