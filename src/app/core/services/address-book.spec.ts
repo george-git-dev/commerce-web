@@ -60,4 +60,24 @@ describe('AddressBook (endereços da conta, em memória)', () => {
     auth.login('outra@email.com', '12345678');
     expect(book.addresses().length).toBe(1);
   });
+
+  it('edita, torna principal, desfaz remoção e esquece a conta excluída', () => {
+    auth.login('maria@email.com', '12345678');
+    const first = book.addresses()[0];
+    const added = book.add(address('200'))!;
+    book.update(added.id, { ...address('200'), complement: 'Ap 12' }, true);
+    expect(book.find(added.id)?.complement).toBe('Ap 12');
+    expect(book.find(added.id)?.isDefault).toBe(true);
+    book.setDefault(first.id);
+    expect(book.find(first.id)?.isDefault).toBe(true);
+    const removed = book.find(first.id)!;
+    book.remove(first.id);
+    expect(book.find(first.id)).toBeUndefined();
+    book.restore(removed);
+    expect(book.find(first.id)?.isDefault).toBe(true);
+    book.restore(removed); // já existe: não duplica
+    expect(book.addresses().filter((a) => a.id === first.id)).toHaveLength(1);
+    book.forgetAccount('maria@email.com');
+    expect(book.find(added.id)).toBeUndefined();
+  });
 });

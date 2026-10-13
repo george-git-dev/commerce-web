@@ -52,4 +52,26 @@ describe('ReviewService', () => {
     expect(reviews.isReviewed('NP100231', 'NP100231-0')).toBe(true);
     expect(reviews.isReviewed('NP100231', 'NP100231-1')).toBe(false);
   });
+
+  it('conta só os pedidos da sessão: em andamento, já comprou e dono', () => {
+    const auth = TestBed.inject(AuthService);
+    const orders = TestBed.inject(OrderService);
+    auth.login('novo.cliente@email.com', '12345678');
+    expect(orders.ownerEmail()).toBe('novo.cliente@email.com');
+    expect(orders.hasPlaced('novo.cliente@email.com')).toBe(false);
+    const sample = orders.orders()[0];
+    const { number, createdAt, status, ...draft } = sample;
+    void number;
+    void createdAt;
+    void status;
+    const placed = orders.place({ ...draft, payment: { method: 'pix' }, total: 100 });
+    expect(placed.status).toBe('aguardando-pagamento');
+    expect(orders.openPlacedCount('novo.cliente@email.com')).toBe(1);
+    expect(orders.hasPlaced('novo.cliente@email.com')).toBe(true);
+    expect(orders.find(placed.number)?.number).toBe(placed.number);
+    const paidWithCredit = orders.place({ ...draft, payment: { method: 'pix' }, total: 0 });
+    expect(paidWithCredit.status).toBe('pago');
+    auth.logout();
+    expect(orders.ownerEmail()).toBe('');
+  });
 });

@@ -41,4 +41,45 @@ describe('CartStore (sacola salva no navegador)', () => {
     localStorage.setItem(CART_STORAGE_KEY, '{quebrado');
     expect(TestBed.inject(CartStore).items()).toEqual([]);
   });
+
+  it('soma quantidades da mesma variante sem passar do estoque; esgotado não entra', () => {
+    const cart = TestBed.inject(CartStore);
+    const asad = product('lattafa-asad');
+    const variant = asad.variants[0];
+    cart.add(asad, variant, 1);
+    cart.add(asad, variant, 1000);
+    expect(cart.items()[0].quantity).toBe(variant.stock);
+    cart.add(asad, { ...variant, id: 'sem-estoque', stock: 0 });
+    expect(cart.items()).toHaveLength(1);
+  });
+
+  it('muda quantidade (com teto), remove com zero, remove e esvazia', () => {
+    const cart = TestBed.inject(CartStore);
+    const asad = product('lattafa-asad');
+    const khamrah = product('lattafa-khamrah');
+    cart.add(asad, asad.variants[0]);
+    cart.add(khamrah, khamrah.variants[0]);
+    cart.setQuantity(asad.variants[0].id, 999);
+    expect(cart.items()[0].quantity).toBe(asad.variants[0].stock);
+    cart.setQuantity(asad.variants[0].id, 0);
+    expect(cart.items().map((l) => l.product.slug)).toEqual(['lattafa-khamrah']);
+    cart.remove(khamrah.variants[0].id);
+    expect(cart.count()).toBe(0);
+    cart.add(asad, asad.variants[0]);
+    cart.clear();
+    expect(cart.items()).toEqual([]);
+  });
+
+  it('outra aba mexeu na sacola: esta atualiza', () => {
+    const cart = TestBed.inject(CartStore);
+    const asad = product('lattafa-asad');
+    localStorage.setItem(
+      CART_STORAGE_KEY,
+      JSON.stringify([{ slug: 'lattafa-asad', variantId: asad.variants[0].id, quantity: 1 }]),
+    );
+    window.dispatchEvent(new StorageEvent('storage', { key: CART_STORAGE_KEY }));
+    expect(cart.count()).toBe(1);
+    window.dispatchEvent(new StorageEvent('storage', { key: 'outra-chave' }));
+    expect(cart.count()).toBe(1);
+  });
 });

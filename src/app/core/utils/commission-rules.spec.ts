@@ -90,3 +90,34 @@ describe('comissões', () => {
     expect(creditBalance(entries, now)).toBe(80);
   });
 });
+
+describe('comissões — totais', () => {
+  it('soma por situação', async () => {
+    const { commissionTotals } = await import('./commission-rules');
+    const now = new Date(2026, 9, 12);
+    const c = (
+      state: 'aberta' | 'paga' | 'cancelada',
+      amount: number,
+      deliveredDaysAgo?: number,
+    ) => ({
+      id: 1,
+      affiliateEmail: 'a',
+      couponCode: 'A',
+      orderNumber: 'N',
+      createdAt: now,
+      base: 0,
+      percent: 5,
+      amount,
+      state,
+      deliveredAt:
+        deliveredDaysAgo === undefined
+          ? undefined
+          : new Date(now.getTime() - deliveredDaysAgo * 86_400_000),
+    });
+    const totals = commissionTotals(
+      [c('aberta', 10), c('aberta', 20, 10), c('paga', 5), c('cancelada', 7)] as never,
+      now,
+    );
+    expect(totals).toMatchObject({ pendente: 10, liberada: 20, paga: 5, cancelada: 7 });
+  });
+});

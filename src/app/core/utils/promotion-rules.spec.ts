@@ -113,3 +113,52 @@ describe('promoções', () => {
     expect(promoStatus({ ...promo }, '2027-01-01')).toBe('encerrada');
   });
 });
+
+describe('promoções — rótulos e validação', () => {
+  it('formato, alvo e desconto em texto', async () => {
+    const r = await import('./promotion-rules');
+    expect(r.formatLabel('frasco')).toBe('Frasco');
+    expect(r.formatLabel('decant')).toBe('Decants (todos os tamanhos)');
+    expect(r.formatLabel('decant:5')).toBe('Decant 5 ml');
+    expect(r.targetLabel({ kind: 'itens', skus: ['a'] })).toBe('1 item escolhido');
+    expect(r.targetLabel({ kind: 'itens', skus: ['a', 'b'] })).toBe('2 itens escolhidos');
+    expect(r.targetLabel({ kind: 'categoria', category: 'perfume' })).toMatch(/^Categoria: /);
+    expect(r.targetLabel({ kind: 'marca', brand: 'Lattafa' })).toBe('Marca: Lattafa');
+    expect(r.targetLabel({ kind: 'formato', format: 'decant:5' })).toBe('Formato: Decant 5 ml');
+    expect(r.discountLabel({ kind: 'percent', value: 15 })).toBe('-15%');
+    expect(r.discountLabel({ kind: 'amount', value: 20 })).toMatch(/R\$\s20,00 a menos/);
+    expect(r.discountLabel({ kind: 'fixed', value: 5.99 })).toMatch(/Por R\$\s5,99/);
+  });
+
+  it('alvo por formato: decant (todos) e tamanho específico', () => {
+    const decant = product.variants[1];
+    const frasco = product.variants[0];
+    expect(targetMatches({ kind: 'formato', format: 'decant' }, product, decant)).toBe(true);
+    expect(targetMatches({ kind: 'formato', format: 'decant:5' }, product, decant)).toBe(true);
+    expect(targetMatches({ kind: 'formato', format: 'frasco' }, product, frasco)).toBe(true);
+    expect(targetMatches({ kind: 'categoria', category: 'kit' }, product, frasco)).toBe(false);
+    expect(targetMatches({ kind: 'itens', skus: ['asad-d5'] }, product, decant)).toBe(true);
+  });
+
+  it('cada problema do cadastro', () => {
+    const base = { ...promo({}), name: 'Black' } as Omit<Promotion, 'id' | 'sold'>;
+    expect(promotionProblems(base)).toEqual([]);
+    expect(promotionProblems({ ...base, name: 'x'.repeat(61) })).toHaveLength(1);
+    expect(promotionProblems({ ...base, target: { kind: 'itens', skus: [] } })).toHaveLength(1);
+    expect(
+      promotionProblems({ ...base, target: { kind: 'categoria', category: '' } }),
+    ).toHaveLength(1);
+    expect(promotionProblems({ ...base, target: { kind: 'marca', brand: '' } })).toHaveLength(1);
+    expect(promotionProblems({ ...base, target: { kind: 'formato', format: '' } })).toHaveLength(1);
+    expect(promotionProblems({ ...base, discount: { kind: 'amount', value: 0 } })).toEqual([
+      'Informe o desconto.',
+    ]);
+    expect(promotionProblems({ ...base, discount: { kind: 'percent', value: 95 } })).toHaveLength(
+      1,
+    );
+    expect(
+      promotionProblems({ ...base, startsOn: '2026-10-10', endsOn: '2026-10-01' }),
+    ).toHaveLength(1);
+    expect(promotionProblems({ ...base, unitLimit: 0 })).toHaveLength(1);
+  });
+});

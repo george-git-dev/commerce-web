@@ -45,4 +45,18 @@ describe('crédito na loja e fechamento', () => {
     // pagar de novo não paga duas vezes
     expect(service.pay('julia.afiliada@email.com', 'George')).toBeNull();
   });
+
+  it('não usa mais que o saldo; estorno devolve; valores inválidos são ignorados', () => {
+    const credit = TestBed.inject(StoreCredit);
+    const email = 'teste.credito@email.com';
+    credit.addCommission(email, 100, 1);
+    expect(credit.balanceOf(email)).toBe(100);
+    expect(credit.use(email, 150, 'NP1')).toBe(false);
+    expect(credit.use(email, 0, 'NP1')).toBe(false);
+    expect(credit.use(email, 40, 'NP1')).toBe(true);
+    expect(credit.balanceOf(email)).toBe(60);
+    credit.refund(email, 0, 'NP1');
+    credit.refund(email, 40, 'NP1');
+    expect(credit.balanceOf(email)).toBe(100);
+  });
 });
