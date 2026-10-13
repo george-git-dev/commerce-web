@@ -1,20 +1,6 @@
 import { Routes } from '@angular/router';
 import { permissionGuard } from '../../core/guards/role-guard';
-import { ADMIN_NAV } from './admin-nav';
 import { AdminLayout } from './layout/admin-layout';
-
-/** Telas já prontas (as outras do menu abrem "em construção"). */
-const READY = [
-  'pedidos',
-  'produtos',
-  'promocoes',
-  'estoque',
-  'clientes',
-  'afiliados',
-  'auditoria',
-  'relatorios',
-  'vitrine',
-];
 
 /** Rotas do backoffice (`/admin`). Cada tela exige a permissão do seu item de menu. */
 export const ADMIN_ROUTES: Routes = [
@@ -234,15 +220,6 @@ export const ADMIN_ROUTES: Routes = [
       { path: 'configuracoes', redirectTo: 'vitrine/configuracoes', pathMatch: 'full' },
       { path: 'aprovacoes', redirectTo: 'vitrine/avaliacoes', pathMatch: 'full' },
       { path: 'aprovacoes/afiliados', redirectTo: 'afiliados', pathMatch: 'full' },
-      // Telas das próximas sessões: por enquanto, uma página "em construção".
-      ...ADMIN_NAV.filter((item) => item.path && !READY.includes(item.path)).map((item) => ({
-        path: item.path,
-        title: `Nani Admin | ${item.label}`,
-        canActivate: [permissionGuard(item.permission, '/admin')],
-        data: { title: item.label, icon: item.icon },
-        loadComponent: () =>
-          import('./placeholder/admin-placeholder').then((m) => m.AdminPlaceholder),
-      })),
       { path: '**', redirectTo: '' },
     ],
   },

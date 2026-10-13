@@ -1,5 +1,6 @@
 import { Route, Routes } from '@angular/router';
 import { routes } from './app.routes';
+import { ADMIN_NAV } from './features/admin/admin-nav';
 import { ADMIN_ROUTES } from './features/admin/admin.routes';
 
 /** Todas as rotas (com filhos), achatadas. */
@@ -27,6 +28,18 @@ describe('rotas', () => {
       loaded.forEach((item, i) => expect(item, lazy[i].path).toBeTruthy());
     },
   );
+
+  it('todo item do menu do backoffice abre uma tela de verdade', () => {
+    const screens = flatten(ADMIN_ROUTES[0].children ?? []).filter(
+      ({ route }) => route.loadComponent,
+    );
+    for (const item of ADMIN_NAV) {
+      expect(
+        screens.some(({ path }) => path === item.path),
+        `menu "${item.label}" sem tela`,
+      ).toBe(true);
+    }
+  });
 
   it('telas com título têm o nome da loja; backoffice exige equipe e permissão por tela', () => {
     for (const { path, route } of all) {
