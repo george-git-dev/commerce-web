@@ -7,6 +7,23 @@ import { FailureSimulator } from './failure-simulator';
 const STATUS = { erro: 500, offline: 0, sessao: 401, limite: 429, validacao: 422 } as const;
 
 /**
+ * O que o back (Spring) responde em cada caso — `ProblemDetail` com a mensagem
+ * pronta. "offline" não tem corpo (a chamada nem chegou ao back): o front usa a reserva.
+ */
+const BACK_PROBLEMS: Record<Exclude<keyof typeof STATUS, 'offline'>, object> = {
+  erro: {
+    code: 'INTERNAL_ERROR',
+    detail: 'Não conseguimos concluir agora. Tente de novo em alguns instantes.',
+  },
+  sessao: { code: 'SESSION_EXPIRED', detail: 'Sua sessão expirou. Entre de novo para continuar.' },
+  limite: {
+    code: 'RATE_LIMITED',
+    detail: 'Você fez muitas tentativas seguidas. Aguarde um minuto e tente de novo.',
+  },
+  validacao: { code: 'CART_OUT_OF_STOCK', detail: 'Este tamanho acabou de esgotar.' },
+};
+
+/**
  * Back FALSO (Fase 1): responde às chamadas `/api/...` com sucesso depois de um
  * pequeno atraso — ou com a falha que o `FailureSimulator` mandar. Fica por
  * último na cadeia, para timeout/nova tentativa/avisos valerem como no back real.
@@ -25,10 +42,7 @@ export const mockApiInterceptor: HttpInterceptorFn = (req, next) => {
           new HttpErrorResponse({
             status,
             url: req.url,
-            error:
-              mode === 'validacao'
-                ? { status, title: 'Unprocessable', detail: 'Este tamanho acabou de esgotar.' }
-                : null,
+            error: mode === 'offline' ? null : { status, ...BACK_PROBLEMS[mode] },
           }),
       ),
     ),

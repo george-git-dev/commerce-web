@@ -88,6 +88,21 @@ describe('proteção global das chamadas ao back', () => {
     expect(notified).toHaveLength(0);
   });
 
+  it('mostra a mensagem do back; reserva do front só sem resposta útil', async () => {
+    const a = firstValueFrom(http.post('/api/orders', {})).catch((e) => e);
+    backend
+      .expectOne('/api/orders')
+      .flush(
+        { code: 'INTERNAL_ERROR', detail: 'Mensagem configurada no back.' },
+        { status: 500, statusText: 'x' },
+      );
+    const error = (await a) as ApiError;
+    expect(error.message).toBe('Mensagem configurada no back.');
+    expect(error.code).toBe('INTERNAL_ERROR');
+    expect(error.fromServer).toBe(true);
+    expect(notified[0]).toContain('Mensagem configurada no back.');
+  });
+
   it('401: sai da conta e avisa que a sessão expirou', async () => {
     const auth = TestBed.inject(AuthService);
     auth.login('ana@email.com', '12345678');

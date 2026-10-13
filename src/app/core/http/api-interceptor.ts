@@ -5,13 +5,7 @@ import { catchError, retry, throwError, timeout, timer } from 'rxjs';
 import { AuthService } from '../services/auth-service';
 import { Notifier } from '../services/notifier';
 import { NO_RETRY, REQUEST_TIMEOUT, SKIP_GLOBAL_ERROR } from './api-context';
-import {
-  API_ERROR_MESSAGES,
-  isTransient,
-  newRequestId,
-  showsGlobally,
-  toApiError,
-} from './api-errors';
+import { isTransient, newRequestId, showsGlobally, toApiError } from './api-errors';
 
 /** Prefixo das chamadas ao nosso back (Fase 2: mesmo domínio, via CloudFront → API). */
 export const API_PREFIX = '/api/';
@@ -22,7 +16,9 @@ export const API_PREFIX = '/api/';
  * - timeout (15 s) — nada fica "carregando para sempre";
  * - nova tentativa automática só em leitura (GET) e só em falha passageira —
  *   nunca em POST/PUT/PATCH/DELETE (não duplica pedido nem pagamento);
- * - erro vira `ApiError` com mensagem amigável; aviso global, menos validação e
+ * - erro vira `ApiError` com a MENSAGEM DO BACK (`detail` do ProblemDetail); o front
+ *   só tem mensagem reserva para quando o back não responde (rede, timeout, fora do ar);
+ *   aviso global, menos validação e
  *   404 (a tela trata) e quando a tela pediu `SKIP_GLOBAL_ERROR`;
  * - 401: sessão expirada → sai e vai para o login, voltando para a mesma página.
  */
@@ -47,7 +43,7 @@ export const apiInterceptor: HttpInterceptorFn = (req, next) => {
       const apiError = toApiError(error, requestId);
       if (apiError.kind === 'session') {
         auth.logout();
-        notifier.error(API_ERROR_MESSAGES.session);
+        notifier.error(apiError.message);
         const current = router.url;
         if (!current.startsWith('/login')) {
           router.navigate(['/login'], { queryParams: { retorno: current } });

@@ -13,7 +13,12 @@ export type ApiErrorKind =
   | 'validation'
   | 'unknown';
 
-/** Mensagens que o cliente vê (sem detalhe técnico). */
+/**
+ * Mensagens RESERVA do front. A regra é: **a mensagem vem do back** (`detail` do
+ * `ProblemDetail`). Estas só aparecem quando o back não respondeu nada útil —
+ * sem internet, timeout, back fora do ar (502/503 do balanceador, sem corpo) —
+ * ou respondeu sem `detail` (falha de contrato, não deveria acontecer).
+ */
 export const API_ERROR_MESSAGES: Record<ApiErrorKind, string> = {
   offline: 'Você está sem conexão. Confira a internet e tente de novo.',
   timeout: 'O servidor demorou para responder. Tente de novo em instantes.',
@@ -32,8 +37,12 @@ export const API_ERROR_MESSAGES: Record<ApiErrorKind, string> = {
  */
 export interface ProblemDetail {
   title?: string;
+  /** Mensagem para o cliente, já em português — é ela que a tela mostra. */
   detail?: string;
   status?: number;
+  /** Código estável da regra (ex.: `CART_OUT_OF_STOCK`) — para a tela decidir, nunca para exibir. */
+  code?: string;
+  /** Campo → mensagem (formulários). */
   errors?: Record<string, string>;
 }
 
@@ -46,8 +55,18 @@ export class ApiError extends Error {
     readonly requestId: string,
     readonly problem?: ProblemDetail,
   ) {
-    super(problem?.detail || API_ERROR_MESSAGES[kind]);
+    super(problem?.detail?.trim() || API_ERROR_MESSAGES[kind]);
     this.name = 'ApiError';
+  }
+
+  /** Código da regra vindo do back (ex.: `CART_OUT_OF_STOCK`). */
+  get code(): string | undefined {
+    return this.problem?.code;
+  }
+
+  /** A mensagem veio do back (e não da reserva do front)? */
+  get fromServer(): boolean {
+    return !!this.problem?.detail?.trim();
   }
 }
 
