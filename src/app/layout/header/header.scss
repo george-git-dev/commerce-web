@@ -106,12 +106,17 @@ $header-h-mobile: 120px;
   justify-self: center;
   display: inline-flex;
   align-items: center;
+  // Não deixa o menu espremer a logo no desktop (a caixa estreita fazia o desenho encolher).
+  flex: none;
 
   &__logo {
     display: block;
     height: 90px;
     width: auto;
+    max-width: none;
     object-fit: contain;
+    // Logo maior sem mudar a altura do header: a escala não ocupa espaço no layout.
+    transform: scale(1.2);
   }
 }
 
@@ -321,6 +326,7 @@ $header-h-mobile: 120px;
 
   .brand__logo {
     height: 85px;
+    transform: scale(1.10);
   }
 
   .search-panel__form {
