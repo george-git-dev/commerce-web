@@ -21,6 +21,19 @@ export function returnDeadline(deliveredAt: Date, reason: ReturnReason): Date {
   return new Date(deliveredAt.getTime() + RETURN_DEADLINE_DAYS[reason] * DAY);
 }
 
+/**
+ * Avaliação só depois do prazo de desistência (7 dias da entrega): quem ainda
+ * pode devolver não avalia. Sem data de entrega (pedido antigo): libera.
+ */
+export function reviewOpensAt(deliveredAt: Date | undefined): Date | null {
+  return deliveredAt ? returnDeadline(deliveredAt, 'arrependimento') : null;
+}
+
+export function canReview(deliveredAt: Date | undefined, now = new Date()): boolean {
+  const opens = reviewOpensAt(deliveredAt);
+  return !opens || now > opens;
+}
+
 /** Ainda dá para pedir por algum motivo? (o maior prazo é o de defeito). */
 export function canStillReturn(deliveredAt: Date | undefined, now = new Date()): boolean {
   return !!deliveredAt && now <= returnDeadline(deliveredAt, 'defeito');

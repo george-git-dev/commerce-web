@@ -137,6 +137,11 @@
                       {{ reply.text }}
                     </blockquote>
                   }
+                } @else if (reviewWait(); as wait) {
+                  <p class="od__reviewed od__reviewed--off">
+                    <mat-icon aria-hidden="true">schedule</mat-icon>
+                    {{ wait }}
+                  </p>
                 } @else {
                   <button matButton="outlined" type="button" (click)="toggleReview(line)">
                     <mat-icon>rate_review</mat-icon>

@@ -10,7 +10,12 @@ import { OrderService } from '../../../core/services/order-service';
 import { ReviewService } from '../../../core/services/review-service';
 import { ReturnService } from '../../../core/services/return-service';
 import { RETURN_REASON_LABELS, RETURN_STATUS_LABELS } from '../../../core/models/return-request';
-import { canStillReturn, returnableQuantity } from '../../../core/utils/return-rules';
+import {
+  canReview,
+  canStillReturn,
+  returnableQuantity,
+  reviewOpensAt,
+} from '../../../core/utils/return-rules';
 import { OrderStatusChip } from '../../../shared/order-status/order-status';
 import { PixPayment } from '../../../shared/pix-payment/pix-payment';
 import { ReviewForm } from './review-form/review-form';
@@ -49,6 +54,21 @@ export class OrderDetail {
   protected readonly returns = computed(() => {
     const order = this.order();
     return order ? this.returnService.forOrder(order.number) : [];
+  });
+
+  /**
+   * Avaliar só depois do prazo de desistência (7 dias da entrega) e sem
+   * devolução em andamento. Devolve o aviso para o cliente, ou `null` = pode.
+   */
+  protected readonly reviewWait = computed(() => {
+    const order = this.order();
+    if (!order) return null;
+    if (this.returnService.openFor(order.number))
+      return 'Você poderá avaliar quando a devolução for finalizada.';
+    const delivered = order.deliveredAt ? new Date(order.deliveredAt) : undefined;
+    if (canReview(delivered)) return null;
+    const opens = reviewOpensAt(delivered)!;
+    return `Você poderá avaliar a partir de ${opens.toLocaleDateString('pt-BR')}, depois do prazo de devolução.`;
   });
 
   /** Pode pedir devolução: entregue, no prazo, sem outra em andamento e com item a devolver. */

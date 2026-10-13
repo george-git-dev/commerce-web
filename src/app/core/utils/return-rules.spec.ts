@@ -1,5 +1,6 @@
 import { ReturnRequest } from '../models/return-request';
 import {
+  canReview,
   deadlineProblem,
   isWholeOrder,
   refundAmount,
@@ -45,5 +46,12 @@ describe('regras de devolução', () => {
     expect(
       returnDraftProblems({ items: [{ quantity: 0, max: 1 }], reason: null, description: '' }),
     ).toHaveLength(2);
+  });
+
+  it('avaliação só depois dos 7 dias de desistência', () => {
+    const now = new Date(2026, 9, 12);
+    expect(canReview(new Date(now.getTime() - 2 * DAY), now)).toBe(false);
+    expect(canReview(new Date(now.getTime() - 8 * DAY), now)).toBe(true);
+    expect(canReview(undefined, now)).toBe(true);
   });
 });
