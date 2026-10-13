@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { MOCK_PRODUCTS } from '../../../../core/data/mock-products';
+import { BRANDS } from '../../../../core/config/brands';
 
 @Component({
   selector: 'app-brands-strip-section',
@@ -8,5 +8,5 @@ import { MOCK_PRODUCTS } from '../../../../core/data/mock-products';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BrandsStripSection {
-  protected readonly brands = [...new Set(MOCK_PRODUCTS.map((product) => product.brandName))];
+  protected readonly brands = BRANDS;
 }

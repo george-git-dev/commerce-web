@@ -1,0 +1,137 @@
+<div class="df">
+  <div class="df__periods" role="radiogroup" aria-label="Período">
+    @for (period of periods; track period[0]) {
+      <button
+        type="button"
+        role="radio"
+        [attr.aria-checked]="data.period() === period[0]"
+        [class.df__period--on]="data.period() === period[0]"
+        (click)="data.period.set(period[0])"
+      >
+        {{ period[1] }}
+      </button>
+    }
+  </div>
+
+  @switch (data.period()) {
+    @case ('mes') {
+      <div class="df__dates">
+        <label>
+          Mês
+          <input
+            type="month"
+            [max]="data.today.slice(0, 7)"
+            [value]="data.month()"
+            [attr.aria-invalid]="!!data.periodProblem() || null"
+            (input)="data.month.set($any($event.target).value)"
+          />
+        </label>
+        @if (data.periodProblem(); as problem) {
+          <p class="df__error" role="alert">{{ problem }}</p>
+        }
+      </div>
+    }
+    @case ('personalizado') {
+      <div class="df__dates">
+        <label>
+          De
+          <input
+            type="date"
+            [min]="minDay"
+            [max]="data.today"
+            [value]="data.customFrom()"
+            [attr.aria-invalid]="!!data.periodProblem() || null"
+            (input)="data.customFrom.set($any($event.target).value)"
+          />
+        </label>
+        <label>
+          Até
+          <input
+            type="date"
+            [min]="minDay"
+            [max]="data.today"
+            [value]="data.customTo()"
+            [attr.aria-invalid]="!!data.periodProblem() || null"
+            (input)="data.customTo.set($any($event.target).value)"
+          />
+        </label>
+        @if (data.periodProblem(); as problem) {
+          <p class="df__error" role="alert">{{ problem }}</p>
+        }
+      </div>
+    }
+  }
+
+  <div class="df__filters">
+    <label>
+      Categoria
+      <select (change)="data.category.set($any($event.target).value)">
+        <option value="" [selected]="!data.category()">Todas</option>
+        @for (item of categories(); track item.id) {
+          <option [value]="item.id" [selected]="item.id === data.category()">
+            {{ item.label }}
+          </option>
+        }
+      </select>
+    </label>
+    <label>
+      Formato
+      <select (change)="data.format.set($any($event.target).value)">
+        <option value="" [selected]="!data.format()">Todos</option>
+        @for (item of data.formatOptions(); track item.id) {
+          <option [value]="item.id" [selected]="item.id === data.format()">
+            {{ item.label }}
+          </option>
+        }
+      </select>
+    </label>
+    <label>
+      Destaque
+      <select (change)="data.highlight.set($any($event.target).value)">
+        <option value="" [selected]="!data.highlight()">Todos</option>
+        @for (item of data.highlightOptions(); track item.id) {
+          <option [value]="item.id" [selected]="item.id === data.highlight()">
+            {{ item.label }}
+          </option>
+        }
+      </select>
+    </label>
+    <label>
+      Gênero
+      <select (change)="data.gender.set($any($event.target).value)">
+        <option value="" [selected]="!data.gender()">Todos</option>
+        @for (item of genders; track item) {
+          <option [value]="item" [selected]="item === data.gender()">{{ item }}</option>
+        }
+      </select>
+    </label>
+    <label>
+      Marca
+      <select (change)="data.brand.set($any($event.target).value)">
+        <option value="" [selected]="!data.brand()">Todas</option>
+        @for (name of brands(); track name) {
+          <option [value]="name" [selected]="name === data.brand()">{{ name }}</option>
+        }
+      </select>
+    </label>
+    <label>
+      Fornecedor
+      <select (change)="setSupplier($any($event.target).value)">
+        <option value="" [selected]="data.supplierId() == null">Todos</option>
+        @for (item of suppliers(); track item.id) {
+          <option [value]="'' + item.id" [selected]="item.id === data.supplierId()">
+            {{ item.tradeName || item.legalName }}
+          </option>
+        }
+      </select>
+    </label>
+  </div>
+
+  @if (data.hasFilters()) {
+    <p class="df__active">
+      <mat-icon aria-hidden="true">filter_alt</mat-icon>
+      Números só dos itens filtrados (faturamento sem frete).
+      <button type="button" (click)="data.clearFilters()">Limpar filtros</button>
+    </p>
+  }
+</div>

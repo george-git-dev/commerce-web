@@ -1,0 +1,9 @@
+<h2>Pague com Pix para confirmar</h2>
+<p>Abra o app do seu banco, escolha Pix "copia e cola" e cole o código abaixo.</p>
+<div class="pix__qr" aria-hidden="true"><mat-icon>qr_code_2</mat-icon></div>
+<code class="pix__code">{{ code }}</code>
+<button matButton="filled" class="ui-cta" type="button" (click)="copy()">
+  <mat-icon>{{ copied() ? 'check' : 'content_copy' }}</mat-icon>
+  {{ copied() ? 'Código copiado' : 'Copiar código Pix' }}
+</button>
+<p class="pix__note">Código fictício (ambiente de demonstração). Vale por 30 minutos.</p>

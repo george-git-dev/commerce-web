@@ -1,0 +1,33 @@
+<form class="ship" (submit)="calculate($event)" novalidate>
+  <label class="ship__label" for="shipping-cep">Calcular frete</label>
+  <div class="ship__row">
+    <input
+      id="shipping-cep"
+      type="text"
+      inputmode="numeric"
+      autocomplete="postal-code"
+      placeholder="00000-000"
+      maxlength="9"
+      [value]="draft()"
+      [attr.aria-invalid]="error() ? true : null"
+      [attr.aria-describedby]="error() ? 'shipping-cep-error' : null"
+      (input)="onInput($event)"
+    />
+    <button matButton="outlined" type="submit">Calcular</button>
+  </div>
+  @if (error()) {
+    <p id="shipping-cep-error" class="ship__error" role="alert">{{ error() }}</p>
+  }
+  <a
+    class="ship__help"
+    href="https://buscacepinter.correios.com.br/app/endereco/index.php"
+    target="_blank"
+    rel="noopener"
+  >
+    Não sei meu CEP
+  </a>
+</form>
+
+@if (options().length) {
+  <app-shipping-options [options]="options()" [(selected)]="selected" [allFree]="allFree()" />
+}

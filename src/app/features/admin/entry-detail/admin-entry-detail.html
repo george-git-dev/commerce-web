@@ -1,0 +1,82 @@
+<section class="ed">
+  <a class="ed__back" routerLink="/admin/estoque/entradas">
+    <mat-icon aria-hidden="true">arrow_back</mat-icon> Entradas
+  </a>
+
+  @if (entry(); as e) {
+    <header class="ed__head">
+      <h2>NF {{ e.invoice }}</h2>
+      <span class="ed__status" [class.ed__status--pending]="e.status === 'pedido'">
+        {{ labels[e.status] }}
+      </span>
+    </header>
+
+    <dl class="ed__card ed__info">
+      <div>
+        <dt>Fornecedor</dt>
+        <dd>
+          @if (supplier(); as s) {
+            <a [routerLink]="['/admin/estoque/fornecedores', s.id]">{{
+              s.tradeName || s.legalName
+            }}</a>
+            <small>CNPJ {{ cnpj(s.cnpj) }}</small>
+          }
+        </dd>
+      </div>
+      <div>
+        <dt>Data da nota</dt>
+        <dd>{{ e.date | date: 'dd/MM/yyyy' }}</dd>
+      </div>
+      <div>
+        <dt>Registrada por</dt>
+        <dd>{{ e.createdBy }}</dd>
+      </div>
+      @if (e.receivedAt) {
+        <div>
+          <dt>Recebida</dt>
+          <dd>{{ e.receivedAt | date: 'dd/MM/yyyy HH:mm' }} · {{ e.receivedBy }}</dd>
+        </div>
+      }
+    </dl>
+
+    <ul class="ed__items">
+      @for (line of lines(); track line.item.sku) {
+        <li>
+          <span class="ed__name">
+            @if (line.slug) {
+              <a [routerLink]="['/admin/estoque', line.item.sku]">{{ line.name }}</a>
+            } @else {
+              {{ line.name }}
+            }
+            <small>
+              {{ line.size }} · SKU {{ line.item.sku }}
+              @if (line.draft) {
+                · <a [routerLink]="['/admin/produtos', line.slug]">rascunho — completar</a>
+              }
+            </small>
+          </span>
+          <span class="ed__qty">
+            {{ line.item.quantity }} × {{ line.item.unitCost | currency: 'BRL' }}
+            <strong>{{ line.item.quantity * line.item.unitCost | currency: 'BRL' }}</strong>
+          </span>
+        </li>
+      }
+    </ul>
+    <p class="ed__total">
+      Total <strong>{{ total() | currency: 'BRL' }}</strong>
+    </p>
+
+    @if (e.status === 'pedido' && canEdit) {
+      <div class="ed__actions">
+        <button matButton="filled" class="ui-cta" type="button" (click)="receive()">
+          <mat-icon>inventory</mat-icon> Marcar como recebido
+        </button>
+      </div>
+    }
+  } @else {
+    <div class="ed__empty">
+      <p>Entrada não encontrada.</p>
+      <a matButton="outlined" routerLink="/admin/estoque/entradas">Ver entradas</a>
+    </div>
+  }
+</section>

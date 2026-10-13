@@ -1,0 +1,91 @@
+<section class="ap" #top>
+  <p class="ap__lead">
+    Aprovar cria o cupom de {{ store.program().buyerDiscountPercent }}% para os seguidores, ligado à
+    conta da pessoa. Não aprovar exige um motivo (a pessoa vê).
+  </p>
+
+  <div class="ap__status" role="tablist" aria-label="Situação">
+    @for (tab of tabs; track tab.id) {
+      <button
+        type="button"
+        role="tab"
+        [attr.aria-selected]="status() === tab.id"
+        [class.ap__tab--on]="status() === tab.id"
+        (click)="status.set(tab.id)"
+      >
+        {{ tab.label }} <span>{{ counts()[tab.id] }}</span>
+      </button>
+    }
+  </div>
+
+  <label class="ap__search">
+    <mat-icon aria-hidden="true">search</mat-icon>
+    <input
+      type="search"
+      placeholder="Nome, perfil ou cupom"
+      aria-label="Buscar afiliado"
+      autocomplete="off"
+      [value]="search()"
+      (input)="search.set($any($event.target).value)"
+    />
+  </label>
+
+  @if (page().content.length) {
+    <ul class="ap__list">
+      @for (a of page().content; track a.id) {
+        <li>
+          <article class="ap__card">
+            <header class="ap__card-head">
+              <span class="ap__product">
+                <strong>{{ a.name }}</strong>
+                <small>{{ a.channel }} · {{ a.profile }}</small>
+              </span>
+              <time [attr.datetime]="a.createdAt.toISOString()">{{
+                a.createdAt | date: 'dd/MM/yyyy'
+              }}</time>
+            </header>
+
+            <p class="ap__comment">{{ a.pitch }}</p>
+            <p class="ap__meta">
+              Chave Pix: {{ store.pix(a) }}
+              @if (a.couponCode) {
+                · Cupom <strong>{{ a.couponCode }}</strong> · comissão {{ a.commissionPercent }}%
+              }
+            </p>
+
+            @if (a.decision; as d) {
+              <p class="ap__moderation">
+                {{ labels[a.status] }} por {{ d.by }} em {{ d.at | date: 'dd/MM/yyyy HH:mm' }}
+                @if (d.reason) {
+                  · <strong>Motivo:</strong> {{ d.reason }}
+                }
+              </p>
+            }
+
+            @if (store.canEdit() && a.status === 'pendente') {
+              <div class="ap__actions">
+                <button matButton="filled" type="button" (click)="approve(a)">
+                  <mat-icon>check</mat-icon> Aprovar
+                </button>
+                <button matButton="outlined" type="button" class="ap__danger" (click)="reject(a)">
+                  <mat-icon>block</mat-icon> Não aprovar
+                </button>
+              </div>
+            }
+            @if (a.status === 'aprovado') {
+              <div class="ap__actions">
+                <a matButton="outlined" routerLink="/admin/promocoes/cupons">Ver cupons</a>
+              </div>
+            }
+          </article>
+        </li>
+      }
+    </ul>
+    <app-pager [paging]="paging" [page]="page()" [anchor]="top" noun="afiliados" />
+  } @else {
+    <p class="ap__empty">
+      <mat-icon aria-hidden="true">handshake</mat-icon>
+      Nenhum pedido aqui.
+    </p>
+  }
+</section>

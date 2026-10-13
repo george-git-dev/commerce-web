@@ -1,0 +1,246 @@
+:host {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  min-width: 0;
+}
+
+.tp__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  justify-content: space-between;
+  gap: 10px;
+
+  h3 {
+    margin: 0;
+    font-family: var(--font-ui);
+    font-size: 1rem;
+    font-weight: 600;
+  }
+
+  p {
+    margin: 2px 0 0;
+    font-size: 0.8125rem;
+    color: var(--muted-foreground);
+  }
+}
+
+// Formato + Ordenar por, lado a lado (no celular dividem a largura).
+.tp__controls {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  width: 100%;
+
+  @media (min-width: 700px) {
+    width: auto;
+  }
+}
+
+.tp__sort {
+  display: grid;
+  gap: 4px;
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+
+  select {
+    min-height: 40px;
+    padding: 0 8px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--card);
+    color: var(--foreground);
+    font: inherit;
+    font-size: 0.875rem;
+  }
+}
+
+.tp__list {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+// Celular: nº + foto à esquerda; nome, marca e formato na largura toda;
+// embaixo unidades/lucro/margem e o faturamento à direita.
+.tp__row {
+  display: grid;
+  grid-template-columns: 18px 40px minmax(0, 1fr) auto;
+  grid-template-areas:
+    'rank img name name'
+    'rank img stats revenue';
+  align-items: center;
+  gap: 2px 10px;
+  padding: 10px 0;
+  border-top: 1px solid var(--border);
+  font-size: 0.875rem;
+
+  img {
+    grid-area: img;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-sm);
+    object-fit: cover;
+  }
+
+  &--head {
+    display: none;
+  }
+}
+
+.tp__rank {
+  grid-area: rank;
+  color: var(--muted-foreground);
+  font-variant-numeric: tabular-nums;
+}
+
+.tp__name {
+  display: grid;
+  grid-area: name;
+  min-width: 0;
+
+  strong {
+    overflow: hidden;
+    font-weight: 600;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  small {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    overflow: hidden;
+    font-size: 0.75rem;
+    color: var(--muted-foreground);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+// Formato da linha: "Frasco 100 ml", "Decant 5 ml", "Kit" — o decant em dourado.
+.tp__fmt {
+  flex-shrink: 0;
+  padding: 1px 6px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--muted);
+  color: var(--foreground);
+  font-size: 0.6875rem;
+  font-weight: 600;
+
+  &--decant {
+    border-color: var(--secondary);
+    background: var(--gold-soft);
+  }
+}
+
+.tp__stats {
+  display: flex;
+  flex-wrap: wrap;
+  grid-area: stats;
+  gap: 2px 12px;
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+
+.tp__revenue,
+.tp__stats > span {
+  font-variant-numeric: tabular-nums;
+}
+
+.tp__revenue {
+  grid-area: revenue;
+  align-self: start;
+  font-weight: 600;
+  text-align: right;
+}
+
+.tp__more,
+.tp__empty {
+  justify-self: start;
+  margin: 0;
+  color: var(--muted-foreground);
+}
+
+.tp__more {
+  min-height: 40px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--earth);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+@media (min-width: 700px) {
+  .tp__row {
+    grid-template-columns: 24px 40px minmax(0, 1fr) 70px 110px 110px 64px;
+    grid-template-areas: none;
+
+    > *,
+    img {
+      grid-row: 1;
+    }
+
+    &--head {
+      display: grid;
+      padding: 0 0 4px;
+      border: 0;
+      font-size: 0.75rem;
+      color: var(--muted-foreground);
+    }
+
+    &--head > :nth-child(n + 4) {
+      text-align: right;
+    }
+  }
+
+  .tp__stats {
+    display: contents;
+    font-size: 0.875rem;
+    color: var(--foreground);
+
+    > span {
+      grid-row: 1;
+      text-align: right;
+    }
+  }
+
+  .tp__rank {
+    grid-column: 1;
+  }
+
+  .tp__row img {
+    grid-column: 2;
+  }
+
+  .tp__name {
+    grid-column: 3;
+  }
+
+  .tp__units {
+    grid-column: 4;
+  }
+
+  .tp__revenue {
+    grid-column: 5;
+    align-self: center;
+    font-weight: 400;
+  }
+
+  .tp__profit {
+    grid-column: 6;
+  }
+
+  .tp__margin {
+    grid-column: 7;
+  }
+
+  .tp__m {
+    display: none;
+  }
+}

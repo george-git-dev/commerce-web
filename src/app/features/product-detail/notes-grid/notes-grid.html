@@ -1,0 +1,43 @@
+<section class="notes">
+  <header class="ui-section-head">
+    <span class="ui-eyebrow">Pirâmide olfativa</span>
+    <h2>Como a fragrância se revela</h2>
+  </header>
+
+  @if (familyText() || occasionText()) {
+    <dl class="notes__facts">
+      @if (familyText()) {
+        <div class="fact">
+          <mat-icon aria-hidden="true">spa</mat-icon>
+          <dt>Família olfativa</dt>
+          <dd>{{ familyText() }}</dd>
+        </div>
+      }
+      @if (occasionText()) {
+        <div class="fact">
+          <mat-icon aria-hidden="true">schedule</mat-icon>
+          <dt>Ocasião</dt>
+          <dd>{{ occasionText() }}</dd>
+        </div>
+      }
+    </dl>
+  }
+
+  <div class="notes__layers">
+    @for (layer of layers(); track layer.title) {
+      <div class="notes__layer">
+        <h3 class="notes__title">
+          {{ layer.title }} <span class="notes__hint">— {{ layer.hint }}</span>
+        </h3>
+        <ul class="notes__grid">
+          @for (note of layer.notes; track note) {
+            <li class="note">
+              <img [src]="images[note]" alt="" width="400" height="400" loading="lazy" />
+              <span class="note__name">{{ note }}</span>
+            </li>
+          }
+        </ul>
+      </div>
+    }
+  </div>
+</section>

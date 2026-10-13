@@ -1,0 +1,317 @@
+<section class="cd">
+  <a class="cd__back" routerLink="/admin/clientes">
+    <mat-icon aria-hidden="true">arrow_back</mat-icon> Clientes
+  </a>
+
+  @if (customer(); as c) {
+    <header class="cd__head">
+      <span class="cd__avatar" aria-hidden="true">{{ c.name.charAt(0) }}</span>
+      <div>
+        <h2>{{ c.name }}</h2>
+        <p>Cliente desde {{ c.since | date: 'dd/MM/yyyy' }} · código {{ c.id }}</p>
+        <span class="cd__tags">
+          @if (c.anonymized) {
+            <span class="cd__tag cd__tag--blocked">
+              <mat-icon aria-hidden="true">person_off</mat-icon> Cadastro excluído
+            </span>
+          } @else if (block()) {
+            <span class="cd__tag cd__tag--blocked">
+              <mat-icon aria-hidden="true">block</mat-icon> Bloqueado
+            </span>
+          } @else {
+            <span class="cd__tag"><mat-icon aria-hidden="true">check_circle</mat-icon> Ativo</span>
+          }
+          @if (inHands()) {
+            <span class="cd__tag">
+              <mat-icon aria-hidden="true">handshake</mat-icon> Entrega em mãos no próximo pedido
+            </span>
+          }
+          @if (affiliate()) {
+            <a class="cd__tag cd__tag--link" routerLink="/admin/afiliados"
+              ><mat-icon aria-hidden="true">sell</mat-icon> Afiliado</a
+            >
+          }
+          @for (role of staffRoles(); track role) {
+            <span class="cd__tag"
+              ><mat-icon aria-hidden="true">badge</mat-icon> {{ roleLabels[role] }}</span
+            >
+          }
+        </span>
+      </div>
+    </header>
+
+    @if (deletion(); as d) {
+      <p class="cd__alert" role="status">
+        <mat-icon aria-hidden="true">person_off</mat-icon>
+        <span>
+          Dados pessoais excluídos (LGPD) por {{ d.by }} em {{ d.at | date: 'dd/MM/yyyy HH:mm' }}.
+          <strong>Motivo:</strong> {{ d.reason }}. Os pedidos foram mantidos sem dados pessoais.
+        </span>
+      </p>
+    }
+
+    @if (block(); as b) {
+      <p class="cd__alert" role="status">
+        <mat-icon aria-hidden="true">block</mat-icon>
+        <span>
+          Bloqueado por {{ b.by }} em {{ b.at | date: 'dd/MM/yyyy HH:mm' }}.
+          <strong>Motivo:</strong> {{ b.reason }}
+        </span>
+      </p>
+    }
+
+    <div class="cd__grid">
+      <article class="cd__card">
+        <h3>Contato</h3>
+        @if (c.anonymized) {
+          <p class="cd__empty">Sem dados pessoais (cadastro excluído).</p>
+        } @else {
+          <dl class="cd__data">
+            <div>
+              <dt>E-mail</dt>
+              <dd>{{ c.email }}</dd>
+            </div>
+            <div>
+              <dt>Telefone</dt>
+              <dd>
+                {{ phone() || '—' }}
+                @if (whatsapp(); as link) {
+                  <a [href]="link" target="_blank" rel="noopener">WhatsApp</a>
+                }
+              </dd>
+            </div>
+            <div>
+              <dt>CPF</dt>
+              <dd>{{ cpf() || 'Não informado' }}</dd>
+            </div>
+            <div>
+              <dt>Cidade</dt>
+              <dd>{{ c.city }}</dd>
+            </div>
+          </dl>
+          @if (!sensitive) {
+            <p class="cd__note">
+              <mat-icon aria-hidden="true">lock</mat-icon>
+              CPF, telefone e endereço completos só para quem tem permissão de dados sensíveis.
+            </p>
+          }
+        }
+      </article>
+
+      <article class="cd__card">
+        <h3>Compras</h3>
+        <dl class="cd__stats">
+          <div>
+            <dt>Total gasto</dt>
+            <dd>{{ c.totalSpent | currency: 'BRL' }}</dd>
+          </div>
+          <div>
+            <dt>Pedidos</dt>
+            <dd>{{ c.orderCount }}</dd>
+          </div>
+          <div>
+            <dt>Ticket médio</dt>
+            <dd>{{ c.orderCount ? (c.averageTicket | currency: 'BRL') : '—' }}</dd>
+          </div>
+          <div>
+            <dt>Cancelados</dt>
+            <dd>{{ c.cancelledCount }}</dd>
+          </div>
+          <div>
+            <dt>Última compra</dt>
+            <dd>{{ c.lastOrderAt ? (c.lastOrderAt | date: 'dd/MM/yyyy') : '—' }}</dd>
+          </div>
+        </dl>
+      </article>
+
+      @if (canEdit && !c.anonymized) {
+        <article class="cd__card cd__actions">
+          <h3>Ações</h3>
+          <button matButton="outlined" type="button" (click)="toggleInHands()">
+            <mat-icon>handshake</mat-icon>
+            {{ inHands() ? 'Cancelar entrega em mãos' : 'Liberar entrega em mãos' }}
+          </button>
+          @if (store.isStaff(c)) {
+            <p class="cd__note">
+              <mat-icon aria-hidden="true">badge</mat-icon>
+              Conta da equipe: para bloquear, tire o acesso ao backoffice antes.
+            </p>
+          } @else if (store.isSelf(c)) {
+            <p class="cd__note">Você não pode bloquear a própria conta.</p>
+          } @else {
+            <button
+              matButton="outlined"
+              type="button"
+              [class.cd__danger]="!block()"
+              (click)="toggleBlock()"
+            >
+              <mat-icon>{{ block() ? 'lock_open' : 'block' }}</mat-icon>
+              {{ block() ? 'Desbloquear cliente' : 'Bloquear cliente' }}
+            </button>
+          }
+          @if (canManageTeam) {
+            @if (deletionProblem(); as problem) {
+              <p class="cd__note">
+                <mat-icon aria-hidden="true">person_off</mat-icon> Excluir cadastro: {{ problem }}
+              </p>
+            } @else {
+              <button
+                matButton="outlined"
+                type="button"
+                class="cd__danger"
+                (click)="deleteCustomer()"
+              >
+                <mat-icon>person_off</mat-icon> Excluir cadastro (LGPD)
+              </button>
+            }
+          }
+        </article>
+
+        <article class="cd__card cd__actions">
+          <h3>Senha</h3>
+          <p class="cd__current">
+            Entra com: <strong>{{ googleOnly() ? 'Google' : 'E-mail e senha' }}</strong>
+          </p>
+          @if (resetEmail(); as e) {
+            <p class="cd__note" [class.cd__note--bad]="!e.ok" role="status">
+              <mat-icon aria-hidden="true">{{ e.ok ? 'mark_email_read' : 'error' }}</mat-icon>
+              @if (e.ok) {
+                E-mail de redefinição enviado em {{ e.at | date: 'dd/MM HH:mm' }}.
+              } @else {
+                O e-mail de redefinição FALHOU em {{ e.at | date: 'dd/MM HH:mm' }}. Use "Gerar link"
+                e mande pelo WhatsApp.
+              }
+            </p>
+          }
+          @if (passwordProblem(); as problem) {
+            <p class="cd__note"><mat-icon aria-hidden="true">info</mat-icon> {{ problem }}</p>
+          } @else {
+            <button matButton="outlined" type="button" (click)="sendResetEmail()">
+              <mat-icon>forward_to_inbox</mat-icon> Enviar link por e-mail
+            </button>
+            <button matButton="outlined" type="button" (click)="openResetLink()">
+              <mat-icon>link</mat-icon> Gerar link de redefinição
+            </button>
+            <p class="cd__note">
+              <mat-icon aria-hidden="true">lock</mat-icon>
+              Ninguém da equipe vê ou define a senha: o cliente cria a nova pelo link.
+            </p>
+          }
+        </article>
+      }
+
+      @if (canManageTeam && !c.anonymized) {
+        <article class="cd__card">
+          <h3>Acesso ao backoffice</h3>
+          @if (accessProblem(); as problem) {
+            <p class="cd__current">
+              Perfil:
+              <strong>{{
+                currentAccess() ? roleLabels[currentAccess()!] : 'Cliente (sem acesso)'
+              }}</strong>
+            </p>
+            <p class="cd__note"><mat-icon aria-hidden="true">lock</mat-icon> {{ problem }}</p>
+          } @else {
+            <fieldset class="cd__roles" aria-label="Perfil da conta">
+              @for (opt of accessOptions; track opt.label) {
+                <label class="cd__role" [class.cd__role--on]="chosenAccess() === opt.value">
+                  <input
+                    type="radio"
+                    name="access"
+                    [checked]="chosenAccess() === opt.value"
+                    (change)="chosenAccess.set(opt.value)"
+                  />
+                  <span>
+                    <strong
+                      >{{ opt.label }}
+                      @if (currentAccess() === opt.value) {
+                        <small>(atual)</small>
+                      }
+                    </strong>
+                    <small>{{ opt.hint }}</small>
+                  </span>
+                </label>
+              }
+            </fieldset>
+            <button
+              matButton="filled"
+              type="button"
+              [disabled]="chosenAccess() === currentAccess()"
+              (click)="applyAccess()"
+            >
+              {{
+                !chosenAccess() && currentAccess()
+                  ? 'Tirar acesso'
+                  : currentAccess()
+                    ? 'Trocar perfil'
+                    : 'Dar acesso'
+              }}
+            </button>
+            <p class="cd__note">
+              <mat-icon aria-hidden="true">info</mat-icon>
+              Vale no próximo login da pessoa. Super admin não é dado por aqui.
+            </p>
+          }
+        </article>
+      }
+
+      <article class="cd__card">
+        <h3>Endereços</h3>
+        @if (c.addresses.length) {
+          <ul class="cd__addresses">
+            @for (a of c.addresses; track $index) {
+              <li>
+                @if (sensitive) {
+                  {{ a.street }}, {{ a.number }} — {{ a.district }}<br />
+                  {{ a.city }}/{{ a.state }} · CEP {{ a.cep }}
+                } @else {
+                  {{ a.city }}/{{ a.state }} · CEP {{ a.cep.slice(0, 5) }}-***
+                }
+              </li>
+            }
+          </ul>
+        } @else {
+          <p class="cd__empty">Nenhum endereço em pedidos.</p>
+        }
+      </article>
+    </div>
+
+    <article class="cd__card" #ordersTop>
+      <h3>
+        Pedidos <small>({{ c.orders.length }})</small>
+      </h3>
+      @if (c.orders.length) {
+        <ul class="cd__orders">
+          @for (o of ordersPage().content; track o.number) {
+            <li>
+              <a [routerLink]="['/admin/pedidos', o.number]">
+                <span>
+                  <strong>{{ o.number }}</strong>
+                  <small
+                    >{{ o.createdAt | date: 'dd/MM/yyyy' }} · {{ o.items.length }}
+                    {{ o.items.length === 1 ? 'item' : 'itens' }}</small
+                  >
+                </span>
+                <span class="cd__status" [class.cd__status--off]="o.status === 'cancelado'">
+                  {{ statusLabels[o.status] }}
+                </span>
+                <strong>{{ o.total | currency: 'BRL' }}</strong>
+              </a>
+            </li>
+          }
+        </ul>
+        <app-pager
+          [paging]="ordersPaging"
+          [page]="ordersPage()"
+          [anchor]="ordersTop"
+          noun="pedidos do cliente"
+          [hideWhenSingle]="true"
+        />
+      } @else {
+        <p class="cd__empty">Ainda não comprou.</p>
+      }
+    </article>
+  } @else {
+    <p class="cd__empty">Cliente não encontrado.</p>
+  }
+</section>

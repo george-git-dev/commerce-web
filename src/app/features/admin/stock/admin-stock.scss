@@ -1,0 +1,209 @@
+.st {
+  display: grid;
+  gap: 14px;
+}
+
+.st__summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+
+  button {
+    min-height: 40px;
+    padding: 0 14px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--card);
+    font: inherit;
+    font-size: 0.875rem;
+    cursor: pointer;
+
+    &[aria-pressed='true'] {
+      border-color: var(--primary);
+      background: var(--primary);
+      color: var(--primary-foreground);
+    }
+  }
+}
+
+.st__chip--baixo strong {
+  color: #8a5a00;
+}
+
+.st__chip--zerado strong {
+  color: var(--wine);
+}
+
+[aria-pressed='true'] strong {
+  color: inherit;
+}
+
+.st__filters {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.st__search {
+  display: flex;
+  grid-column: 1 / -1;
+  align-items: center;
+  gap: 8px;
+  height: 48px;
+  padding-inline: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--card);
+
+  mat-icon {
+    color: var(--muted-foreground);
+  }
+
+  input {
+    flex: 1;
+    width: 0;
+    border: 0;
+    outline: none;
+    background: none;
+    font: inherit;
+    font-size: 1rem;
+  }
+}
+
+.st__select {
+  display: grid;
+  gap: 4px;
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+
+  select {
+    width: 100%;
+    height: 44px;
+    padding-inline: 8px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--card);
+    color: var(--foreground);
+    font: inherit;
+    font-size: 0.9375rem;
+  }
+}
+
+.st__count {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--muted-foreground);
+}
+
+.st__list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+// Celular: foto, nome + tamanho/SKU, saldo e situação numa linha só.
+.st__row {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+  font-size: 0.875rem;
+
+  &:hover {
+    border-color: var(--gold);
+  }
+
+  img,
+  .st__noimg {
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-sm);
+    object-fit: cover;
+  }
+
+  small {
+    font-size: 0.75rem;
+    color: var(--muted-foreground);
+  }
+}
+
+.st__noimg {
+  display: grid;
+  place-items: center;
+  background: var(--muted);
+}
+
+.st__name,
+.st__qty {
+  display: grid;
+  min-width: 0;
+}
+
+.st__name * {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.st__qty {
+  justify-items: end;
+
+  strong {
+    font-size: 1.125rem;
+  }
+}
+
+.st__badge {
+  min-width: 60px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-align: center;
+
+  &--ok {
+    background: color-mix(in oklch, #2f6b45 14%, transparent);
+    color: #2f6b45;
+  }
+
+  &--baixo {
+    background: color-mix(in oklch, #c48a00 18%, transparent);
+    color: #7a4f00;
+  }
+
+  &--zerado {
+    background: color-mix(in oklch, var(--wine) 12%, transparent);
+    color: var(--wine);
+  }
+}
+
+.st__empty {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  padding: 40px 16px;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  color: var(--muted-foreground);
+
+  p {
+    margin: 0;
+  }
+}
+
+@media (min-width: 700px) {
+  .st__filters {
+    grid-template-columns: minmax(0, 1fr) 170px 130px 170px;
+    align-items: end;
+  }
+
+  .st__search {
+    grid-column: auto;
+  }
+}

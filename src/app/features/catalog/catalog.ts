@@ -1,28 +1,53 @@
+import { CartActions } from '../../core/services/cart-actions';
 import { NgTemplateOutlet } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router } from '@angular/router';
+import { OCCASION_LABELS, OLFACTORY_FAMILIES, OlfactoryFamily } from '../../core/config/fragrance';
 import { CATALOG_QUERY_PARAMS } from '../../core/config/navigation';
-import { MOCK_PRODUCTS } from '../../core/data/mock-products';
-import { CartStore } from '../../core/services/cart-store';
+import {
+  categoriesTitle,
+  formatCategories,
+  parseCategories,
+  PRODUCT_CATEGORIES,
+} from '../../core/config/product-categories';
+import { CatalogService } from '../../core/services/catalog-service';
 import { FavoritesStore } from '../../core/services/favorites-store';
-import { Product } from '../../core/models/product';
+import { FavoriteAction } from '../../core/services/favorite-action';
+import {
+  Occasion,
+  Product,
+  ProductCategory,
+  ProductSelection,
+  VariantKind,
+} from '../../core/models/product';
+import {
+  effectivePrice,
+  hasDeal,
+  hasKind,
+  isAvailable,
+  lowestPrice,
+} from '../../core/utils/product-pricing';
 import { EmptyState } from '../../shared/empty-state/empty-state';
 import { ProductCard } from '../../shared/product-card/product-card';
 
-type SortOption = 'relevancia' | 'menor-preco' | 'maior-preco' | 'avaliacao';
+type SortOption = 'relevancia' | 'mais-vendidos' | 'menor-preco' | 'maior-preco' | 'avaliacao';
 
-function toNumber(value: string | null): number | null {
-  if (!value) return null;
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : null;
+const MAX_PRICE_DIGITS = 5; // até R$ 99.999
+
+/**
+ * Lê um preço da URL. Aceita só inteiros positivos com até 5 dígitos;
+ * qualquer outra coisa (texto, negativo, decimal, notação 1e5…) é ignorada.
+ */
+function toPrice(value: string | null): number | null {
+  if (!value || !new RegExp(`^\\d{1,${MAX_PRICE_DIGITS}}$`).test(value)) return null;
+  return Number(value);
 }
 
 /**
- * `/produtos`. Dado sempre mockado (`MOCK_PRODUCTS`) — a reconexão com a API
+ * `/produtos`. Dado mockado, via `CatalogService` — a reconexão com a API
  * real de listagem/paginação é uma etapa futura do roadmap.
  *
  * Os filtros funcionais (gênero, marca, preço, busca) vivem na URL: cada
@@ -39,26 +64,89 @@ function toNumber(value: string | null): number | null {
 export class Catalog {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
-  private readonly cart = inject(CartStore);
+  private readonly cartActions = inject(CartActions);
   private readonly favorites = inject(FavoritesStore);
-  private readonly snackBar = inject(MatSnackBar);
+  private readonly favoriteAction = inject(FavoriteAction);
+  private readonly catalog = inject(CatalogService);
 
   protected readonly params = CATALOG_QUERY_PARAMS;
+  protected readonly categories = PRODUCT_CATEGORIES;
   private readonly queryParamMap = toSignal(this.route.queryParamMap, { requireSync: true });
 
   protected readonly filtersOpen = signal(false);
 
-  protected readonly brands = [
-    ...new Set(MOCK_PRODUCTS.map((product) => product.brandName)),
-  ].sort();
+  /** Famílias presentes no catálogo, na ordem da lista oficial. */
+  protected readonly familyOptions = computed(() => {
+    const present = new Set(this.catalog.products().flatMap((product) => product.families));
+    return OLFACTORY_FAMILIES.filter((family) => present.has(family));
+  });
+  protected readonly ratingOptions = [4, 3] as const;
+  protected readonly occasionOptions = Object.entries(OCCASION_LABELS) as [Occasion, string][];
 
+  /** Selos manuais presentes no catálogo (Exclusivo, Edição limitada…), em ordem alfabética. */
+  protected readonly badgeOptions = computed(() =>
+    [
+      ...new Set(
+        this.catalog
+          .products()
+          .map((product) => product.badge)
+          .filter((badge): badge is string => !!badge),
+      ),
+    ].sort((a, b) => a.localeCompare(b, 'pt-BR')),
+  );
+
+  protected readonly brands = computed(() =>
+    [...new Set(this.catalog.products().map((product) => product.brandName))].sort(),
+  );
+
+  /**
+   * `?categoria=kit` ou `?categoria=hidratante,body-splash` (link "Corpo e banho").
+   * Lista vazia = tudo (perfumes, kits, hidratantes, body splash).
+   */
+  protected readonly selectedCategories = computed(() =>
+    parseCategories(this.queryParamMap().get(this.params.category)),
+  );
+  /**
+   * Título: o da categoria/grupo ("Hidratantes", "Corpo e banho"); sem categoria,
+   * o destaque ativo ("Lançamentos", "Ofertas"); senão "Todos os produtos".
+   */
+  protected readonly title = computed(() => {
+    const categories = this.selectedCategories();
+    if (categories.length) return categoriesTitle(categories);
+    const highlights = [
+      ...(this.launchOnly() ? ['Lançamentos'] : []),
+      ...(this.dealOnly() ? ['Ofertas'] : []),
+      ...(this.bestSellerOnly() ? ['Mais vendidos'] : []),
+      ...this.badges(),
+    ];
+    return highlights.length ? highlights.join(' · ') : categoriesTitle([]);
+  });
+  /** `?familia=Oriental,Floral` — várias valem como "ou". */
+  protected readonly families = computed(() => {
+    const value = this.queryParamMap().get(this.params.family);
+    const ids = new Set((value ?? '').split(',').map((family) => family.trim()));
+    return this.familyOptions().filter((family) => ids.has(family));
+  });
+  /** `?ocasiao=dia,noite` — várias valem como "ou". */
+  protected readonly occasions = computed<readonly Occasion[]>(() => {
+    const ids = (this.queryParamMap().get(this.params.occasion) ?? '').split(',');
+    return this.occasionOptions.map(([id]) => id).filter((id) => ids.includes(id));
+  });
+  /** `?nota=4` — média mínima de avaliação (4 ou 3). */
+  protected readonly minRating = computed(() => {
+    const value = Number(this.queryParamMap().get(this.params.minRating));
+    return this.ratingOptions.find((option) => option === value) ?? null;
+  });
+  protected readonly inStockOnly = computed(
+    () => this.queryParamMap().get(this.params.inStock) === 'true',
+  );
   protected readonly gender = computed(() => this.queryParamMap().get(this.params.gender));
   protected readonly brand = computed(() => this.queryParamMap().get(this.params.brand));
   protected readonly priceMin = computed(() =>
-    toNumber(this.queryParamMap().get(this.params.priceMin)),
+    toPrice(this.queryParamMap().get(this.params.priceMin)),
   );
   protected readonly priceMax = computed(() =>
-    toNumber(this.queryParamMap().get(this.params.priceMax)),
+    toPrice(this.queryParamMap().get(this.params.priceMax)),
   );
   protected readonly search = computed(() => this.queryParamMap().get(this.params.search) ?? '');
   protected readonly dealOnly = computed(
@@ -67,22 +155,48 @@ export class Catalog {
   protected readonly launchOnly = computed(
     () => this.queryParamMap().get(this.params.launch) === 'true',
   );
+  protected readonly bestSellerOnly = computed(
+    () => this.queryParamMap().get(this.params.bestSeller) === 'true',
+  );
+  /** `?selo=Exclusivo,Edição limitada` — só os que existem no catálogo. */
+  protected readonly badges = computed(() => {
+    const ids = (this.queryParamMap().get(this.params.badge) ?? '').split(',');
+    return this.badgeOptions().filter((badge) => ids.includes(badge));
+  });
+  /** `?tipo=decant` — entra no menu junto com os decants (pós-MVP). */
+  protected readonly kind = computed<VariantKind | null>(() => {
+    const value = this.queryParamMap().get(this.params.kind);
+    return value === 'frasco' || value === 'decant' ? value : null;
+  });
   protected readonly sort = computed<SortOption>(
     () => (this.queryParamMap().get(this.params.sort) as SortOption | null) ?? 'relevancia',
   );
 
   protected readonly hasActiveFilters = computed(
     () =>
+      this.selectedCategories().length > 0 ||
+      this.families().length > 0 ||
+      this.occasions().length > 0 ||
+      this.minRating() !== null ||
+      this.inStockOnly() ||
       !!this.gender() ||
       !!this.brand() ||
       this.priceMin() !== null ||
       this.priceMax() !== null ||
       !!this.search() ||
       this.dealOnly() ||
-      this.launchOnly(),
+      this.launchOnly() ||
+      this.bestSellerOnly() ||
+      this.badges().length > 0 ||
+      !!this.kind(),
   );
 
   protected readonly products = computed<readonly Product[]>(() => {
+    const categories = this.selectedCategories();
+    const families = this.families();
+    const occasions = this.occasions();
+    const minRating = this.minRating();
+    const inStockOnly = this.inStockOnly();
     const gender = this.gender();
     const brand = this.brand();
     const min = this.priceMin();
@@ -90,17 +204,54 @@ export class Catalog {
     const search = this.search().trim().toLowerCase();
     const dealOnly = this.dealOnly();
     const launchOnly = this.launchOnly();
+    const bestSellerOnly = this.bestSellerOnly();
+    const badges = this.badges();
+    const anyHighlight = dealOnly || launchOnly || bestSellerOnly || badges.length > 0;
+    const kind = this.kind();
 
-    let list = MOCK_PRODUCTS.filter((product) => {
+    let list = this.catalog.products().filter((product) => {
+      if (categories.length && !categories.includes(product.category)) return false;
+      if (families.length && !families.some((family) => product.families.includes(family))) {
+        return false;
+      }
+      // Produto sem ocasião cadastrada não entra quando o filtro está ativo.
+      if (
+        occasions.length &&
+        !occasions.some((occasion) => product.occasions?.includes(occasion))
+      ) {
+        return false;
+      }
+      if (minRating !== null && (product.rating ?? 0) < minRating) return false;
+      if (inStockOnly && !isAvailable(product)) return false;
       if (gender && product.gender !== gender) return false;
       if (brand && product.brandName !== brand) return false;
-      if (min !== null && product.finalPrice < min) return false;
-      if (max !== null && product.finalPrice > max) return false;
-      if (dealOnly && !product.oldPrice) return false;
-      if (launchOnly && product.badge !== 'Lançamento') return false;
+      // Preço: o produto entra se algum tamanho estiver dentro da faixa.
+      if (
+        (min !== null || max !== null) &&
+        !product.variants.some((variant) => {
+          const price = effectivePrice(variant);
+          return (min === null || price >= min) && (max === null || price <= max);
+        })
+      ) {
+        return false;
+      }
+      // Destaques: dentro do grupo vale "ou" (como nas categorias) —
+      // Lançamentos + Ofertas mostra os dois, não só quem é as duas coisas.
+      if (
+        anyHighlight &&
+        !(
+          (dealOnly && hasDeal(product)) ||
+          (launchOnly && product.launch) ||
+          (bestSellerOnly && product.bestSeller) ||
+          (!!product.badge && badges.includes(product.badge))
+        )
+      ) {
+        return false;
+      }
+      if (kind && !hasKind(product, kind)) return false;
       if (
         search &&
-        !`${product.name} ${product.brandName} ${product.family ?? ''}`
+        !`${product.name} ${product.brandName} ${product.families.join(' ')}`
           .toLowerCase()
           .includes(search)
       ) {
@@ -111,14 +262,21 @@ export class Catalog {
 
     list = [...list];
     switch (this.sort()) {
+      case 'mais-vendidos':
+        list.sort((a, b) => (b.soldCount ?? 0) - (a.soldCount ?? 0));
+        break;
       case 'menor-preco':
-        list.sort((a, b) => a.finalPrice - b.finalPrice);
+        list.sort((a, b) => lowestPrice(a) - lowestPrice(b));
         break;
       case 'maior-preco':
-        list.sort((a, b) => b.finalPrice - a.finalPrice);
+        list.sort((a, b) => lowestPrice(b) - lowestPrice(a));
         break;
       case 'avaliacao':
-        list.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
+        // Empate na média: quem tem mais avaliações vem antes.
+        list.sort(
+          (a, b) =>
+            (b.rating ?? 0) - (a.rating ?? 0) || (b.reviewCount ?? 0) - (a.reviewCount ?? 0),
+        );
         break;
     }
     return list;
@@ -136,17 +294,58 @@ export class Catalog {
     });
   }
 
+  /** Chip de categoria: marca/desmarca, permitindo combinar (ex.: hidratantes + body splash). */
+  protected toggleCategory(category: ProductCategory): void {
+    const current = this.selectedCategories();
+    const next = current.includes(category)
+      ? current.filter((id) => id !== category)
+      : [...current, category];
+    this.setFilter(this.params.category, formatCategories(next));
+  }
+
+  /** Checkbox de família: marca/desmarca, mantendo as outras. */
+  protected toggleFamily(family: OlfactoryFamily): void {
+    const current = this.families();
+    const next = current.includes(family)
+      ? current.filter((item) => item !== family)
+      : [...current, family];
+    this.setFilter(this.params.family, next.join(',') || null);
+  }
+
+  /** Checkbox de ocasião: marca/desmarca, mantendo a outra. */
+  protected toggleOccasion(occasion: Occasion): void {
+    const current = this.occasions();
+    const next = current.includes(occasion)
+      ? current.filter((item) => item !== occasion)
+      : [...current, occasion];
+    this.setFilter(this.params.occasion, next.join(',') || null);
+  }
+
+  /** Chip de selo (Exclusivo, Edição limitada…): marca/desmarca, mantendo os outros. */
+  protected toggleBadge(badge: string): void {
+    const current = this.badges();
+    const next = current.includes(badge)
+      ? current.filter((item) => item !== badge)
+      : [...current, badge];
+    this.setFilter(this.params.badge, next.join(',') || null);
+  }
+
+  /** Remove, enquanto o usuário digita, tudo que não for dígito, e limita o tamanho. */
+  protected keepDigitsOnly(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    input.value = input.value.replace(/\D/g, '').slice(0, MAX_PRICE_DIGITS);
+  }
+
   protected clearFilters(): void {
     this.filtersOpen.set(false);
     this.router.navigate([], { relativeTo: this.route, queryParams: {} });
   }
 
-  protected onAddToCart(product: Product): void {
-    this.cart.add(product);
-    this.snackBar.open(`${product.name} foi adicionado ao carrinho.`, 'Fechar', { duration: 3000 });
+  protected onAddToCart({ product, variant }: ProductSelection): void {
+    this.cartActions.add(product, variant);
   }
 
   protected onToggleFavorite(product: Product): void {
-    this.favorites.toggle(product);
+    this.favoriteAction.toggle(product);
   }
 }

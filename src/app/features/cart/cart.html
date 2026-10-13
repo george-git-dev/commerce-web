@@ -7,11 +7,11 @@
     @if (cart.items().length) {
       <div class="cart__layout">
         <div class="cart__items">
-          @for (line of cart.items(); track line.product.id) {
+          @for (line of cart.items(); track line.variant.id) {
             <app-cart-line-item
               [line]="line"
-              (quantityChange)="cart.setQuantity(line.product.id, $event)"
-              (remove)="cart.remove(line.product.id)"
+              (quantityChange)="cart.setQuantity(line.variant.id, $event)"
+              (remove)="cart.remove(line.variant.id)"
             />
           }
         </div>
@@ -23,31 +23,89 @@
             <span>Subtotal</span>
             <span>{{ cart.subtotal() | currency: 'BRL' }}</span>
           </div>
-          <p class="cart__shipping-note">O frete é calculado no checkout.</p>
+          @let missing = missingForFreeShipping();
+          @if (freeShippingByCoupon() || missing !== null) {
+            <p class="cart__shipping-note">
+              @if (freeShippingByCoupon()) {
+                Frete grátis pelo cupom.
+              } @else if (missing) {
+                Faltam {{ missing | currency: 'BRL' }} para o frete grátis.
+              } @else {
+                Você ganhou frete grátis na entrega econômica.
+              }
+            </p>
+          }
 
-          <label class="cart__coupon">
-            <span>Cupom de desconto</span>
-            <div class="cart__coupon-row">
-              <input
-                type="text"
-                placeholder="Código do cupom"
-                [value]="coupon()"
-                (input)="coupon.set($any($event.target).value)"
-              />
-              <button matButton="outlined" type="button">Aplicar</button>
+          @if (appliedCoupon(); as applied) {
+            <div class="cart__coupon-applied" [class.cart__coupon-applied--warn]="couponProblem()">
+              <mat-icon aria-hidden="true">sell</mat-icon>
+              <span>
+                <strong>{{ applied.code }}</strong>
+                {{ couponProblem() ?? couponText() }}
+              </span>
+              <button
+                matIconButton
+                type="button"
+                aria-label="Remover cupom"
+                (click)="removeCoupon()"
+              >
+                <mat-icon>close</mat-icon>
+              </button>
             </div>
-          </label>
+          } @else {
+            <form class="cart__coupon" (submit)="$event.preventDefault(); applyCoupon()">
+              <label for="cart-coupon">Cupom de desconto</label>
+              <div class="cart__coupon-row">
+                <input
+                  id="cart-coupon"
+                  type="text"
+                  placeholder="Código do cupom"
+                  autocapitalize="characters"
+                  [value]="coupon()"
+                  [attr.aria-invalid]="couponError() ? true : null"
+                  (input)="coupon.set($any($event.target).value); couponError.set('')"
+                />
+                <button matButton="outlined" type="submit">Aplicar</button>
+              </div>
+              @if (couponError()) {
+                <p class="cart__coupon-error" role="alert">{{ couponError() }}</p>
+              }
+            </form>
+          }
+
+          <app-shipping-calculator
+            [options]="shippingOptions()"
+            [(selected)]="shippingId"
+            [allFree]="freeShippingByCoupon()"
+          />
+
+          @if (discount()) {
+            <div class="cart__row cart__row--discount">
+              <span>Desconto</span>
+              <span>− {{ discount() | currency: 'BRL' }}</span>
+            </div>
+          }
+          <div class="cart__row cart__row--shipping">
+            <span>Frete</span>
+            <span>
+              @if (selectedShipping()) {
+                {{ shippingPrice() ? (shippingPrice() | currency: 'BRL') : 'Grátis' }}
+              } @else {
+                Informe o CEP
+              }
+            </span>
+          </div>
 
           <div class="cart__row cart__row--total">
             <span>Total</span>
-            <span>{{ cart.subtotal() | currency: 'BRL' }}</span>
+            <span>{{ total() | currency: 'BRL' }}</span>
           </div>
 
-          <button matButton="filled" class="ui-cta cart__checkout" type="button" disabled>
-            Ir para o checkout
-            <mat-icon iconPositionEnd>arrow_forward</mat-icon>
-          </button>
-          <p class="cart__checkout-note">Checkout em breve — próxima etapa do roadmap.</p>
+          <a matButton="filled" class="ui-cta cart__checkout" routerLink="/finalizar-compra">
+            <mat-icon>lock</mat-icon>
+            Continuar compra
+          </a>
+          <p class="cart__checkout-note">Você revisa tudo antes de confirmar.</p>
         </aside>
       </div>
     } @else {

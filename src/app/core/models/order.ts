@@ -1,0 +1,113 @@
+import { ShippingOption } from './shipping';
+
+export interface Address {
+  cep: string;
+  street: string;
+  number: string;
+  complement: string;
+  district: string;
+  city: string;
+  state: string;
+}
+
+export interface DeliveryAddress extends Address {
+  recipient: string;
+}
+
+/** Endereço guardado na conta (Minha conta → Endereços). */
+export interface SavedAddress extends DeliveryAddress {
+  id: string;
+  isDefault: boolean;
+}
+
+/** Dados da nota fiscal: CPF/CNPJ, nome e endereço de cobrança. */
+export interface BillingInfo {
+  document: string;
+  name: string;
+  address: Address;
+}
+
+export type OrderStatus =
+  | 'aguardando-pagamento'
+  | 'pago'
+  | 'em-separacao'
+  /** Embalado, esperando o Correio/coleta (entrega em mãos: "Pronto para entrega"). */
+  | 'pronto-envio'
+  | 'enviado'
+  | 'entregue'
+  | 'cancelado';
+
+export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
+  'aguardando-pagamento': 'Aguardando pagamento',
+  pago: 'Pagamento confirmado',
+  'em-separacao': 'Em separação',
+  'pronto-envio': 'Pronto para envio',
+  enviado: 'Enviado',
+  entregue: 'Entregue',
+  cancelado: 'Cancelado',
+};
+
+/** Etapas da linha do tempo, na ordem (cancelado fica de fora). */
+export const ORDER_TIMELINE: readonly { status: OrderStatus; label: string }[] = [
+  { status: 'aguardando-pagamento', label: 'Pedido recebido' },
+  { status: 'pago', label: 'Pagamento confirmado' },
+  { status: 'em-separacao', label: 'Em separação' },
+  { status: 'pronto-envio', label: 'Pronto para envio' },
+  { status: 'enviado', label: 'Enviado' },
+  { status: 'entregue', label: 'Entregue' },
+];
+
+export type PaymentMethod = 'pix' | 'cartao' | 'boleto';
+
+export const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
+  pix: 'Pix',
+  cartao: 'Cartão de crédito',
+  boleto: 'Boleto',
+};
+
+export interface OrderItem {
+  /** Identifica o item dentro do pedido (usado na avaliação). */
+  id: string;
+  slug: string;
+  /** Variante vendida (devolução volta ao estoque por ela). */
+  sku?: string;
+  productName: string;
+  variantLabel: string;
+  image: string;
+  quantity: number;
+  unitPrice: number;
+}
+
+/**
+ * Pedido criado no checkout. No mock, montado no front; na Fase 2 é a resposta
+ * do `POST /orders` — o back recalcula preços, frete e desconto e devolve isto.
+ */
+export interface Order {
+  number: string;
+  createdAt: string;
+  status: OrderStatus;
+  /** Código de rastreio, quando já foi enviado. */
+  trackingCode?: string;
+  /** Quando foi entregue (conta o prazo de devolução). */
+  deliveredAt?: string;
+  items: readonly OrderItem[];
+  /** `null` = entrega em mãos (combinada com a loja, sem endereço). */
+  address: DeliveryAddress | null;
+  billing: BillingInfo;
+  shipping: ShippingOption;
+  payment: {
+    method: PaymentMethod;
+    installments?: number;
+    /** Só os 4 últimos dígitos, como o gateway devolve — nunca o número inteiro. */
+    cardLast4?: string;
+    cardBrand?: string;
+  };
+  couponCode?: string;
+  subtotal: number;
+  discount: number;
+  pixDiscount: number;
+  shippingPrice: number;
+  /** Crédito na loja usado (abate o total; volta se o pedido for cancelado). */
+  storeCredit?: number;
+  total: number;
+}

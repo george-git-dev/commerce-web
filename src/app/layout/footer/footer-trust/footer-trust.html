@@ -1,0 +1,24 @@
+<div class="ui-container trust">
+  <section class="trust__block" aria-labelledby="trust-payments">
+    <h4 id="trust-payments">Formas de pagamento</h4>
+    <ul class="trust__payments">
+      @for (payment of payments; track payment.label) {
+        <li [attr.aria-label]="payment.label" [title]="payment.label">
+          @if (payment.brand) {
+            <app-brand-icon [name]="payment.brand" [colored]="true" />
+          } @else {
+            {{ payment.label }}
+          }
+        </li>
+      }
+    </ul>
+  </section>
+
+  <section class="trust__block" aria-labelledby="trust-security">
+    <h4 id="trust-security">Segurança</h4>
+    <ul class="trust__seals">
+      <li><mat-icon aria-hidden="true">lock</mat-icon> Site seguro · HTTPS</li>
+      <li><mat-icon aria-hidden="true">verified_user</mat-icon> Pagamento protegido</li>
+    </ul>
+  </section>
+</div>

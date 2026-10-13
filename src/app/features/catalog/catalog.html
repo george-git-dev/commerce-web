@@ -1,5 +1,76 @@
 <ng-template #filterControls>
   <div class="filter-group">
+    <h3>Categoria</h3>
+    <div class="filter-group__options">
+      <button
+        type="button"
+        class="chip"
+        [class.chip--active]="selectedCategories().length === 0"
+        [attr.aria-pressed]="selectedCategories().length === 0"
+        (click)="setFilter(params.category, null)"
+      >
+        Todas
+      </button>
+      @for (option of categories; track option.id) {
+        <button
+          type="button"
+          class="chip"
+          [class.chip--active]="selectedCategories().includes(option.id)"
+          [attr.aria-pressed]="selectedCategories().includes(option.id)"
+          (click)="toggleCategory(option.id)"
+        >
+          {{ option.plural }}
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- Situações do produto (não são categorias): combinam com qualquer filtro. -->
+  <div class="filter-group">
+    <h3>Destaques</h3>
+    <div class="filter-group__options">
+      <button
+        type="button"
+        class="chip"
+        [class.chip--active]="launchOnly()"
+        [attr.aria-pressed]="launchOnly()"
+        (click)="setFilter(params.launch, launchOnly() ? null : 'true')"
+      >
+        Lançamentos
+      </button>
+      <button
+        type="button"
+        class="chip"
+        [class.chip--active]="dealOnly()"
+        [attr.aria-pressed]="dealOnly()"
+        (click)="setFilter(params.deal, dealOnly() ? null : 'true')"
+      >
+        Ofertas
+      </button>
+      <button
+        type="button"
+        class="chip"
+        [class.chip--active]="bestSellerOnly()"
+        [attr.aria-pressed]="bestSellerOnly()"
+        (click)="setFilter(params.bestSeller, bestSellerOnly() ? null : 'true')"
+      >
+        Mais vendidos
+      </button>
+      @for (badge of badgeOptions(); track badge) {
+        <button
+          type="button"
+          class="chip"
+          [class.chip--active]="badges().includes(badge)"
+          [attr.aria-pressed]="badges().includes(badge)"
+          (click)="toggleBadge(badge)"
+        >
+          {{ badge }}
+        </button>
+      }
+    </div>
+  </div>
+
+  <div class="filter-group">
     <h3>Gênero</h3>
     <div class="filter-group__options">
       <button
@@ -34,7 +105,7 @@
       >
         Todas
       </button>
-      @for (option of brands; track option) {
+      @for (option of brands(); track option) {
         <button
           type="button"
           class="chip"
@@ -53,59 +124,94 @@
       <label>
         <span>Mín.</span>
         <input
-          type="number"
-          min="0"
+          type="text"
+          inputmode="numeric"
+          pattern="[0-9]*"
+          maxlength="5"
+          autocomplete="off"
           placeholder="R$ 0"
           [value]="priceMin()"
+          (input)="keepDigitsOnly($event)"
           (change)="setFilter(params.priceMin, $any($event.target).value)"
         />
       </label>
       <label>
         <span>Máx.</span>
         <input
-          type="number"
-          min="0"
+          type="text"
+          inputmode="numeric"
+          pattern="[0-9]*"
+          maxlength="5"
+          autocomplete="off"
           placeholder="R$ 1000"
           [value]="priceMax()"
+          (input)="keepDigitsOnly($event)"
           (change)="setFilter(params.priceMax, $any($event.target).value)"
         />
       </label>
     </div>
   </div>
 
-  <!-- Acordeões visuais — sem lógica de filtro nesta fase. -->
-  <details class="filter-accordion">
+  <!-- Filtros secundários: fechados por padrão, abertos quando há algo marcado. -->
+  <details class="filter-accordion" [open]="families().length > 0">
     <summary>Família olfativa</summary>
     <div class="filter-accordion__body">
-      @for (family of ['Amadeirado', 'Floral', 'Oriental', 'Cítrico', 'Aromático']; track family) {
-        <label class="checkbox"><input type="checkbox" />{{ family }}</label>
+      @for (family of familyOptions(); track family) {
+        <label class="checkbox">
+          <input
+            type="checkbox"
+            [checked]="families().includes(family)"
+            (change)="toggleFamily(family)"
+          />
+          {{ family }}
+        </label>
       }
     </div>
   </details>
 
-  <details class="filter-accordion">
-    <summary>Volume</summary>
+  <details class="filter-accordion" [open]="occasions().length > 0">
+    <summary>Ocasião</summary>
     <div class="filter-accordion__body">
-      @for (volume of ['50 ml', '75 ml', '90 ml', '100 ml']; track volume) {
-        <label class="checkbox"><input type="checkbox" />{{ volume }}</label>
+      @for (option of occasionOptions; track option[0]) {
+        <label class="checkbox">
+          <input
+            type="checkbox"
+            [checked]="occasions().includes(option[0])"
+            (change)="toggleOccasion(option[0])"
+          />
+          {{ option[1] }}
+        </label>
       }
     </div>
   </details>
 
-  <details class="filter-accordion">
+  <details class="filter-accordion" [open]="minRating() !== null">
     <summary>Avaliação</summary>
     <div class="filter-accordion__body">
-      @for (stars of [4, 3, 2]; track stars) {
-        <label class="checkbox"><input type="checkbox" />{{ stars }} estrelas ou mais</label>
+      @for (stars of ratingOptions; track stars) {
+        <label class="checkbox">
+          <input
+            type="checkbox"
+            [checked]="minRating() === stars"
+            (change)="setFilter(params.minRating, minRating() === stars ? null : '' + stars)"
+          />
+          {{ stars }} estrelas ou mais
+        </label>
       }
     </div>
   </details>
 
-  <details class="filter-accordion">
+  <details class="filter-accordion" [open]="inStockOnly()">
     <summary>Disponibilidade</summary>
     <div class="filter-accordion__body">
-      <label class="checkbox"><input type="checkbox" />Em estoque</label>
-      <label class="checkbox"><input type="checkbox" />Frete grátis</label>
+      <label class="checkbox">
+        <input
+          type="checkbox"
+          [checked]="inStockOnly()"
+          (change)="setFilter(params.inStock, inStockOnly() ? null : 'true')"
+        />
+        Só em estoque
+      </label>
     </div>
   </details>
 
@@ -121,12 +227,12 @@
   <div class="ui-container">
     <header class="catalog__head">
       <span class="ui-eyebrow">Catálogo</span>
-      <h1>Todos os perfumes</h1>
-      <p>Explore nossa seleção completa de eau de parfum masculinos, femininos e unissex.</p>
+      <h1>{{ title() }}</h1>
+      <p>Perfumes árabes, kits para presentear, hidratantes e body splash.</p>
     </header>
 
     <div class="catalog__toolbar">
-      <span class="catalog__count">{{ products().length }} perfume(s) encontrado(s)</span>
+      <span class="catalog__count">{{ products().length }} produto(s) encontrado(s)</span>
 
       <div class="catalog__toolbar-actions">
         <button
@@ -143,6 +249,7 @@
           <span>Ordenar por</span>
           <select [value]="sort()" (change)="setFilter(params.sort, $any($event.target).value)">
             <option value="relevancia">Relevância</option>
+            <option value="mais-vendidos">Mais vendidos</option>
             <option value="menor-preco">Menor preço</option>
             <option value="maior-preco">Maior preço</option>
             <option value="avaliacao">Melhor avaliados</option>
@@ -171,7 +278,7 @@
         } @else {
           <app-empty-state
             icon="search_off"
-            title="Nenhum perfume encontrado"
+            title="Nenhum produto encontrado"
             message="Tente ajustar os filtros ou buscar por outro termo."
             ctaLabel="Limpar filtros"
             (ctaClick)="clearFilters()"

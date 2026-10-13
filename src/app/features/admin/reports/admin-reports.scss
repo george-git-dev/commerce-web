@@ -1,0 +1,215 @@
+h2 {
+  margin: 0;
+  font-size: clamp(1.75rem, 1.4rem + 1.6vw, 2.5rem);
+}
+
+h3 {
+  margin: 0;
+  font-size: 1.0625rem;
+}
+
+.rp {
+  display: grid;
+  gap: 16px;
+  max-width: 880px;
+}
+
+.rp__head {
+  display: grid;
+  gap: 4px;
+}
+
+.rp__eyebrow {
+  margin: 0;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.rp__lead,
+.rp__hint {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+}
+
+// Pedido: cartão com os filtros e o botão.
+.rp__form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+
+  label {
+    display: grid;
+    gap: 4px;
+    min-width: 0;
+    font-size: 0.75rem;
+    color: var(--muted-foreground);
+  }
+
+  select,
+  input {
+    min-width: 0;
+    height: 44px;
+    padding: 0 8px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--background);
+    color: var(--foreground);
+    font: inherit;
+    font-size: 0.875rem;
+  }
+}
+
+.rp__wide {
+  grid-column: 1 / -1;
+}
+
+.rp__dates {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 8px;
+}
+
+.rp__error {
+  margin: 0;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  background: color-mix(in oklch, var(--wine) 10%, transparent);
+  color: var(--wine);
+  font-size: 0.8125rem;
+}
+
+.rp__go {
+  min-height: 48px;
+}
+
+.rp__jobs {
+  display: grid;
+  gap: 10px;
+}
+
+.rp__list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rp__job {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+
+  button {
+    justify-self: start;
+    min-height: 44px;
+  }
+
+  &--pronto {
+    border-color: var(--gold);
+  }
+
+  &--falhou {
+    border-color: var(--wine);
+  }
+}
+
+// Situação: ícone + texto (nunca só cor).
+.rp__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--muted-foreground);
+
+  mat-icon {
+    width: 16px;
+    height: 16px;
+    font-size: 16px;
+  }
+
+  .rp__job--pronto & {
+    color: var(--earth);
+  }
+
+  .rp__job--falhou & {
+    color: var(--wine);
+  }
+
+  .rp__job--gerando & mat-icon {
+    animation: rp-spin 1s linear infinite;
+  }
+}
+
+@keyframes rp-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rp__job--gerando .rp__status mat-icon {
+    animation: none;
+  }
+}
+
+.rp__info {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+
+  small {
+    font-size: 0.75rem;
+    color: var(--muted-foreground);
+    overflow-wrap: anywhere;
+  }
+}
+
+.rp__empty {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 20px 16px;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  color: var(--muted-foreground);
+  font-size: 0.875rem;
+}
+
+@media (min-width: 900px) {
+  .rp__form {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) auto;
+    align-items: end;
+  }
+
+  .rp__form > label:first-child {
+    grid-column: 1 / -1;
+  }
+
+  .rp__go {
+    grid-column: auto;
+  }
+
+  .rp__job {
+    grid-template-columns: 110px minmax(0, 1fr) auto;
+    align-items: center;
+
+    button {
+      justify-self: end;
+    }
+  }
+}

@@ -5,26 +5,105 @@
 .brands {
   background: var(--muted);
   border-block: 1px solid var(--border);
+  padding-block: 16px;
+}
 
-  &__row {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
-    gap: 28px 44px;
-    padding-block: 32px;
+// Área visível: esconde o que passa das bordas e esfumaça as laterais.
+.brands__viewport {
+  overflow: hidden;
+  mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
+}
+
+// Trilho com as duas cópias lado a lado. Anda metade do próprio tamanho (uma cópia)
+// e recomeça: nesse instante a segunda cópia está exatamente onde a primeira estava.
+.brands__track {
+  display: flex;
+  width: max-content;
+  animation: brands-scroll 40s linear infinite;
+}
+
+// Pausa quando o cliente passa o mouse (desktop).
+.brands__viewport:hover .brands__track {
+  animation-play-state: paused;
+}
+
+.brands__list {
+  display: flex;
+  align-items: center;
+  gap: 56px;
+  margin: 0;
+  // Metade do gap de cada lado: o espaço entre o fim de uma cópia e o começo da outra
+  // fica igual ao espaço entre as marcas, e a emenda some.
+  padding: 0 28px;
+  list-style: none;
+}
+
+.brands__item {
+  flex-shrink: 0;
+}
+
+.brands__name {
+  font-family: var(--font-display);
+  font-size: 1.125rem;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  color: var(--muted-foreground);
+}
+
+// Logos em tom neutro; ganham a cor original no hover.
+// Logos já padronizadas num tom neutro; ficam mais visíveis no hover.
+.brands__logo {
+  display: block;
+  height: 64px;
+  width: auto;
+  opacity: 0.75;
+  transition: opacity var(--motion-fast) var(--ease-swift);
+
+  &:hover {
+    opacity: 1;
   }
+}
 
-  &__name {
-    font-family: var(--font-display);
-    font-size: 1.125rem;
-    letter-spacing: 0.04em;
-    color: var(--muted-foreground);
+@keyframes brands-scroll {
+  to {
+    transform: translateX(-50%);
   }
 }
 
 @media (min-width: 900px) {
+  .brands__list {
+    gap: 72px;
+    padding: 0 36px;
+  }
+
   .brands__name {
     font-size: 1.375rem;
+  }
+
+  .brands__logo {
+    height: 72px;
+  }
+}
+
+// Quem pediu "reduzir movimento" no sistema vê as marcas paradas, centralizadas.
+@media (prefers-reduced-motion: reduce) {
+  .brands__viewport {
+    mask-image: none;
+  }
+
+  .brands__track {
+    width: auto;
+    animation: none;
+    justify-content: center;
+  }
+
+  .brands__list {
+    flex-wrap: wrap;
+    justify-content: center;
+    row-gap: 20px;
+  }
+
+  .brands__list[aria-hidden] {
+    display: none;
   }
 }

@@ -1,3 +1,5 @@
+import { BODY_CARE_CATEGORIES } from '../config/product-categories';
+import { STORE_CONFIG } from '../config/store-config';
 import { Category } from '../models/category';
 import { Highlight } from '../models/highlight';
 
@@ -10,7 +12,8 @@ export const HIGHLIGHTS_MOCK: readonly Highlight[] = [
   {
     icon: 'local_shipping',
     title: 'Frete grátis',
-    text: 'Acima de R$ 299, para todo o Brasil',
+    // {freteGratis} vira o valor atual (Configurações da loja, no backoffice).
+    text: 'Acima de {freteGratis}, para todo o Brasil',
   },
   {
     icon: 'lock',
@@ -20,12 +23,12 @@ export const HIGHLIGHTS_MOCK: readonly Highlight[] = [
   {
     icon: 'inventory_2',
     title: 'Produto original',
-    text: 'Frascos lacrados, direto do fabricante',
+    text: 'Frascos lacrados, direto do importador',
   },
   {
     icon: 'payments',
     title: 'Pagamento facilitado',
-    text: 'Parcele em até 12x sem juros',
+    text: `Parcele em até ${STORE_CONFIG.maxInstallments}x sem juros`,
   },
 ];
 
@@ -56,10 +59,19 @@ export const CATEGORIES_MOCK: readonly Category[] = [
   },
   {
     id: 'kits',
-    name: 'Kits',
+    name: 'Kits e presentes',
     text: 'Conjuntos para presentear',
     icon: 'redeem',
     image: 'img/categorias/kits.webp',
+    categoryFilter: ['kit'],
+  },
+  {
+    id: 'corpo-e-banho',
+    name: 'Corpo e banho',
+    text: 'Hidratantes e body splash',
+    icon: 'spa',
+    image: 'img/categorias/corpo-e-banho.webp',
+    categoryFilter: BODY_CARE_CATEGORIES,
   },
   {
     id: 'lancamentos',
@@ -74,5 +86,12 @@ export const CATEGORIES_MOCK: readonly Category[] = [
     text: 'Seleção com até 40% off',
     icon: 'sell',
     image: 'img/categorias/ofertas.webp',
+  },
+  {
+    // Fecha a grade em 8 (2×4 no celular, 4×2 a partir do tablet).
+    id: 'ver-tudo',
+    name: 'Ver tudo',
+    text: 'O catálogo completo',
+    icon: 'grid_view',
   },
 ];

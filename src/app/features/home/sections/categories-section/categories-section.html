@@ -5,7 +5,7 @@
     <header class="categories__head">
       <span class="ui-eyebrow">Categorias</span>
       <h2>Explore por categoria</h2>
-      <p>Encontre o perfume ideal para cada momento.</p>
+      <p>Perfumes, kits e cuidados para o corpo — para cada momento.</p>
     </header>
 
     <div class="categories__grid">
@@ -17,13 +17,13 @@
               [ngSrc]="category.image"
               alt=""
               fill
-              sizes="(min-width: 1024px) 16vw, (min-width: 640px) 33vw, 50vw"
+              sizes="(min-width: 640px) 25vw, 50vw"
             />
           }
           <mat-icon class="tile__icon">{{ category.icon }}</mat-icon>
           <span class="tile__name">{{ category.name }}</span>
           <span class="tile__text">{{ category.text }}</span>
-          <span class="tile__link">Ver perfumes <mat-icon>arrow_forward</mat-icon></span>
+          <span class="tile__link">Explorar <mat-icon>arrow_forward</mat-icon></span>
         </a>
       }
     </div>

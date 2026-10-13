@@ -1,0 +1,225 @@
+<section class="vf">
+  <a class="vf__back" routerLink="/admin/promocoes/cupons">
+    <mat-icon aria-hidden="true">arrow_back</mat-icon> Cupons
+  </a>
+  <h2>{{ original ? original.code : 'Novo cupom' }}</h2>
+
+  @if (id && !original) {
+    <p class="pf__note">Cupom não encontrado.</p>
+  } @else {
+    @if (original) {
+      <dl class="cf__stats">
+        <div>
+          <dt>Usos</dt>
+          <dd>{{ original.uses }}{{ original.maxUses ? ' de ' + original.maxUses : '' }}</dd>
+        </div>
+        <div>
+          <dt>Desconto dado</dt>
+          <dd>{{ original.discountGiven | currency: 'BRL' }}</dd>
+        </div>
+        <div>
+          <dt>Situação</dt>
+          <dd>{{ statusLabels[status()] }}</dd>
+        </div>
+      </dl>
+    }
+
+    @if (tried() && problems().length) {
+      <ul class="vf__problems" role="alert">
+        @for (problem of problems(); track problem) {
+          <li>{{ problem }}</li>
+        }
+      </ul>
+    }
+
+    <form class="vf__card" (submit)="$event.preventDefault(); save()" novalidate>
+      <fieldset [disabled]="readOnly">
+        <label>
+          Código
+          <input
+            class="cf__code"
+            autocapitalize="characters"
+            autocomplete="off"
+            spellcheck="false"
+            maxlength="20"
+            placeholder="Ex.: NANI10"
+            [readOnly]="used"
+            [value]="code()"
+            [attr.aria-invalid]="(tried() && problems()[0]?.startsWith('Código')) || null"
+            (input)="code.set($any($event.target).value.toUpperCase())"
+          />
+          <span class="vf__hint">
+            <span>
+              @if (used) {
+                Já usado em pedidos: o código não muda mais.
+              } @else {
+                3 a 20 letras ou números, sem espaço. O cliente digita sem diferenciar maiúsculas.
+              }
+            </span>
+          </span>
+        </label>
+
+        <h3>Desconto</h3>
+        <div class="pf__seg" role="radiogroup" aria-label="Tipo de desconto">
+          @for (item of kinds; track item.id) {
+            <label [class.pf__seg--on]="kind() === item.id">
+              <input
+                type="radio"
+                name="kind"
+                [checked]="kind() === item.id"
+                (change)="kind.set(item.id)"
+              />
+              {{ item.label }}
+            </label>
+          }
+        </div>
+        @if (kind() !== 'shipping') {
+          <div class="pf__row">
+            <label>
+              {{ kind() === 'percent' ? 'Percentual (%)' : 'Valor (R$)' }}
+              <input
+                inputmode="decimal"
+                [value]="valueText()"
+                [attr.aria-invalid]="(tried() && !(draft().value > 0)) || null"
+                (input)="valueText.set($any($event.target).value)"
+              />
+            </label>
+            @if (kind() === 'percent') {
+              <label>
+                Teto em R$ (opcional)
+                <input
+                  inputmode="decimal"
+                  placeholder="Ex.: 50"
+                  [value]="maxDiscountText()"
+                  (input)="maxDiscountText.set($any($event.target).value)"
+                />
+              </label>
+            }
+          </div>
+        } @else {
+          <p class="vf__hint">
+            <span>Zera o frete escolhido pelo cliente (qualquer modalidade).</span>
+          </p>
+        }
+        <p class="vf__hint">
+          <span
+            >Resumo: <strong>{{ summary() }}</strong></span
+          >
+        </p>
+
+        <h3>Regras</h3>
+        <label>
+          Pedido mínimo em R$ (opcional)
+          <input
+            inputmode="decimal"
+            placeholder="Ex.: 200 — soma dos produtos, sem frete"
+            [value]="minText()"
+            (input)="minText.set($any($event.target).value)"
+          />
+        </label>
+        @if (kind() !== 'shipping') {
+          <label class="vf__check">
+            <input
+              type="checkbox"
+              [checked]="allowOnPromo()"
+              (change)="allowOnPromo.set($any($event.target).checked)"
+            />
+            <span class="pf__choice">
+              Vale também em itens em oferta
+              <small
+                >Desmarcado: desconta só dos itens com preço normal (não soma com promoção).</small
+              >
+            </span>
+          </label>
+        }
+        <label class="vf__check">
+          <input
+            type="checkbox"
+            [checked]="firstPurchaseOnly()"
+            (change)="firstPurchaseOnly.set($any($event.target).checked)"
+          />
+          Só na primeira compra
+        </label>
+
+        <h3>Período e usos</h3>
+        <div class="vf__dates">
+          <label>
+            De (opcional)
+            <input
+              type="date"
+              [value]="startsOn()"
+              (input)="startsOn.set($any($event.target).value)"
+            />
+          </label>
+          <label>
+            Até (opcional)
+            <input
+              type="date"
+              [min]="startsOn()"
+              [value]="endsOn()"
+              (input)="endsOn.set($any($event.target).value)"
+            />
+          </label>
+        </div>
+        <div class="pf__row">
+          <label>
+            Usos no total (opcional)
+            <input
+              inputmode="numeric"
+              placeholder="Ex.: 100"
+              [value]="maxUsesText()"
+              (input)="maxUsesText.set($any($event.target).value)"
+            />
+          </label>
+          <label>
+            Usos por cliente
+            <input
+              inputmode="numeric"
+              placeholder="Sem limite"
+              [value]="perCustomerText()"
+              (input)="perCustomerText.set($any($event.target).value)"
+            />
+          </label>
+        </div>
+        <p class="vf__hint">
+          <span>
+            Termina no que vier primeiro: a data final ou os usos no total. Em branco = sem limite.
+          </span>
+        </p>
+        <label class="vf__check">
+          <input
+            type="checkbox"
+            [checked]="active()"
+            (change)="active.set($any($event.target).checked)"
+          />
+          Ativo
+        </label>
+        <p class="vf__hint">
+          <span
+            >Situação ao salvar: <strong>{{ statusLabels[status()] }}</strong
+            >.</span
+          >
+        </p>
+      </fieldset>
+
+      @if (!readOnly) {
+        <div class="vf__actions">
+          @if (original && !used) {
+            <button matButton type="button" class="vf__danger" (click)="remove()">
+              <mat-icon>delete</mat-icon> Excluir
+            </button>
+          }
+          <button matButton="filled" type="submit" class="ui-cta">Salvar cupom</button>
+        </div>
+        @if (used) {
+          <p class="vf__hint">
+            <span
+              >Cupom já usado não é excluído (está nos pedidos): desmarque "Ativo" para tirar do
+              ar.</span
+            >
+          </p>
+        }
+      }
+    </form>
+  }
+</section>

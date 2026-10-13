@@ -1,0 +1,156 @@
+<section class="au" #top>
+  <header class="au__head">
+    <div>
+      <p class="au__eyebrow">Gestão da loja</p>
+      <h2>Auditoria</h2>
+      <p class="au__lead">
+        Quem fez o quê e quando no backoffice. Só leitura: nenhum registro pode ser editado ou
+        apagado.
+      </p>
+    </div>
+    @if (canExport) {
+      <button matButton="outlined" type="button" class="au__export" (click)="exportCsv()">
+        <mat-icon>download</mat-icon> Exportar Excel (CSV)
+      </button>
+    }
+  </header>
+
+  <div class="au__filters">
+    <label class="au__search">
+      <mat-icon aria-hidden="true">search</mat-icon>
+      <input
+        type="search"
+        placeholder="Ação ou código (pedido, SKU, NF…)"
+        aria-label="Buscar na auditoria"
+        autocomplete="off"
+        [value]="search()"
+        (input)="search.set($any($event.target).value)"
+      />
+    </label>
+    <div class="au__selects">
+      <label>
+        Período
+        <select (change)="period.set($any($event.target).value)">
+          @for (item of periods; track item[0]) {
+            <option [value]="item[0]" [selected]="period() === item[0]">{{ item[1] }}</option>
+          }
+        </select>
+      </label>
+      <label>
+        Área
+        <select (change)="area.set($any($event.target).value)">
+          <option value="todas" [selected]="area() === 'todas'">Todas</option>
+          @for (item of areas; track item[0]) {
+            <option [value]="item[0]" [selected]="area() === item[0]">{{ item[1] }}</option>
+          }
+        </select>
+      </label>
+      <label>
+        Quem
+        <select (change)="by.set($any($event.target).value)">
+          <option value="todos" [selected]="by() === 'todos'">Toda a equipe</option>
+          @for (person of people(); track person) {
+            <option [value]="person" [selected]="by() === person">{{ person }}</option>
+          }
+        </select>
+      </label>
+    </div>
+  </div>
+
+  <p class="au__count" aria-live="polite">
+    {{ filtered().length }} {{ filtered().length === 1 ? 'registro' : 'registros' }} · toque na
+    linha para ver todas as alterações
+  </p>
+
+  @if (page().content.length) {
+    <div class="au__scroll" tabindex="0" role="region" aria-label="Registros da auditoria">
+      <table class="au__table">
+        <thead>
+          <tr>
+            @for (col of columns; track col.label) {
+              <th scope="col" [attr.aria-sort]="ariaSort(col.sort)">
+                @if (col.sort) {
+                  <button type="button" (click)="sortBy(col.sort)">
+                    {{ col.label }}
+                    <span class="au__arrow" aria-hidden="true">{{
+                      sort().column === col.sort ? (sort().desc ? '↓' : '↑') : ''
+                    }}</span>
+                  </button>
+                } @else {
+                  <span>{{ col.label }}</span>
+                }
+              </th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @for (entry of page().content; track $index) {
+            @let isOpen = open() === entry;
+            <tr class="au__row" [class.au__row--open]="isOpen" (click)="toggle(entry, $event)">
+              <th scope="row">
+                {{ entry.at | date: 'dd/MM/yyyy' }}
+                <small>{{ entry.at | date: 'HH:mm' }}</small>
+              </th>
+              <td>{{ entry.by }}</td>
+              <td>{{ entry.role }}</td>
+              <td>{{ areaOf(entry.entity) }}</td>
+              <td>{{ entry.action }}</td>
+              <td>
+                @if (link(entry); as url) {
+                  <a [routerLink]="url">{{ entry.entityId }}</a>
+                } @else {
+                  {{ entry.entityId }}
+                }
+              </td>
+              <td class="au__change">
+                @if (entry.changes.length) {
+                  <button
+                    type="button"
+                    [attr.aria-expanded]="isOpen"
+                    (click)="$event.stopPropagation(); toggle(entry)"
+                  >
+                    <span>{{ changeText(entry.changes[0]) }}</span>
+                    @if (entry.changes.length > 1) {
+                      <strong>+{{ entry.changes.length - 1 }}</strong>
+                    }
+                  </button>
+                } @else {
+                  —
+                }
+              </td>
+              <td>
+                {{ entry.origin.ip }}
+                <small>{{ entry.origin.device }}</small>
+              </td>
+            </tr>
+            @if (isOpen && entry.changes.length) {
+              <tr class="au__detail">
+                <td [attr.colspan]="columns.length">
+                  <dl>
+                    @for (change of entry.changes; track $index) {
+                      <div>
+                        <dt>{{ change.field }}</dt>
+                        <dd>
+                          @if (change.before && change.before !== '—') {
+                            <span class="au__before">{{ change.before }}</span> →
+                          }
+                          <strong>{{ change.after || '(removido)' }}</strong>
+                        </dd>
+                      </div>
+                    }
+                  </dl>
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+    <app-pager [paging]="paging" [page]="page()" [anchor]="top" noun="registros" />
+  } @else {
+    <div class="au__empty">
+      <mat-icon aria-hidden="true">history</mat-icon>
+      <p>Nenhum registro com esses filtros.</p>
+    </div>
+  }
+</section>

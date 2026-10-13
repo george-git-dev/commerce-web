@@ -1,8 +1,7 @@
+import { CartActions } from '../../core/services/cart-actions';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { CartStore } from '../../core/services/cart-store';
 import { FavoritesStore } from '../../core/services/favorites-store';
-import { Product } from '../../core/models/product';
+import { Product, ProductSelection } from '../../core/models/product';
 import { EmptyState } from '../../shared/empty-state/empty-state';
 import { ProductCard } from '../../shared/product-card/product-card';
 
@@ -16,12 +15,10 @@ import { ProductCard } from '../../shared/product-card/product-card';
 })
 export class Favorites {
   protected readonly favorites = inject(FavoritesStore);
-  private readonly cart = inject(CartStore);
-  private readonly snackBar = inject(MatSnackBar);
+  private readonly cartActions = inject(CartActions);
 
-  protected onAddToCart(product: Product): void {
-    this.cart.add(product);
-    this.snackBar.open(`${product.name} foi adicionado ao carrinho.`, 'Fechar', { duration: 3000 });
+  protected onAddToCart({ product, variant }: ProductSelection): void {
+    this.cartActions.add(product, variant);
   }
 
   protected onToggleFavorite(product: Product): void {

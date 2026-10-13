@@ -10,4 +10,9 @@ export interface Banner {
   imageDesktop?: string;
   /** Descrição da imagem, para leitores de tela e Google. */
   alt: string;
+  /** Opcional: para onde o banner leva ao ser tocado. Sem ele, o banner é só imagem. */
+  link?: {
+    path: string;
+    queryParams?: Record<string, string>;
+  };
 }

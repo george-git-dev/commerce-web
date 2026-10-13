@@ -1,0 +1,238 @@
+h2,
+h3 {
+  margin: 0;
+}
+
+.dash {
+  display: grid;
+  gap: 20px;
+}
+
+.dash__head {
+  display: grid;
+  gap: 14px;
+}
+
+.dash__eyebrow {
+  margin: 0;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.dash__hello {
+  font-size: clamp(1.75rem, 1.4rem + 1.6vw, 2.5rem);
+}
+
+.dash__kpis {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+
+  // Secundários: 2 ou 3 lado a lado, compactos.
+  &--small {
+    grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+    margin-top: -10px;
+  }
+}
+
+.dash__grid {
+  display: grid;
+  gap: 16px;
+}
+
+.dash__card {
+  display: grid;
+  align-content: start;
+  gap: 14px;
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+}
+
+.dash__card-head--row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+// Ver por: Dia · Mês · Ano.
+.dash__group {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--muted);
+
+  > span {
+    padding: 0 8px 0 6px;
+    font-size: 0.75rem;
+    color: var(--muted-foreground);
+  }
+
+  button {
+    min-width: 56px;
+    min-height: 34px;
+    border: 0;
+    border-radius: 4px;
+    background: none;
+    color: var(--muted-foreground);
+    font: inherit;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    cursor: pointer;
+
+    &[aria-checked='true'] {
+      background: var(--card);
+      color: var(--foreground);
+      box-shadow: var(--shadow-sm);
+    }
+  }
+}
+
+.dash__card-head {
+  h3 {
+    font-family: var(--font-ui);
+    font-size: 1rem;
+    font-weight: 600;
+  }
+
+  p {
+    margin: 2px 0 0;
+    font-size: 0.8125rem;
+    color: var(--muted-foreground);
+  }
+}
+
+// Listas com barra horizontal (mais vendidos, status): rótulo + valor + barra.
+.dash__bars {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+}
+
+.dash__bar-text {
+  display: grid;
+  flex: 1;
+  gap: 6px;
+  min-width: 0;
+}
+
+.dash__bar-label {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 0.875rem;
+
+  strong {
+    flex-shrink: 0;
+    font-weight: 600;
+  }
+}
+
+.dash__bar {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--muted);
+
+  span {
+    display: block;
+    height: 100%;
+    min-width: 4px;
+    border-radius: 999px;
+    background: #a67b41;
+  }
+}
+
+.dash__table {
+  font-size: 0.8125rem;
+
+  summary {
+    color: var(--earth);
+    cursor: pointer;
+  }
+
+  table {
+    width: 100%;
+    margin-top: 8px;
+    border-collapse: collapse;
+  }
+
+  th,
+  td {
+    padding: 4px 0;
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+  }
+
+  td:last-child,
+  th:last-child {
+    text-align: right;
+  }
+}
+
+@media (min-width: 1024px) {
+  .dash {
+    gap: 24px;
+  }
+
+  .dash__kpis {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+
+    &--small {
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    }
+  }
+
+  // Esquerda: vendas e produtos; direita: estoque e status; categorias embaixo.
+  .dash__grid {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .dash__card {
+    padding: 20px;
+  }
+
+  .dash__card--sales,
+  .dash__card--groups {
+    --chart-height: 280px;
+  }
+
+  .dash__card--sales {
+    grid-area: 1 / 1;
+  }
+
+  .dash__card--top {
+    grid-area: 2 / 1 / span 2;
+  }
+
+  .dash__card--stock {
+    grid-area: 1 / 2;
+  }
+
+  .dash__card--status {
+    grid-area: 2 / 2;
+  }
+
+  .dash__card--groups {
+    grid-area: 3 / 2;
+  }
+}

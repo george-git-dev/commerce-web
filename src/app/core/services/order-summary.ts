@@ -1,0 +1,92 @@
+import { computed, inject, Injectable, linkedSignal, signal } from '@angular/core';
+import { STORE_CONFIG } from '../config/store-config';
+import { PaymentMethod } from '../models/order';
+import { ShippingOption } from '../models/shipping';
+import { CartStore } from './cart-store';
+import { AuthService } from './auth-service';
+import { CouponService } from './coupon-service';
+import { ShippingService } from './shipping-service';
+import { StoreCredit } from './store-credit';
+import { StorefrontContent } from './storefront-content';
+
+const round2 = (value: number) => Math.round(value * 100) / 100;
+
+/**
+ * Valores do pedido em um só lugar — carrinho e checkout leem daqui, então a
+ * escolha de frete e o cupom seguem de uma tela para a outra.
+ * É PRÉVIA: o back recalcula tudo ao criar o pedido (nunca confiar no front).
+ */
+@Injectable({ providedIn: 'root' })
+export class OrderSummary {
+  private readonly cart = inject(CartStore);
+  private readonly shipping = inject(ShippingService);
+  private readonly coupons = inject(CouponService);
+  private readonly auth = inject(AuthService);
+  private readonly storefront = inject(StorefrontContent);
+  private readonly credit = inject(StoreCredit);
+
+  readonly subtotal = this.cart.subtotal;
+  readonly coupon = this.coupons.applied;
+
+  /**
+   * Opções para o CEP da sessão; recalcula se o subtotal mudar (frete grátis).
+   * Entrega em mãos só entra para a conta liberada pelo admin.
+   */
+  readonly shippingOptions = computed(() =>
+    this.shipping.quote(
+      this.shipping.cep(),
+      this.subtotal(),
+      this.auth.user()?.inHandsDelivery ?? false,
+    ),
+  );
+  /** Mantém a escolha quando as opções mudam; padrão: a primeira (mais barata). */
+  readonly shippingId = linkedSignal<readonly ShippingOption[], ShippingOption['id'] | null>({
+    source: this.shippingOptions,
+    computation: (options, previous) =>
+      options.find((option) => option.id === previous?.value)?.id ?? options[0]?.id ?? null,
+  });
+  readonly selectedShipping = computed(
+    () => this.shippingOptions().find((option) => option.id === this.shippingId()) ?? null,
+  );
+
+  /** Cupom aplicado que deixou de valer (ex.: a quantidade baixou do mínimo). */
+  readonly couponProblem = computed(() => {
+    return this.coupons.problem(this.coupon());
+  });
+  readonly discount = computed(() => this.coupons.productDiscount(this.coupon()));
+  readonly freeShippingByCoupon = computed(
+    () => this.coupon()?.kind === 'shipping' && !this.couponProblem(),
+  );
+  readonly shippingPrice = computed(() =>
+    this.freeShippingByCoupon() ? 0 : (this.selectedShipping()?.price ?? 0),
+  );
+  /** Quanto falta para o frete grátis (0 = já tem; `null` = sem promoção agora). */
+  readonly missingForFreeShipping = computed(() => {
+    const min = this.storefront.freeShippingMin();
+    return min == null ? null : Math.max(0, min - this.subtotal());
+  });
+
+  /** Forma de pagamento escolhida no checkout (afeta o desconto no Pix). */
+  readonly paymentMethod = signal<PaymentMethod | null>(null);
+  readonly pixDiscount = computed(() =>
+    this.paymentMethod() === 'pix' && STORE_CONFIG.pixDiscountPercent > 0
+      ? round2(((this.subtotal() - this.discount()) * STORE_CONFIG.pixDiscountPercent) / 100)
+      : 0,
+  );
+
+  /** Antes do crédito na loja. */
+  readonly totalBeforeCredit = computed(() =>
+    round2(this.subtotal() - this.discount() - this.pixDiscount() + this.shippingPrice()),
+  );
+
+  /** Saldo de crédito na loja da conta (0 sem login). */
+  readonly creditAvailable = this.credit.myBalance;
+  /** O cliente marcou "usar meu crédito" no pagamento. */
+  readonly useCredit = signal(false);
+  /** Quanto do crédito abate este pedido (até o total). */
+  readonly creditApplied = computed(() =>
+    this.useCredit() ? round2(Math.min(this.creditAvailable(), this.totalBeforeCredit())) : 0,
+  );
+
+  readonly total = computed(() => round2(this.totalBeforeCredit() - this.creditApplied()));
+}

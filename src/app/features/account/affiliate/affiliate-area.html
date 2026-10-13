@@ -1,0 +1,276 @@
+<section class="afa ui-section ui-section--page">
+  <div class="ui-container afa__inner">
+    <nav class="afa__crumb" aria-label="Trilha de navegação">
+      <a routerLink="/minha-conta">Minha conta</a>
+      <mat-icon aria-hidden="true">chevron_right</mat-icon>
+      <span aria-current="page">Afiliado</span>
+    </nav>
+    <h1>Programa de afiliados</h1>
+
+    @let m = mine();
+    @if (m?.status === 'aprovado' && isAffiliate()) {
+      @if (!live()) {
+        <div class="f-card afa__paused" role="status">
+          <mat-icon aria-hidden="true">pause_circle</mat-icon>
+          <span>
+            <strong>Sua participação está pausada.</strong>
+            O cupom não vale por enquanto e novas vendas não geram comissão. O que você já ganhou
+            continua aqui e será pago normalmente.
+          </span>
+        </div>
+      } @else {
+        <div class="f-card afa__coupon">
+          <p class="afa__label">Seu cupom</p>
+          <app-coupon-ticket class="afa__ticket" size="lg" [code]="m!.couponCode!" />
+          <p class="afa__desc">
+            Quem usa ganha {{ discount() }}% de desconto; você recebe {{ m!.commissionPercent }}% de
+            cada venda, liberado {{ program().holdDays }} dias depois da entrega.
+          </p>
+          <div class="afa__actions">
+            <button matButton="filled" class="ui-cta" type="button" (click)="copy(m!.couponCode!)">
+              <mat-icon>content_copy</mat-icon> Copiar cupom
+            </button>
+            <a matButton="outlined" [href]="shareHref()" target="_blank" rel="noopener">
+              <mat-icon>share</mat-icon> Enviar no WhatsApp
+            </a>
+          </div>
+        </div>
+      }
+      @let t = totals();
+      <dl class="afa__kpis">
+        <div>
+          <dt>Pendente</dt>
+          <dd>{{ t.pendente | currency: 'BRL' }}</dd>
+          <small>aguardando entrega + {{ program().holdDays }} dias</small>
+        </div>
+        <div>
+          <dt>Liberado</dt>
+          <dd>{{ t.liberada | currency: 'BRL' }}</dd>
+          <small>aguardando o pagamento da loja</small>
+        </div>
+        <div>
+          <dt>Recebido</dt>
+          <dd>{{ received() | currency: 'BRL' }}</dd>
+          <small>Pix e crédito na loja</small>
+        </div>
+      </dl>
+
+      <section class="f-card afa__method" aria-labelledby="afa-method">
+        <h2 id="afa-method">Como quero receber</h2>
+        <div class="afa__options" role="radiogroup" aria-labelledby="afa-method">
+          <label class="afa__option" [class.afa__option--on]="m!.payoutMethod === 'pix'">
+            <input
+              type="radio"
+              name="payout"
+              [checked]="m!.payoutMethod === 'pix'"
+              (change)="setMethod('pix')"
+            />
+            <span>
+              <strong>Pix</strong>
+              <small
+                >Na sua chave, a partir de R$ {{ program().minPayout }} (abaixo disso
+                acumula).</small
+              >
+              @if (t.liberada) {
+                <small class="afa__value">Hoje: {{ preview().pix | currency: 'BRL' }}</small>
+              }
+            </span>
+          </label>
+          <label class="afa__option" [class.afa__option--on]="m!.payoutMethod === 'credito'">
+            <input
+              type="radio"
+              name="payout"
+              [checked]="m!.payoutMethod === 'credito'"
+              (change)="setMethod('credito')"
+            />
+            <span>
+              <strong>Crédito na loja +{{ program().storeCreditBonusPercent }}%</strong>
+              <small
+                >Sem mínimo, vale {{ program().storeCreditValidityMonths }} meses, usado no
+                checkout.</small
+              >
+              @if (t.liberada) {
+                <small class="afa__value">Hoje: {{ preview().credito | currency: 'BRL' }}</small>
+              }
+            </span>
+          </label>
+        </div>
+        <p class="afa__hint">Vale para o próximo pagamento.</p>
+      </section>
+
+      <section class="f-card afa__sales" aria-labelledby="afa-sales">
+        <h2 id="afa-sales">Vendas com o seu cupom</h2>
+        @if (sales().length) {
+          <ul>
+            @for (c of sales().slice(0, salesShown()); track c.id) {
+              @let st = status(c);
+              <li>
+                <span>
+                  <strong>{{ c.amount | currency: 'BRL' }}</strong>
+                  <small
+                    >{{ c.createdAt | date: 'dd/MM/yyyy' }} · compra de
+                    {{ c.base | currency: 'BRL' }}</small
+                  >
+                </span>
+                <span [class]="'afa__badge afa__badge--' + st">{{ statusLabels[st] }}</span>
+              </li>
+            }
+          </ul>
+          @if (sales().length > salesShown()) {
+            <button matButton type="button" (click)="salesShown.set(salesShown() + 10)">
+              Ver mais
+            </button>
+          }
+        } @else {
+          <p class="afa__hint">Nenhuma venda ainda. Compartilhe seu cupom!</p>
+        }
+      </section>
+
+      @if (payouts().length) {
+        <section class="f-card afa__sales" aria-labelledby="afa-payouts">
+          <h2 id="afa-payouts">Pagamentos</h2>
+          <ul>
+            @for (p of payouts(); track p.id) {
+              <li>
+                <span>
+                  <strong
+                    >{{ p.paidAmount | currency: 'BRL' }} · {{ methodLabels[p.method] }}</strong
+                  >
+                  <small>Pago em {{ p.paidAt | date: 'dd/MM/yyyy' }}</small>
+                </span>
+                @if (p.receipt; as r) {
+                  <a class="afa__receipt" [href]="r.url" target="_blank" rel="noopener">
+                    <mat-icon aria-hidden="true">receipt</mat-icon> Comprovante
+                  </a>
+                } @else {
+                  <span class="afa__badge afa__badge--paga">Pago</span>
+                }
+              </li>
+            }
+          </ul>
+          @if (payouts()[0]?.method === 'credito' || payouts().some(isCredit)) {
+            <a matButton routerLink="/minha-conta/credito">Ver meu crédito na loja</a>
+          }
+        </section>
+      }
+    } @else if (m?.status === 'aprovado') {
+      <div class="f-card afa__status">
+        <mat-icon aria-hidden="true">check_circle</mat-icon>
+        <div>
+          <h2>Pedido aprovado</h2>
+          <p>Saia e entre de novo na sua conta para liberar a sua área de afiliado.</p>
+        </div>
+      </div>
+    } @else if (m?.status === 'pendente') {
+      <div class="f-card afa__status">
+        <mat-icon aria-hidden="true">hourglass_top</mat-icon>
+        <div>
+          <h2>Pedido em análise</h2>
+          <p>
+            Recebemos seu pedido em {{ m!.createdAt | date: 'dd/MM/yyyy' }} ({{ m!.channel }} ·
+            {{ m!.profile }}). Avisamos por e-mail quando for analisado.
+          </p>
+        </div>
+      </div>
+    } @else {
+      @if (m?.status === 'reprovado') {
+        <div class="f-card afa__status afa__status--no">
+          <mat-icon aria-hidden="true">info</mat-icon>
+          <div>
+            <h2>Pedido não aprovado</h2>
+            @if (m!.decision?.reason; as reason) {
+              <p><strong>Motivo:</strong> {{ reason }}</p>
+            }
+            @if (block(); as message) {
+              <p>{{ message }}</p>
+            }
+          </div>
+        </div>
+      }
+
+      @if (!m && block(); as message) {
+        <div class="f-card afa__status">
+          <mat-icon aria-hidden="true">info</mat-icon>
+          <div>
+            <h2>Programa de afiliados</h2>
+            <p>{{ message }}</p>
+          </div>
+        </div>
+      }
+
+      @if (showForm()) {
+        <p class="afa__intro">
+          Divulgue a Nani com um cupom próprio: seus seguidores ganham
+          {{ program().buyerDiscountPercent }}% de desconto e você recebe
+          {{ program().commissionPercent }}% de cada venda.
+          <a routerLink="/seja-afiliado">Saiba como funciona</a>.
+        </p>
+        <form class="f-card afa__form" (submit)="$event.preventDefault(); submit()" novalidate>
+          <h2>Quero ser afiliado</h2>
+          <div class="f-grid">
+            <label class="f-field f-field--half">
+              Onde você mais divulga
+              <select [value]="channel()" (change)="channel.set($any($event.target).value)">
+                @for (c of channels; track c) {
+                  <option [value]="c" [selected]="c === channel()">{{ c }}</option>
+                }
+              </select>
+            </label>
+            <label class="f-field f-field--half">
+              Seu &#64; ou link do perfil
+              <input
+                autocomplete="off"
+                placeholder="Ex.: &#64;seuperfil"
+                [value]="profile()"
+                [attr.aria-invalid]="(tried() && profile().trim().length < 3) || null"
+                (input)="profile.set($any($event.target).value)"
+              />
+            </label>
+            <label class="f-field">
+              Como você pretende divulgar
+              <textarea
+                rows="3"
+                [attr.maxlength]="pitchMax"
+                placeholder="Ex.: resenhas nos stories, vídeos comparando fragrâncias…"
+                [value]="pitch()"
+                (input)="pitch.set($any($event.target).value)"
+              ></textarea>
+              <small class="afa__hint">{{ pitch().length }}/{{ pitchMax }}</small>
+            </label>
+            <label class="f-field">
+              Chave Pix para receber as comissões
+              <input
+                autocomplete="off"
+                placeholder="CPF, e-mail, celular ou chave aleatória"
+                [value]="pixKey()"
+                (input)="pixKey.set($any($event.target).value)"
+              />
+              <small class="afa__hint">Use uma chave no seu nome (CPF ou CNPJ do titular).</small>
+            </label>
+          </div>
+          <label class="afa__check">
+            <input
+              type="checkbox"
+              [checked]="terms()"
+              (change)="terms.set($any($event.target).checked)"
+            />
+            <span>
+              Li e aceito os
+              <a routerLink="/ajuda/programa-de-afiliados" target="_blank">termos do programa</a>.
+            </span>
+          </label>
+          @if (tried() && problems().length) {
+            <ul class="afa__problems" role="alert">
+              @for (p of problems(); track p) {
+                <li>{{ p }}</li>
+              }
+            </ul>
+          }
+          <div class="f-actions">
+            <button matButton="filled" class="ui-cta" type="submit">Enviar pedido</button>
+          </div>
+        </form>
+      }
+    }
+  </div>
+</section>

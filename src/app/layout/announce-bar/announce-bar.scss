@@ -1,0 +1,75 @@
+// Faixa superior clara, com as mensagens rolando de ponta a ponta.
+:host {
+  display: block;
+  background: var(--muted);
+  color: var(--earth);
+  font-size: 0.75rem;
+}
+
+// Área visível das mensagens: largura total da tela.
+.announce__viewport {
+  display: flex;
+  align-items: center;
+  height: 28px;
+  overflow: hidden;
+  mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+}
+
+// As duas cópias lado a lado; anda uma cópia e recomeça, sem emenda.
+.announce__track {
+  display: flex;
+  width: max-content;
+  animation: announce-scroll 80s linear infinite;
+}
+
+.announce__viewport:hover .announce__track {
+  animation-play-state: paused;
+}
+
+.announce__list {
+  display: flex;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    white-space: nowrap;
+
+    // Estrela da logo como separador (inclusive entre o fim de uma cópia e o começo da outra).
+    &::after {
+      content: '✦';
+      margin-inline: 22px;
+      color: var(--gold);
+      font-size: 0.625rem;
+      vertical-align: middle;
+    }
+  }
+}
+
+@media (min-width: 640px) {
+  :host {
+    font-size: 0.8125rem;
+  }
+
+  .announce__viewport {
+    height: 32px;
+  }
+}
+
+@keyframes announce-scroll {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+// Quem pediu "reduzir movimento": mensagens paradas, só a primeira cópia.
+@media (prefers-reduced-motion: reduce) {
+  .announce__track {
+    animation: none;
+  }
+
+  .announce__list[aria-hidden] {
+    display: none;
+  }
+}

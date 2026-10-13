@@ -1,0 +1,71 @@
+.trust {
+  display: grid;
+  gap: 24px;
+  padding-block: 24px;
+  border-top: 1px solid color-mix(in oklch, var(--primary-foreground) 12%, transparent);
+
+  h4 {
+    margin: 0 0 12px;
+    color: var(--primary-foreground);
+    font-family: var(--font-ui);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+}
+
+// Selo de bandeira: cartão branco com o ícone na cor da marca (ou o nome).
+.trust__payments li {
+  display: grid;
+  place-items: center;
+  min-width: 48px;
+  height: 30px;
+  padding: 0 8px;
+  border-radius: 4px;
+  background: #fff;
+  color: #1a1a1a;
+  font-family: var(--font-ui);
+  font-size: 0.6875rem;
+  font-weight: 700;
+
+  app-brand-icon {
+    width: 22px;
+    height: 22px;
+  }
+}
+
+.trust__seals li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 1px solid color-mix(in oklch, var(--primary-foreground) 18%, transparent);
+  border-radius: 999px;
+  color: var(--primary-foreground);
+  font-size: 0.75rem;
+
+  mat-icon {
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+    font-size: 16px;
+    color: var(--gold);
+  }
+}
+
+@media (min-width: 900px) {
+  .trust {
+    grid-template-columns: auto auto;
+    justify-content: space-between;
+  }
+}

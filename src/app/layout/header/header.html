@@ -1,13 +1,4 @@
-<div class="announce">
-  <div class="ui-container announce__inner">
-    <ul class="announce__list">
-      <li>Frete grátis acima de R$ 299</li>
-      <li>Parcele em até 12x</li>
-      <li>Compra segura</li>
-    </ul>
-    <a [href]="store.phoneHref" class="announce__phone">{{ store.phone }}</a>
-  </div>
-</div>
+<app-announce-bar />
 
 <mat-toolbar class="bar" [class.bar--scrolled]="scrolled()">
   <div class="ui-container bar__inner">
@@ -30,9 +21,24 @@
       @for (link of navLinks; track link.label) {
         <a [routerLink]="link.path" [queryParams]="link.queryParams ?? null">{{ link.label }}</a>
       }
+      @if (affiliateProgram.live()) {
+        <a routerLink="/seja-afiliado" class="nav__affiliate">Seja afiliado</a>
+      }
     </nav>
 
     <div class="bar__actions">
+      <button
+        type="button"
+        matIconButton
+        class="bar__sound"
+        data-ambient-toggle
+        [class.bar__sound--on]="ambientSound.enabled()"
+        [attr.aria-pressed]="ambientSound.enabled()"
+        [attr.aria-label]="ambientSound.enabled() ? 'Desligar som ambiente' : 'Ligar som ambiente'"
+        (click)="ambientSound.toggle()"
+      >
+        <mat-icon>{{ ambientSound.enabled() ? 'music_note' : 'music_off' }}</mat-icon>
+      </button>
       <button
         type="button"
         matIconButton
@@ -44,8 +50,15 @@
         <mat-icon>search</mat-icon>
       </button>
 
-      <a routerLink="/minha-conta" matIconButton class="bar__account" aria-label="Minha conta">
-        <mat-icon>person</mat-icon>
+      <a
+        routerLink="/minha-conta"
+        matIconButton
+        class="bar__account"
+        [attr.aria-label]="
+          auth.user() ? 'Minha conta de ' + auth.user()?.name : 'Entrar ou criar conta'
+        "
+      >
+        <mat-icon>{{ auth.isLoggedIn() ? 'account_circle' : 'person' }}</mat-icon>
       </a>
       <a routerLink="/favoritos" matIconButton aria-label="Favoritos">
         <mat-icon
@@ -92,15 +105,24 @@
 </mat-toolbar>
 
 <div id="mobile-menu" class="mobile-menu" [class.mobile-menu--open]="menuOpen()">
+  <a routerLink="/minha-conta" class="mobile-menu__account" (click)="closeMenu()">
+    <mat-icon>{{ auth.isLoggedIn() ? 'account_circle' : 'person' }}</mat-icon>
+    {{ auth.user() ? 'Olá, ' + auth.user()?.name : 'Entrar ou criar conta' }}
+  </a>
   <nav aria-label="Navegação principal (mobile)">
     @for (link of navLinks; track link.label) {
       <a [routerLink]="link.path" [queryParams]="link.queryParams ?? null" (click)="closeMenu()">
         {{ link.label }}
       </a>
     }
+    @if (affiliateProgram.live()) {
+      <a routerLink="/seja-afiliado" class="mobile-menu__affiliate" (click)="closeMenu()">
+        <mat-icon aria-hidden="true">handshake</mat-icon>
+        <span>
+          Seja afiliado
+          <small>Ganhe a cada venda com o seu cupom</small>
+        </span>
+      </a>
+    }
   </nav>
-  <a routerLink="/minha-conta" class="mobile-menu__account" (click)="closeMenu()">
-    <mat-icon>person</mat-icon>
-    Minha conta
-  </a>
 </div>

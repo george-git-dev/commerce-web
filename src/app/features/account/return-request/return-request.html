@@ -1,0 +1,219 @@
+<section class="rr ui-section ui-section--page">
+  <div class="ui-container rr__inner">
+    <nav class="rr__crumb" aria-label="Trilha de navegação">
+      <a routerLink="/minha-conta/pedidos">Meus pedidos</a>
+      <mat-icon aria-hidden="true">chevron_right</mat-icon>
+      @if (order(); as o) {
+        <a [routerLink]="['/minha-conta/pedidos', o.number]">{{ o.number }}</a>
+        <mat-icon aria-hidden="true">chevron_right</mat-icon>
+      }
+      <span aria-current="page">Devolução</span>
+    </nav>
+    <h1>Solicitar devolução</h1>
+
+    @if (blocked(); as message) {
+      <p class="rr__blocked" role="status">
+        <mat-icon aria-hidden="true">info</mat-icon>
+        {{ message }}
+      </p>
+      <a matButton="outlined" routerLink="/minha-conta/pedidos">Ver meus pedidos</a>
+    } @else {
+      @let o = order()!;
+      <div class="f-card rr__card rr__how">
+        <h2>Como funciona</h2>
+        <ol>
+          <li>
+            Você escolhe os itens e o motivo aqui. Se chegou quebrado, vazando, com defeito ou
+            diferente do pedido, envie <strong>fotos</strong> do produto, da embalagem e da etiqueta
+            da caixa de envio (não descarte a caixa).
+          </li>
+          <li>
+            A gente analisa e te chama no WhatsApp com as instruções para enviar (o frete de volta é
+            por nossa conta).
+          </li>
+          <li>
+            O produto volta para a nossa loja e passa por uma <strong>avaliação</strong> (estado,
+            lacre e itens).
+          </li>
+          <li>Só depois da avaliação aprovada fazemos o estorno, no mesmo meio de pagamento.</li>
+        </ol>
+        <p class="rr__note">
+          <mat-icon aria-hidden="true">info</mat-icon>
+          <span
+            ><strong>O estorno não é automático.</strong> Pedir a devolução não cancela a compra nem
+            devolve o valor na hora: isso só acontece depois que o produto chega e é avaliado.</span
+          >
+        </p>
+        <p class="rr__note">
+          <mat-icon aria-hidden="true">inventory_2</mat-icon>
+          <span
+            >Desistência: o produto precisa voltar <strong>lacrado, sem uso</strong>, na embalagem
+            original e com todos os itens. Produto aberto ou usado pode ter a devolução
+            recusada.</span
+          >
+        </p>
+        <p class="rr__hint">
+          Entregue em {{ o.deliveredAt | date: 'dd/MM/yyyy' }}. Desistência: até 7 dias da entrega ·
+          avaria, defeito ou produto errado: até 30 dias.
+        </p>
+      </div>
+
+      <form class="f-card rr__card" (submit)="$event.preventDefault(); submit()" novalidate>
+        <fieldset class="rr__items">
+          <legend>O que você vai devolver?</legend>
+          @for (line of lines(); track line.item.id) {
+            <div class="rr__item" [class.rr__item--off]="!line.max">
+              <label class="rr__pick">
+                <input
+                  type="checkbox"
+                  [disabled]="!line.max"
+                  [checked]="line.quantity > 0"
+                  (change)="toggle(line.item.id, line.max, $any($event.target).checked)"
+                />
+                <img [src]="line.item.image" alt="" width="56" height="56" />
+                <span>
+                  <strong>{{ line.item.productName }}</strong>
+                  <small
+                    >{{ line.item.variantLabel }} ·
+                    {{ line.item.unitPrice | currency: 'BRL' }}</small
+                  >
+                  @if (!line.max) {
+                    <small>Já devolvido.</small>
+                  }
+                </span>
+              </label>
+              @if (line.quantity > 0 && line.max > 1) {
+                <label class="rr__qty">
+                  Quantidade
+                  <select
+                    [value]="line.quantity"
+                    (change)="setQuantity(line.item.id, +$any($event.target).value)"
+                  >
+                    @for (n of range(line.max); track n) {
+                      <option [value]="n" [selected]="n === line.quantity">{{ n }}</option>
+                    }
+                  </select>
+                </label>
+              }
+            </div>
+          }
+        </fieldset>
+
+        <fieldset class="rr__reasons">
+          <legend>Motivo</legend>
+          @for (r of reasons(); track r.id) {
+            <label class="rr__radio" [class.rr__radio--off]="r.late">
+              <input
+                type="radio"
+                name="reason"
+                [disabled]="r.late"
+                [checked]="reason() === r.id"
+                (change)="reason.set(r.id)"
+              />
+              <span>
+                {{ r.label }}
+                @if (r.late) {
+                  <small>Prazo encerrado.</small>
+                } @else if (r.until) {
+                  <small>Até {{ r.until | date: 'dd/MM/yyyy' }}.</small>
+                }
+              </span>
+            </label>
+          }
+        </fieldset>
+
+        <label class="f-field">
+          {{
+            reason() && reason() !== 'arrependimento'
+              ? 'Conte o que aconteceu'
+              : 'Quer contar algo? (opcional)'
+          }}
+          <textarea
+            rows="4"
+            [attr.maxlength]="descriptionMax"
+            [value]="description()"
+            (input)="description.set($any($event.target).value)"
+          ></textarea>
+          <small class="rr__hint">{{ description().length }}/{{ descriptionMax }}</small>
+        </label>
+
+        @if (reason() === 'arrependimento') {
+          <label class="rr__radio rr__seal">
+            <input
+              type="checkbox"
+              [checked]="sealed()"
+              (change)="sealed.set($any($event.target).checked)"
+            />
+            <span>Confirmo que o produto está lacrado, sem uso e na embalagem original.</span>
+          </label>
+        }
+
+        @if (needsPhotos()) {
+          <div class="rr__photos">
+            <p class="rr__label">
+              Fotos ({{ photos().length }}/{{ photosMax }})
+              <small>Produto, embalagem e etiqueta da caixa. JPG, PNG ou WEBP até 5 MB.</small>
+            </p>
+            @if (photos().length) {
+              <ul>
+                @for (p of photos(); track p.url) {
+                  <li>
+                    <img [src]="p.url" [alt]="p.name" width="80" height="80" />
+                    <button
+                      type="button"
+                      class="rr__remove"
+                      [attr.aria-label]="'Remover ' + p.name"
+                      (click)="removePhoto(p)"
+                    >
+                      <mat-icon>close</mat-icon>
+                    </button>
+                  </li>
+                }
+              </ul>
+            }
+            @if (photos().length < photosMax) {
+              <label class="rr__add">
+                <mat-icon>add_a_photo</mat-icon> Adicionar fotos
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  multiple
+                  (change)="addPhotos($any($event.target))"
+                />
+              </label>
+            }
+            @if (photoError(); as error) {
+              <p class="f-error" role="alert">{{ error }}</p>
+            }
+          </div>
+        }
+
+        @if (refund()) {
+          <p class="rr__refund">
+            Valor a estornar se a devolução for aprovada:
+            <strong>{{ refund() | currency: 'BRL' }}</strong>
+            <small
+              >Já considera o desconto do pedido; o frete volta se devolver o pedido inteiro. O
+              estorno é feito só depois que o produto chega e passa pela avaliação.</small
+            >
+          </p>
+        }
+
+        @if (tried() && problems().length) {
+          <ul class="f-error rr__problems" role="alert">
+            @for (p of problems(); track p) {
+              <li>{{ p }}</li>
+            }
+          </ul>
+        }
+
+        <div class="rr__actions">
+          <a matButton [routerLink]="['/minha-conta/pedidos', o.number]">Voltar</a>
+          <button matButton="filled" class="ui-cta" type="submit">
+            Enviar pedido de devolução
+          </button>
+        </div>
+      </form>
+    }
+  </div>
+</section>

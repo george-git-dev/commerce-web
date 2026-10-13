@@ -6,11 +6,17 @@
   background: var(--background);
 }
 
+// Celular: espaços enxutos — cada pixel vazio é rolagem a mais. O desktop
+// volta aos espaçamentos padrão da `ui-section` (ver media query no fim).
+.detail.ui-section {
+  padding-block: 16px 24px;
+}
+
 .breadcrumb {
   display: flex;
   align-items: center;
   gap: 4px;
-  margin-bottom: 24px;
+  margin-bottom: 16px;
   font-size: 0.8125rem;
   color: var(--muted-foreground);
   flex-wrap: wrap;
@@ -33,42 +39,8 @@
 .detail__layout {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 32px;
-  margin-bottom: 56px;
-}
-
-.detail__gallery {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.detail__main-image {
-  width: 100%;
-  // `width`/`height="800"` no HTML (evitam layout shift) viram um `height: 800px`
-  // de baixa prioridade — sem este `auto`, `aspect-ratio` nunca chega a agir e a
-  // imagem fica travada em 800px de altura real, ignorando a largura do container.
-  height: auto;
-  aspect-ratio: 1;
-  object-fit: cover;
-  border-radius: var(--radius);
-  background: var(--muted);
-}
-
-.detail__thumbs {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
-
-  img {
-    width: 100%;
-    height: auto;
-    aspect-ratio: 1;
-    object-fit: cover;
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--border);
-    background: var(--muted);
-  }
+  gap: 20px;
+  margin-bottom: 24px;
 }
 
 .detail__brand {
@@ -87,14 +59,28 @@
 }
 
 .detail__rating {
+  display: block;
   margin-top: 12px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+// Compensa o header fixo ao rolar até as avaliações.
+.reviews-anchor {
+  scroll-margin-top: 96px;
+}
+
+.reviews__placeholder {
+  min-height: 360px;
 }
 
 .detail__price {
   display: flex;
   align-items: baseline;
   gap: 12px;
-  margin: 18px 0 2px;
+  margin: 12px 0 2px;
 
   strong {
     font-family: var(--font-ui);
@@ -109,9 +95,27 @@
 }
 
 .detail__installment {
-  margin: 0 0 22px;
+  margin: 0 0 20px;
   font-size: 0.875rem;
   color: var(--muted-foreground);
+}
+
+.detail__concentration {
+  margin: 4px 0 0;
+  font-size: 0.8125rem;
+  letter-spacing: 0.04em;
+  color: var(--muted-foreground);
+}
+
+.detail__discount {
+  align-self: center;
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  background: color-mix(in oklch, var(--wine) 12%, transparent);
+  color: var(--wine);
+  font-family: var(--font-ui);
+  font-size: 0.8125rem;
+  font-weight: 600;
 }
 
 .detail__description {
@@ -120,41 +124,40 @@
   color: var(--muted-foreground);
 }
 
-.detail__specs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin: 22px 0;
+// Kit: lista do que vem na caixa.
+.kit {
+  margin: 16px 0 20px;
 }
 
-.spec-card {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 14px 16px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--card);
+.kit__title {
+  margin: 0 0 8px;
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+
+.kit__list {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.9375rem;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
 
   mat-icon {
-    color: var(--earth);
-  }
-
-  div {
-    display: flex;
-    flex-direction: column;
-    line-height: 1.3;
-  }
-
-  span {
-    font-size: 0.6875rem;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    color: var(--muted-foreground);
-  }
-
-  strong {
-    font-size: 0.9375rem;
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    color: var(--gold);
   }
 }
 
@@ -208,32 +211,21 @@
   }
 }
 
-.pyramid {
-  padding-block: 48px;
-  border-top: 1px solid var(--border);
-}
-
-.pyramid__grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 24px;
-  text-align: center;
-}
-
-.pyramid__col p {
-  margin: 0;
-  color: var(--muted-foreground);
-}
-
 .related {
-  padding-block: 48px;
+  padding-block: 32px 0;
   border-top: 1px solid var(--border);
+}
+
+// Reserva espaço enquanto as sugestões não carregam (evita a página "pular").
+.related__placeholder {
+  min-height: 420px;
 }
 
 .related__grid {
+  // Mesma grade da home ("Produtos em destaque"): 2 por linha no celular.
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 20px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
 }
 
 .detail__not-found {
@@ -246,33 +238,37 @@
   }
 }
 
-@media (min-width: 560px) {
+@media (min-width: 640px) {
   .related__grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
   }
 }
 
 @media (min-width: 900px) {
+  .detail.ui-section {
+    // Topo curto: o breadcrumb já separa o conteúdo do header.
+    padding-block: 24px clamp(48px, 6vw, 96px);
+  }
+
+  .breadcrumb {
+    margin-bottom: 24px;
+  }
+
   .detail__layout {
     grid-template-columns: 1fr 1fr;
     gap: 56px;
+    margin-bottom: 56px;
   }
 
-  .pyramid__grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-
-  .pyramid__col {
-    padding-inline: 16px;
-
-    & + & {
-      border-left: 1px solid var(--border);
-    }
+  .related {
+    padding-block: 48px 0;
   }
 }
 
 @media (min-width: 1024px) {
   .related__grid {
     grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
   }
 }

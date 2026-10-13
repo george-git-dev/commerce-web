@@ -1,0 +1,143 @@
+<section class="rt" #top>
+  <app-orders-tabs />
+
+  <p class="rt__lead">
+    Cliente pede em Meus pedidos (ou você registra no pedido). Aprove, combine o envio pelo WhatsApp
+    e, quando o produto chegar, conclua: o que voltou lacrado entra no estoque e você confirma o
+    estorno.
+  </p>
+
+  <div class="rt__chips" role="tablist" aria-label="Situação da devolução">
+    @for (f of filters(); track f.id) {
+      <button
+        type="button"
+        role="tab"
+        [attr.aria-selected]="filter() === f.id"
+        [class.rt__chip--on]="filter() === f.id"
+        (click)="filter.set(f.id)"
+      >
+        {{ f.label }} <span>{{ f.count }}</span>
+      </button>
+    }
+  </div>
+
+  @if (page().content.length) {
+    <ul class="rt__list">
+      @for (r of page().content; track r.id) {
+        <li class="rt__card">
+          <div class="rt__head">
+            <span>
+              <strong>
+                @if (orderExists(r.orderNumber)) {
+                  <a [routerLink]="['/admin/pedidos', r.orderNumber]">Pedido {{ r.orderNumber }}</a>
+                } @else {
+                  Pedido {{ r.orderNumber }}
+                }
+              </strong>
+              <small>{{ r.customerName }} · {{ email(r.customerEmail) }}</small>
+            </span>
+            <span class="rt__status rt__status--{{ r.status }}">{{
+              store.statusLabels[r.status]
+            }}</span>
+          </div>
+
+          <p class="rt__meta">
+            {{ r.createdAt | date: 'dd/MM/yyyy HH:mm' }} ·
+            {{
+              r.createdBy === 'Cliente' ? 'pedida pelo cliente' : 'registrada por ' + r.createdBy
+            }}
+          </p>
+          <p class="rt__reason">
+            <strong>{{ store.reasonLabels[r.reason] }}</strong>
+            @if (r.description) {
+              <span>"{{ r.description }}"</span>
+            }
+          </p>
+
+          @if (r.sealedConfirmed) {
+            <p class="rt__meta">Cliente confirmou: lacrado, sem uso, na embalagem original.</p>
+          }
+          @if (r.photos?.length) {
+            <ul class="rt__photos" aria-label="Fotos enviadas pelo cliente">
+              @for (p of r.photos; track p.url) {
+                <li>
+                  <a [href]="p.url" target="_blank" rel="noopener">
+                    <img [src]="p.url" [alt]="p.name" width="72" height="72" />
+                  </a>
+                </li>
+              }
+            </ul>
+          }
+
+          <ul class="rt__items">
+            @for (item of r.items; track item.itemId) {
+              <li>
+                {{ item.quantity }}× {{ item.name }} · {{ item.variant }}
+                @if (restocked(r, item.itemId); as n) {
+                  <small>{{ n }} voltou ao estoque</small>
+                } @else if (r.status === 'concluida') {
+                  <small>não voltou ao estoque</small>
+                }
+              </li>
+            }
+          </ul>
+
+          <p class="rt__refund">
+            @switch (r.status) {
+              @case ('concluida') {
+                Estornado:
+              }
+              @case ('recusada') {
+                Sem estorno (seria
+              }
+              @default {
+                Estorno se aprovado:
+              }
+            }
+            <strong>{{ r.refundAmount | currency: 'BRL' }}</strong
+            >{{ r.status === 'recusada' ? ')' : '' }} · {{ methodLabels[r.payment] }}
+            @if (r.wholeOrder) {
+              <small>(pedido inteiro, com frete)</small>
+            }
+          </p>
+
+          @if (r.status === 'recusada' && r.decision; as d) {
+            <p class="rt__meta">
+              {{ d.afterReview ? 'Recusada após avaliar o produto' : 'Recusada' }} por {{ d.by }}:
+              {{ d.reason }}
+            </p>
+          }
+          @if (r.completion; as c) {
+            <p class="rt__meta">
+              Concluída por {{ c.by }} em {{ c.at | date: 'dd/MM/yyyy HH:mm' }}
+              @if (c.note) {
+                · {{ c.note }}
+              }
+            </p>
+          }
+
+          @if (store.canEdit() && (r.status === 'solicitada' || r.status === 'aprovada')) {
+            <div class="rt__actions">
+              @if (r.status === 'solicitada') {
+                <button matButton type="button" class="rt__danger" (click)="refuse(r)">
+                  Recusar
+                </button>
+                <button matButton="filled" type="button" (click)="approve(r)">Aprovar</button>
+              } @else {
+                <button matButton type="button" class="rt__danger" (click)="refuseAfterReview(r)">
+                  Recusar após avaliação
+                </button>
+                <button matButton="filled" type="button" (click)="complete(r)">
+                  <mat-icon>inventory</mat-icon> Produto recebido · concluir
+                </button>
+              }
+            </div>
+          }
+        </li>
+      }
+    </ul>
+    <app-pager [paging]="paging" [page]="page()" [anchor]="top" noun="devoluções" />
+  } @else {
+    <p class="rt__empty">Nenhuma devolução {{ filter() === 'todas' ? 'ainda' : 'aqui' }}.</p>
+  }
+</section>

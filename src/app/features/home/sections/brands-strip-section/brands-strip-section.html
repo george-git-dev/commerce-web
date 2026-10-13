@@ -1,7 +1,27 @@
-<section class="brands">
-  <div class="ui-container brands__row">
-    @for (brand of brands; track brand) {
-      <span class="brands__name">{{ brand }}</span>
-    }
+<section class="brands" aria-label="Marcas que vendemos">
+  <div class="brands__viewport">
+    <div class="brands__track">
+      <!-- A lista aparece duas vezes: quando a primeira sai da tela, a segunda ocupa o lugar dela,
+           e o loop fica contínuo. A cópia é escondida dos leitores de tela para não ler tudo em dobro. -->
+      @for (copy of [0, 1]; track copy) {
+        <ul class="brands__list" [attr.aria-hidden]="copy === 1 ? 'true' : null">
+          @for (brand of brands; track brand.name) {
+            <li class="brands__item">
+              @if (brand.logo) {
+                <img
+                  class="brands__logo"
+                  [src]="brand.logo"
+                  [alt]="brand.name"
+                  loading="lazy"
+                  height="40"
+                />
+              } @else {
+                <span class="brands__name">{{ brand.name }}</span>
+              }
+            </li>
+          }
+        </ul>
+      }
+    </div>
   </div>
 </section>

@@ -1,0 +1,127 @@
+<section class="rp">
+  <header class="rp__head">
+    <p class="rp__eyebrow">Gestão da loja</p>
+    <h2>Relatórios</h2>
+    <p class="rp__lead">
+      Escolha o relatório e o período e peça para gerar. Quando ficar pronto, é só baixar o arquivo
+      para o Excel (CSV).
+    </p>
+  </header>
+
+  <form class="rp__form" (submit)="$event.preventDefault(); generate()" novalidate>
+    <label class="rp__wide">
+      Relatório
+      <select (change)="report.set($any($event.target).value)">
+        @for (item of reports; track item[0]) {
+          <option [value]="item[0]" [selected]="report() === item[0]">{{ item[1].label }}</option>
+        }
+      </select>
+    </label>
+    <p class="rp__hint rp__wide">{{ info().hint }}</p>
+
+    @if (info().usesPeriod) {
+      <label>
+        Período
+        <select (change)="period.set($any($event.target).value)">
+          @for (item of periods; track item[0]) {
+            <option [value]="item[0]" [selected]="period() === item[0]">{{ item[1] }}</option>
+          }
+        </select>
+      </label>
+    }
+    @if (groupOptions(); as options) {
+      <label>
+        Ver
+        <select (change)="setGroup($any($event.target).value)">
+          @for (item of options; track item[0]) {
+            <option [value]="item[0]" [selected]="group() === item[0]">{{ item[1] }}</option>
+          }
+        </select>
+      </label>
+    }
+    @if (info().usesPeriod && period() === 'personalizado') {
+      <div class="rp__dates rp__wide">
+        <label>
+          De
+          <input
+            type="date"
+            [min]="minDay"
+            [max]="today"
+            [value]="from()"
+            (change)="from.set($any($event.target).value)"
+          />
+        </label>
+        <label>
+          Até
+          <input
+            type="date"
+            [min]="minDay"
+            [max]="today"
+            [value]="to()"
+            (change)="to.set($any($event.target).value)"
+          />
+        </label>
+      </div>
+    }
+
+    @if (rangeProblem() || error(); as message) {
+      <p class="rp__error rp__wide" role="alert">{{ message }}</p>
+    }
+
+    <button
+      matButton="filled"
+      type="submit"
+      class="rp__go rp__wide"
+      [disabled]="!!rangeProblem() || jobs.pending() >= maxPending"
+    >
+      <mat-icon>play_arrow</mat-icon> Gerar relatório
+    </button>
+  </form>
+
+  <section class="rp__jobs" aria-labelledby="jobs-title">
+    <h3 id="jobs-title">Meus relatórios</h3>
+    @if (jobs.mine().length) {
+      <ul class="rp__list" aria-live="polite">
+        @for (job of jobs.mine(); track job.id) {
+          @let s = status[job.status];
+          <li class="rp__job" [class]="'rp__job rp__job--' + job.status">
+            <span class="rp__status">
+              <mat-icon aria-hidden="true">{{ s.icon }}</mat-icon> {{ s.label }}
+            </span>
+            <div class="rp__info">
+              <strong>{{ job.title }}</strong>
+              <small>{{ job.detail }}</small>
+              <small>
+                Pedido às {{ job.requestedAt | date: 'HH:mm' }}
+                @if (job.status === 'pronto') {
+                  · {{ job.rows }} {{ job.rows === 1 ? 'linha' : 'linhas' }} · disponível até
+                  {{ job.expiresAt | date: 'dd/MM' }}
+                }
+                @if (job.error) {
+                  · {{ job.error }}
+                }
+              </small>
+            </div>
+            @switch (job.status) {
+              @case ('pronto') {
+                <button matButton="filled" type="button" (click)="jobs.download(job)">
+                  <mat-icon>download</mat-icon> Baixar CSV
+                </button>
+              }
+              @case ('falhou') {
+                <button matButton="outlined" type="button" (click)="retry(job)">
+                  <mat-icon>refresh</mat-icon> Tentar de novo
+                </button>
+              }
+            }
+          </li>
+        }
+      </ul>
+    } @else {
+      <p class="rp__empty">
+        <mat-icon aria-hidden="true">insights</mat-icon>
+        Nenhum relatório pedido ainda. Os que você pedir aparecem aqui.
+      </p>
+    }
+  </section>
+</section>

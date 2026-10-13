@@ -1,12 +1,13 @@
-<section class="account ui-section">
+<section class="account ui-section ui-section--page">
   <div class="ui-container">
     <header class="account__head">
-      <h1>Minha conta</h1>
+      <h1>Olá, {{ auth.user()?.name }}</h1>
       <p>Gerencie pedidos, favoritos e seus dados em um só lugar.</p>
+      <p class="account__email">{{ auth.user()?.email }}</p>
     </header>
 
     <div class="account__grid">
-      @for (card of cards; track card.title) {
+      @for (card of visibleCards(); track card.title) {
         @if (card.link) {
           <a class="card" [routerLink]="card.link">
             <mat-icon>{{ card.icon }}</mat-icon>
@@ -24,5 +25,10 @@
         }
       }
     </div>
+
+    <button matButton="outlined" class="account__logout" type="button" (click)="logout()">
+      <mat-icon>logout</mat-icon>
+      Sair da conta
+    </button>
   </div>
 </section>

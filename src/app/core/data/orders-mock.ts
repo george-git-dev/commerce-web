@@ -1,0 +1,129 @@
+import { LOCAL_DELIVERY } from '../config/store-config';
+import { Address, Order } from '../models/order';
+import { Product } from '../models/product';
+import { effectivePrice, variantLabel } from '../utils/product-pricing';
+
+/** Endereço FICTÍCIO usado nos pedidos de exemplo e no endereço inicial da conta. */
+export const SAMPLE_ADDRESS: Address = {
+  cep: '05794-340',
+  street: 'Rua das Acácias',
+  number: '120',
+  complement: '',
+  district: 'Centro',
+  city: 'São Paulo',
+  state: 'SP',
+};
+
+const daysAgo = (days: number) => new Date(Date.now() - days * 86_400_000).toISOString();
+
+/**
+ * Pedidos de exemplo FICTÍCIOS para cada conta (só para testar Minha conta):
+ * dois entregues ("Avaliar" e "Solicitar devolução"), um enviado com rastreio e um aguardando Pix.
+ * Na Fase 2 somem — a lista vem de `GET /me/orders`.
+ */
+export function sampleOrders(name: string, find: (slug: string) => Product | undefined): Order[] {
+  const address = SAMPLE_ADDRESS;
+  const item = (number: string, index: number, slug: string, quantity = 1) => {
+    const product = find(slug)!;
+    const variant = product.variants[0];
+    return {
+      id: `${number}-${index}`,
+      slug,
+      sku: variant.id,
+      productName: product.name,
+      variantLabel: variantLabel(product, variant),
+      image: product.images[0] ?? '',
+      quantity,
+      unitPrice: effectivePrice(variant),
+    };
+  };
+  const build = (
+    number: string,
+    days: number,
+    status: Order['status'],
+    payment: Order['payment'],
+    items: Order['items'],
+    shipping: Order['shipping'],
+    trackingCode?: string,
+    deliveredDaysAgo?: number,
+  ): Order => {
+    const inHands = shipping.id === 'em-maos';
+    const shippingPrice = shipping.price;
+    const subtotal = items.reduce((sum, line) => sum + line.unitPrice * line.quantity, 0);
+    return {
+      number,
+      createdAt: daysAgo(days),
+      status,
+      trackingCode,
+      deliveredAt: deliveredDaysAgo === undefined ? undefined : daysAgo(deliveredDaysAgo),
+      items,
+      address: inHands ? null : { recipient: name, ...address },
+      billing: { document: '', name, address },
+      shipping,
+      payment,
+      subtotal,
+      discount: 0,
+      pixDiscount: 0,
+      shippingPrice,
+      total: subtotal + shippingPrice,
+    };
+  };
+
+  const economic = (price: number): Order['shipping'] => ({
+    id: 'economico',
+    label: 'Econômico',
+    minDays: 3,
+    maxDays: 5,
+    price,
+  });
+  const inHandsShipping: Order['shipping'] = {
+    id: 'em-maos',
+    label: LOCAL_DELIVERY.label,
+    minDays: 0,
+    maxDays: 0,
+    price: 0,
+    note: LOCAL_DELIVERY.note,
+  };
+
+  return [
+    build(
+      'NP100258',
+      1,
+      'aguardando-pagamento',
+      { method: 'pix' },
+      [item('NP100258', 1, 'maison-alhambra-delilah')],
+      inHandsShipping,
+    ),
+    build(
+      'NP100245',
+      4,
+      'enviado',
+      { method: 'cartao', installments: 3, cardLast4: '1111', cardBrand: 'Visa' },
+      [item('NP100245', 1, 'lattafa-khamrah')],
+      economic(14.9),
+      'BR123456789BR',
+    ),
+    // Entregue há 2 dias: dá para desistir (7 dias) ou devolver por defeito.
+    build(
+      'NP100238',
+      6,
+      'entregue',
+      { method: 'pix' },
+      [item('NP100238', 1, 'lattafa-fakhar-black')],
+      economic(0),
+      'BR987654321BR',
+      2,
+    ),
+    // Entregue há 15 dias: só por defeito/produto errado (30 dias).
+    build(
+      'NP100231',
+      20,
+      'entregue',
+      { method: 'pix' },
+      [item('NP100231', 1, 'lattafa-asad'), item('NP100231', 2, 'lattafa-yara-body-mist', 2)],
+      economic(0),
+      'BR555666777BR',
+      15,
+    ),
+  ];
+}

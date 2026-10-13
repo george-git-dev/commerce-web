@@ -166,13 +166,19 @@ textarea {
   padding-inline: 20px;
 }
 
+// Mobile-first: seções enxutas no celular; espaço maior a partir de 900px.
 .ui-section {
-  padding-block: clamp(48px, 6vw, 96px);
+  padding-block: 40px;
+}
+
+// Páginas internas (conta, checkout, ajuda…): pouco respiro no topo.
+.ui-section--page {
+  padding-block: 16px 40px;
 }
 
 .ui-section-head {
   text-align: center;
-  margin-bottom: clamp(32px, 5vw, 52px);
+  margin-bottom: clamp(24px, 5vw, 52px);
 
   h2 {
     font-size: clamp(2rem, 1.3rem + 2.4vw, 3rem);
@@ -250,8 +256,19 @@ textarea {
   }
 }
 
-@media (max-width: 900px) {
+@media (min-width: 900px) {
   .ui-section {
-    padding-block: 68px;
+    padding-block: clamp(48px, 6vw, 96px);
   }
+
+  .ui-section--page {
+    padding-block: 24px 72px;
+  }
+}
+
+// Aviso de erro (Notifier): fundo vinho para diferenciar do aviso de sucesso.
+.snack--error {
+  --mat-snack-bar-container-color: var(--wine);
+  --mat-snack-bar-supporting-text-color: #fff;
+  --mat-snack-bar-button-color: #ffd88a;
 }

@@ -1,0 +1,82 @@
+:host {
+  display: inline-flex;
+  max-width: 100%;
+}
+
+// Ticket dourado com recortes laterais (máscara) e picote entre canhoto e código.
+.tk {
+  --notch: 6px;
+  display: inline-flex;
+  align-items: stretch;
+  max-width: 100%;
+  border-radius: 6px;
+  background: linear-gradient(
+    135deg,
+    var(--gold),
+    color-mix(in oklch, var(--gold) 65%, var(--earth))
+  );
+  color: var(--card);
+  box-shadow: 0 2px 8px color-mix(in oklch, var(--gold) 30%, transparent);
+  -webkit-mask:
+    radial-gradient(circle var(--notch) at 0 50%, #0000 98%, #000) left / 51% 100% no-repeat,
+    radial-gradient(circle var(--notch) at 100% 50%, #0000 98%, #000) right / 51% 100% no-repeat;
+  mask:
+    radial-gradient(circle var(--notch) at 0 50%, #0000 98%, #000) left / 51% 100% no-repeat,
+    radial-gradient(circle var(--notch) at 100% 50%, #0000 98%, #000) right / 51% 100% no-repeat;
+}
+
+.tk__stub {
+  display: grid;
+  place-items: center;
+  padding: 4px 8px 4px 12px;
+  border-right: 2px dashed color-mix(in oklch, var(--card) 70%, transparent);
+  font-size: 0.5625rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  opacity: 0.9;
+}
+
+.tk__code {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  padding: 5px 14px 5px 10px;
+  font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace;
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  overflow-wrap: anywhere;
+}
+
+// Grande: canhoto em pé, código em destaque.
+.tk--lg {
+  --notch: 11px;
+  border-radius: 10px;
+
+  .tk__stub {
+    padding: 12px 10px 12px 18px;
+    border-right-width: 3px;
+    font-size: 0.6875rem;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    border-right: 0;
+    border-left: 3px dashed color-mix(in oklch, var(--card) 70%, transparent);
+  }
+
+  .tk__code {
+    padding: 14px 26px 14px 18px;
+    font-size: clamp(1.5rem, 1.1rem + 2vw, 2.25rem);
+    letter-spacing: 0.1em;
+  }
+}
+
+// Só para leitor de tela ("Cupom JULIA5").
+.tk__sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

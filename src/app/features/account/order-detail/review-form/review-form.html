@@ -1,0 +1,44 @@
+<form class="rf" (submit)="$event.preventDefault(); submit()" novalidate>
+  <fieldset class="rf__stars">
+    <legend>Sua nota para {{ item().productName }}</legend>
+    @for (star of stars; track star) {
+      <button
+        type="button"
+        class="rf__star"
+        [class.rf__star--on]="star <= rating()"
+        [attr.aria-label]="star + (star === 1 ? ' estrela' : ' estrelas')"
+        [attr.aria-pressed]="rating() === star"
+        (click)="setRating(star)"
+      >
+        <mat-icon>{{ star <= rating() ? 'star' : 'star_border' }}</mat-icon>
+      </button>
+    }
+  </fieldset>
+  @if (ratingError()) {
+    <small class="rf__error" role="alert">Escolha de 1 a 5 estrelas.</small>
+  }
+
+  <label class="rf__field">
+    Comentário
+    <textarea
+      [formControl]="comment"
+      rows="4"
+      [attr.maxlength]="max"
+      placeholder="Fixação, projeção, ocasião em que usou…"
+      [attr.aria-invalid]="(comment.invalid && comment.touched) || null"
+    ></textarea>
+    <span class="rf__hint">
+      @if (comment.invalid && comment.touched) {
+        <small class="rf__error">Escreva pelo menos {{ min }} caracteres.</small>
+      }
+      <small>{{ comment.value.length }}/{{ max }}</small>
+    </span>
+  </label>
+
+  <p class="rf__note">
+    Seu primeiro nome e a inicial do sobrenome aparecem junto com a avaliação, com o selo "Compra
+    verificada".
+  </p>
+
+  <button matButton="filled" class="ui-cta" type="submit">Enviar avaliação</button>
+</form>

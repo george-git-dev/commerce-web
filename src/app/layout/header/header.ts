@@ -1,3 +1,4 @@
+import { AffiliateProgram } from '../../core/services/affiliate-program';
 import { ChangeDetectionStrategy, Component, HostListener, inject, signal } from '@angular/core';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatButtonModule } from '@angular/material/button';
@@ -5,22 +6,36 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { Router, RouterLink } from '@angular/router';
 import { CATALOG_QUERY_PARAMS, NAV_LINKS } from '../../core/config/navigation';
-import { STORE_CONFIG } from '../../core/config/store-config';
+import { AuthService } from '../../core/services/auth-service';
 import { CartStore } from '../../core/services/cart-store';
 import { FavoritesStore } from '../../core/services/favorites-store';
+import { AmbientSoundService } from '../../core/services/ambient-sound-service';
+import { AnnounceBar } from '../announce-bar/announce-bar';
 
 @Component({
   selector: 'app-header',
-  imports: [MatBadgeModule, MatButtonModule, MatIconModule, MatToolbarModule, RouterLink],
+  imports: [
+    MatBadgeModule,
+    MatButtonModule,
+    MatIconModule,
+    MatToolbarModule,
+    RouterLink,
+    AnnounceBar,
+  ],
   templateUrl: './header.html',
   styleUrl: './header.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Header {
-  protected readonly store = STORE_CONFIG;
+  // A lista é repetida para que cada "cópia" da faixa fique mais larga que qualquer tela
+  // (inclusive monitores ultrawide); senão sobra espaço vazio à direita durante o loop.
   protected readonly navLinks = NAV_LINKS;
+  protected readonly auth = inject(AuthService);
+  /** Programa de afiliados fora do ar: "Seja afiliado" some. */
+  protected readonly affiliateProgram = inject(AffiliateProgram);
   protected readonly cart = inject(CartStore);
   protected readonly favorites = inject(FavoritesStore);
+  protected readonly ambientSound = inject(AmbientSoundService);
   private readonly router = inject(Router);
 
   protected readonly menuOpen = signal(false);

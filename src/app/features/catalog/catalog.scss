@@ -5,6 +5,12 @@
 .catalog {
   background: var(--background);
 
+  // Página que começa logo abaixo do header: topo mais curto que o de uma
+  // seção comum (a partir de 900px, ver media query no fim do arquivo).
+  &.ui-section {
+    padding-top: 20px;
+  }
+
   &__head {
     max-width: 60ch;
     margin-bottom: 28px;
@@ -109,6 +115,7 @@
 
     label {
       flex: 1;
+      min-width: 0; // deixa cada metade encolher até caber na coluna
       display: flex;
       flex-direction: column;
       gap: 6px;
@@ -117,6 +124,9 @@
     }
 
     input {
+      width: 100%;
+      min-width: 0; // remove a largura mínima padrão do navegador
+      box-sizing: border-box;
       height: 40px;
       padding-inline: 12px;
       border: 1px solid var(--border);
@@ -257,6 +267,10 @@
     display: block;
     position: sticky;
     top: 132px;
+    // Mais alta que a tela, a parte de baixo só aparecia no fim da lista:
+    // limita à altura visível e rola por dentro.
+    max-height: calc(100vh - 148px);
+    overflow-y: auto;
   }
 
   .catalog__grid {
@@ -272,5 +286,11 @@
 @media (min-width: 1280px) {
   .catalog__grid {
     grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 900px) {
+  .catalog.ui-section {
+    padding-top: 40px;
   }
 }

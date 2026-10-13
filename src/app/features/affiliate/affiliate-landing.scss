@@ -1,0 +1,196 @@
+// Página do programa: mobile-first, mesma linguagem da home (Italiana + dourado).
+.aff__hero {
+  padding: 40px 0 32px;
+  background:
+    radial-gradient(
+      120% 80% at 100% 0%,
+      color-mix(in oklch, var(--gold) 22%, transparent),
+      transparent 60%
+    ),
+    var(--muted);
+}
+
+.aff__hero-inner {
+  display: grid;
+  gap: 14px;
+  max-width: 760px;
+
+  h1 {
+    margin: 0;
+    font-size: clamp(2rem, 1.4rem + 3vw, 3.25rem);
+    line-height: 1.1;
+  }
+}
+
+.aff__lead {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--earth);
+}
+
+.aff__ctas {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  margin-top: 6px;
+}
+
+.aff__how-link {
+  color: var(--earth) !important;
+}
+
+.aff__body {
+  display: grid;
+  gap: 40px;
+  padding-block: 32px 48px;
+  max-width: 960px;
+
+  h2 {
+    margin: 0 0 16px;
+    font-size: clamp(1.5rem, 1.2rem + 1.4vw, 2.25rem);
+  }
+}
+
+.aff__numbers {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: grid;
+    gap: 4px;
+    padding: 16px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--card);
+  }
+
+  mat-icon {
+    color: var(--gold);
+  }
+
+  strong {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    line-height: 1.1;
+  }
+
+  span {
+    font-size: 0.9375rem;
+    color: var(--earth);
+  }
+}
+
+// Âncora do "Como funciona": não fica escondida atrás do header fixo.
+.aff__steps {
+  scroll-margin-top: 140px;
+}
+
+.aff__steps ol {
+  display: grid;
+  gap: 18px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr);
+    gap: 14px;
+    align-items: start;
+  }
+
+  mat-icon {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: color-mix(in oklch, var(--gold) 16%, transparent);
+    color: var(--earth);
+    font-size: 22px;
+  }
+
+  h3 {
+    margin: 0 0 4px;
+    font-size: 1.0625rem;
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.9375rem;
+    color: var(--muted-foreground);
+  }
+}
+
+.aff__rules {
+  ul {
+    display: grid;
+    gap: 8px;
+    margin: 0;
+    padding-left: 20px;
+    font-size: 0.9375rem;
+    color: var(--earth);
+  }
+}
+
+.aff__terms {
+  margin: 14px 0 0;
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+
+  a {
+    color: var(--earth);
+    text-decoration: underline;
+  }
+}
+
+.aff__final {
+  display: grid;
+  justify-items: start;
+  gap: 4px;
+  padding: 24px 20px;
+  border-radius: var(--radius);
+  background: var(--muted);
+}
+
+@media (min-width: 700px) {
+  .aff__hero {
+    padding: 72px 0 56px;
+  }
+
+  .aff__numbers {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .aff__steps ol {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px 32px;
+  }
+
+  .aff__final {
+    justify-items: center;
+    text-align: center;
+  }
+}
+
+// Programa fora do ar.
+.aff__paused {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin: 0 0 16px;
+  padding: 10px 14px;
+  border-radius: var(--radius);
+  background: color-mix(in oklch, var(--wine) 12%, var(--background));
+  color: var(--wine);
+  font-size: 0.9375rem;
+
+  mat-icon {
+    flex: none;
+  }
+}

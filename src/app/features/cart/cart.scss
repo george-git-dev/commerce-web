@@ -9,9 +9,11 @@
     margin-bottom: 24px;
   }
 
+  // minmax(0, 1fr): sem isto, o conteúdo mais largo (campo + botão) estica a
+  // coluna além da tela no celular e a página inteira fica "encolhida".
   &__layout {
     display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     gap: 32px;
     align-items: start;
   }
@@ -39,6 +41,19 @@
     font-size: 0.9375rem;
     color: var(--muted-foreground);
 
+    &--shipping,
+    &--discount {
+      margin-top: 16px;
+    }
+
+    &--discount + &--shipping {
+      margin-top: 8px;
+    }
+
+    &--discount span:last-child {
+      color: var(--earth);
+    }
+
     &--total {
       margin-top: 16px;
       padding-top: 16px;
@@ -56,11 +71,42 @@
     color: var(--muted-foreground);
   }
 
+  &__coupon-error {
+    margin: 6px 0 0;
+    font-size: 0.75rem;
+    color: var(--wine);
+  }
+
+  // Cupom aplicado: selo com o código, a regra e o botão de remover.
+  &__coupon-applied {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 4px 6px 12px;
+    border: 1px dashed var(--gold);
+    border-radius: var(--radius-sm);
+    font-size: 0.8125rem;
+
+    > mat-icon {
+      flex-shrink: 0;
+      color: var(--gold);
+    }
+
+    span {
+      flex: 1;
+    }
+
+    &--warn {
+      border-color: var(--wine);
+      color: var(--wine);
+    }
+  }
+
   &__coupon {
     display: block;
     margin-bottom: 8px;
 
-    span {
+    label {
       display: block;
       margin-bottom: 8px;
       font-size: 0.8125rem;
@@ -73,6 +119,7 @@
 
       input {
         flex: 1;
+        width: 0;
         min-width: 0;
         height: 44px;
         padding-inline: 12px;
@@ -99,7 +146,7 @@
 
 @media (min-width: 900px) {
   .cart__layout {
-    grid-template-columns: 1fr 340px;
+    grid-template-columns: minmax(0, 1fr) 340px;
     gap: 48px;
   }
 

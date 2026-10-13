@@ -1,0 +1,336 @@
+import { computed, inject, Injectable, signal } from '@angular/core';
+import { hasPermission, Permission } from '../config/permissions';
+import { ActionResult, AuthResult, AuthUser } from '../models/auth';
+import { isValidCpf, isValidPhone } from '../utils/br-format';
+import { AccountDirectory } from './account-directory';
+
+const STORAGE_KEY = 'nani.auth.mock';
+export const MIN_PASSWORD_LENGTH = 8;
+/** Validade do link de redefinição de senha. */
+export const RESET_LINK_MINUTES = 30;
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+/** Mesma mensagem genérica para qualquer bloqueio (o motivo fica só no backoffice). */
+const BLOCKED: AuthResult = {
+  ok: false,
+  message: 'Não foi possível entrar nesta conta. Fale com o nosso atendimento.',
+};
+
+/** Lê a sessão salva; navegador sem storage (aba anônima, SSR) = deslogado. */
+function readStoredUser(): AuthUser | null {
+  try {
+    const raw = globalThis.localStorage?.getItem(STORAGE_KEY);
+    const parsed = raw ? (JSON.parse(raw) as Partial<AuthUser>) : null;
+    return parsed?.email && parsed.name ? { name: parsed.name, email: parsed.email } : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Guarda só nome e e-mail — CPF e senha nunca vão para o navegador. */
+function storeUser(user: AuthUser | null): void {
+  try {
+    if (!user) {
+      globalThis.localStorage?.removeItem(STORAGE_KEY);
+      return;
+    }
+    const stored = { name: user.name, email: user.email };
+    globalThis.localStorage?.setItem(STORAGE_KEY, JSON.stringify(stored));
+  } catch {
+    // Sem storage disponível: a sessão vale só até recarregar a página.
+  }
+}
+
+/** "maria.silva@x.com" → "Maria" (nome provisório quando só há e-mail). */
+function nameFromEmail(email: string): string {
+  const first = email.split('@')[0].split(/[._-]/)[0];
+  return first.charAt(0).toUpperCase() + first.slice(1);
+}
+
+/**
+ * Autenticação SIMULADA (dívida técnica até a Fase 2 / B4): aceita qualquer e-mail
+ * válido com senha de 8+ caracteres e guarda só nome e e-mail no navegador —
+ * nunca a senha. Na Fase 2 vira `POST /auth/login` e `POST /auth/register`, com
+ * token JWT (de preferência em cookie httpOnly) e as regras do portão de segurança
+ * (BCrypt, limite de tentativas, recuperação de senha).
+ */
+@Injectable({ providedIn: 'root' })
+export class AuthService {
+  /** Perfis, entrega em mãos e bloqueio (o backoffice altera em Clientes/Equipe). */
+  private readonly directory = inject(AccountDirectory);
+  private readonly state = signal<AuthUser | null>(this.restore());
+  /** Links de redefinição de senha ainda válidos (só no mock; no back ficam no banco). */
+  private readonly resetLinks = new Map<string, { email: string; expiresAt: number }>();
+
+  readonly user = this.state.asReadonly();
+  readonly isLoggedIn = computed(() => this.state() !== null);
+  /** Tem acesso ao backoffice (algum perfil além de cliente). */
+  readonly isStaff = computed(() => this.can('admin:access'));
+
+  /** O usuário logado tem a permissão? (Só para a tela — o back confere de novo.) */
+  can(permission: Permission): boolean {
+    return hasPermission(this.state()?.roles, permission);
+  }
+
+  login(email: string, password: string): AuthResult {
+    const problem = this.credentialsProblem(email, password);
+    if (problem) return { ok: false, message: problem };
+    // Conta excluída não existe mais: mesma resposta de credencial errada.
+    if (this.directory.deletionOf(email.trim().toLowerCase())) {
+      return { ok: false, message: 'E-mail ou senha incorretos.' };
+    }
+    if (this.directory.blockOf(email.trim().toLowerCase())) return BLOCKED;
+    return this.start({ name: nameFromEmail(email.trim()), email: email.trim().toLowerCase() });
+  }
+
+  register(name: string, email: string, cpf: string, password: string): AuthResult {
+    if (name.trim().length < 2) return { ok: false, message: 'Informe seu nome.' };
+    if (!isValidCpf(cpf)) return { ok: false, message: 'Informe um CPF válido.' };
+    const problem = this.credentialsProblem(email, password);
+    if (problem) return { ok: false, message: problem };
+    if (this.directory.blockOf(email.trim().toLowerCase())) return BLOCKED;
+    // E-mail de conta excluída vira um cadastro novo (sem nada do anterior).
+    this.directory.forgetDeletion(email.trim().toLowerCase());
+    return this.start({ name: name.trim(), email: email.trim().toLowerCase(), cpf });
+  }
+
+  /**
+   * Completa o cadastro de quem ainda não tem CPF (conta antiga ou Google).
+   * Fase 2: `PATCH /me` — o CPF fica só no back; o front recebe mascarado.
+   */
+  completeCpf(cpf: string): AuthResult {
+    const user = this.state();
+    if (!user) return { ok: false, message: 'Entre na sua conta.' };
+    if (!isValidCpf(cpf)) return { ok: false, message: 'Informe um CPF válido.' };
+    return this.start({ ...user, cpf });
+  }
+
+  /**
+   * Minha conta → Dados pessoais. E-mail não muda aqui (no back exige confirmar o
+   * novo endereço). Fase 2: `PATCH /me`.
+   */
+  updateProfile(name: string, phone: string): AuthResult {
+    const user = this.state();
+    if (!user) return { ok: false, message: 'Entre na sua conta.' };
+    if (name.trim().length < 2) return { ok: false, message: 'Informe seu nome.' };
+    if (phone && !isValidPhone(phone)) return { ok: false, message: 'Informe um celular válido.' };
+    return this.start({ ...user, name: name.trim(), phone: phone || undefined });
+  }
+
+  /**
+   * Troca de senha SIMULADA: não há senha guardada para conferir a atual, então
+   * só valida o formato. Fase 2: `POST /me/password` — o back confere a atual
+   * (BCrypt), aplica a política de senha e encerra as outras sessões.
+   */
+  changePassword(current: string, next: string): AuthResult {
+    const user = this.state();
+    if (!user) return { ok: false, message: 'Entre na sua conta.' };
+    if (current.length < MIN_PASSWORD_LENGTH)
+      return { ok: false, message: 'Senha atual incorreta.' };
+    if (next.length < MIN_PASSWORD_LENGTH) {
+      return {
+        ok: false,
+        message: `A nova senha precisa ter pelo menos ${MIN_PASSWORD_LENGTH} caracteres.`,
+      };
+    }
+    if (next === current) {
+      return { ok: false, message: 'A nova senha precisa ser diferente da atual.' };
+    }
+    return { ok: true, user };
+  }
+
+  /**
+   * "Esqueci minha senha" SIMULADO. Cria um link de uso único que vale
+   * ${RESET_LINK_MINUTES} minutos e devolve o token só para a tela de
+   * demonstração (aqui não há e-mail). A tela mostra a MESMA mensagem exista ou
+   * não a conta, para não revelar quem é cliente. Fase 2 (B4):
+   * `POST /auth/password-reset` → o back guarda só o hash do token, envia o link
+   * por e-mail e limita pedidos por IP/e-mail; a resposta não traz o token.
+   */
+  requestPasswordReset(email: string): string | null {
+    const normalized = email.trim().toLowerCase();
+    if (!EMAIL_PATTERN.test(normalized)) return null;
+    return this.createResetLink(normalized).token;
+  }
+
+  /**
+   * Link de redefinição gerado PELO BACKOFFICE (plano B quando o e-mail não
+   * chega): o admin repassa pelo WhatsApp do telefone cadastrado. Quem cria a
+   * senha continua sendo o cliente; a senha atual vale até ele trocar. Fase 2:
+   * `POST /admin/customers/{id}/password-reset-link` (só `customers:edit`;
+   * conta da equipe só `team:manage`), auditado, com limite por hora.
+   */
+  issueResetLink(email: string): { token: string; expiresAt: Date } {
+    const { token, expiresAt } = this.createResetLink(email.trim().toLowerCase());
+    return { token, expiresAt: new Date(expiresAt) };
+  }
+
+  /** Um link válido por conta: gerar outro invalida o anterior. */
+  private createResetLink(email: string): { token: string; expiresAt: number } {
+    for (const [token, link] of this.resetLinks) {
+      if (link.email === email) this.resetLinks.delete(token);
+    }
+    const token = globalThis.crypto.randomUUID();
+    const expiresAt = Date.now() + RESET_LINK_MINUTES * 60_000;
+    this.resetLinks.set(token, { email, expiresAt });
+    return { token, expiresAt };
+  }
+
+  /** O link ainda serve? (A tela de nova senha confere antes de mostrar o formulário.) */
+  isResetLinkValid(token: string | null): boolean {
+    const link = token ? this.resetLinks.get(token) : undefined;
+    return !!link && link.expiresAt > Date.now();
+  }
+
+  /**
+   * Define a nova senha pelo link. Não entra na conta: o cliente faz login com a
+   * senha nova. Fase 2: `POST /auth/password-reset/confirm` — o back invalida o
+   * token e encerra as sessões abertas.
+   */
+  resetPassword(token: string | null, password: string): ActionResult {
+    if (!token || !this.isResetLinkValid(token)) {
+      return { ok: false, message: 'Este link expirou ou já foi usado. Peça um novo.' };
+    }
+    if (password.length < MIN_PASSWORD_LENGTH) {
+      return {
+        ok: false,
+        message: `A senha precisa ter pelo menos ${MIN_PASSWORD_LENGTH} caracteres.`,
+      };
+    }
+    this.resetLinks.delete(token);
+    return { ok: true };
+  }
+
+  /**
+   * "Continuar com Google" SIMULADO: entra com uma conta Google fictícia.
+   * Fase 2: Google Identity Services no front (o próprio Google desenha o botão
+   * e devolve um ID token) → `POST /auth/google` → o back valida o token com o
+   * Google (assinatura, `aud` = nosso client ID, expiração), cria/encontra o
+   * cliente pelo e-mail verificado e emite o nosso JWT. O front nunca confia no
+   * token sozinho.
+   */
+  loginWithGoogle(): AuthResult {
+    if (this.directory.blockOf('cliente.google@gmail.com')) return BLOCKED;
+    this.directory.forgetDeletion('cliente.google@gmail.com');
+    return this.start({ name: 'Cliente Google', email: 'cliente.google@gmail.com' });
+  }
+
+  /** Conta que entra só pelo Google (sem senha na loja): confirma digitando o e-mail. */
+  isGoogleOnly(): boolean {
+    const user = this.state();
+    return !!user && this.directory.isGoogleOnly(user.email);
+  }
+
+  /**
+   * "Excluir minha conta" (LGPD). Pedidos ficam guardados sem dado pessoal;
+   * login, favoritos e endereços deixam de existir; o e-mail fica livre.
+   * `openOrders` vem de quem chama (pedidos da conta em andamento).
+   * Mock: a senha não é conferida (só o formato), como na troca de senha.
+   * Fase 2: `DELETE /me` com a senha — o back confere (BCrypt), anonimiza na
+   * mesma transação que o admin usa, derruba sessões/tokens e envia e-mail.
+   */
+  /** Trava que não depende da confirmação: conta da equipe ou pedido em andamento. */
+  ownDeletionBlock(openOrders: number): string | null {
+    const user = this.state();
+    if (!user) return 'Entre na sua conta.';
+    if (hasPermission(user.roles, 'admin:access')) {
+      return 'Conta da equipe não é excluída por aqui. Fale com o administrador da loja.';
+    }
+    // Comissões e pagamentos têm registro (e pode haver valor a receber).
+    if (hasPermission(user.roles, 'affiliate:area')) {
+      return 'Você é afiliado: fale com a loja para encerrar a participação antes de excluir a conta.';
+    }
+    if (openOrders) {
+      return openOrders === 1
+        ? 'Você tem um pedido em andamento. Poderá excluir a conta quando ele for entregue ou cancelado.'
+        : `Você tem ${openOrders} pedidos em andamento. Poderá excluir a conta quando forem entregues ou cancelados.`;
+    }
+    return null;
+  }
+
+  /** Motivo de não poder excluir a conta agora (ou `null`). */
+  ownDeletionProblem(confirmation: string, openOrders: number): string | null {
+    const block = this.ownDeletionBlock(openOrders);
+    if (block) return block;
+    const user = this.state()!;
+    if (this.directory.isGoogleOnly(user.email)) {
+      if (confirmation.trim().toLowerCase() !== user.email) {
+        return 'Digite o seu e-mail exatamente como está na conta.';
+      }
+    } else if (confirmation.length < MIN_PASSWORD_LENGTH) {
+      return 'Senha incorreta.';
+    }
+    return null;
+  }
+
+  deleteOwnAccount(confirmation: string, reason: string, openOrders: number): ActionResult {
+    const problem = this.ownDeletionProblem(confirmation, openOrders);
+    if (problem) return { ok: false, message: problem };
+    const user = this.state()!;
+    this.directory.markDeleted(user.email, {
+      customerId: 0,
+      reason: reason.trim() || 'Não informado',
+      by: 'Cliente (própria conta)',
+      at: new Date(),
+      pending: true,
+    });
+    this.logout();
+    return { ok: true };
+  }
+
+  logout(): void {
+    this.state.set(null);
+    storeUser(null);
+  }
+
+  /**
+   * Usa a liberação de entrega em mãos (chamado ao criar o pedido com ela).
+   * No back isso acontece na mesma transação que cria o pedido; para outra
+   * entrega em mãos, o admin libera de novo.
+   */
+  consumeInHandsDelivery(): void {
+    const user = this.state();
+    if (!user?.inHandsDelivery) return;
+    this.directory.setInHands(user.email, false);
+    this.state.set(this.withFlags(user));
+  }
+
+  /**
+   * Mock do que vem do back: perfis (todo cadastro tem `ROLE_CUSTOMER`; a equipe
+   * ganha mais um) e a flag de entrega em mãos (sem liberação, o campo nem aparece).
+   */
+  private withFlags(user: AuthUser | null): AuthUser | null {
+    if (!user) return null;
+    const next: AuthUser = { ...user, roles: this.directory.rolesOf(user.email) };
+    delete next.inHandsDelivery;
+    if (this.directory.canReceiveInHands(user.email)) next.inHandsDelivery = true;
+    return next;
+  }
+
+  /** Sessão salva no navegador; conta bloqueada desde então = sai. */
+  private restore(): AuthUser | null {
+    const stored = readStoredUser();
+    if (
+      stored &&
+      (this.directory.blockOf(stored.email) || this.directory.deletionOf(stored.email))
+    ) {
+      storeUser(null);
+      return null;
+    }
+    return this.withFlags(stored);
+  }
+
+  private start(input: AuthUser): AuthResult {
+    const user = this.withFlags(input)!;
+    this.state.set(user);
+    storeUser(user);
+    return { ok: true, user };
+  }
+
+  private credentialsProblem(email: string, password: string): string | null {
+    if (!EMAIL_PATTERN.test(email.trim())) return 'Informe um e-mail válido.';
+    if (password.length < MIN_PASSWORD_LENGTH) {
+      return `A senha precisa ter pelo menos ${MIN_PASSWORD_LENGTH} caracteres.`;
+    }
+    return null;
+  }
+}

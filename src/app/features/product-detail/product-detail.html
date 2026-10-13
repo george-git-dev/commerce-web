@@ -4,95 +4,77 @@
       <nav class="breadcrumb" aria-label="Trilha de navegação">
         <a routerLink="/">Início</a>
         <mat-icon aria-hidden="true">chevron_right</mat-icon>
-        <a routerLink="/produtos">Perfumes</a>
+        @if (categoryCrumb(); as crumb) {
+          <a routerLink="/produtos" [queryParams]="crumb.queryParams">{{ crumb.label }}</a>
+        }
         <mat-icon aria-hidden="true">chevron_right</mat-icon>
         <span aria-current="page">{{ item.name }}</span>
       </nav>
 
       <div class="detail__layout">
-        <div class="detail__gallery">
-          <img
-            class="detail__main-image"
-            [src]="imagery.productPlaceholder"
-            [alt]="item.name"
-            width="800"
-            height="800"
-          />
-          <div class="detail__thumbs">
-            @for (thumb of thumbnails; track thumb) {
-              <img
-                [src]="imagery.productPlaceholder"
-                [alt]="item.name"
-                width="160"
-                height="160"
-                loading="lazy"
-              />
-            }
-          </div>
-        </div>
+        <app-product-gallery [images]="item.images" [alt]="item.name" />
 
         <div class="detail__info">
           <p class="detail__brand">{{ item.brandName }}</p>
           <h1>{{ item.name }}</h1>
+          <p class="detail__concentration">{{ typeLine() }}</p>
 
           @if (item.rating) {
-            <app-star-rating
+            <button
+              type="button"
               class="detail__rating"
-              [rating]="item.rating"
-              [reviews]="item.reviews"
-            />
+              aria-label="Ver avaliações"
+              (click)="scrollToReviews()"
+            >
+              <app-star-rating [rating]="item.rating" [reviews]="item.reviewCount" />
+            </button>
           }
 
           <p class="detail__price">
-            <strong>{{ item.finalPrice | currency: 'BRL' }}</strong>
-            @if (item.oldPrice) {
-              <s>{{ item.oldPrice | currency: 'BRL' }}</s>
+            <strong>{{ price() | currency: 'BRL' }}</strong>
+            @if (discount(); as percent) {
+              <s>{{ variant()?.price | currency: 'BRL' }}</s>
+              <span class="detail__discount">-{{ percent }}%</span>
             }
           </p>
           <p class="detail__installment">
             em até 6x de {{ installment() | currency: 'BRL' }} sem juros
           </p>
 
+          <app-variant-picker [product]="item" [(kind)]="kind" [(variant)]="variant" />
+
           <p class="detail__description">{{ item.description }}</p>
 
-          <div class="detail__specs">
-            @if (item.family) {
-              <div class="spec-card">
-                <mat-icon>spa</mat-icon>
-                <div>
-                  <span>Família olfativa</span>
-                  <strong>{{ item.family }}</strong>
-                </div>
-              </div>
-            }
-            @if (item.volume) {
-              <div class="spec-card">
-                <mat-icon>science</mat-icon>
-                <div>
-                  <span>Volume</span>
-                  <strong>{{ item.volume }}</strong>
-                </div>
-              </div>
-            }
-          </div>
+          @if (item.kitItems?.length) {
+            <div class="kit">
+              <h2 class="kit__title">O que vem no kit</h2>
+              <ul class="kit__list">
+                @for (kitItem of item.kitItems; track kitItem) {
+                  <li><mat-icon aria-hidden="true">check</mat-icon>{{ kitItem }}</li>
+                }
+              </ul>
+            </div>
+          }
 
           <div class="detail__actions">
             <button
               matButton="filled"
               class="ui-cta"
-              [disabled]="!item.active || item.stock <= 0"
+              [disabled]="!inStock() || buying.running()"
+              [attr.aria-busy]="buying.running()"
               (click)="buyNow(item)"
             >
-              Comprar agora
+              {{ buying.running() ? 'Aguarde…' : 'Comprar agora' }}
             </button>
             <button
               matButton="outlined"
               class="ui-cta"
-              [disabled]="!item.active || item.stock <= 0"
-              (click)="addToCart(item)"
+              [disabled]="!inStock() || adding.running()"
+              [attr.aria-busy]="adding.running()"
+              (click)="addSelected(item)"
             >
               <mat-icon>shopping_bag</mat-icon>
-              Adicionar ao carrinho
+              {{ adding.running() ? 'Adicionando…' : 'Adicionar ao carrinho' }}
             </button>
             <button
               matIconButton
@@ -117,45 +99,44 @@
       </div>
 
       @if (item.notes; as notes) {
-        <section class="pyramid">
-          <header class="ui-section-head">
-            <span class="ui-eyebrow">Pirâmide olfativa</span>
-            <h2>Como a fragrância se revela</h2>
-          </header>
-          <div class="pyramid__grid">
-            <div class="pyramid__col">
-              <span class="ui-eyebrow">Saída</span>
-              <p>{{ notes[0] }}</p>
-            </div>
-            <div class="pyramid__col">
-              <span class="ui-eyebrow">Coração</span>
-              <p>{{ notes[1] }}</p>
-            </div>
-            <div class="pyramid__col">
-              <span class="ui-eyebrow">Fundo</span>
-              <p>{{ notes[2] }}</p>
-            </div>
-          </div>
-        </section>
+        <app-notes-grid
+          [notes]="notes"
+          [families]="item.families"
+          [occasions]="item.occasions ?? []"
+        />
       }
 
-      @if (related().length) {
-        <section class="related">
-          <header class="ui-section-head">
-            <span class="ui-eyebrow">Para você</span>
-            <h2>Você também pode gostar</h2>
-          </header>
-          <div class="related__grid">
-            @for (product of related(); track product.id) {
-              <app-product-card
-                [product]="product"
-                [favorite]="isFavorite(product)"
-                (addToCart)="addToCart($event)"
-                (toggleFavorite)="toggleFavorite($event)"
-              />
-            }
-          </div>
-        </section>
+      <!-- Âncora fora do @defer: o clique nas estrelas rola até aqui mesmo antes de carregar. -->
+      <div id="avaliacoes" class="reviews-anchor">
+        @defer (on viewport) {
+          <app-product-reviews [product]="item" />
+        } @placeholder {
+          <div class="reviews__placeholder" aria-hidden="true"></div>
+        }
+      </div>
+
+      <!-- Só carrega (e busca as sugestões) quando o cliente rola até aqui. -->
+      @defer (on viewport) {
+        @if (related().length) {
+          <section class="related">
+            <header class="ui-section-head">
+              <span class="ui-eyebrow">Para você</span>
+              <h2>Você também pode gostar</h2>
+            </header>
+            <div class="related__grid">
+              @for (product of related(); track product.id) {
+                <app-product-card
+                  [product]="product"
+                  [favorite]="isFavorite(product)"
+                  (addToCart)="addToCart($event)"
+                  (toggleFavorite)="toggleFavorite($event)"
+                />
+              }
+            </div>
+          </section>
+        }
+      } @placeholder {
+        <div class="related__placeholder" aria-hidden="true"></div>
       }
     </div>
   </section>
