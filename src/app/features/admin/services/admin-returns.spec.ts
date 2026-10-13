@@ -21,6 +21,7 @@ describe('devoluções', () => {
       items: [{ itemId: order.items[0].id, quantity: 1 }],
       reason: 'arrependimento' as const,
       description: '',
+      sealedConfirmed: true,
     };
     expect(returns.request(order, draft).ok).toBe(true);
     const created = returns.forOrder('NP100238')[0];

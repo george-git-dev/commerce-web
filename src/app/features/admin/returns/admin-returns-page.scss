@@ -171,3 +171,19 @@
   text-align: center;
   color: var(--muted-foreground);
 }
+
+.rt__photos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  img {
+    display: block;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    object-fit: cover;
+  }
+}

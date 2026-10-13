@@ -184,7 +184,7 @@ export class AdminReturns {
       quantity: chosen.find((c) => c.itemId === line.id)?.quantity ?? 0,
       max: line.max,
     }));
-    return returnDraftProblems({ items: lines, reason, description });
+    return returnDraftProblems({ items: lines, reason, description, byStaff: true });
   }
 
   /**

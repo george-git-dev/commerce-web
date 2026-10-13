@@ -1,7 +1,8 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { ActionResult } from '../models/auth';
 import { Order } from '../models/order';
-import { ReturnReason, ReturnRequest } from '../models/return-request';
+import { ReturnPhoto, ReturnReason, ReturnRequest } from '../models/return-request';
+import { photoProblem } from '../utils/return-rules';
 import {
   deadlineProblem,
   isWholeOrder,
@@ -15,6 +16,8 @@ export interface ReturnDraft {
   items: readonly { itemId: string; quantity: number }[];
   reason: ReturnReason | null;
   description: string;
+  photos?: readonly ReturnPhoto[];
+  sealedConfirmed?: boolean;
 }
 
 const DAY = 86_400_000;
@@ -38,6 +41,14 @@ export class ReturnService {
       createdBy: 'Cliente',
       reason: 'defeito',
       description: 'A válvula do frasco não borrifa, o perfume sai em gotas.',
+      photos: [
+        {
+          name: 'valvula.webp',
+          type: 'image/webp',
+          size: 48_000,
+          url: 'img/produtos/garrafa-preta.webp',
+        },
+      ],
       items: [
         {
           itemId: 'NP100238-1',
@@ -93,7 +104,11 @@ export class ReturnService {
       items,
       reason: draft.reason,
       description: draft.description,
+      photos: draft.photos?.length ?? 0,
+      sealedConfirmed: draft.sealedConfirmed,
     });
+    const badPhoto = (draft.photos ?? []).map(photoProblem).find(Boolean);
+    if (badPhoto) problems.push(badPhoto);
     if (problems.length) return { ok: false, message: problems[0] };
     const late = deadlineProblem(
       order.deliveredAt ? new Date(order.deliveredAt) : undefined,
@@ -122,6 +137,8 @@ export class ReturnService {
       createdBy: 'Cliente',
       reason: draft.reason!,
       description: draft.description.trim(),
+      photos: draft.reason === 'arrependimento' ? undefined : draft.photos,
+      sealedConfirmed: draft.reason === 'arrependimento' ? true : undefined,
       items: chosen,
       wholeOrder: whole,
       refundAmount: refundAmount(chosen, order, whole),

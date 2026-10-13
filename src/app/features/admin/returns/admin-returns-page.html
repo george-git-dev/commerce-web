@@ -54,6 +54,21 @@
             }
           </p>
 
+          @if (r.sealedConfirmed) {
+            <p class="rt__meta">Cliente confirmou: lacrado, sem uso, na embalagem original.</p>
+          }
+          @if (r.photos?.length) {
+            <ul class="rt__photos" aria-label="Fotos enviadas pelo cliente">
+              @for (p of r.photos; track p.url) {
+                <li>
+                  <a [href]="p.url" target="_blank" rel="noopener">
+                    <img [src]="p.url" [alt]="p.name" width="72" height="72" />
+                  </a>
+                </li>
+              }
+            </ul>
+          }
+
           <ul class="rt__items">
             @for (item of r.items; track item.itemId) {
               <li>

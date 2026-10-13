@@ -1,13 +1,22 @@
 import { PaymentMethod } from './order';
 
 /** Motivo da devolução. */
-export type ReturnReason = 'arrependimento' | 'defeito' | 'produto-errado';
+export type ReturnReason = 'arrependimento' | 'avariado' | 'defeito' | 'produto-errado';
 
 export const RETURN_REASON_LABELS: Record<ReturnReason, string> = {
   arrependimento: 'Desisti da compra (até 7 dias da entrega)',
-  defeito: 'Produto com defeito ou avariado',
+  avariado: 'Chegou quebrado, vazando ou amassado',
+  defeito: 'Produto com defeito (ex.: válvula não borrifa)',
   'produto-errado': 'Recebi um produto diferente do pedido',
 };
+
+/** Foto enviada pelo cliente. Mock: só em memória; Fase 2: S3 privado + URL temporária. */
+export interface ReturnPhoto {
+  name: string;
+  type: string;
+  size: number;
+  url: string;
+}
 
 /**
  * Solicitada (cliente pediu) → Aprovada (aguardando o produto voltar) →
@@ -54,6 +63,10 @@ export interface ReturnRequest {
   createdBy: string;
   reason: ReturnReason;
   description: string;
+  /** Fotos (obrigatórias em avaria, defeito e produto errado). */
+  photos?: readonly ReturnPhoto[];
+  /** Desistência: o cliente confirmou que está lacrado, sem uso e na embalagem original. */
+  sealedConfirmed?: boolean;
   items: readonly ReturnItem[];
   /** Devolveu o pedido inteiro (aí o frete também volta). */
   wholeOrder: boolean;

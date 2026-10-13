@@ -22,16 +22,30 @@
       <div class="f-card rr__card rr__how">
         <h2>Como funciona</h2>
         <ol>
-          <li>Você escolhe os itens e o motivo aqui.</li>
+          <li>
+            Você escolhe os itens e o motivo aqui. Se chegou quebrado, vazando, com defeito ou
+            diferente do pedido, envie <strong>fotos</strong> do produto, da embalagem e da etiqueta
+            da caixa de envio (não descarte a caixa).
+          </li>
           <li>
             A gente analisa e te chama no WhatsApp com as instruções para enviar (o frete de volta é
             por nossa conta).
           </li>
-          <li>Quando o produto chegar, fazemos o estorno no mesmo meio de pagamento.</li>
+          <li>
+            Quando o produto chegar e for conferido, fazemos o estorno no mesmo meio de pagamento.
+          </li>
         </ol>
+        <p class="rr__note">
+          <mat-icon aria-hidden="true">inventory_2</mat-icon>
+          <span
+            >Desistência: o produto precisa voltar <strong>lacrado, sem uso</strong>, na embalagem
+            original e com todos os itens. Produto aberto ou usado pode ter a devolução
+            recusada.</span
+          >
+        </p>
         <p class="rr__hint">
           Entregue em {{ o.deliveredAt | date: 'dd/MM/yyyy' }}. Desistência: até 7 dias da entrega ·
-          defeito ou produto errado: até 30 dias.
+          avaria, defeito ou produto errado: até 30 dias.
         </p>
       </div>
 
@@ -115,10 +129,54 @@
         </label>
 
         @if (reason() === 'arrependimento') {
-          <p class="rr__note">
-            <mat-icon aria-hidden="true">inventory_2</mat-icon>
-            Para desistência, envie o produto lacrado, sem uso, na embalagem original.
-          </p>
+          <label class="rr__radio rr__seal">
+            <input
+              type="checkbox"
+              [checked]="sealed()"
+              (change)="sealed.set($any($event.target).checked)"
+            />
+            <span>Confirmo que o produto está lacrado, sem uso e na embalagem original.</span>
+          </label>
+        }
+
+        @if (needsPhotos()) {
+          <div class="rr__photos">
+            <p class="rr__label">
+              Fotos ({{ photos().length }}/{{ photosMax }})
+              <small>Produto, embalagem e etiqueta da caixa. JPG, PNG ou WEBP até 5 MB.</small>
+            </p>
+            @if (photos().length) {
+              <ul>
+                @for (p of photos(); track p.url) {
+                  <li>
+                    <img [src]="p.url" [alt]="p.name" width="80" height="80" />
+                    <button
+                      type="button"
+                      class="rr__remove"
+                      [attr.aria-label]="'Remover ' + p.name"
+                      (click)="removePhoto(p)"
+                    >
+                      <mat-icon>close</mat-icon>
+                    </button>
+                  </li>
+                }
+              </ul>
+            }
+            @if (photos().length < photosMax) {
+              <label class="rr__add">
+                <mat-icon>add_a_photo</mat-icon> Adicionar fotos
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  multiple
+                  (change)="addPhotos($any($event.target))"
+                />
+              </label>
+            }
+            @if (photoError(); as error) {
+              <p class="f-error" role="alert">{{ error }}</p>
+            }
+          </div>
         }
 
         @if (refund()) {

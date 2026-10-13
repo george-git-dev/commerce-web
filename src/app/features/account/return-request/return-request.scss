@@ -50,6 +50,17 @@
     width: 100%;
     min-width: 0;
   }
+
+  textarea {
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--background);
+    color: var(--foreground);
+    font: inherit;
+    font-size: 1rem;
+    resize: vertical;
+  }
 }
 
 .rr__how ol {
@@ -207,4 +218,96 @@ legend {
   flex-wrap: wrap;
   justify-content: flex-end;
   gap: 8px;
+}
+
+.rr__seal {
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: color-mix(in oklch, var(--gold) 10%, transparent);
+}
+
+.rr__photos {
+  display: grid;
+  gap: 10px;
+
+  ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  li {
+    position: relative;
+  }
+
+  img {
+    display: block;
+    border-radius: var(--radius-sm);
+    object-fit: cover;
+  }
+}
+
+.rr__label {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  font-weight: 600;
+
+  small {
+    font-weight: 400;
+    font-size: 0.8125rem;
+    color: var(--muted-foreground);
+  }
+}
+
+.rr__remove {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--foreground);
+  color: var(--background);
+  cursor: pointer;
+
+  mat-icon {
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+  }
+}
+
+.rr__add {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  justify-self: start;
+  min-height: 44px;
+  padding: 0 18px;
+  border: 1px solid var(--gold);
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+
+  &:focus-within {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+  }
+
+  input {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
 }

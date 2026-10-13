@@ -9,9 +9,26 @@ const round2 = (n: number) => Math.round(n * 100) / 100;
  */
 export const RETURN_DEADLINE_DAYS: Record<ReturnReason, number> = {
   arrependimento: 7,
+  avariado: 30,
   defeito: 30,
   'produto-errado': 30,
 };
+
+/** Fotos: obrigatórias fora da desistência (produto, embalagem e etiqueta de envio). */
+export const RETURN_PHOTO_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+export const RETURN_PHOTO_MAX_BYTES = 5 * 1024 * 1024;
+export const RETURN_PHOTOS_MAX = 5;
+
+export function needsPhotos(reason: ReturnReason | null): boolean {
+  return !!reason && reason !== 'arrependimento';
+}
+
+/** Problema de uma foto (tipo/tamanho) ou `null`. */
+export function photoProblem(file: { name: string; type: string; size: number }): string | null {
+  if (!RETURN_PHOTO_TYPES.includes(file.type)) return `${file.name}: use JPG, PNG ou WEBP.`;
+  if (file.size > RETURN_PHOTO_MAX_BYTES) return `${file.name}: máximo de 5 MB.`;
+  return null;
+}
 
 export const RETURN_DESCRIPTION_MIN = 10;
 export const RETURN_DESCRIPTION_MAX = 500;
@@ -49,7 +66,7 @@ export function deadlineProblem(
   if (now > returnDeadline(deliveredAt, reason)) {
     return reason === 'arrependimento'
       ? 'O prazo para desistir da compra (7 dias da entrega) já passou.'
-      : 'O prazo para devolução por defeito ou produto errado (30 dias da entrega) já passou.';
+      : 'O prazo para devolução por avaria, defeito ou produto errado (30 dias da entrega) já passou.';
   }
   return null;
 }
@@ -102,6 +119,11 @@ export function returnDraftProblems(draft: {
   items: readonly { quantity: number; max: number }[];
   reason: ReturnReason | null;
   description: string;
+  /** Quantas fotos foram anexadas. */
+  photos?: number;
+  sealedConfirmed?: boolean;
+  /** Registrada pela loja (fotos e confirmação vieram pelo WhatsApp): não exige. */
+  byStaff?: boolean;
 }): string[] {
   const problems: string[] = [];
   const chosen = draft.items.filter((i) => i.quantity > 0);
@@ -116,6 +138,16 @@ export function returnDraftProblems(draft: {
   }
   if (text.length > RETURN_DESCRIPTION_MAX) {
     problems.push(`Use no máximo ${RETURN_DESCRIPTION_MAX} caracteres.`);
+  }
+  if (!draft.byStaff) {
+    const photos = draft.photos ?? 0;
+    if (needsPhotos(draft.reason) && photos < 1) {
+      problems.push('Envie pelo menos uma foto (produto, embalagem e etiqueta da caixa).');
+    }
+    if (photos > RETURN_PHOTOS_MAX) problems.push(`No máximo ${RETURN_PHOTOS_MAX} fotos.`);
+    if (draft.reason === 'arrependimento' && !draft.sealedConfirmed) {
+      problems.push('Confirme que o produto está lacrado, sem uso e na embalagem original.');
+    }
   }
   return problems;
 }

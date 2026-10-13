@@ -6,14 +6,21 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { STORE_CONFIG } from '../../../core/config/store-config';
-import { RETURN_REASON_LABELS, ReturnReason } from '../../../core/models/return-request';
+import {
+  RETURN_REASON_LABELS,
+  ReturnPhoto,
+  ReturnReason,
+} from '../../../core/models/return-request';
 import { OrderService } from '../../../core/services/order-service';
 import { ReturnService } from '../../../core/services/return-service';
 import {
   canStillReturn,
   deadlineProblem,
   isWholeOrder,
+  needsPhotos,
+  photoProblem,
   refundAmount,
+  RETURN_PHOTOS_MAX,
   RETURN_DESCRIPTION_MAX,
   returnableQuantity,
   returnDeadline,
@@ -71,6 +78,11 @@ export class ReturnRequestPage {
   protected readonly quantities = signal<Readonly<Record<string, number>>>({});
   protected readonly reason = signal<ReturnReason | null>(null);
   protected readonly description = signal('');
+  protected readonly sealed = signal(false);
+  protected readonly photos = signal<readonly ReturnPhoto[]>([]);
+  protected readonly photoError = signal<string | null>(null);
+  protected readonly photosMax = RETURN_PHOTOS_MAX;
+  protected readonly needsPhotos = computed(() => needsPhotos(this.reason()));
   protected readonly tried = signal(false);
 
   protected readonly lines = computed(() => {
@@ -107,12 +119,44 @@ export class ReturnRequestPage {
       items: this.lines().map((l) => ({ quantity: l.quantity, max: l.max })),
       reason: this.reason(),
       description: this.description(),
+      photos: this.photos().length,
+      sealedConfirmed: this.sealed(),
     });
     const reason = this.reason();
     const late = reason && deadlineProblem(this.delivered(), reason);
     if (late) problems.push(late);
     return problems;
   });
+
+  /** Fotos ficam só na memória (URL local) — nada vai para o navegador. */
+  protected addPhotos(input: HTMLInputElement): void {
+    const files = Array.from(input.files ?? []);
+    input.value = '';
+    this.photoError.set(null);
+    for (const file of files) {
+      if (this.photos().length >= RETURN_PHOTOS_MAX) {
+        this.photoError.set(`No máximo ${RETURN_PHOTOS_MAX} fotos.`);
+        break;
+      }
+      const problem = photoProblem(file);
+      if (problem) {
+        this.photoError.set(problem);
+        continue;
+      }
+      const photo: ReturnPhoto = {
+        name: file.name,
+        type: file.type,
+        size: file.size,
+        url: URL.createObjectURL(file),
+      };
+      this.photos.update((list) => [...list, photo]);
+    }
+  }
+
+  protected removePhoto(photo: ReturnPhoto): void {
+    URL.revokeObjectURL(photo.url);
+    this.photos.update((list) => list.filter((p) => p !== photo));
+  }
 
   protected toggle(itemId: string, max: number, on: boolean): void {
     this.setQuantity(itemId, on ? max : 0);
@@ -134,6 +178,8 @@ export class ReturnRequestPage {
       items: this.chosen(),
       reason: this.reason(),
       description: this.description(),
+      photos: this.needsPhotos() ? this.photos() : [],
+      sealedConfirmed: this.sealed(),
     });
     if (!result.ok) {
       this.snackBar.open(result.message, 'Fechar', { duration: 4000 });

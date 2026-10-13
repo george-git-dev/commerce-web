@@ -2,6 +2,7 @@ import { ReturnRequest } from '../models/return-request';
 import {
   canReview,
   deadlineProblem,
+  photoProblem,
   isWholeOrder,
   refundAmount,
   returnableQuantity,
@@ -39,10 +40,28 @@ describe('regras de devolução', () => {
     );
   });
 
-  it('defeito exige descrição; desistência não', () => {
+  it('desistência exige lacre confirmado; avaria/defeito exigem descrição e foto', () => {
     const items = [{ quantity: 1, max: 1 }];
-    expect(returnDraftProblems({ items, reason: 'arrependimento', description: '' })).toEqual([]);
-    expect(returnDraftProblems({ items, reason: 'defeito', description: 'ruim' })).toHaveLength(1);
+    expect(
+      returnDraftProblems({
+        items,
+        reason: 'arrependimento',
+        description: '',
+        sealedConfirmed: true,
+      }),
+    ).toEqual([]);
+    expect(returnDraftProblems({ items, reason: 'arrependimento', description: '' })).toEqual([
+      'Confirme que o produto está lacrado, sem uso e na embalagem original.',
+    ]);
+    expect(returnDraftProblems({ items, reason: 'defeito', description: 'ruim' })).toHaveLength(2);
+    expect(
+      returnDraftProblems({ items, reason: 'avariado', description: 'Chegou vazando', photos: 2 }),
+    ).toEqual([]);
+    expect(
+      returnDraftProblems({ items, reason: 'defeito', description: 'ruim demais', byStaff: true }),
+    ).toEqual([]);
+    expect(photoProblem({ name: 'a.gif', type: 'image/gif', size: 10 })).toContain('JPG');
+    expect(photoProblem({ name: 'a.jpg', type: 'image/jpeg', size: 6e6 })).toContain('5 MB');
     expect(
       returnDraftProblems({ items: [{ quantity: 0, max: 1 }], reason: null, description: '' }),
     ).toHaveLength(2);
