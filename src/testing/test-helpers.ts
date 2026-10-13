@@ -166,3 +166,46 @@ export async function renderAt<T>(
 export function currentUrl(): string {
   return TestBed.inject(Router).url;
 }
+
+// ----- Diálogos (MatDialog abre no overlay, fora do componente) -----
+
+/** Conteúdo do diálogo aberto (o último), ou `null`. */
+export function dialogEl(): HTMLElement | null {
+  const all = document.querySelectorAll<HTMLElement>('mat-dialog-container');
+  return all.length ? all[all.length - 1] : null;
+}
+
+/** Espera o diálogo abrir e devolve o elemento. */
+export async function openDialog(): Promise<HTMLElement> {
+  await vi.waitFor(() => {
+    TestBed.tick();
+    if (!dialogEl()?.querySelector('button')) throw new Error('Diálogo não abriu');
+  });
+  return dialogEl()!;
+}
+
+/** Atualiza a tela do diálogo (zoneless) depois de digitar/clicar nele. */
+export async function settleDialog(): Promise<void> {
+  TestBed.tick();
+  await Promise.resolve();
+  TestBed.tick();
+}
+
+/** Botão do diálogo pelo texto. */
+export function dialogButton(text: string | RegExp): HTMLButtonElement {
+  const match = (value: string) =>
+    typeof text === 'string' ? value.includes(text) : text.test(value);
+  const button = Array.from(dialogEl()?.querySelectorAll<HTMLElement>('button, a') ?? []).find(
+    (el) => match(el.textContent?.trim() ?? ''),
+  );
+  if (!button) throw new Error(`Botão do diálogo não encontrado: ${text}`);
+  return button as HTMLButtonElement;
+}
+
+/** Espera o diálogo fechar. */
+export async function dialogClosed(): Promise<void> {
+  await vi.waitFor(() => {
+    TestBed.tick();
+    if (dialogEl()) throw new Error('Diálogo ainda aberto');
+  });
+}
