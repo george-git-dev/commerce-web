@@ -53,15 +53,16 @@
           @switch (r.status) {
             @case ('solicitada') {
               <p>
-                Recebemos seu pedido. Vamos te chamar no WhatsApp com as instruções para enviar o
-                produto.
+                Recebemos seu pedido de devolução e vamos te chamar no WhatsApp com as instruções
+                para enviar o produto. O valor só é estornado depois que o produto chega e passa
+                pela nossa avaliação.
               </p>
             }
             @case ('aprovada') {
               <p>
-                Devolução aprovada. Envie o produto conforme combinamos pelo WhatsApp; quando ele
-                chegar, fazemos o estorno de
-                <strong>{{ r.refundAmount | currency: 'BRL' }}</strong
+                Pode enviar o produto conforme combinamos pelo WhatsApp. Quando ele chegar, passa
+                pela nossa avaliação (estado, lacre e itens); se estiver tudo certo, fazemos o
+                estorno de <strong>{{ r.refundAmount | currency: 'BRL' }}</strong
                 >.
               </p>
             }

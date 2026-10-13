@@ -185,7 +185,11 @@ export class ReturnRequestPage {
       this.snackBar.open(result.message, 'Fechar', { duration: 4000 });
       return;
     }
-    this.snackBar.open('Pedido de devolução enviado.', 'Fechar', { duration: 3500 });
+    this.snackBar.open(
+      'Pedido de devolução enviado. Vamos te chamar no WhatsApp com as instruções.',
+      'Fechar',
+      { duration: 4500 },
+    );
     this.router.navigate(['/minha-conta/pedidos', order.number]);
   }
 }

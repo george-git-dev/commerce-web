@@ -32,9 +32,18 @@
             por nossa conta).
           </li>
           <li>
-            Quando o produto chegar e for conferido, fazemos o estorno no mesmo meio de pagamento.
+            O produto volta para a nossa loja e passa por uma <strong>avaliação</strong> (estado,
+            lacre e itens).
           </li>
+          <li>Só depois da avaliação aprovada fazemos o estorno, no mesmo meio de pagamento.</li>
         </ol>
+        <p class="rr__note">
+          <mat-icon aria-hidden="true">info</mat-icon>
+          <span
+            ><strong>O estorno não é automático.</strong> Pedir a devolução não cancela a compra nem
+            devolve o valor na hora: isso só acontece depois que o produto chega e é avaliado.</span
+          >
+        </p>
         <p class="rr__note">
           <mat-icon aria-hidden="true">inventory_2</mat-icon>
           <span
@@ -181,9 +190,11 @@
 
         @if (refund()) {
           <p class="rr__refund">
-            Estorno estimado: <strong>{{ refund() | currency: 'BRL' }}</strong>
+            Valor a estornar se a devolução for aprovada:
+            <strong>{{ refund() | currency: 'BRL' }}</strong>
             <small
-              >Já considera o desconto do pedido; o frete volta se devolver o pedido inteiro.</small
+              >Já considera o desconto do pedido; o frete volta se devolver o pedido inteiro. O
+              estorno é feito só depois que o produto chega e passa pela avaliação.</small
             >
           </p>
         }

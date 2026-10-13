@@ -111,29 +111,29 @@ export const HELP_PAGES: readonly HelpPage[] = [
     title: 'Trocas e devoluções',
     group: 'suporte',
     summary: 'Seus direitos e o passo a passo para trocar ou devolver.',
-    updatedAt: '2026-10-02',
+    updatedAt: '2026-10-12',
     sections: [
       {
         heading: 'Arrependimento (até 7 dias)',
         paragraphs: [
           'Pelo artigo 49 do Código de Defesa do Consumidor, você pode desistir da compra em até 7 dias corridos a partir do recebimento, sem precisar justificar.',
-          'Nesse caso devolvemos o valor integral pago, incluindo o frete, na mesma forma de pagamento usada na compra.',
+          'O produto precisa voltar lacrado, sem uso, na embalagem original e com todos os itens. Aprovada a devolução, devolvemos o valor pago, incluindo o frete quando o pedido volta inteiro, na mesma forma de pagamento.',
         ],
       },
       {
-        heading: 'Produto com defeito',
+        heading: 'Produto avariado, com defeito ou diferente do pedido',
         paragraphs: [
-          'Perfumes e cosméticos são produtos não duráveis: você tem até 30 dias a partir do recebimento para nos avisar sobre um defeito aparente (artigo 26 do CDC).',
-          'Após a análise, você escolhe entre a troca por um produto igual, outro produto ou o reembolso.',
+          'Perfumes e cosméticos são produtos não duráveis: você tem até 30 dias a partir do recebimento para nos avisar (artigo 26 do CDC).',
+          'Envie fotos do produto, da embalagem e da etiqueta da caixa de envio e não descarte a caixa. Após a análise, você escolhe entre a troca por um produto igual, outro produto ou o reembolso.',
         ],
       },
       {
         heading: 'Como solicitar',
         items: [
-          `Fale com a gente pelo WhatsApp ${store.whatsapp} ou pelo e-mail ${store.email}, informando o número do pedido.`,
+          `Em Minha conta → Meus pedidos, abra o pedido entregue e toque em "Solicitar devolução". Se preferir, fale com a gente pelo WhatsApp ${store.whatsapp} ou pelo e-mail ${store.email}, informando o número do pedido.`,
           'Enviamos as instruções e o código de postagem, sem custo para você.',
-          'O produto deve voltar com a embalagem e os itens que acompanharam a entrega.',
-          'O reembolso ou a troca acontece em até 10 dias úteis depois que o produto chega até nós.',
+          'O produto volta para a loja e passa por uma avaliação (estado, lacre e itens).',
+          'O estorno não é automático: só é feito depois da avaliação aprovada, em até 10 dias úteis da chegada do produto. No cartão, o valor pode levar até 2 faturas para aparecer.',
         ],
       },
     ],

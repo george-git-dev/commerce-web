@@ -26,7 +26,7 @@ export type ReturnStatus = 'solicitada' | 'aprovada' | 'recusada' | 'concluida';
 
 export const RETURN_STATUS_LABELS: Record<ReturnStatus, string> = {
   solicitada: 'Solicitada',
-  aprovada: 'Aprovada · aguardando o produto',
+  aprovada: 'Aguardando o produto',
   recusada: 'Recusada',
   concluida: 'Concluída',
 };
