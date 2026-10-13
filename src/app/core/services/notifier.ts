@@ -25,8 +25,12 @@ export class Notifier {
     const now = Date.now();
     if (text === this.last.text && now - this.last.at < DEDUPE_MS) return;
     this.last = { text, at: now };
-    import('@angular/material/snack-bar').then(({ MatSnackBar }) =>
-      this.injector.get(MatSnackBar).open(text, 'Fechar', { duration, panelClass }),
-    );
+    import('@angular/material/snack-bar').then(({ MatSnackBar }) => {
+      try {
+        this.injector.get(MatSnackBar).open(text, 'Fechar', { duration, panelClass });
+      } catch {
+        // O app foi desmontado enquanto o aviso carregava (ex.: troca de página/teste): ignora.
+      }
+    });
   }
 }

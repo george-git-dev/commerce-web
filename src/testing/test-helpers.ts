@@ -1,8 +1,9 @@
 import { registerLocaleData } from '@angular/common';
 import ptBr from '@angular/common/locales/pt';
-import { LOCALE_ID, provideZonelessChangeDetection, Type } from '@angular/core';
+import { Component, LOCALE_ID, provideZonelessChangeDetection, Type } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideRouter, Routes } from '@angular/router';
+import { provideRouter, Router, Routes } from '@angular/router';
+import { RouterTestingHarness } from '@angular/router/testing';
 import { Product } from '../app/core/models/product';
 import { AuthService } from '../app/core/services/auth-service';
 import { MOCK_PRODUCTS } from '../app/core/data/mock-products';
@@ -119,4 +120,49 @@ export async function settle(fixture: ComponentFixture<unknown>): Promise<void> 
   fixture.detectChanges();
   await fixture.whenStable();
   fixture.detectChanges();
+}
+
+/** Página vazia para as outras rotas do teste (destino de navegação). */
+@Component({ template: '<p id="outra-pagina">outra página</p>' })
+export class BlankPage {}
+
+/**
+ * Abre um componente de tela numa URL de verdade (com query params), como o
+ * usuário chegaria. `path` é o caminho da rota do componente (padrão: o da URL).
+ * Outras URLs caem numa página vazia — dá para conferir para onde navegou.
+ */
+export async function renderAt<T>(
+  url: string | (() => string),
+  component: Type<T>,
+  options: {
+    path?: string;
+    providers?: unknown[];
+    extraRoutes?: Routes;
+    /** Roda depois de configurar o TestBed e antes de abrir a página (ex.: login, dados). */
+    setup?: () => void;
+  } = {},
+) {
+  const first = typeof url === 'string' ? url : '';
+  const path = options.path ?? first.split('?')[0].replace(/^\//, '');
+  TestBed.configureTestingModule({
+    providers: [
+      ...screenProviders([
+        { path, component },
+        ...(options.extraRoutes ?? []),
+        { path: '**', component: BlankPage },
+      ]),
+      ...(options.providers ?? []),
+    ] as never[],
+  });
+  options.setup?.();
+  const harness = await RouterTestingHarness.create();
+  const instance = await harness.navigateByUrl(typeof url === 'string' ? url : url(), component);
+  harness.detectChanges();
+  await harness.fixture.whenStable();
+  return { harness, instance, fixture: harness.fixture, router: TestBed.inject(Router) };
+}
+
+/** URL atual do roteador (para conferir navegação). */
+export function currentUrl(): string {
+  return TestBed.inject(Router).url;
 }
