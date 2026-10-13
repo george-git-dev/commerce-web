@@ -13,14 +13,20 @@ function flatten(list: Routes, prefix = ''): { path: string; route: Route }[] {
 describe('rotas', () => {
   const all = [...flatten(routes), ...flatten(ADMIN_ROUTES, 'admin')];
 
-  it('toda tela carregada sob demanda existe (import não quebrado)', async () => {
-    const lazy = all.filter(({ route }) => route.loadComponent || route.loadChildren);
-    expect(lazy.length).toBeGreaterThan(30);
-    for (const { path, route } of lazy) {
-      const loaded = await (route.loadComponent ?? route.loadChildren)!();
-      expect(loaded, path).toBeTruthy();
-    }
-  });
+  // Carrega todos os chunks de tela: em máquina mais lenta (ou com a suíte inteira
+  // rodando em paralelo) passa dos 5 s padrão, então o limite deste teste é maior.
+  it(
+    'toda tela carregada sob demanda existe (import não quebrado)',
+    { timeout: 60_000 },
+    async () => {
+      const lazy = all.filter(({ route }) => route.loadComponent || route.loadChildren);
+      expect(lazy.length).toBeGreaterThan(30);
+      const loaded = await Promise.all(
+        lazy.map(({ route }) => (route.loadComponent ?? route.loadChildren)!()),
+      );
+      loaded.forEach((item, i) => expect(item, lazy[i].path).toBeTruthy());
+    },
+  );
 
   it('telas com título têm o nome da loja; backoffice exige equipe e permissão por tela', () => {
     for (const { path, route } of all) {
