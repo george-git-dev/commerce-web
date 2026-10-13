@@ -1,3 +1,4 @@
+import { netTotal } from './admin-order-flow';
 import { categoryInfo, PRODUCT_CATEGORIES } from '../../../core/config/product-categories';
 import { OrderStatus } from '../../../core/models/order';
 import { AdminOrder } from '../data/admin-orders-mock';
@@ -131,7 +132,7 @@ export interface Kpis {
 
 export function kpis(orders: readonly AdminOrder[], from: Date, to: Date): Kpis {
   const valid = orders.filter((order) => counts(order) && within(order, from, to));
-  const revenue = valid.reduce((sum, order) => sum + order.total, 0);
+  const revenue = valid.reduce((sum, order) => sum + netTotal(order), 0);
   return {
     revenue: Math.round(revenue * 100) / 100,
     orders: valid.length,
@@ -267,7 +268,7 @@ export function totalRow(rows: readonly SalesRow[]): SalesRow {
 }
 
 export const revenueOf = (orders: readonly AdminOrder[]) =>
-  Math.round(orders.reduce((sum, order) => sum + order.total, 0) * 100) / 100;
+  Math.round(orders.reduce((sum, order) => sum + netTotal(order), 0) * 100) / 100;
 
 type Item = AdminOrder['items'][number];
 

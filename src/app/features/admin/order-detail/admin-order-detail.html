@@ -146,6 +146,30 @@
           </p>
         </article>
 
+        @if (orderReturns().length || canRegisterReturn()) {
+          <article class="od__card">
+            <h3>Devolução</h3>
+            @for (r of orderReturns(); track r.id) {
+              <p class="od__lines">
+                <strong>{{ returnStatuses[r.status] }}</strong>
+                <span
+                  >{{ r.items.length }} {{ r.items.length === 1 ? 'item' : 'itens' }} · estorno
+                  {{ r.refundAmount | currency: 'BRL' }}</span
+                >
+                <a routerLink="/admin/pedidos/devolucoes">Ver em Devoluções</a>
+              </p>
+            }
+            @if (o.refunded) {
+              <p class="od__muted">Estornado: {{ o.refunded | currency: 'BRL' }}</p>
+            }
+            @if (canRegisterReturn()) {
+              <button matButton="outlined" type="button" (click)="registerReturn()">
+                <mat-icon>assignment_return</mat-icon> Registrar devolução
+              </button>
+            }
+          </article>
+        }
+
         @if (canEdit() && (advanceText() || cancellable())) {
           <div class="od__actions">
             @if (advanceText(); as label) {

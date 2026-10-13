@@ -233,3 +233,34 @@
     color: var(--earth);
   }
 }
+
+// Devolução do pedido.
+.od__return {
+  display: grid;
+  gap: 8px;
+  border-color: color-mix(in oklch, var(--gold) 50%, var(--border));
+
+  h2 {
+    margin: 0;
+    font-size: 1.125rem;
+  }
+
+  p {
+    margin: 0;
+  }
+}
+
+.od__return--off {
+  border-color: var(--border);
+  opacity: 0.85;
+}
+
+.od__return-items {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 0.875rem;
+}
+
+.od__return-btn {
+  margin-bottom: 16px;
+}

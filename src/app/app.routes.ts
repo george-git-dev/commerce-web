@@ -98,6 +98,13 @@ export const routes: Routes = [
     loadComponent: () => import('./features/account/orders/orders').then((m) => m.Orders),
   },
   {
+    path: 'minha-conta/pedidos/:numero/devolucao',
+    title: 'Nani Perfumes | Devolução',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/account/return-request/return-request').then((m) => m.ReturnRequestPage),
+  },
+  {
     path: 'minha-conta/pedidos/:numero',
     title: 'Nani Perfumes | Pedido',
     canActivate: [authGuard],

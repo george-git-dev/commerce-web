@@ -3,7 +3,7 @@ import { AuditEntry } from './admin-audit';
 
 /** Áreas do filtro: cada uma junta as entidades que a auditoria registra. */
 export const AUDIT_AREAS = {
-  pedidos: { label: 'Pedidos', entities: ['Pedido'] },
+  pedidos: { label: 'Pedidos', entities: ['Pedido', 'Devolução'] },
   produtos: { label: 'Produtos e promoções', entities: ['Produto', 'Marca', 'Promoção', 'Cupom'] },
   estoque: { label: 'Estoque e compras', entities: ['Estoque', 'Entrada', 'Fornecedor'] },
   clientes: { label: 'Clientes e equipe', entities: ['Cliente'] },
@@ -72,6 +72,8 @@ export function auditLink(entry: AuditEntry): string | null {
       return entry.action.startsWith('Excluiu') ? null : `/admin/vitrine/banners/${id}`;
     case 'Aviso':
       return '/admin/vitrine/avisos';
+    case 'Devolução':
+      return '/admin/pedidos/devolucoes';
     case 'Avaliação':
       return '/admin/vitrine/avaliacoes';
     case 'Afiliado':

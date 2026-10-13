@@ -1,3 +1,4 @@
+import { netTotal } from './admin-order-flow';
 import { PAYMENT_METHOD_LABELS } from '../../../core/models/order';
 import { CsvValue, toCsv } from '../../../core/utils/csv';
 import { variantLabel } from '../../../core/utils/product-pricing';
@@ -180,7 +181,7 @@ export function salesReport(
     else {
       bucket.orders++;
       bucket.items += order.items.reduce((sum, item) => sum + item.quantity, 0);
-      bucket.revenue += order.total;
+      bucket.revenue += netTotal(order);
       bucket.freight += order.shippingPrice;
     }
     buckets.set(key, bucket);
@@ -433,7 +434,7 @@ export function paymentsReport(orders: readonly AdminOrder[], range: DateRange):
   ) =>
     Object.keys(labels).map((key): ReportRow => {
       const list = valid.filter((order) => keyOf(order) === key);
-      const value = round2(list.reduce((sum, order) => sum + order.total, 0));
+      const value = round2(list.reduce((sum, order) => sum + netTotal(order), 0));
       return {
         cells: {
           tipo: type,
@@ -475,7 +476,7 @@ export function customersReport(
   let fresh = 0;
   const rows: ReportRow[] = [...byEmail.entries()].map(([email, list]) => {
     const customer = customers.find((c) => c.email === email);
-    const total = round2(list.reduce((sum, order) => sum + order.total, 0));
+    const total = round2(list.reduce((sum, order) => sum + netTotal(order), 0));
     // Novo = a primeira compra da vida dele caiu dentro do período.
     if (customer && customer.since >= range.start) fresh++;
     return {
@@ -507,7 +508,7 @@ export function customersReport(
     totals: {
       cliente: 'Total',
       pedidos: valid.length,
-      total: round2(valid.reduce((sum, order) => sum + order.total, 0)),
+      total: round2(valid.reduce((sum, order) => sum + netTotal(order), 0)),
     },
     note: `${rows.length} clientes compraram: ${fresh} novos (${pctText(fresh, rows.length)}) e ${recurring} recorrentes (${pctText(recurring, rows.length)}).`,
   };

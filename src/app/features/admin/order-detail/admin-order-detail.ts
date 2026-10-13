@@ -21,6 +21,9 @@ import { isAnonymizedEmail } from '../services/customer-rules';
 import { AdminCustomerStore } from '../services/admin-customer-store';
 import { AdminOrderStore } from '../services/admin-order-store';
 import { ActionDialog, ActionDialogData } from '../shared/action-dialog/action-dialog';
+import { RETURN_STATUS_LABELS } from '../../../core/models/return-request';
+import { AdminReturns } from '../services/admin-returns';
+import { RegisterReturnDialog } from '../returns/register-return-dialog';
 
 /** `/admin/pedidos/:numero` — detalhe, histórico e ações do pedido. */
 @Component({
@@ -50,6 +53,36 @@ export class AdminOrderDetail {
   protected readonly statusLabel = statusLabel;
 
   protected readonly canEdit = computed(() => this.auth.can('orders:edit'));
+  private readonly returns = inject(AdminReturns);
+  protected readonly returnStatuses = RETURN_STATUS_LABELS;
+  protected readonly orderReturns = computed(() => {
+    const order = this.order();
+    return order ? this.returns.ofOrder(order.number) : [];
+  });
+  /** Entregue, sem devolução em andamento e com item que ainda pode voltar. */
+  protected readonly canRegisterReturn = computed(() => {
+    const order = this.order();
+    if (!order || !this.canEdit() || order.status !== 'entregue') return false;
+    if (this.orderReturns().some((r) => r.status === 'solicitada' || r.status === 'aprovada'))
+      return false;
+    return this.returns.returnable(order).some((line) => line.max > 0);
+  });
+
+  protected registerReturn(): void {
+    const order = this.order();
+    if (!order) return;
+    this.dialog
+      .open(RegisterReturnDialog, { data: order, width: '520px', maxWidth: '94vw' })
+      .afterClosed()
+      .subscribe((done?: boolean) => {
+        if (done)
+          this.snackBar.open(
+            'Devolução registrada. Conclua em Pedidos → Devoluções quando o produto chegar.',
+            'Fechar',
+            { duration: 4500 },
+          );
+      });
+  }
   /** CPF/telefone completos só para quem tem a permissão (o resto vê mascarado). */
   protected readonly sensitive = computed(() => this.auth.can('customers:sensitive'));
 

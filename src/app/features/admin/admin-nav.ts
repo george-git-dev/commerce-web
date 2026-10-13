@@ -11,8 +11,8 @@ export interface AdminNavItem {
   permission: Permission;
   /** Também na barra de atalhos de baixo (celular). */
   shortcut?: boolean;
-  /** Contador de pendências: avaliações (Vitrine) ou pedidos de afiliado (Afiliados). */
-  badge?: 'reviews' | 'affiliates';
+  /** Contador de pendências: avaliações (Vitrine), pedidos de afiliado (Afiliados) ou devoluções (Pedidos). */
+  badge?: 'reviews' | 'affiliates' | 'returns';
 }
 
 /** Menu do backoffice, na ordem de exibição. */
@@ -31,6 +31,8 @@ export const ADMIN_NAV: readonly AdminNavItem[] = [
     path: 'pedidos',
     permission: 'orders:view',
     shortcut: true,
+    // Devoluções solicitadas pelos clientes.
+    badge: 'returns',
   },
   { label: 'Produtos', icon: 'inventory_2', path: 'produtos', permission: 'products:view' },
   // Preço promocional: por itens, categoria, marca ou formato, com período.

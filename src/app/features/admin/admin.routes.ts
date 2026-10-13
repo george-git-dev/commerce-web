@@ -34,6 +34,12 @@ export const ADMIN_ROUTES: Routes = [
         loadComponent: () => import('./orders/admin-orders').then((m) => m.AdminOrders),
       },
       {
+        path: 'pedidos/devolucoes',
+        title: 'Nani Admin | Devoluções',
+        canActivate: [permissionGuard('orders:view', '/admin')],
+        loadComponent: () => import('./returns/admin-returns-page').then((m) => m.AdminReturnsPage),
+      },
+      {
         path: 'pedidos/:numero',
         title: 'Nani Admin | Pedido',
         canActivate: [permissionGuard('orders:view', '/admin')],

@@ -85,6 +85,24 @@ export class CommissionService {
   }
 
   /**
+   * Devolução de parte do pedido: a comissão (ainda não paga) cai na proporção
+   * do que voltou; se voltou tudo, é cancelada. Já paga: não mexe (pós-MVP: abater
+   * no próximo pagamento). Devolve `true` se mudou algo.
+   */
+  returnFromOrder(orderNumber: string, returnedBase: number): boolean {
+    let changed = false;
+    this.update(orderNumber, (c) => {
+      if (c.state !== 'aberta' || returnedBase <= 0) return c;
+      changed = true;
+      const base = Math.max(0, Math.round((c.base - returnedBase) * 100) / 100);
+      return base === 0
+        ? { ...c, base, amount: 0, state: 'cancelada' }
+        : { ...c, base, amount: commissionAmount(base, c.percent) };
+    });
+    return changed;
+  }
+
+  /**
    * Paga as comissões liberadas de UM afiliado: Pix (com comprovante, feito
    * fora do sistema) ou crédito na loja (lançado na hora, com bônus).
    * Idempotente: o que já foi pago não entra de novo.

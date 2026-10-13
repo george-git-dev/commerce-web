@@ -18,7 +18,7 @@ const daysAgo = (days: number) => new Date(Date.now() - days * 86_400_000).toISO
 
 /**
  * Pedidos de exemplo FICTÍCIOS para cada conta (só para testar Minha conta):
- * um entregue (botão "Avaliar"), um enviado com rastreio e um aguardando Pix.
+ * dois entregues ("Avaliar" e "Solicitar devolução"), um enviado com rastreio e um aguardando Pix.
  * Na Fase 2 somem — a lista vem de `GET /me/orders`.
  */
 export function sampleOrders(name: string, find: (slug: string) => Product | undefined): Order[] {
@@ -29,6 +29,7 @@ export function sampleOrders(name: string, find: (slug: string) => Product | und
     return {
       id: `${number}-${index}`,
       slug,
+      sku: variant.id,
       productName: product.name,
       variantLabel: variantLabel(product, variant),
       image: product.images[0] ?? '',
@@ -44,6 +45,7 @@ export function sampleOrders(name: string, find: (slug: string) => Product | und
     items: Order['items'],
     shipping: Order['shipping'],
     trackingCode?: string,
+    deliveredDaysAgo?: number,
   ): Order => {
     const inHands = shipping.id === 'em-maos';
     const shippingPrice = shipping.price;
@@ -53,6 +55,7 @@ export function sampleOrders(name: string, find: (slug: string) => Product | und
       createdAt: daysAgo(days),
       status,
       trackingCode,
+      deliveredAt: deliveredDaysAgo === undefined ? undefined : daysAgo(deliveredDaysAgo),
       items,
       address: inHands ? null : { recipient: name, ...address },
       billing: { document: '', name, address },
@@ -100,6 +103,18 @@ export function sampleOrders(name: string, find: (slug: string) => Product | und
       economic(14.9),
       'BR123456789BR',
     ),
+    // Entregue há 2 dias: dá para desistir (7 dias) ou devolver por defeito.
+    build(
+      'NP100238',
+      6,
+      'entregue',
+      { method: 'pix' },
+      [item('NP100238', 1, 'lattafa-fakhar-black')],
+      economic(0),
+      'BR987654321BR',
+      2,
+    ),
+    // Entregue há 15 dias: só por defeito/produto errado (30 dias).
     build(
       'NP100231',
       20,
@@ -107,6 +122,8 @@ export function sampleOrders(name: string, find: (slug: string) => Product | und
       { method: 'pix' },
       [item('NP100231', 1, 'lattafa-asad'), item('NP100231', 2, 'lattafa-yara-body-mist', 2)],
       economic(0),
+      'BR555666777BR',
+      15,
     ),
   ];
 }

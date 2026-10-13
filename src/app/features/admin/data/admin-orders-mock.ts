@@ -59,6 +59,8 @@ export interface AdminOrder {
   coupon?: { code: string; discount: number };
   shippingPrice: number;
   total: number;
+  /** Estornado em devoluções (o painel desconta do faturamento). */
+  refunded?: number;
 }
 
 const CUSTOMERS = [

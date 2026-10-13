@@ -8,6 +8,9 @@ import { STORE_CONFIG } from '../../../core/config/store-config';
 import { ORDER_TIMELINE, OrderItem, PAYMENT_METHOD_LABELS } from '../../../core/models/order';
 import { OrderService } from '../../../core/services/order-service';
 import { ReviewService } from '../../../core/services/review-service';
+import { ReturnService } from '../../../core/services/return-service';
+import { RETURN_REASON_LABELS, RETURN_STATUS_LABELS } from '../../../core/models/return-request';
+import { canStillReturn, returnableQuantity } from '../../../core/utils/return-rules';
 import { OrderStatusChip } from '../../../shared/order-status/order-status';
 import { PixPayment } from '../../../shared/pix-payment/pix-payment';
 import { ReviewForm } from './review-form/review-form';
@@ -38,6 +41,24 @@ export class OrderDetail {
   protected readonly order = computed(() => this.orders.find(this.paramMap().get('numero')));
   protected readonly methodLabels = PAYMENT_METHOD_LABELS;
   protected readonly store = STORE_CONFIG;
+  private readonly returnService = inject(ReturnService);
+  protected readonly returnReasons = RETURN_REASON_LABELS;
+  protected readonly returnStatuses = RETURN_STATUS_LABELS;
+
+  /** Devoluções deste pedido (a mais recente primeiro). */
+  protected readonly returns = computed(() => {
+    const order = this.order();
+    return order ? this.returnService.forOrder(order.number) : [];
+  });
+
+  /** Pode pedir devolução: entregue, no prazo, sem outra em andamento e com item a devolver. */
+  protected readonly canReturn = computed(() => {
+    const order = this.order();
+    if (!order || order.status !== 'entregue') return false;
+    if (this.returnService.openFor(order.number)) return false;
+    if (!canStillReturn(order.deliveredAt ? new Date(order.deliveredAt) : undefined)) return false;
+    return order.items.some((item) => returnableQuantity(item, this.returns()) > 0);
+  });
   /** Item com o formulário de avaliação aberto (um por vez). */
   protected readonly reviewing = signal<string | null>(null);
 

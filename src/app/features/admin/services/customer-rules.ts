@@ -1,3 +1,4 @@
+import { netTotal } from './admin-order-flow';
 import { Role } from '../../../core/config/permissions';
 import { OrderStatus } from '../../../core/models/order';
 import { AdminOrder, AdminOrderAddress } from '../data/admin-orders-mock';
@@ -186,7 +187,7 @@ export function buildCustomers(
   for (const [email, list] of byEmail) {
     const sorted = [...list].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
     const valid = sorted.filter((order) => order.status !== 'cancelado');
-    const total = round2(valid.reduce((sum, order) => sum + order.total, 0));
+    const total = round2(valid.reduce((sum, order) => sum + netTotal(order), 0));
     const addresses = new Map<string, AdminOrderAddress>();
     for (const order of sorted)
       if (order.address) addresses.set(addressKey(order.address), order.address);

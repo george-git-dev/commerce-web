@@ -69,6 +69,8 @@ export interface OrderItem {
   /** Identifica o item dentro do pedido (usado na avaliação). */
   id: string;
   slug: string;
+  /** Variante vendida (devolução volta ao estoque por ela). */
+  sku?: string;
   productName: string;
   variantLabel: string;
   image: string;
@@ -86,6 +88,8 @@ export interface Order {
   status: OrderStatus;
   /** Código de rastreio, quando já foi enviado. */
   trackingCode?: string;
+  /** Quando foi entregue (conta o prazo de devolução). */
+  deliveredAt?: string;
   items: readonly OrderItem[];
   /** `null` = entrega em mãos (combinada com a loja, sem endereço). */
   address: DeliveryAddress | null;

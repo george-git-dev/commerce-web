@@ -33,6 +33,11 @@ export function needsTracking(order: AdminOrder): boolean {
   return order.status === 'pronto-envio' && order.shipping !== 'em-maos';
 }
 
+/** Valor que ficou com a loja: total menos o estornado em devoluções. */
+export function netTotal(order: Pick<AdminOrder, 'total' | 'refunded'>): number {
+  return Math.round((order.total - (order.refunded ?? 0)) * 100) / 100;
+}
+
 /** Código de rastreio: 8 a 30 letras/números (Correios: AA123456789BR). */
 export function isValidTracking(code: string): boolean {
   return /^[A-Z0-9]{8,30}$/.test(code.trim().toUpperCase());

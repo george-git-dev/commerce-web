@@ -1,3 +1,4 @@
+import { ReturnService } from '../../../core/services/return-service';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -35,11 +36,13 @@ export class AdminLayout {
   protected readonly auth = inject(AuthService);
   private readonly reviews = inject(ReviewService);
   private readonly affiliates = inject(AffiliateService);
+  private readonly returns = inject(ReturnService);
 
   /** Pendências por item do menu (só para quem pode decidir/ver aquilo). */
   protected readonly badges = computed<Record<NonNullable<AdminNavItem['badge']>, number>>(() => ({
     reviews: this.auth.can('approvals:view') ? this.reviews.pendingCount() : 0,
     affiliates: this.auth.can('affiliates:view') ? this.affiliates.pendingCount() : 0,
+    returns: this.auth.can('orders:view') ? this.returns.pendingCount() : 0,
   }));
 
   protected readonly desktop = toSignal(

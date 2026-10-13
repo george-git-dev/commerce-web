@@ -1,8 +1,5 @@
 <section class="ao" #top>
-  <header class="ao__head">
-    <p class="ao__eyebrow">Vendas</p>
-    <h2>Pedidos</h2>
-  </header>
+  <app-orders-tabs />
 
   <div class="ao__tabs" role="tablist" aria-label="Status do pedido">
     @for (tab of tabs(); track tab.id) {

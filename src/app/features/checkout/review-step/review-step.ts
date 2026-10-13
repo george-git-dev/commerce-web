@@ -65,6 +65,7 @@ export class ReviewStep {
       items: this.cart.items().map((line, index) => ({
         id: `${line.variant.id}-${index}`,
         slug: line.product.slug,
+        sku: line.variant.id,
         productName: line.product.name,
         variantLabel: variantLabel(line.product, line.variant),
         image: line.product.images[0] ?? '',

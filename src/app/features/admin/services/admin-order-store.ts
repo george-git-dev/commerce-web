@@ -65,6 +65,13 @@ export class AdminOrderStore {
     return updated;
   }
 
+  /** Devolução concluída: soma o estornado no pedido (o painel desconta). */
+  addRefund(number: string, amount: number): void {
+    const order = this.find(number);
+    if (!order) return;
+    this.save({ ...order, refunded: Math.round(((order.refunded ?? 0) + amount) * 100) / 100 });
+  }
+
   cancel(number: string, reason: string): AdminOrder | undefined {
     const order = this.find(number);
     if (!order || !canCancel(order)) return undefined;

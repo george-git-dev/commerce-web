@@ -1,3 +1,4 @@
+import { OrdersTabs } from './orders-tabs';
 import { CurrencyPipe, DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
@@ -33,7 +34,7 @@ function createState() {
  */
 @Component({
   selector: 'app-admin-orders',
-  imports: [CurrencyPipe, DatePipe, MatIconModule, RouterLink, OrderStatusChip, Pager],
+  imports: [OrdersTabs, CurrencyPipe, DatePipe, MatIconModule, RouterLink, OrderStatusChip, Pager],
   templateUrl: './admin-orders.html',
   styleUrl: './admin-orders.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -6,7 +6,7 @@ import { ReviewService } from './review-service';
 describe('OrderService (pedidos por conta)', () => {
   beforeEach(() => localStorage.clear());
 
-  it('sem login não há pedidos; logado vê os 3 de exemplo', () => {
+  it('sem login não há pedidos; logado vê os 4 de exemplo', () => {
     const auth = TestBed.inject(AuthService);
     const orders = TestBed.inject(OrderService);
     expect(orders.orders().length).toBe(0);
@@ -15,6 +15,7 @@ describe('OrderService (pedidos por conta)', () => {
     expect(orders.orders().map((order) => order.status)).toEqual([
       'aguardando-pagamento',
       'enviado',
+      'entregue',
       'entregue',
     ]);
     expect(orders.find('NP100245')?.trackingCode).toBe('BR123456789BR');

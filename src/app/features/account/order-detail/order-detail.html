@@ -29,6 +29,68 @@
         </ol>
       }
 
+      @if (canReturn()) {
+        <a
+          matButton="outlined"
+          class="od__return-btn"
+          [routerLink]="['/minha-conta/pedidos', item.number, 'devolucao']"
+        >
+          <mat-icon>assignment_return</mat-icon> Solicitar devolução
+        </a>
+      }
+
+      @for (r of returns(); track r.id) {
+        <section class="od__card od__return" [class.od__return--off]="r.status === 'recusada'">
+          <h2>Devolução · {{ returnStatuses[r.status] }}</h2>
+          <p class="od__muted">
+            Pedida em {{ r.createdAt | date: 'dd/MM/yyyy' }} · {{ returnReasons[r.reason] }}
+          </p>
+          <ul class="od__return-items">
+            @for (line of r.items; track line.itemId) {
+              <li>{{ line.quantity }}× {{ line.name }} · {{ line.variant }}</li>
+            }
+          </ul>
+          @switch (r.status) {
+            @case ('solicitada') {
+              <p>
+                Recebemos seu pedido. Vamos te chamar no WhatsApp com as instruções para enviar o
+                produto.
+              </p>
+            }
+            @case ('aprovada') {
+              <p>
+                Devolução aprovada. Envie o produto conforme combinamos pelo WhatsApp; quando ele
+                chegar, fazemos o estorno de
+                <strong>{{ r.refundAmount | currency: 'BRL' }}</strong
+                >.
+              </p>
+            }
+            @case ('concluida') {
+              <p>
+                Produto recebido e estorno de
+                <strong>{{ r.refundAmount | currency: 'BRL' }}</strong> feito em
+                {{ r.completion?.at | date: 'dd/MM/yyyy' }} no mesmo meio de pagamento (no cartão,
+                pode levar até 2 faturas para aparecer).
+              </p>
+            }
+            @case ('recusada') {
+              <p>
+                Devolução não aceita.
+                @if (r.decision?.reason; as reason) {
+                  <strong>Motivo:</strong> {{ reason }}
+                }
+              </p>
+            }
+          }
+          @if (r.status === 'solicitada' || r.status === 'aprovada') {
+            <p class="od__muted">
+              Dúvidas?
+              <a [href]="store.whatsappHref" target="_blank" rel="noopener">{{ store.whatsapp }}</a>
+            </p>
+          }
+        </section>
+      }
+
       @if (item.status === 'aguardando-pagamento' && item.payment.method === 'pix') {
         <app-pix-payment class="od__card" />
       }
