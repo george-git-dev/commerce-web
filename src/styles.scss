@@ -5,6 +5,15 @@
 @use '@angular/material' as mat;
 @use '@angular/cdk' as cdk;
 
+// Fontes servidas pelo próprio site (não pelo Google): abre mais rápido no
+// celular, não depende do Google e não envia o IP do visitante a terceiros.
+// Só o subconjunto latino (cobre todo o português) e só os pesos usados.
+@use '@fontsource/italiana/latin-400' as italiana-400;
+@use '@fontsource/dm-sans/latin-400' as dm-sans-400;
+@use '@fontsource/dm-sans/latin-500' as dm-sans-500;
+@use '@fontsource/dm-sans/latin-600' as dm-sans-600;
+@use '@fontsource/dm-sans/latin-700' as dm-sans-700;
+
 // Classe .cdk-visually-hidden (texto só para leitor de tela) sempre disponível.
 @include cdk.a11y-visually-hidden();
 
@@ -291,4 +300,33 @@ swiper-container:not(:defined) {
 swiper-container:not(:defined) > swiper-slide {
   flex: 0 0 100%;
   min-width: 0;
+}
+
+// Ícones do <mat-icon> (antes vinham do CSS do Google): cada ícone é uma
+// "palavra" da fonte Material Icons desenhada como símbolo (ligadura).
+// `block` (e não `swap`): enquanto a fonte carrega o ícone fica invisível,
+// em vez de mostrar o nome dele ("shopping_cart") por um instante.
+@font-face {
+  font-family: 'Material Icons';
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+  src: url('../node_modules/@fontsource/material-icons/files/material-icons-latin-400-normal.woff2')
+    format('woff2');
+}
+
+.material-icons {
+  font-family: 'Material Icons';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
 }
