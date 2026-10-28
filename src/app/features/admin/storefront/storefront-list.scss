@@ -119,7 +119,7 @@ button.vl__main {
 
   &--no-ar {
     background: color-mix(in oklch, #2f6b45 14%, transparent);
-    color: #2f6b45;
+    color: #2a6040; // um tom mais escuro que o fundo: 5.2:1 (texto de 11 px)
   }
 
   &--agendado {

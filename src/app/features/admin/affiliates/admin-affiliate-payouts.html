@@ -31,17 +31,17 @@
     <div>
       <dt>Pendente</dt>
       <dd>{{ t.pendente | currency: 'BRL' }}</dd>
-      <small>aguardando entrega/prazo</small>
+      <dd class="afp__kpi-note">aguardando entrega/prazo</dd>
     </div>
     <div>
       <dt>Liberado</dt>
       <dd>{{ t.liberada | currency: 'BRL' }}</dd>
-      <small>pronto para pagar</small>
+      <dd class="afp__kpi-note">pronto para pagar</dd>
     </div>
     <div>
       <dt>Pago</dt>
       <dd>{{ t.paid | currency: 'BRL' }}</dd>
-      <small>Pix feitos e créditos lançados</small>
+      <dd class="afp__kpi-note">Pix feitos e créditos lançados</dd>
     </div>
   </dl>
 

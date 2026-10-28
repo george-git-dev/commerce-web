@@ -82,6 +82,8 @@ html {
   // Dourado para ícone que informa algo (estrelas, botão de som) sobre fundo claro:
   // 3,1:1 a 3,6:1 nos fundos da loja (mínimo de 3:1 para gráfico, WCAG 1.4.11).
   --gold-deep: #a8803f;
+  // Dourado para TEXTO pequeno sobre fundo claro (eyebrows do admin): 4.98:1 sobre --background.
+  --gold-text: #86652f;
 
   --earth: oklch(
     0.42 0.045 55

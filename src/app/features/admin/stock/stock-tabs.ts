@@ -57,7 +57,7 @@ import { AdminPurchaseStore } from '../services/admin-purchase-store';
       font-weight: 600;
       letter-spacing: 0.2em;
       text-transform: uppercase;
-      color: var(--gold);
+      color: var(--gold-text);
     }
 
     .tabs {

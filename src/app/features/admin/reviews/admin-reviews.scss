@@ -150,8 +150,11 @@
   font-size: 0.8125rem;
   color: var(--muted-foreground);
 
+  // Sublinhado: o link se distingue do texto em volta sem depender só da cor.
   a {
     color: var(--earth);
+    text-decoration: underline;
+    text-underline-offset: 2px;
   }
 }
 

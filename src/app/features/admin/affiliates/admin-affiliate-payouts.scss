@@ -32,7 +32,7 @@ h2 {
   font-weight: 600;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: var(--gold);
+  color: var(--gold-text);
 }
 
 .afp__lead {
@@ -72,8 +72,10 @@ h2 {
     font-weight: 600;
   }
 
-  small {
+  // Explicação abaixo do valor: um 2º <dd> (dentro de <dl> só valem dt/dd).
+  .afp__kpi-note {
     font-size: 0.6875rem;
+    font-weight: 400;
     color: var(--muted-foreground);
   }
 }
