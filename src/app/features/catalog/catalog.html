@@ -265,6 +265,8 @@
 
       <div class="catalog__results">
         @if (products().length) {
+          <!-- Título só para leitor de tela: os cards usam h3 (h1 → h2 → h3). -->
+          <h2 class="cdk-visually-hidden">Produtos</h2>
           <div class="catalog__grid">
             @for (product of products(); track product.id) {
               <app-product-card

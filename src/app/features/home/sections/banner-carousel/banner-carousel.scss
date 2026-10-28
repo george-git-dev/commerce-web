@@ -18,6 +18,7 @@
   --swiper-pagination-bullet-inactive-color: var(--primary-foreground);
   --swiper-pagination-bullet-inactive-opacity: 0.5;
   --swiper-pagination-bullet-size: 8px;
+  --swiper-pagination-bullet-horizontal-gap: 2px;
   --swiper-pagination-bottom: 16px;
   --swiper-navigation-color: var(--primary-foreground);
   --swiper-navigation-size: 28px;
@@ -121,4 +122,13 @@
       left: -4px;
     }
   }
+}
+
+// Bolinha continua com 8px, mas a área de toque tem 24px (WCAG 2.5.8):
+// o espaço extra é preenchimento transparente em volta do ponto.
+swiper-container::part(bullet),
+swiper-container::part(bullet-active) {
+  box-sizing: content-box;
+  padding: 8px;
+  background-clip: content-box;
 }

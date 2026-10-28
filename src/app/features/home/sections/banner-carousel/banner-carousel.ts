@@ -35,7 +35,10 @@ export class BannerCarousel {
     // Roda só no navegador, depois que os slides estão na tela.
     afterNextRender(async () => {
       await loadSwiper();
-      this.swiperRef()?.nativeElement.initialize?.();
+      // Saiu da tela enquanto o Swiper carregava: não inicia.
+      const swiper = this.swiperRef()?.nativeElement;
+      if (!swiper?.isConnected) return;
+      swiper.initialize?.();
 
       // Quem pediu "reduzir movimento" no sistema não recebe autoplay.
       if (globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {

@@ -209,3 +209,27 @@ export async function dialogClosed(): Promise<void> {
     if (dialogEl()) throw new Error('Diálogo ainda aberto');
   });
 }
+
+// ----- Acessibilidade (axe) -----
+
+/**
+ * Problemas de acessibilidade (axe-core) dentro do elemento. Fora do teste:
+ * contraste (o jsdom não calcula cores) e regras de página inteira (landmarks,
+ * h1 único) — essas são conferidas no navegador de verdade.
+ */
+export async function a11yViolations(root: Element): Promise<string[]> {
+  const { default: axe } = await import('axe-core');
+  const result = await axe.run(root, {
+    resultTypes: ['violations'],
+    rules: {
+      'color-contrast': { enabled: false },
+      region: { enabled: false },
+      'landmark-one-main': { enabled: false },
+      'page-has-heading-one': { enabled: false },
+    },
+  });
+  return result.violations.map(
+    (v) =>
+      `${v.id} (${v.impact}): ${v.help} → ${v.nodes.map((n) => n.target.join(' ')).join(', ')}`,
+  );
+}

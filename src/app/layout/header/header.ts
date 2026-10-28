@@ -14,6 +14,8 @@ import { AnnounceBar } from '../announce-bar/announce-bar';
 
 @Component({
   selector: 'app-header',
+  // Região de cabeçalho do site para leitores de tela (faixa de avisos + barra).
+  host: { role: 'banner' },
   imports: [
     MatBadgeModule,
     MatButtonModule,

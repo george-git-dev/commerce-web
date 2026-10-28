@@ -1,4 +1,4 @@
-<span class="rating" [attr.aria-label]="'Avaliação ' + rating() + ' de 5'">
+<span class="rating" role="img" [attr.aria-label]="'Avaliação ' + rating() + ' de 5'">
   <span class="rating__stars" aria-hidden="true">
     @for (star of stars(); track $index) {
       <mat-icon>{{ star }}</mat-icon>

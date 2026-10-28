@@ -3,6 +3,10 @@
 // com contraste verificado em WCAG AA (ver ratios abaixo, calculados a partir
 // dos valores oklch reais — não são estimativas).
 @use '@angular/material' as mat;
+@use '@angular/cdk' as cdk;
+
+// Classe .cdk-visually-hidden (texto só para leitor de tela) sempre disponível.
+@include cdk.a11y-visually-hidden();
 
 html {
   height: 100%;
@@ -66,6 +70,9 @@ html {
     0.67 0.095 74
   ); // #b88c4f — decorativo (2.82:1 sobre --background, não usar como texto sobre claro)
   --gold-soft: oklch(0.93 0.035 77); // #f5e5cf
+  // Dourado para ícone que informa algo (estrelas, botão de som) sobre fundo claro:
+  // 3,1:1 a 3,6:1 nos fundos da loja (mínimo de 3:1 para gráfico, WCAG 1.4.11).
+  --gold-deep: #a8803f;
 
   --earth: oklch(
     0.42 0.045 55

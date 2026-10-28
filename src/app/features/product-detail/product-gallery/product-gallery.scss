@@ -21,6 +21,7 @@
   --swiper-pagination-bullet-inactive-color: var(--foreground);
   --swiper-pagination-bullet-inactive-opacity: 0.3;
   --swiper-pagination-bullet-size: 8px;
+  --swiper-pagination-bullet-horizontal-gap: 2px;
 }
 
 // A foto inteira é o botão que abre o zoom.
@@ -97,4 +98,12 @@
     grid-template-columns: repeat(4, 1fr);
     gap: 10px;
   }
+}
+// Bolinha continua com 8px, mas a área de toque tem 24px (WCAG 2.5.8):
+// o espaço extra é preenchimento transparente em volta do ponto.
+swiper-container::part(bullet),
+swiper-container::part(bullet-active) {
+  box-sizing: content-box;
+  padding: 8px;
+  background-clip: content-box;
 }

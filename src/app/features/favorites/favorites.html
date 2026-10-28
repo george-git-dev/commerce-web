@@ -5,6 +5,7 @@
     </header>
 
     @if (favorites.products().length) {
+      <h2 class="cdk-visually-hidden">Perfumes favoritos</h2>
       <div class="favorites__grid">
         @for (product of favorites.products(); track product.id) {
           <app-product-card

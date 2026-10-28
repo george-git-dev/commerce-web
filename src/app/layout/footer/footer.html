@@ -27,7 +27,7 @@
     @for (group of groups(); track group.title) {
       <details class="footer__group" [open]="wide()">
         <summary>
-          <h4>{{ group.title }}</h4>
+          <h2>{{ group.title }}</h2>
           <mat-icon aria-hidden="true">expand_more</mat-icon>
         </summary>
         <ul class="footer__links">
@@ -42,7 +42,7 @@
 
     <details class="footer__group" [open]="wide()">
       <summary>
-        <h4>Atendimento</h4>
+        <h2>Atendimento</h2>
         <mat-icon aria-hidden="true">expand_more</mat-icon>
       </summary>
       <ul class="footer__links footer__contact">

@@ -326,7 +326,7 @@ $header-h-mobile: 120px;
 
   .brand__logo {
     height: 85px;
-    transform: scale(1.10);
+    transform: scale(1.1);
   }
 
   .search-panel__form {
@@ -336,7 +336,7 @@ $header-h-mobile: 120px;
 
 // Botão de som ambiente: dourado quando ligado.
 .bar__sound--on mat-icon {
-  color: var(--gold);
+  color: var(--gold-deep);
 }
 
 @keyframes affiliate-shine {

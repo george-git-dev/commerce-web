@@ -43,7 +43,10 @@ export class ProductGallery {
   constructor() {
     afterNextRender(async () => {
       await loadSwiper();
-      this.swiperRef()?.nativeElement.initialize?.();
+      // Saiu da tela enquanto o Swiper carregava: não inicia.
+      const swiper = this.swiperRef()?.nativeElement;
+      if (!swiper?.isConnected) return;
+      swiper.initialize?.();
     });
 
     // Trocou de produto (ex.: clicou num relacionado): volta para a primeira foto.
