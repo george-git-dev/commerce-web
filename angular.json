@@ -3,7 +3,8 @@
   "version": 1,
   "cli": {
     "packageManager": "npm",
-    "analytics": false
+    "analytics": false,
+    "schematicCollections": ["angular-eslint"]
   },
   "newProjectRoot": "projects",
   "projects": {
@@ -84,6 +85,7 @@
         "test": {
           "builder": "@angular/build:unit-test",
           "options": {
+            "setupFiles": ["src/testing/setup.ts"],
             "coverageInclude": ["src/app/**/*.ts"],
             "coverageExclude": ["src/testing/**", "src/app/app.config.ts"],
             "coverageReporters": ["text-summary", "html"],
@@ -93,6 +95,12 @@
               "functions": 90,
               "branches": 88
             }
+          }
+        },
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "lintFilePatterns": ["src/**/*.ts", "src/**/*.html"]
           }
         }
       }

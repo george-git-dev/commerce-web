@@ -5,7 +5,11 @@ import { StorefrontContent } from '../../../core/services/storefront-content';
 import { linkToText, moneyLabel } from '../../../core/utils/storefront-rules';
 import { AdminAudit } from './admin-audit';
 
-type Change = { field: string; before: string; after: string };
+interface Change {
+  field: string;
+  before: string;
+  after: string;
+}
 
 const yesNo = (value: boolean) => (value ? 'Sim' : 'Não');
 const period = (item: { startsOn?: string; endsOn?: string }) =>

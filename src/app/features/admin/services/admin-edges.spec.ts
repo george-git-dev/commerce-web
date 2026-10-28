@@ -13,6 +13,10 @@ import { variantProblems } from './product-rules';
 
 const login = (email = 'admin@email.com') => TestBed.inject(AuthService).login(email, '12345678');
 
+// Pedidos fictícios do backoffice dependem da data de hoje: data fixa = mesmo resultado sempre.
+beforeEach(() => vi.setSystemTime(new Date(2026, 9, 12, 15)));
+afterEach(() => vi.useRealTimers());
+
 describe('backoffice: casos de borda', () => {
   beforeEach(() => localStorage.clear());
 

@@ -22,6 +22,6 @@ export const authGuard: CanActivateFn = (_route, state) => {
  * site: "//x", "/\\x" (o navegador trata como "//x") e "https://x".
  */
 export function safeReturnUrl(value: string | null, fallback = '/minha-conta'): string {
-  const internal = !!value && value.startsWith('/') && !/^\/[\/\\]/.test(value);
+  const internal = !!value && value.startsWith('/') && !/^\/[/\\]/.test(value);
   return internal ? value : fallback;
 }

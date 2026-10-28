@@ -9,6 +9,10 @@ import { AdminOrderStore } from './admin-order-store';
 import { adminItemId, AdminReturns } from './admin-returns';
 import { AdminStockStore } from './admin-stock-store';
 
+// Pedidos fictícios do backoffice dependem da data de hoje: data fixa = mesmo resultado sempre.
+beforeEach(() => vi.setSystemTime(new Date(2026, 9, 12, 15)));
+afterEach(() => vi.useRealTimers());
+
 describe('devoluções', () => {
   beforeEach(() => localStorage.clear());
 

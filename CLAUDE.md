@@ -30,9 +30,10 @@ Fase atual: o layout está sendo redesenhado a partir de um protótipo feito no 
 - `npm start` / `ng serve`: servidor de desenvolvimento em `http://localhost:4200`
 - `npm run build` / `ng build`: build de produção em `dist/`
 - `npm run watch`: build de desenvolvimento em modo watch
-- `npm test` / `ng test`: testes unitários (Vitest via `@angular/build:unit-test`)
-- Rodar um único arquivo de teste: `ng test -- src/app/features/home/home.spec.ts` (argumentos do Vitest vão depois do `--`)
-- Ainda não há script de lint no `package.json`.
+- `npm test` / `ng test`: testes unitários em modo watch (Vitest via `@angular/build:unit-test`)
+- `npm run test:ci`: roda todos os testes uma vez com cobertura; falha abaixo do limite mínimo do `angular.json`. Relatório em `coverage/commerce-web/index.html`
+- Rodar um único arquivo de teste: `ng test --watch=false --include src/app/features/home/home.spec.ts`
+- `npm run lint` / `ng lint`: ESLint (`angular-eslint` + regras do projeto em `eslint.config.js`: OnPush, signals, `inject()`, control flow, acessibilidade dos templates). Rodar antes de commitar
 
 ## Arquitetura
 

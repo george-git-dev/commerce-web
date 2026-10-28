@@ -34,6 +34,14 @@ const submitDialog = async () => {
   await settleDialog();
 };
 
+/**
+ * Os pedidos fictícios do backoffice são sorteados a partir da data de hoje:
+ * conforme o dia, pode não existir pedido "aguardando pagamento" ou "pago".
+ * Data fixa = mesmos pedidos em qualquer dia (só o `Date` é simulado).
+ */
+beforeEach(() => vi.setSystemTime(new Date(2026, 9, 12, 15)));
+afterEach(() => vi.useRealTimers());
+
 describe('Admin · lista de pedidos', () => {
   beforeEach(() => localStorage.clear());
 
