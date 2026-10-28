@@ -16,6 +16,8 @@ export interface PaymentMethod {
 export interface StoreConfig {
   name: string;
   tagline: string;
+  /** Nome do backoffice na aba do navegador ("Pedidos | Nani Admin"). */
+  adminName: string;
   /**
    * Endereço público do site, sem barra no fim (canonical, Open Graph, dados
    * estruturados). ⚠ Domínio ainda não registrado: o mesmo valor está fixo em
@@ -58,6 +60,7 @@ export interface StoreConfig {
 export const STORE_CONFIG: StoreConfig = {
   name: 'Nani Perfumes',
   tagline: 'Essência do Oriente',
+  adminName: 'Nani Admin',
   siteUrl: 'https://www.naniperfumes.com.br',
   description:
     'Perfumes árabes originais: Lattafa, Armaf, Afnan, Rasasi e mais. Frascos lacrados e decants, com entrega para todo o Brasil.',

@@ -83,7 +83,7 @@ describe('SEO', () => {
     expect(absolute('https://cdn.exemplo.com/a.webp')).toBe('https://cdn.exemplo.com/a.webp');
   });
 
-  it('navegação: título da rota, descrição e noindex herdado da rota pai', async () => {
+  it('navegação: "página | marca", descrição, noindex e marca do admin herdados da rota pai', async () => {
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
       providers: [
@@ -92,9 +92,17 @@ describe('SEO', () => {
         provideRouter([
           {
             path: 'produtos',
-            title: 'Perfumes | Nani Perfumes',
+            title: 'Perfumes',
             data: { seo: { description: 'Catálogo' } },
             component: Blank,
+          },
+          {
+            path: 'admin',
+            data: { seo: { noindex: true, brand: 'admin' } },
+            children: [
+              { path: 'pedidos', title: 'Pedidos', component: Blank },
+              { path: '', component: Blank },
+            ],
           },
           {
             path: 'minha-conta',
@@ -108,13 +116,18 @@ describe('SEO', () => {
     const harness = await RouterTestingHarness.create();
 
     await harness.navigateByUrl('/produtos?marca=lattafa#topo');
-    expect(document.title).toBe('Perfumes | Nani Perfumes');
+    expect(document.title).toBe(`Perfumes | ${STORE_CONFIG.name}`);
     expect(meta('name', 'description')).toBe('Catálogo');
     expect(canonical()).toBe(`${STORE_CONFIG.siteUrl}/produtos`);
 
     await harness.navigateByUrl('/minha-conta/pedidos');
-    expect(document.title).toBe('Meus pedidos');
+    expect(document.title).toBe(`Meus pedidos | ${STORE_CONFIG.name}`);
     expect(meta('name', 'robots')).toBe('noindex, nofollow');
+
+    await harness.navigateByUrl('/admin/pedidos');
+    expect(document.title).toBe(`Pedidos | ${STORE_CONFIG.adminName}`);
+    await harness.navigateByUrl('/admin');
+    expect(document.title).toBe(STORE_CONFIG.adminName);
 
     await harness.navigateByUrl('/');
     expect(document.title).toBe(`${STORE_CONFIG.name} | ${STORE_CONFIG.tagline}`);

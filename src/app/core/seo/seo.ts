@@ -1,12 +1,12 @@
 import { DOCUMENT } from '@angular/common';
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, signal } from '@angular/core';
 import { Meta, Title } from '@angular/platform-browser';
 import { ActivatedRouteSnapshot, RouterStateSnapshot, TitleStrategy } from '@angular/router';
 import { STORE_CONFIG } from '../config/store-config';
 
 /** SEO de uma página. O que não vier usa o padrão da loja. */
 export interface PageSeo {
-  /** Título da aba e do Google ("Asad — Lattafa | Nani Perfumes"). */
+  /** Título completo da aba e do Google — montar com `pageTitle()`. */
   title?: string;
   /** Até ~155 caracteres; o resto o Google corta. */
   description?: string;
@@ -20,8 +20,19 @@ export interface PageSeo {
   type?: 'website' | 'product';
 }
 
-/** Em `data.seo` da rota: descrição e noindex fixos da página. */
-export type RouteSeo = Pick<PageSeo, 'description' | 'noindex'>;
+/** Em `data.seo` da rota: descrição e noindex fixos da página; `brand: 'admin'` no backoffice. */
+export type RouteSeo = Pick<PageSeo, 'description' | 'noindex'> & { brand?: 'store' | 'admin' };
+
+/**
+ * Título no formato "página | marca" — a página primeiro, porque a aba do
+ * celular e o Google cortam o fim. Sem página: "Nani Perfumes | Essência do Oriente".
+ * O nome vem do `STORE_CONFIG` (nunca escrito à mão nas telas e rotas).
+ */
+export function pageTitle(page?: string, brand: 'store' | 'admin' = 'store'): string {
+  const name = brand === 'admin' ? STORE_CONFIG.adminName : STORE_CONFIG.name;
+  if (page) return `${page} | ${name}`;
+  return brand === 'admin' ? name : `${STORE_CONFIG.name} | ${STORE_CONFIG.tagline}`;
+}
 
 const JSON_LD_ID = 'seo-jsonld';
 const DEFAULT_IMAGE = 'img/og-nani.jpg';
@@ -38,14 +49,19 @@ export class Seo {
   private readonly title = inject(Title);
   private readonly meta = inject(Meta);
   private readonly document = inject(DOCUMENT);
+  private readonly current = signal(this.document.title);
+
+  /** Título da página atual (o da aba pode estar rolando: ver `AwayTitle`). */
+  readonly pageTitle = this.current.asReadonly();
 
   /** Aplica a página. Chamado na navegação (padrões da rota) e pelas telas com conteúdo próprio. */
   update(page: PageSeo, path = this.currentPath()): void {
-    const title = page.title ?? `${STORE_CONFIG.name} | ${STORE_CONFIG.tagline}`;
+    const title = page.title ?? pageTitle();
     const description = truncate(page.description ?? STORE_CONFIG.description, 160);
     const url = absolute(path);
     const image = absolute(page.image ?? DEFAULT_IMAGE);
 
+    this.current.set(title);
     this.title.setTitle(title);
     this.setName('description', description);
     this.setName('robots', page.noindex ? 'noindex, nofollow' : 'index, follow');
@@ -111,8 +127,10 @@ function truncate(text: string, max: number): string {
 }
 
 /**
- * Na navegação: título da rota + descrição/noindex de `data.seo` (o da rota
- * mais interna vale; `noindex` de uma rota pai vale para as filhas, ex.: admin).
+ * Na navegação: título da rota (só o nome da página, ex.: `title: 'Carrinho'`)
+ * vira "Carrinho | Nani Perfumes"; descrição/noindex/marca de `data.seo` (o da
+ * rota mais interna vale; `noindex` e `brand` de uma rota pai valem para as
+ * filhas, ex.: admin).
  * Telas com conteúdo próprio (produto, ajuda) chamam `Seo.update` depois.
  */
 @Injectable()
@@ -126,10 +144,12 @@ export class SeoTitleStrategy extends TitleStrategy {
       const data = route.data?.['seo'] as RouteSeo | undefined;
       if (data?.description) seo.description = data.description;
       if (data?.noindex) seo.noindex = true;
+      if (data?.brand) seo.brand = data.brand;
       route = route.firstChild;
     }
+    const { brand, ...page } = seo;
     this.seo.update(
-      { ...seo, title: this.buildTitle(snapshot) },
+      { ...page, title: pageTitle(this.buildTitle(snapshot), brand) },
       snapshot.url.split(/[?#]/)[0] || '/',
     );
   }

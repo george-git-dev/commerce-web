@@ -1,5 +1,6 @@
 import { Route, Routes } from '@angular/router';
 import { routes } from './app.routes';
+import { STORE_CONFIG } from './core/config/store-config';
 import { ADMIN_NAV } from './features/admin/admin-nav';
 import { ADMIN_ROUTES } from './features/admin/admin.routes';
 
@@ -41,9 +42,13 @@ describe('rotas', () => {
     }
   });
 
-  it('telas com título têm o nome da loja; backoffice exige equipe e permissão por tela', () => {
+  it('título da rota é só o nome da página (a marca entra pelo SeoTitleStrategy); backoffice exige equipe e permissão por tela', () => {
     for (const { path, route } of all) {
-      if (route.title) expect(String(route.title), path).toMatch(/^Nani (Perfumes|Admin) \|/);
+      if (!route.title) continue;
+      const title = String(route.title);
+      expect(title, path).not.toContain('|');
+      expect(title, path).not.toContain(STORE_CONFIG.name);
+      expect(title, path).not.toContain(STORE_CONFIG.adminName);
     }
     expect(routes.find((r) => r.path === 'admin')!.canActivate?.length).toBe(1);
     const screens = flatten(ADMIN_ROUTES, 'admin').filter(

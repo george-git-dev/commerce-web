@@ -7,7 +7,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { HELP_GROUP_LABELS, HELP_PAGES } from '../../core/config/help-pages';
 import { STORE_CONFIG } from '../../core/config/store-config';
 import { StorefrontContent } from '../../core/services/storefront-content';
-import { Seo } from '../../core/seo/seo';
+import { pageTitle, Seo } from '../../core/seo/seo';
 
 /** `/ajuda/:pagina` — uma página genérica para ajuda, políticas e contato. */
 @Component({
@@ -46,8 +46,8 @@ export class HelpPageView {
       const path = `/ajuda/${this.paramMap().get('pagina') ?? ''}`;
       seo.update(
         page
-          ? { title: `${page.title} | Nani Perfumes`, description: page.summary }
-          : { title: 'Página não encontrada | Nani Perfumes', noindex: true },
+          ? { title: pageTitle(page.title), description: page.summary }
+          : { title: pageTitle('Página não encontrada'), noindex: true },
         path,
       );
     });

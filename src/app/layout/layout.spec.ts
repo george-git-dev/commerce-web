@@ -99,7 +99,7 @@ describe('ConnectionBanner', () => {
 });
 
 describe('App (casca)', () => {
-  it('no backoffice some o header/rodapé da loja; título rola na aba', async () => {
+  it('no backoffice some o header/rodapé da loja; título só rola com a aba em segundo plano', async () => {
     vi.useFakeTimers();
     const f = await render(App, {
       routes: [
@@ -111,10 +111,16 @@ describe('App (casca)', () => {
     await TestBed.inject(Router).navigateByUrl('/admin');
     f.detectChanges();
     expect($$(f, 'app-header')).toHaveLength(0);
-    const first = document.title;
+    const page = document.title;
     vi.advanceTimersByTime(400);
-    expect(document.title).not.toBe(first);
-    f.destroy();
+    expect(document.title).toBe(page);
+    Object.defineProperty(document, 'hidden', { configurable: true, get: () => true });
+    document.dispatchEvent(new Event('visibilitychange'));
+    vi.advanceTimersByTime(400);
+    expect(document.title).not.toBe(page);
+    f.destroy(); // para o efeito e devolve o título da página
+    expect(document.title).toBe(page);
+    Object.defineProperty(document, 'hidden', { configurable: true, get: () => false });
     vi.useRealTimers();
   });
 });

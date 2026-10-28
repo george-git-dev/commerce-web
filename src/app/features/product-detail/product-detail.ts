@@ -26,7 +26,7 @@ import {
   lowestPrice,
   variantKinds,
 } from '../../core/utils/product-pricing';
-import { Seo } from '../../core/seo/seo';
+import { pageTitle, Seo } from '../../core/seo/seo';
 import { productJsonLd } from '../../core/seo/structured-data';
 import { ProductCard } from '../../shared/product-card/product-card';
 import { StarRating } from '../../shared/star-rating/star-rating';
@@ -80,7 +80,7 @@ export class ProductDetail {
       const product = this.product();
       const path = `/produtos/${this.paramMap().get('slug') ?? ''}`;
       if (!product) {
-        this.seo.update({ title: 'Produto não encontrado | Nani Perfumes', noindex: true }, path);
+        this.seo.update({ title: pageTitle('Produto não encontrado'), noindex: true }, path);
         return;
       }
       const price = lowestPrice(product).toLocaleString('pt-BR', {
@@ -89,7 +89,7 @@ export class ProductDetail {
       });
       this.seo.update(
         {
-          title: `${product.name} — ${product.brandName} | Nani Perfumes`,
+          title: pageTitle(`${product.name} — ${product.brandName}`),
           description: `${product.brandName} ${product.name}, a partir de ${price}. ${product.description}`,
           image: product.images[0],
           type: 'product',
