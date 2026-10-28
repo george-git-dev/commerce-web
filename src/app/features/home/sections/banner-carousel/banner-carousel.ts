@@ -13,6 +13,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { RouterLink } from '@angular/router';
 import type { SwiperContainer } from 'swiper/element';
 import { StorefrontContent } from '../../../../core/services/storefront-content';
+import { loadSwiper } from '../../../../shared/swiper/load-swiper';
 
 @Component({
   selector: 'app-banner-carousel',
@@ -32,7 +33,8 @@ export class BannerCarousel {
 
   constructor() {
     // Roda só no navegador, depois que os slides estão na tela.
-    afterNextRender(() => {
+    afterNextRender(async () => {
+      await loadSwiper();
       this.swiperRef()?.nativeElement.initialize?.();
 
       // Quem pediu "reduzir movimento" no sistema não recebe autoplay.

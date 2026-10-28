@@ -272,3 +272,16 @@ textarea {
   --mat-snack-bar-supporting-text-color: #fff;
   --mat-snack-bar-button-color: #ffd88a;
 }
+
+// Swiper carrega sob demanda (shared/swiper/load-swiper.ts). Até o carrossel
+// ficar pronto, mostra só o 1º slide na largura toda — sem os slides empilhados
+// "pulando" quando ele inicia (evita layout shift).
+swiper-container:not(:defined) {
+  display: flex;
+  overflow: hidden;
+}
+
+swiper-container:not(:defined) > swiper-slide {
+  flex: 0 0 100%;
+  min-width: 0;
+}

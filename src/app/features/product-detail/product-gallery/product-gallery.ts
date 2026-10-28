@@ -13,6 +13,7 @@ import {
   viewChild,
 } from '@angular/core';
 import type { SwiperContainer } from 'swiper/element';
+import { loadSwiper } from '../../../shared/swiper/load-swiper';
 import { ImageLightbox, LightboxData } from '../image-lightbox/image-lightbox';
 
 /**
@@ -40,7 +41,10 @@ export class ProductGallery {
   protected readonly active = signal(0);
 
   constructor() {
-    afterNextRender(() => this.swiperRef()?.nativeElement.initialize?.());
+    afterNextRender(async () => {
+      await loadSwiper();
+      this.swiperRef()?.nativeElement.initialize?.();
+    });
 
     // Trocou de produto (ex.: clicou num relacionado): volta para a primeira foto.
     effect(() => {

@@ -11,6 +11,7 @@ import {
 } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import type { SwiperContainer } from 'swiper/element';
+import { loadSwiper } from '../../../shared/swiper/load-swiper';
 
 /** O que a galeria passa para a tela de zoom ao abrir. */
 export interface LightboxData {
@@ -42,7 +43,10 @@ export class ImageLightbox {
   protected readonly current = signal(this.data.start + 1);
 
   constructor() {
-    afterNextRender(() => this.swiperRef()?.nativeElement.initialize?.());
+    afterNextRender(async () => {
+      await loadSwiper();
+      this.swiperRef()?.nativeElement.initialize?.();
+    });
   }
 
   protected onSlideChange(): void {
