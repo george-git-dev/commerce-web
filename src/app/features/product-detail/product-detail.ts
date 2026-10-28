@@ -1,7 +1,14 @@
 import { CartActions } from '../../core/services/cart-actions';
 import { Busy } from '../../shared/busy/busy';
 import { CurrencyPipe, DOCUMENT } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, inject, linkedSignal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  effect,
+  inject,
+  linkedSignal,
+} from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -16,8 +23,11 @@ import {
   defaultVariant,
   discountPercent,
   effectivePrice,
+  lowestPrice,
   variantKinds,
 } from '../../core/utils/product-pricing';
+import { Seo } from '../../core/seo/seo';
+import { productJsonLd } from '../../core/seo/structured-data';
 import { ProductCard } from '../../shared/product-card/product-card';
 import { StarRating } from '../../shared/star-rating/star-rating';
 import { NotesGrid } from './notes-grid/notes-grid';
@@ -62,6 +72,33 @@ export class ProductDetail {
   private readonly favorites = inject(FavoritesStore);
   private readonly favoriteAction = inject(FavoriteAction);
   private readonly document = inject(DOCUMENT);
+  private readonly seo = inject(Seo);
+
+  constructor() {
+    // Título, descrição, imagem da prévia e dados estruturados (preço, estoque, estrelas).
+    effect(() => {
+      const product = this.product();
+      const path = `/produtos/${this.paramMap().get('slug') ?? ''}`;
+      if (!product) {
+        this.seo.update({ title: 'Produto não encontrado | Nani Perfumes', noindex: true }, path);
+        return;
+      }
+      const price = lowestPrice(product).toLocaleString('pt-BR', {
+        style: 'currency',
+        currency: 'BRL',
+      });
+      this.seo.update(
+        {
+          title: `${product.name} — ${product.brandName} | Nani Perfumes`,
+          description: `${product.brandName} ${product.name}, a partir de ${price}. ${product.description}`,
+          image: product.images[0],
+          type: 'product',
+          jsonLd: productJsonLd(product, path),
+        },
+        path,
+      );
+    });
+  }
 
   private readonly paramMap = toSignal(this.route.paramMap, { requireSync: true });
   private readonly queryParamMap = toSignal(this.route.queryParamMap, { requireSync: true });

@@ -1,4 +1,6 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject } from '@angular/core';
+import { Seo } from '../../core/seo/seo';
+import { storeJsonLd } from '../../core/seo/structured-data';
 import { CatalogService } from '../../core/services/catalog-service';
 import { BrandsStripSection } from './sections/brands-strip-section/brands-strip-section';
 import { CategoriesSection } from './sections/categories-section/categories-section';
@@ -29,4 +31,10 @@ export class Home {
   protected readonly bestsellers = computed(() =>
     [...this.catalog.products()].sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0)).slice(0, 4),
   );
+
+  constructor() {
+    // Dados da loja para o Google (nome, logo, redes). Título e descrição são os padrões.
+    const seo = inject(Seo);
+    effect(() => seo.update({ jsonLd: storeJsonLd() }, '/'));
+  }
 }

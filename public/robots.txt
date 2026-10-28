@@ -1,0 +1,12 @@
+User-agent: *
+Disallow: /admin
+Disallow: /minha-conta
+Disallow: /finalizar-compra
+Disallow: /carrinho
+Disallow: /favoritos
+Disallow: /login
+Disallow: /esqueci-senha
+Disallow: /redefinir-senha
+Disallow: /pedido/
+
+Sitemap: https://www.naniperfumes.com.br/sitemap.xml

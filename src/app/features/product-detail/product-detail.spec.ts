@@ -40,6 +40,25 @@ describe('Página do produto', () => {
     expect(textOf(missing.fixture)).toContain('Produto não encontrado');
   });
 
+  it('SEO: título com marca, dados estruturados; inexistente fica fora do Google', async () => {
+    await open('/produtos/lattafa-asad');
+    const asad = productBySlug('lattafa-asad');
+    expect(document.title).toBe(`${asad.name} — ${asad.brandName} | Nani Perfumes`);
+    const jsonLd = JSON.parse(document.getElementById('seo-jsonld')!.textContent!);
+    expect(jsonLd['@type']).toBe('Product');
+    expect(jsonLd.name).toBe(asad.name);
+    expect(document.querySelector<HTMLLinkElement>('link[rel="canonical"]')?.href).toMatch(
+      /\/produtos\/lattafa-asad$/,
+    );
+    TestBed.resetTestingModule();
+    await open('/produtos/nao-existe');
+    expect(document.title).toBe('Produto não encontrado | Nani Perfumes');
+    expect(document.querySelector<HTMLMetaElement>('meta[name="robots"]')?.content).toBe(
+      'noindex, nofollow',
+    );
+    expect(document.getElementById('seo-jsonld')).toBeNull();
+  });
+
   it('adicionar: botão ocupado até o back confirmar; depois entra na sacola', async () => {
     const { fixture } = await open('/produtos/lattafa-asad');
     const button = buttonByText(fixture, 'Adicionar ao carrinho');

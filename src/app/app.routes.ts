@@ -7,6 +7,7 @@ export const routes: Routes = [
   {
     // Backoffice: área separada, carregada só por quem é da equipe.
     path: 'admin',
+    data: { seo: { noindex: true } },
     canActivate: [staffGuard],
     loadChildren: () => import('./features/admin/admin.routes').then((m) => m.ADMIN_ROUTES),
   },
@@ -17,6 +18,12 @@ export const routes: Routes = [
   },
   {
     path: 'produtos',
+    data: {
+      seo: {
+        description:
+          'Perfumes árabes originais para todos os estilos: masculinos, femininos e unissex, em frasco lacrado ou decant. Filtre por marca, família olfativa e preço.',
+      },
+    },
     title: 'Nani Perfumes | Perfumes',
     loadComponent: () => import('./features/catalog/catalog').then((m) => m.Catalog),
   },
@@ -28,44 +35,57 @@ export const routes: Routes = [
   },
   {
     path: 'carrinho',
+    data: { seo: { noindex: true } },
     title: 'Nani Perfumes | Carrinho',
     loadComponent: () => import('./features/cart/cart').then((m) => m.Cart),
   },
   {
     path: 'favoritos',
+    data: { seo: { noindex: true } },
     title: 'Nani Perfumes | Favoritos',
     canActivate: [authGuard],
     loadComponent: () => import('./features/favorites/favorites').then((m) => m.Favorites),
   },
   {
     path: 'login',
+    data: { seo: { noindex: true } },
     title: 'Nani Perfumes | Entrar',
     loadComponent: () => import('./features/auth/login').then((m) => m.Login),
   },
   {
     path: 'esqueci-senha',
+    data: { seo: { noindex: true } },
     title: 'Nani Perfumes | Esqueci minha senha',
     loadComponent: () => import('./features/auth/forgot-password').then((m) => m.ForgotPassword),
   },
   {
     path: 'redefinir-senha',
+    data: { seo: { noindex: true } },
     title: 'Nani Perfumes | Nova senha',
     loadComponent: () => import('./features/auth/reset-password').then((m) => m.ResetPassword),
   },
   {
     path: 'minha-conta/dados',
+    data: { seo: { noindex: true } },
     title: 'Nani Perfumes | Dados pessoais',
     canActivate: [authGuard],
     loadComponent: () => import('./features/account/profile/profile').then((m) => m.Profile),
   },
   {
     path: 'seja-afiliado',
+    data: {
+      seo: {
+        description:
+          'Divulgue a Nani Perfumes com o seu cupom: quem compra ganha desconto e você recebe comissão a cada venda.',
+      },
+    },
     title: 'Nani Perfumes | Seja afiliado',
     loadComponent: () =>
       import('./features/affiliate/affiliate-landing').then((m) => m.AffiliateLanding),
   },
   {
     path: 'minha-conta/afiliado',
+    data: { seo: { noindex: true } },
     title: 'Nani Perfumes | Programa de afiliados',
     canActivate: [authGuard],
     loadComponent: () =>
@@ -73,6 +93,7 @@ export const routes: Routes = [
   },
   {
     path: 'minha-conta/credito',
+    data: { seo: { noindex: true } },
     title: 'Nani Perfumes | Crédito na loja',
     canActivate: [authGuard],
     loadComponent: () =>
@@ -80,6 +101,7 @@ export const routes: Routes = [
   },
   {
     path: 'minha-conta/excluir-conta',
+    data: { seo: { noindex: true } },
     title: 'Nani Perfumes | Excluir conta',
     canActivate: [authGuard],
     loadComponent: () =>
@@ -87,18 +109,21 @@ export const routes: Routes = [
   },
   {
     path: 'minha-conta/enderecos',
+    data: { seo: { noindex: true } },
     title: 'Nani Perfumes | Meus endereços',
     canActivate: [authGuard],
     loadComponent: () => import('./features/account/addresses/addresses').then((m) => m.Addresses),
   },
   {
     path: 'minha-conta/pedidos',
+    data: { seo: { noindex: true } },
     title: 'Nani Perfumes | Meus pedidos',
     canActivate: [authGuard],
     loadComponent: () => import('./features/account/orders/orders').then((m) => m.Orders),
   },
   {
     path: 'minha-conta/pedidos/:numero/devolucao',
+    data: { seo: { noindex: true } },
     title: 'Nani Perfumes | Devolução',
     canActivate: [authGuard],
     loadComponent: () =>
@@ -106,6 +131,7 @@ export const routes: Routes = [
   },
   {
     path: 'minha-conta/pedidos/:numero',
+    data: { seo: { noindex: true } },
     title: 'Nani Perfumes | Pedido',
     canActivate: [authGuard],
     loadComponent: () =>
@@ -113,18 +139,21 @@ export const routes: Routes = [
   },
   {
     path: 'minha-conta',
+    data: { seo: { noindex: true } },
     title: 'Nani Perfumes | Minha conta',
     canActivate: [authGuard],
     loadComponent: () => import('./features/account/account').then((m) => m.Account),
   },
   {
     path: 'finalizar-compra',
+    data: { seo: { noindex: true } },
     title: 'Nani Perfumes | Finalizar compra',
     canActivate: [authGuard, customerGuard, cartNotEmptyGuard],
     loadComponent: () => import('./features/checkout/checkout').then((m) => m.Checkout),
   },
   {
     path: 'pedido/:numero',
+    data: { seo: { noindex: true } },
     title: 'Nani Perfumes | Pedido recebido',
     canActivate: [authGuard],
     loadComponent: () =>
@@ -137,6 +166,7 @@ export const routes: Routes = [
   },
   {
     path: '**',
+    data: { seo: { noindex: true } },
     title: 'Nani Perfumes | Página não encontrada',
     loadComponent: () => import('./features/not-found/not-found').then((m) => m.NotFound),
   },

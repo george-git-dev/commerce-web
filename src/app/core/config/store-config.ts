@@ -16,6 +16,15 @@ export interface PaymentMethod {
 export interface StoreConfig {
   name: string;
   tagline: string;
+  /**
+   * Endereço público do site, sem barra no fim (canonical, Open Graph, dados
+   * estruturados). ⚠ Domínio ainda não registrado: o mesmo valor está fixo em
+   * `src/index.html`, `public/robots.txt` e `public/sitemap.xml` — um teste
+   * confere que os quatro batem.
+   */
+  siteUrl: string;
+  /** Descrição padrão das páginas (Google e prévia de link), até ~155 caracteres. */
+  description: string;
   /** Razão social — obrigatória no site (Decreto 7.962/2013), junto com CNPJ e endereço. */
   legalName: string;
   cnpj: string;
@@ -49,6 +58,9 @@ export interface StoreConfig {
 export const STORE_CONFIG: StoreConfig = {
   name: 'Nani Perfumes',
   tagline: 'Essência do Oriente',
+  siteUrl: 'https://www.naniperfumes.com.br',
+  description:
+    'Perfumes árabes originais: Lattafa, Armaf, Afnan, Rasasi e mais. Frascos lacrados e decants, com entrega para todo o Brasil.',
   legalName: 'Nani Comércio de Perfumes LTDA',
   cnpj: '12.345.678/0001-90',
   address: 'Alameda Lorena, 1420 - Jardins, São Paulo - SP, 01424-001',

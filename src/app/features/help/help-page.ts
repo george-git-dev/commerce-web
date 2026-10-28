@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -7,6 +7,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { HELP_GROUP_LABELS, HELP_PAGES } from '../../core/config/help-pages';
 import { STORE_CONFIG } from '../../core/config/store-config';
 import { StorefrontContent } from '../../core/services/storefront-content';
+import { Seo } from '../../core/seo/seo';
 
 /** `/ajuda/:pagina` — uma página genérica para ajuda, políticas e contato. */
 @Component({
@@ -37,4 +38,18 @@ export class HelpPageView {
     const page = this.page();
     return page ? HELP_GROUP_LABELS[page.group] : '';
   });
+
+  constructor() {
+    const seo = inject(Seo);
+    effect(() => {
+      const page = this.page();
+      const path = `/ajuda/${this.paramMap().get('pagina') ?? ''}`;
+      seo.update(
+        page
+          ? { title: `${page.title} | Nani Perfumes`, description: page.summary }
+          : { title: 'Página não encontrada | Nani Perfumes', noindex: true },
+        path,
+      );
+    });
+  }
 }

@@ -11,7 +11,13 @@ import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/
 import { GlobalErrorHandler } from './core/errors/global-error-handler';
 import { apiInterceptor } from './core/http/api-interceptor';
 import { mockApiInterceptor } from './core/http/mock-api-interceptor';
-import { provideRouter, withInMemoryScrolling, withRouterConfig } from '@angular/router';
+import {
+  provideRouter,
+  TitleStrategy,
+  withInMemoryScrolling,
+  withRouterConfig,
+} from '@angular/router';
+import { SeoTitleStrategy } from './core/seo/seo';
 import { routes } from './app.routes';
 
 registerLocaleData(ptBr);
@@ -33,6 +39,8 @@ export const appConfig: ApplicationConfig = {
       // Sem isto, clicar duas vezes no mesmo item de menu não rola de novo até a seção.
       withRouterConfig({ onSameUrlNavigation: 'reload' }),
     ),
+    // Título + descrição, canonical, Open Graph e robots a cada navegação.
+    { provide: TitleStrategy, useClass: SeoTitleStrategy },
     { provide: LOCALE_ID, useValue: 'pt-BR' },
   ],
 };
