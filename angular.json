@@ -77,7 +77,8 @@
               "buildTarget": "commerce-web:build:production"
             },
             "development": {
-              "buildTarget": "commerce-web:build:development"
+              "buildTarget": "commerce-web:build:development",
+              "proxyConfig": "proxy.conf.json"
             }
           },
           "defaultConfiguration": "development"
