@@ -1,7 +1,9 @@
 import {
   ApplicationConfig,
   ErrorHandler,
+  inject,
   LOCALE_ID,
+  provideAppInitializer,
   provideBrowserGlobalErrorListeners,
   provideZonelessChangeDetection,
 } from '@angular/core';
@@ -19,6 +21,9 @@ import {
 } from '@angular/router';
 import { SeoTitleStrategy } from './core/seo/seo';
 import { routes } from './app.routes';
+import { AUTH_MODE } from './core/config/auth-mode';
+import { AuthService } from './core/services/auth-service';
+import { environment } from '../environments/environment';
 
 registerLocaleData(ptBr);
 
@@ -42,5 +47,9 @@ export const appConfig: ApplicationConfig = {
     // Título + descrição, canonical, Open Graph e robots a cada navegação.
     { provide: TitleStrategy, useClass: SeoTitleStrategy },
     { provide: LOCALE_ID, useValue: 'pt-BR' },
+    // Login de verdade (BFF) ou simulado, conforme o ambiente (`npm run start:mock`).
+    { provide: AUTH_MODE, useValue: environment.auth },
+    // Antes da primeira tela: quem está logado (`GET /api/me` no modo bff; prazo de 5 s).
+    provideAppInitializer(() => inject(AuthService).init()),
   ],
 };

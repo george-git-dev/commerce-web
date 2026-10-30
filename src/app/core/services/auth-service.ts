@@ -1,8 +1,10 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
+import { AUTH_MODE } from '../config/auth-mode';
 import { hasPermission, Permission } from '../config/permissions';
 import { ActionResult, AuthResult, AuthUser } from '../models/auth';
 import { isValidCpf, isValidPhone } from '../utils/br-format';
 import { AccountDirectory } from './account-directory';
+import { BffSession } from './bff-session';
 
 const STORAGE_KEY = 'nani.auth.mock';
 export const MIN_PASSWORD_LENGTH = 8;
@@ -47,14 +49,23 @@ function nameFromEmail(email: string): string {
 }
 
 /**
- * Autenticação SIMULADA (dívida técnica até a Fase 2 / B4): aceita qualquer e-mail
- * válido com senha de 8+ caracteres e guarda só nome e e-mail no navegador —
- * nunca a senha. Na Fase 2 vira `POST /auth/login` e `POST /auth/register`, com
- * token JWT (de preferência em cookie httpOnly) e as regras do portão de segurança
- * (BCrypt, limite de tentativas, recuperação de senha).
+ * Porta única da sessão para as telas, em dois modos (`AUTH_MODE`):
+ * - `bff`: login de verdade. Entrar, criar conta e sair acontecem no
+ *   commerce-bff-nani/Keycloak (`startLogin`, `startRegister`, `logout`); ao
+ *   abrir o site, `init()` pergunta ao BFF quem está logado (`GET /api/me`).
+ *   Nada da sessão fica no navegador além do cookie HttpOnly do BFF.
+ * - `mock`: autenticação SIMULADA (testes e `npm run start:mock`): aceita
+ *   qualquer e-mail válido com senha de 8+ e guarda só nome e e-mail no
+ *   navegador — nunca a senha.
+ * Perfil, CPF, troca de senha, exclusão de conta e entrega em mãos continuam
+ * simulados nos dois modos até existirem os endpoints (B2.3/B4).
  */
 @Injectable({ providedIn: 'root' })
 export class AuthService {
+  private readonly mode = inject(AUTH_MODE);
+  /** Login de verdade (BFF/Keycloak)? Fora dele, as telas de login simulado. */
+  readonly usesBff = this.mode === 'bff';
+  private readonly bff = inject(BffSession);
   /** Perfis, entrega em mãos e bloqueio (o backoffice altera em Clientes/Equipe). */
   private readonly directory = inject(AccountDirectory);
   private readonly state = signal<AuthUser | null>(this.restore());
@@ -65,6 +76,22 @@ export class AuthService {
   readonly isLoggedIn = computed(() => this.state() !== null);
   /** Tem acesso ao backoffice (algum perfil além de cliente). */
   readonly isStaff = computed(() => this.can('admin:access'));
+
+  /** Abertura do site: no modo `bff`, pergunta ao BFF quem está logado. */
+  async init(): Promise<void> {
+    if (!this.usesBff) return;
+    this.state.set(this.withFlags(await this.bff.me()));
+  }
+
+  /** Entrar (modo `bff`): tela do Keycloak e volta para `returnTo`. */
+  startLogin(returnTo: string): void {
+    this.bff.login(returnTo);
+  }
+
+  /** Criar conta (modo `bff`): tela de cadastro do Keycloak e volta para `returnTo`. */
+  startRegister(returnTo: string): void {
+    this.bff.register(returnTo);
+  }
 
   /** O usuário logado tem a permissão? (Só para a tela — o back confere de novo.) */
   can(permission: Permission): boolean {
@@ -277,7 +304,14 @@ export class AuthService {
     return { ok: true };
   }
 
+  /** Sair. No modo `bff`, encerra a sessão no BFF e no Keycloak (sai da SPA). */
   logout(): void {
+    this.clearSession();
+    if (this.usesBff) void this.bff.logout();
+  }
+
+  /** Esquece a sessão só aqui no front (ex.: o back respondeu que ela expirou). */
+  clearSession(): void {
     this.state.set(null);
     storeUser(null);
   }
@@ -300,7 +334,9 @@ export class AuthService {
    */
   private withFlags(user: AuthUser | null): AuthUser | null {
     if (!user) return null;
-    const next: AuthUser = { ...user, roles: this.directory.rolesOf(user.email) };
+    // No modo `bff` os perfis vêm do Keycloak; no mock, da lista simulada.
+    const roles = this.usesBff ? (user.roles ?? []) : this.directory.rolesOf(user.email);
+    const next: AuthUser = { ...user, roles };
     delete next.inHandsDelivery;
     if (this.directory.canReceiveInHands(user.email)) next.inHandsDelivery = true;
     return next;
@@ -308,6 +344,10 @@ export class AuthService {
 
   /** Sessão salva no navegador; conta bloqueada desde então = sai. */
   private restore(): AuthUser | null {
+    if (this.usesBff) {
+      storeUser(null); // limpa o que o login simulado tenha deixado
+      return null;
+    }
     const stored = readStoredUser();
     if (
       stored &&
@@ -322,7 +362,7 @@ export class AuthService {
   private start(input: AuthUser): AuthResult {
     const user = this.withFlags(input)!;
     this.state.set(user);
-    storeUser(user);
+    if (!this.usesBff) storeUser(user);
     return { ok: true, user };
   }
 

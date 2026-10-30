@@ -18,6 +18,20 @@ export const authGuard: CanActivateFn = (_route, state) => {
 };
 
 /**
+ * `/login`, `/esqueci-senha` e `/redefinir-senha`. No modo `bff` essas telas são
+ * do Keycloak (F20): manda direto para o login de verdade, levando o `?retorno=`;
+ * quem já está logado volta para onde ia. No modo mock, abre a tela simulada.
+ */
+export const loginPageGuard: CanActivateFn = (route) => {
+  const auth = inject(AuthService);
+  if (!auth.usesBff) return true;
+  const target = safeReturnUrl(route.queryParamMap.get(RETURN_URL_PARAM));
+  if (auth.isLoggedIn()) return inject(Router).parseUrl(target);
+  auth.startLogin(target);
+  return false;
+};
+
+/**
  * Só aceita caminho interno ("/x"). Bloqueia redirecionamento aberto para outro
  * site: "//x", "/\\x" (o navegador trata como "//x") e "https://x".
  */

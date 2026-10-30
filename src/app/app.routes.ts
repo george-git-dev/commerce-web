@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { authGuard } from './core/guards/auth-guard';
+import { authGuard, loginPageGuard } from './core/guards/auth-guard';
 import { customerGuard, staffGuard } from './core/guards/role-guard';
 import { cartNotEmptyGuard } from './core/guards/cart-guard';
 
@@ -48,18 +48,21 @@ export const routes: Routes = [
   {
     path: 'login',
     data: { seo: { noindex: true } },
+    canActivate: [loginPageGuard],
     title: 'Entrar',
     loadComponent: () => import('./features/auth/login').then((m) => m.Login),
   },
   {
     path: 'esqueci-senha',
     data: { seo: { noindex: true } },
+    canActivate: [loginPageGuard],
     title: 'Esqueci minha senha',
     loadComponent: () => import('./features/auth/forgot-password').then((m) => m.ForgotPassword),
   },
   {
     path: 'redefinir-senha',
     data: { seo: { noindex: true } },
+    canActivate: [loginPageGuard],
     title: 'Nova senha',
     loadComponent: () => import('./features/auth/reset-password').then((m) => m.ResetPassword),
   },

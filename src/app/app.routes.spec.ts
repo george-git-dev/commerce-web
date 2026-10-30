@@ -1,5 +1,6 @@
 import { Route, Routes } from '@angular/router';
 import { routes } from './app.routes';
+import { loginPageGuard } from './core/guards/auth-guard';
 import { STORE_CONFIG } from './core/config/store-config';
 import { ADMIN_NAV } from './features/admin/admin-nav';
 import { ADMIN_ROUTES } from './features/admin/admin.routes';
@@ -67,8 +68,12 @@ describe('rotas', () => {
     expect(private_.length).toBeGreaterThanOrEqual(10);
     for (const path of private_) expect(guards(path).length, path).toBe(1);
     expect(guards('finalizar-compra')).toHaveLength(3);
-    for (const open of ['', 'produtos', 'carrinho', 'login', 'seja-afiliado', 'ajuda/:pagina']) {
+    for (const open of ['', 'produtos', 'carrinho', 'seja-afiliado', 'ajuda/:pagina']) {
       expect(guards(open), open).toHaveLength(0);
+    }
+    // Telas de login: no modo bff mandam para o Keycloak.
+    for (const path of ['login', 'esqueci-senha', 'redefinir-senha']) {
+      expect(guards(path), path).toEqual([loginPageGuard]);
     }
   });
 });

@@ -42,7 +42,8 @@ export const apiInterceptor: HttpInterceptorFn = (req, next) => {
     catchError((error: unknown) => {
       const apiError = toApiError(error, requestId);
       if (apiError.kind === 'session') {
-        auth.logout();
+        // A sessão já acabou no back: só limpa aqui (sem chamar o logout do BFF).
+        auth.clearSession();
         notifier.error(apiError.message);
         const current = router.url;
         if (!current.startsWith('/login')) {

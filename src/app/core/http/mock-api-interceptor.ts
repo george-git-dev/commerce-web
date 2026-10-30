@@ -1,6 +1,7 @@
 import { HttpErrorResponse, HttpInterceptorFn, HttpResponse } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { delay, mergeMap, NEVER, of, throwError, timer } from 'rxjs';
+import { BFF_PATHS } from '../services/bff-session';
 import { API_PREFIX } from './api-interceptor';
 import { FailureSimulator } from './failure-simulator';
 
@@ -27,10 +28,12 @@ const BACK_PROBLEMS: Record<Exclude<keyof typeof STATUS, 'offline'>, object> = {
  * Back FALSO (Fase 1): responde às chamadas `/api/...` com sucesso depois de um
  * pequeno atraso — ou com a falha que o `FailureSimulator` mandar. Fica por
  * último na cadeia, para timeout/nova tentativa/avisos valerem como no back real.
- * Fase 2: sai daqui e as chamadas vão para o Spring.
+ * Fase 2: sai daqui e as chamadas vão para o Spring. Sessão e login (`BFF_PATHS`)
+ * já vão para o BFF de verdade.
  */
 export const mockApiInterceptor: HttpInterceptorFn = (req, next) => {
   if (!req.url.startsWith(API_PREFIX)) return next(req);
+  if (BFF_PATHS.some((path) => req.url.startsWith(path))) return next(req);
   const mode = inject(FailureSimulator).mode();
   if (!mode) return of(new HttpResponse({ status: 200, body: { ok: true } })).pipe(delay(350));
   if (mode === 'lento') return NEVER;
