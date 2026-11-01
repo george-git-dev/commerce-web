@@ -19,6 +19,15 @@ import { Addresses } from './addresses/addresses';
 import { DeleteAccount } from './delete-account/delete-account';
 import { Orders } from './orders/orders';
 import { Profile } from './profile/profile';
+import { Profile as ProfileData, ProfileService } from '../../core/services/profile-service';
+import { of, throwError } from 'rxjs';
+
+const ANA_PROFILE: ProfileData = {
+  name: 'Ana Souza',
+  email: 'ana@email.com',
+  cpf: '***.444.444-**',
+  phone: '11987654321',
+};
 import { StoreCreditPage } from './store-credit/store-credit-page';
 
 const titles = (fixture: { nativeElement: HTMLElement }) =>
@@ -172,6 +181,27 @@ describe('Dados pessoais', () => {
     expect(auth.user()?.name).toBe('Ana Lima');
     expect(auth.user()?.cpf).toBeTruthy();
     expect($$(fixture, '[formControlName="cpf"]')).toHaveLength(0);
+  });
+
+  it('dados vêm do back: carregando, falha com "tentar de novo" e depois o formulário', async () => {
+    const answers = [throwError(() => new Error('fora do ar')), of(ANA_PROFILE)];
+    const { fixture } = await renderAt('/minha-conta/dados', Profile, {
+      setup: () => loginAs('customer'),
+      providers: [{ provide: ProfileService, useValue: { load: () => answers.shift()! } }],
+    });
+    expect(textOf(fixture)).toContain('Não conseguimos carregar seus dados agora.');
+    (
+      $$(fixture, 'button').find((b) => b.textContent?.includes('Tentar de novo')) as HTMLElement
+    ).click();
+    await settle(fixture);
+    expect(($(fixture, '[formControlName="name"]') as HTMLInputElement).value).toBe('Ana Souza');
+    expect(($(fixture, '[formControlName="phone"]') as HTMLInputElement).value).toBe(
+      '(11) 98765-4321',
+    );
+    expect(textOf(fixture)).not.toContain('Carregando');
+    expect($$(fixture, 'input[readonly]').map((i) => (i as HTMLInputElement).value)).toContain(
+      '***.444.444-**',
+    );
   });
 
   it('dados inválidos não salvam', async () => {

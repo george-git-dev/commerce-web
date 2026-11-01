@@ -7,75 +7,92 @@
     </nav>
     <h1>Dados pessoais</h1>
 
-    <form class="f-card" [formGroup]="data" (ngSubmit)="saveData()" novalidate>
-      <h2>Seus dados</h2>
-      <div class="f-grid">
-        <label class="f-field">
-          Nome completo
-          <input
-            formControlName="name"
-            autocomplete="name"
-            [attr.aria-invalid]="invalid(data.controls.name) || null"
-          />
-          @if (invalid(data.controls.name)) {
-            <small class="f-error">Informe seu nome.</small>
-          }
-        </label>
-
-        <label class="f-field">
-          E-mail
-          <input [value]="auth.user()?.email" readonly aria-readonly="true" />
-          <small class="profile__hint">
-            Para trocar o e-mail, fale com o <a routerLink="/ajuda/contato">atendimento</a>.
-          </small>
-        </label>
-
-        @if (auth.user()?.cpf; as cpf) {
-          <label class="f-field profile__half">
-            CPF
-            <input [value]="maskCpf(cpf)" readonly aria-readonly="true" />
-          </label>
-        } @else {
-          <label class="f-field profile__half">
-            CPF
+    @if (loadFailed()) {
+      <div class="f-card" role="alert">
+        <h2>Seus dados</h2>
+        <p>Não conseguimos carregar seus dados agora.</p>
+        <div class="f-actions">
+          <button matButton="outlined" type="button" (click)="load()">Tentar de novo</button>
+        </div>
+      </div>
+    } @else if (!profile()) {
+      <div class="f-card" aria-busy="true">
+        <h2>Seus dados</h2>
+        <p>Carregando seus dados…</p>
+      </div>
+    } @else {
+      <form class="f-card" [formGroup]="data" (ngSubmit)="saveData()" novalidate>
+        <h2>Seus dados</h2>
+        <div class="f-grid">
+          <label class="f-field">
+            Nome completo
             <input
-              formControlName="cpf"
-              appMask="cpf"
-              inputmode="numeric"
-              placeholder="000.000.000-00"
-              [attr.aria-invalid]="invalid(data.controls.cpf) || null"
+              formControlName="name"
+              autocomplete="name"
+              [attr.aria-invalid]="invalid(data.controls.name) || null"
             />
-            @if (invalid(data.controls.cpf)) {
-              <small class="f-error">CPF inválido.</small>
-            } @else {
-              <small class="profile__hint">Usado na nota fiscal. Não dá para alterar depois.</small>
+            @if (invalid(data.controls.name)) {
+              <small class="f-error">Informe seu nome.</small>
             }
           </label>
-        }
 
-        <label class="f-field profile__half">
-          Celular
-          <input
-            formControlName="phone"
-            appMask="phone"
-            type="tel"
-            inputmode="tel"
-            autocomplete="tel-national"
-            placeholder="(11) 98765-4321"
-            [attr.aria-invalid]="invalid(data.controls.phone) || null"
-          />
-          @if (invalid(data.controls.phone)) {
-            <small class="f-error">Celular inválido.</small>
+          <label class="f-field">
+            E-mail
+            <input [value]="profile()?.email" readonly aria-readonly="true" />
+            <small class="profile__hint">
+              Para trocar o e-mail, fale com o <a routerLink="/ajuda/contato">atendimento</a>.
+            </small>
+          </label>
+
+          @if (profile()?.cpf; as cpf) {
+            <label class="f-field profile__half">
+              CPF
+              <input [value]="cpf" readonly aria-readonly="true" />
+            </label>
+          } @else {
+            <label class="f-field profile__half">
+              CPF
+              <input
+                formControlName="cpf"
+                appMask="cpf"
+                inputmode="numeric"
+                placeholder="000.000.000-00"
+                [attr.aria-invalid]="invalid(data.controls.cpf) || null"
+              />
+              @if (invalid(data.controls.cpf)) {
+                <small class="f-error">CPF inválido.</small>
+              } @else {
+                <small class="profile__hint"
+                  >Usado na nota fiscal. Não dá para alterar depois.</small
+                >
+              }
+            </label>
           }
-        </label>
-      </div>
-      @if (dataError(); as message) {
-        <p class="f-error profile__message" role="alert">{{ message }}</p>
-      }
-      <div class="f-actions">
-        <button matButton="filled" class="ui-cta" type="submit">Salvar dados</button>
-      </div>
-    </form>
+
+          <label class="f-field profile__half">
+            Celular
+            <input
+              formControlName="phone"
+              appMask="phone"
+              type="tel"
+              inputmode="tel"
+              autocomplete="tel-national"
+              placeholder="(11) 98765-4321"
+              [attr.aria-invalid]="invalid(data.controls.phone) || null"
+            />
+            @if (invalid(data.controls.phone)) {
+              <small class="f-error">Celular inválido.</small>
+            }
+          </label>
+        </div>
+        @if (dataError(); as message) {
+          <p class="f-error profile__message" role="alert">{{ message }}</p>
+        }
+        <div class="f-actions">
+          <button matButton="filled" class="ui-cta" type="submit">Salvar dados</button>
+        </div>
+      </form>
+    }
 
     <form class="f-card" [formGroup]="password" (ngSubmit)="savePassword()" novalidate>
       <h2>Trocar senha</h2>

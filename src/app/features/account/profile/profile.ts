@@ -11,7 +11,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { RouterLink } from '@angular/router';
 import { AuthService, MIN_PASSWORD_LENGTH } from '../../../core/services/auth-service';
-import { maskCpf } from '../../../core/utils/br-format';
+import { Profile as ProfileData, ProfileService } from '../../../core/services/profile-service';
+import { formatPhone } from '../../../core/utils/br-format';
 import { cpfValidator, phoneValidator } from '../../../core/utils/br-validators';
 import { InputMask } from '../../../shared/input-mask/input-mask';
 
@@ -21,7 +22,10 @@ function samePasswords(group: AbstractControl): ValidationErrors | null {
   return confirm && next !== confirm ? { mismatch: true } : null;
 }
 
-/** `/minha-conta/dados` — nome, celular, CPF (se faltar) e troca de senha. */
+/**
+ * `/minha-conta/dados` — nome, celular, CPF (se faltar) e troca de senha. Os dados vêm do back
+ * (`ProfileService` → BFF `GET /api/me/profile`); salvar ainda é simulado (próxima entrega).
+ */
 @Component({
   selector: 'app-profile',
   imports: [MatButtonModule, MatIconModule, ReactiveFormsModule, RouterLink, InputMask],
@@ -33,14 +37,17 @@ export class Profile {
   private readonly fb = inject(NonNullableFormBuilder);
   private readonly snackBar = inject(MatSnackBar);
   protected readonly auth = inject(AuthService);
+  private readonly profiles = inject(ProfileService);
   protected readonly minPassword = MIN_PASSWORD_LENGTH;
-  protected readonly maskCpf = maskCpf;
 
-  private readonly user = this.auth.user();
+  /** Dados como estão no back (`null` enquanto carrega). */
+  protected readonly profile = signal<ProfileData | null>(null);
+  /** Não deu para carregar (o aviso global já saiu pelo interceptor); a tela oferece tentar de novo. */
+  protected readonly loadFailed = signal(false);
 
   protected readonly data = this.fb.group({
-    name: [this.user?.name ?? '', [Validators.required, Validators.minLength(2)]],
-    phone: [this.user?.phone ?? '', phoneValidator],
+    name: ['', [Validators.required, Validators.minLength(2)]],
+    phone: ['', phoneValidator],
     // Só aparece para quem ainda não tem CPF (conta antiga ou Google).
     cpf: ['', cpfValidator],
   });
@@ -57,6 +64,22 @@ export class Profile {
   protected readonly passwordError = signal<string | null>(null);
   protected readonly showPasswords = signal(false);
 
+  constructor() {
+    this.load();
+  }
+
+  /** Busca os dados no back e preenche o formulário. */
+  protected load(): void {
+    this.loadFailed.set(false);
+    this.profiles.load().subscribe({
+      next: (profile) => {
+        this.profile.set(profile);
+        this.data.reset({ name: profile.name, phone: formatPhone(profile.phone ?? ''), cpf: '' });
+      },
+      error: () => this.loadFailed.set(true),
+    });
+  }
+
   protected invalid(control: { invalid: boolean; touched: boolean; dirty: boolean }): boolean {
     return control.invalid && (control.touched || control.dirty);
   }
@@ -67,14 +90,14 @@ export class Profile {
       return;
     }
     const { name, phone, cpf } = this.data.getRawValue();
-    if (cpf && !this.auth.user()?.cpf) {
+    if (cpf && !this.profile()?.cpf) {
       const result = this.auth.completeCpf(cpf);
       if (!result.ok) return this.dataError.set(result.message);
     }
     const result = this.auth.updateProfile(name, phone);
     if (!result.ok) return this.dataError.set(result.message);
     this.dataError.set(null);
-    this.data.markAsPristine();
+    this.load();
     this.snackBar.open('Dados atualizados.', 'Fechar', { duration: 3000 });
   }
 

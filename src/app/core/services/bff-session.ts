@@ -6,8 +6,11 @@ import { Role, ROLE_PERMISSIONS } from '../config/permissions';
 import { NO_RETRY, REQUEST_TIMEOUT, SKIP_GLOBAL_ERROR } from '../http/api-context';
 import { AuthUser } from '../models/auth';
 
-/** Rotas do BFF que não passam pelo back falso (`mockApiInterceptor`). */
-export const BFF_PATHS = ['/api/auth/'] as const;
+/**
+ * Rotas que JÁ vão para o back de verdade (BFF): não passam pelo back falso
+ * (`mockApiInterceptor`). Cada entrega que tira um mock acrescenta a rota aqui.
+ */
+export const BFF_PATHS = ['/api/auth/', '/api/me/profile'] as const;
 
 /** A abertura do site espera o `/api/me`: prazo curto para não travar a primeira tela. */
 export const SESSION_CHECK_TIMEOUT_MS = 5_000;

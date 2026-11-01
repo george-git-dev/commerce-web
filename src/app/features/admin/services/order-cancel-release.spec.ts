@@ -7,10 +7,15 @@ import { canCancel } from './admin-order-flow';
 import { AdminOrderStore } from './admin-order-store';
 
 describe('cancelar pedido devolve cupom e unidades de promoção', () => {
+  // Pedidos fictícios do admin são sorteados pela data: data fixa = mesmos pedidos sempre
+  // (em alguns dias o sorteio não gerava pedido com cupom que ainda pode ser cancelado).
   beforeEach(() => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date(2026, 9, 12, 15));
     localStorage.clear();
     TestBed.inject(AuthService).login('admin@email.com', '12345678');
   });
+  afterEach(() => vi.useRealTimers());
 
   it('uso do cupom e desconto dado voltam; auditoria registra', () => {
     const store = TestBed.inject(AdminOrderStore);
