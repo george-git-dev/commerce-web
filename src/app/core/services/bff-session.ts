@@ -61,6 +61,11 @@ export class BffSession {
     this.go(`/api/auth/register?returnTo=${encodeURIComponent(returnTo)}`);
   }
 
+  /** Troca de senha na tela do Keycloak (confere a senha atual); depois volta para `returnTo`. */
+  changePassword(returnTo: string): void {
+    this.go(`/api/auth/password?returnTo=${encodeURIComponent(returnTo)}`);
+  }
+
   /**
    * Encerra a sessão no BFF e depois no Keycloak (`redirectUrl` = end-session,
    * que volta para a loja). Se o BFF não responder, volta para o início.

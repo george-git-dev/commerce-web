@@ -94,65 +94,77 @@
       </form>
     }
 
-    <form class="f-card" [formGroup]="password" (ngSubmit)="savePassword()" novalidate>
-      <h2>Trocar senha</h2>
-      <div class="f-grid">
-        <label class="f-field">
-          Senha atual
-          <input
-            formControlName="current"
-            [type]="showPasswords() ? 'text' : 'password'"
-            autocomplete="current-password"
-            [attr.aria-invalid]="invalid(password.controls.current) || null"
-          />
-          @if (invalid(password.controls.current)) {
-            <small class="f-error">Informe a senha atual.</small>
-          }
-        </label>
-        <label class="f-field">
-          Nova senha
-          <input
-            formControlName="next"
-            [type]="showPasswords() ? 'text' : 'password'"
-            autocomplete="new-password"
-            [attr.aria-invalid]="invalid(password.controls.next) || null"
-          />
-          @if (invalid(password.controls.next)) {
-            <small class="f-error">Pelo menos {{ minPassword }} caracteres.</small>
-          }
-        </label>
-        <label class="f-field">
-          Confirmar nova senha
-          <input
-            formControlName="confirm"
-            [type]="showPasswords() ? 'text' : 'password'"
-            autocomplete="new-password"
-            [attr.aria-invalid]="
-              ((password.hasError('mismatch') || password.controls.confirm.invalid) &&
-                password.controls.confirm.touched) ||
-              null
-            "
-          />
-          @if (password.hasError('mismatch') && password.controls.confirm.touched) {
-            <small class="f-error">As senhas não conferem.</small>
-          }
-        </label>
+    @if (auth.usesBff) {
+      <div class="f-card">
+        <h2>Trocar senha</h2>
+        <p>Você vai para a tela segura de senha da Nani e volta para cá depois de trocar.</p>
+        <div class="f-actions">
+          <button matButton="filled" class="ui-cta" type="button" (click)="changePassword()">
+            Trocar senha
+          </button>
+        </div>
       </div>
-      <label class="profile__check">
-        <input
-          type="checkbox"
-          [checked]="showPasswords()"
-          (change)="showPasswords.set($any($event.target).checked)"
-        />
-        Mostrar senhas
-      </label>
-      @if (passwordError(); as message) {
-        <p class="f-error profile__message" role="alert">{{ message }}</p>
-      }
-      <div class="f-actions">
-        <button matButton="filled" class="ui-cta" type="submit">Trocar senha</button>
-      </div>
-    </form>
+    } @else {
+      <form class="f-card" [formGroup]="password" (ngSubmit)="savePassword()" novalidate>
+        <h2>Trocar senha</h2>
+        <div class="f-grid">
+          <label class="f-field">
+            Senha atual
+            <input
+              formControlName="current"
+              [type]="showPasswords() ? 'text' : 'password'"
+              autocomplete="current-password"
+              [attr.aria-invalid]="invalid(password.controls.current) || null"
+            />
+            @if (invalid(password.controls.current)) {
+              <small class="f-error">Informe a senha atual.</small>
+            }
+          </label>
+          <label class="f-field">
+            Nova senha
+            <input
+              formControlName="next"
+              [type]="showPasswords() ? 'text' : 'password'"
+              autocomplete="new-password"
+              [attr.aria-invalid]="invalid(password.controls.next) || null"
+            />
+            @if (invalid(password.controls.next)) {
+              <small class="f-error">Pelo menos {{ minPassword }} caracteres.</small>
+            }
+          </label>
+          <label class="f-field">
+            Confirmar nova senha
+            <input
+              formControlName="confirm"
+              [type]="showPasswords() ? 'text' : 'password'"
+              autocomplete="new-password"
+              [attr.aria-invalid]="
+                ((password.hasError('mismatch') || password.controls.confirm.invalid) &&
+                  password.controls.confirm.touched) ||
+                null
+              "
+            />
+            @if (password.hasError('mismatch') && password.controls.confirm.touched) {
+              <small class="f-error">As senhas não conferem.</small>
+            }
+          </label>
+        </div>
+        <label class="profile__check">
+          <input
+            type="checkbox"
+            [checked]="showPasswords()"
+            (change)="showPasswords.set($any($event.target).checked)"
+          />
+          Mostrar senhas
+        </label>
+        @if (passwordError(); as message) {
+          <p class="f-error profile__message" role="alert">{{ message }}</p>
+        }
+        <div class="f-actions">
+          <button matButton="filled" class="ui-cta" type="submit">Trocar senha</button>
+        </div>
+      </form>
+    }
 
     <p class="profile__delete">
       Quer sair da Nani Perfumes?

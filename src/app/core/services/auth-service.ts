@@ -93,6 +93,11 @@ export class AuthService {
     this.bff.register(returnTo);
   }
 
+  /** Trocar senha (modo `bff`): tela do Keycloak e volta para `returnTo`. */
+  startPasswordChange(returnTo: string): void {
+    this.bff.changePassword(returnTo);
+  }
+
   /** O usuário logado tem a permissão? (Só para a tela — o back confere de novo.) */
   can(permission: Permission): boolean {
     return hasPermission(this.state()?.roles, permission);

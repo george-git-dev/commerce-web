@@ -101,12 +101,14 @@ describe('login de verdade (modo bff)', () => {
     backend = { verify: () => undefined } as never;
   });
 
-  it('entrar e criar conta levam ao BFF com o caminho de volta', () => {
+  it('entrar, criar conta e trocar senha levam ao BFF com o caminho de volta', () => {
     auth.startLogin('/finalizar-compra?etapa=2');
     auth.startRegister('/minha-conta');
+    auth.startPasswordChange('/minha-conta/dados');
     expect(visited).toEqual([
       '/api/auth/login?returnTo=%2Ffinalizar-compra%3Fetapa%3D2',
       '/api/auth/register?returnTo=%2Fminha-conta',
+      '/api/auth/password?returnTo=%2Fminha-conta%2Fdados',
     ]);
   });
 

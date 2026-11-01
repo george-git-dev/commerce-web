@@ -19,6 +19,7 @@ import { Addresses } from './addresses/addresses';
 import { DeleteAccount } from './delete-account/delete-account';
 import { Orders } from './orders/orders';
 import { Profile } from './profile/profile';
+import { AUTH_MODE } from '../../core/config/auth-mode';
 import { Profile as ProfileData, ProfileService } from '../../core/services/profile-service';
 import { of, throwError } from 'rxjs';
 
@@ -202,6 +203,24 @@ describe('Dados pessoais', () => {
     expect($$(fixture, 'input[readonly]').map((i) => (i as HTMLInputElement).value)).toContain(
       '***.444.444-**',
     );
+  });
+
+  it('login de verdade: trocar senha é um botão que leva à tela do Keycloak', async () => {
+    const { fixture } = await renderAt('/minha-conta/dados', Profile, {
+      setup: () => loginAs('customer'),
+      providers: [
+        { provide: AUTH_MODE, useValue: 'bff' },
+        { provide: ProfileService, useValue: { load: () => of(ANA_PROFILE) } },
+      ],
+    });
+    const go = vi
+      .spyOn(TestBed.inject(AuthService), 'startPasswordChange')
+      .mockImplementation(() => undefined);
+    expect($$(fixture, '[formControlName="current"]')).toHaveLength(0);
+    (
+      $$(fixture, 'button').find((b) => b.textContent?.includes('Trocar senha')) as HTMLElement
+    ).click();
+    expect(go).toHaveBeenCalledWith('/minha-conta/dados');
   });
 
   it('dados inválidos não salvam', async () => {

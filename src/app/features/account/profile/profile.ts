@@ -101,6 +101,12 @@ export class Profile {
     this.snackBar.open('Dados atualizados.', 'Fechar', { duration: 3000 });
   }
 
+  /** Login de verdade: a troca de senha é na tela do Keycloak (confere a senha atual). */
+  protected changePassword(): void {
+    this.auth.startPasswordChange('/minha-conta/dados');
+  }
+
+  /** Só no modo simulado (testes e `start:mock`). */
   protected savePassword(): void {
     if (this.password.invalid) {
       this.password.markAllAsTouched();
