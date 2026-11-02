@@ -29,6 +29,8 @@
             <input
               formControlName="name"
               autocomplete="name"
+              [readonly]="auth.usesBff"
+              [attr.aria-readonly]="auth.usesBff || null"
               [attr.aria-invalid]="invalid(data.controls.name) || null"
             />
             @if (invalid(data.controls.name)) {
@@ -60,7 +62,7 @@
                 [attr.aria-invalid]="invalid(data.controls.cpf) || null"
               />
               @if (invalid(data.controls.cpf)) {
-                <small class="f-error">CPF inválido.</small>
+                <small class="f-error">{{ serverError('cpf') ?? 'CPF inválido.' }}</small>
               } @else {
                 <small class="profile__hint"
                   >Usado na nota fiscal. Não dá para alterar depois.</small
@@ -81,7 +83,7 @@
               [attr.aria-invalid]="invalid(data.controls.phone) || null"
             />
             @if (invalid(data.controls.phone)) {
-              <small class="f-error">Celular inválido.</small>
+              <small class="f-error">{{ serverError('phone') ?? 'Celular inválido.' }}</small>
             }
           </label>
         </div>
@@ -89,7 +91,9 @@
           <p class="f-error profile__message" role="alert">{{ message }}</p>
         }
         <div class="f-actions">
-          <button matButton="filled" class="ui-cta" type="submit">Salvar dados</button>
+          <button matButton="filled" class="ui-cta" type="submit" [disabled]="saving.running()">
+            {{ saving.running() ? 'Aguarde…' : 'Salvar dados' }}
+          </button>
         </div>
       </form>
     }

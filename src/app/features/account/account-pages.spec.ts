@@ -21,7 +21,8 @@ import { Orders } from './orders/orders';
 import { Profile } from './profile/profile';
 import { AUTH_MODE } from '../../core/config/auth-mode';
 import { Profile as ProfileData, ProfileService } from '../../core/services/profile-service';
-import { of, throwError } from 'rxjs';
+import { of, Subject, throwError } from 'rxjs';
+import { ApiError } from '../../core/http/api-errors';
 
 const ANA_PROFILE: ProfileData = {
   name: 'Ana Souza',
@@ -221,6 +222,37 @@ describe('Dados pessoais', () => {
       $$(fixture, 'button').find((b) => b.textContent?.includes('Trocar senha')) as HTMLElement
     ).click();
     expect(go).toHaveBeenCalledWith('/minha-conta/dados');
+  });
+
+  it('salvar: "Aguarde…" enquanto o back responde e erro do back no formulário', async () => {
+    const answer = new Subject<ProfileData>();
+    const { fixture } = await renderAt('/minha-conta/dados', Profile, {
+      setup: () => loginAs('customer'),
+      providers: [
+        {
+          provide: ProfileService,
+          useValue: { load: () => of({ ...ANA_PROFILE, cpf: null }), save: () => answer },
+        },
+      ],
+    });
+    type($(fixture, '[formControlName="cpf"]'), '390.533.447-05');
+    $$(fixture, 'form')[0].dispatchEvent(new Event('submit'));
+    await settle(fixture);
+    const button = () => $$(fixture, 'button[type="submit"]')[0] as HTMLButtonElement;
+    expect(button().disabled).toBe(true);
+    expect(button().textContent).toContain('Aguarde');
+
+    answer.error(
+      new ApiError('validation', 409, 'X', {
+        code: 'CPF_IN_USE',
+        detail: 'Este CPF já está em outra conta. Fale com o nosso atendimento.',
+        errors: { cpf: 'CPF já usado.' },
+      }),
+    );
+    await settle(fixture);
+    expect(button().disabled).toBe(false);
+    expect(textOf(fixture)).toContain('Este CPF já está em outra conta.');
+    expect(textOf(fixture)).toContain('CPF já usado.');
   });
 
   it('dados inválidos não salvam', async () => {

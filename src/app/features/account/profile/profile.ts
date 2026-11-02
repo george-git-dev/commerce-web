@@ -12,7 +12,9 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { RouterLink } from '@angular/router';
 import { AuthService, MIN_PASSWORD_LENGTH } from '../../../core/services/auth-service';
 import { Profile as ProfileData, ProfileService } from '../../../core/services/profile-service';
+import { ApiError } from '../../../core/http/api-errors';
 import { formatPhone } from '../../../core/utils/br-format';
+import { Busy } from '../../../shared/busy/busy';
 import { cpfValidator, phoneValidator } from '../../../core/utils/br-validators';
 import { InputMask } from '../../../shared/input-mask/input-mask';
 
@@ -24,7 +26,8 @@ function samePasswords(group: AbstractControl): ValidationErrors | null {
 
 /**
  * `/minha-conta/dados` — nome, celular, CPF (se faltar) e troca de senha. Os dados vêm do back
- * (`ProfileService` → BFF `GET /api/me/profile`); salvar ainda é simulado (próxima entrega).
+ * (`ProfileService` → BFF `/api/me/profile`). Celular e CPF salvam no back; o nome, no login
+ * de verdade, é editado na tela do Keycloak.
  */
 @Component({
   selector: 'app-profile',
@@ -52,6 +55,8 @@ export class Profile {
     cpf: ['', cpfValidator],
   });
   protected readonly dataError = signal<string | null>(null);
+  /** "Salvar dados" ocupado: botão desabilitado com "Aguarde…" até o back responder. */
+  protected readonly saving = new Busy();
 
   protected readonly password = this.fb.group(
     {
@@ -90,15 +95,31 @@ export class Profile {
       return;
     }
     const { name, phone, cpf } = this.data.getRawValue();
-    if (cpf && !this.profile()?.cpf) {
-      const result = this.auth.completeCpf(cpf);
-      if (!result.ok) return this.dataError.set(result.message);
-    }
-    const result = this.auth.updateProfile(name, phone);
-    if (!result.ok) return this.dataError.set(result.message);
     this.dataError.set(null);
-    this.load();
-    this.snackBar.open('Dados atualizados.', 'Fechar', { duration: 3000 });
+    this.saving.run(
+      this.profiles.save({ name, phone, cpf: this.profile()?.cpf ? '' : cpf }),
+      (profile) => {
+        this.profile.set(profile);
+        this.data.reset({ name: profile.name, phone: formatPhone(profile.phone ?? ''), cpf: '' });
+        this.snackBar.open('Dados atualizados.', 'Fechar', { duration: 3000 });
+      },
+      (error) => this.showError(error),
+    );
+  }
+
+  /** Mensagem do back no formulário; erro de campo (`errors`) também marca o campo. */
+  private showError(error: ApiError): void {
+    this.dataError.set(error.message);
+    for (const [field, message] of Object.entries(error.problem?.errors ?? {})) {
+      const control = this.data.get(field);
+      control?.setErrors({ server: message });
+      control?.markAsTouched();
+    }
+  }
+
+  /** Mensagem que o back mandou para o campo (ou `null` para usar a do front). */
+  protected serverError(field: 'phone' | 'cpf'): string | null {
+    return this.data.controls[field].getError('server') ?? null;
   }
 
   /** Login de verdade: a troca de senha é na tela do Keycloak (confere a senha atual). */

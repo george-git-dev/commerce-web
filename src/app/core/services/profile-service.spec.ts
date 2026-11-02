@@ -35,6 +35,33 @@ describe('ProfileService (Dados pessoais)', () => {
     expect(await loaded).toEqual(ANA);
   });
 
+  it('modo bff: salvar manda só números (CPF nulo quando não informado)', async () => {
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: AUTH_MODE, useValue: 'bff' },
+        provideHttpClient(withInterceptors([apiInterceptor, mockApiInterceptor])),
+        provideHttpClientTesting(),
+        provideRouter([]),
+      ],
+    });
+    const saved = firstValueFrom(
+      TestBed.inject(ProfileService).save({ name: 'Ana', phone: '(11) 98765-4321', cpf: '' }),
+    );
+    const req = TestBed.inject(HttpTestingController).expectOne('/api/me/profile');
+    expect(req.request.method).toBe('PATCH');
+    expect(req.request.body).toEqual({ phone: '11987654321', cpf: null });
+    req.flush(ANA);
+    expect(await saved).toEqual(ANA);
+  });
+
+  it('modo mock: erro da regra simulada chega como ApiError com a mensagem', async () => {
+    loginAs('customer');
+    const error = await firstValueFrom(
+      TestBed.inject(ProfileService).save({ name: 'A', phone: '', cpf: '' }),
+    ).catch((e) => e);
+    expect(error.message).toBe('Informe seu nome.');
+  });
+
   it('modo mock: monta do login simulado, com o CPF já mascarado', async () => {
     const auth = loginAs('customer');
     auth.completeCpf('529.982.247-25');

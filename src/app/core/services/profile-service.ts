@@ -1,8 +1,9 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { Observable, of, throwError } from 'rxjs';
 import { AUTH_MODE } from '../config/auth-mode';
-import { maskCpf } from '../utils/br-format';
+import { ApiError } from '../http/api-errors';
+import { maskCpf, onlyDigits } from '../utils/br-format';
 import { AuthService } from './auth-service';
 
 /**
@@ -16,6 +17,15 @@ export interface Profile {
   cpf: string | null;
   /** Celular com DDD, só números (ex.: `11987654321`). `null` = não informado. */
   phone: string | null;
+}
+
+/** O que a tela manda salvar. Nome só no modo simulado (no login de verdade, é no Keycloak). */
+export interface ProfileChanges {
+  name: string;
+  /** Como digitado, com ou sem máscara; vazio apaga. */
+  phone: string;
+  /** Só quando a conta ainda não tem CPF; vazio = não mexe. */
+  cpf: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -36,4 +46,28 @@ export class ProfileService {
       phone: user?.phone ?? null,
     });
   }
+
+  /**
+   * Salva celular e CPF (`PATCH /api/me/profile`) e devolve os dados atualizados. Erro do back
+   * (CPF em outra conta, campo inválido…) chega como `ApiError`, com a mensagem pronta.
+   */
+  save(changes: ProfileChanges): Observable<Profile> {
+    if (this.http) {
+      return this.http.patch<Profile>('/api/me/profile', {
+        phone: onlyDigits(changes.phone),
+        cpf: changes.cpf ? onlyDigits(changes.cpf) : null,
+      });
+    }
+    if (changes.cpf) {
+      const result = this.auth.completeCpf(changes.cpf);
+      if (!result.ok) return throwError(() => simulatedError(result.message));
+    }
+    const result = this.auth.updateProfile(changes.name, changes.phone);
+    return result.ok ? this.load() : throwError(() => simulatedError(result.message));
+  }
+}
+
+/** Erro do modo simulado no mesmo formato do back (mensagem no `detail`). */
+function simulatedError(detail: string): ApiError {
+  return new ApiError('validation', 400, 'SIMULADO', { detail });
 }
