@@ -61,6 +61,11 @@ export class BffSession {
     this.go(`/api/auth/register?returnTo=${encodeURIComponent(returnTo)}`);
   }
 
+  /** Alterar nome na tela de perfil do Keycloak; depois volta para `returnTo`. */
+  editProfile(returnTo: string): void {
+    this.go(`/api/auth/profile?returnTo=${encodeURIComponent(returnTo)}`);
+  }
+
   /** Troca de senha na tela do Keycloak (confere a senha atual); depois volta para `returnTo`. */
   changePassword(returnTo: string): void {
     this.go(`/api/auth/password?returnTo=${encodeURIComponent(returnTo)}`);

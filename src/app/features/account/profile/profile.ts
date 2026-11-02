@@ -122,6 +122,11 @@ export class Profile {
     return this.data.controls[field].getError('server') ?? null;
   }
 
+  /** Login de verdade: o nome é alterado na tela do Keycloak (é lá que ele fica guardado). */
+  protected editName(): void {
+    this.auth.startProfileEdit('/minha-conta/dados');
+  }
+
   /** Login de verdade: a troca de senha é na tela do Keycloak (confere a senha atual). */
   protected changePassword(): void {
     this.auth.startPasswordChange('/minha-conta/dados');

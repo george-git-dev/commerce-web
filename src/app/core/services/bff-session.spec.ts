@@ -105,10 +105,12 @@ describe('login de verdade (modo bff)', () => {
     auth.startLogin('/finalizar-compra?etapa=2');
     auth.startRegister('/minha-conta');
     auth.startPasswordChange('/minha-conta/dados');
+    auth.startProfileEdit('/minha-conta/dados');
     expect(visited).toEqual([
       '/api/auth/login?returnTo=%2Ffinalizar-compra%3Fetapa%3D2',
       '/api/auth/register?returnTo=%2Fminha-conta',
       '/api/auth/password?returnTo=%2Fminha-conta%2Fdados',
+      '/api/auth/profile?returnTo=%2Fminha-conta%2Fdados',
     ]);
   });
 

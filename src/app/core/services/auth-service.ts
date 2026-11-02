@@ -93,6 +93,11 @@ export class AuthService {
     this.bff.register(returnTo);
   }
 
+  /** Alterar nome (modo `bff`): tela de perfil do Keycloak e volta para `returnTo`. */
+  startProfileEdit(returnTo: string): void {
+    this.bff.editProfile(returnTo);
+  }
+
   /** Trocar senha (modo `bff`): tela do Keycloak e volta para `returnTo`. */
   startPasswordChange(returnTo: string): void {
     this.bff.changePassword(returnTo);

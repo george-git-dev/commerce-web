@@ -206,7 +206,7 @@ describe('Dados pessoais', () => {
     );
   });
 
-  it('login de verdade: trocar senha é um botão que leva à tela do Keycloak', async () => {
+  it('login de verdade: trocar senha e alterar nome levam às telas do Keycloak', async () => {
     const { fixture } = await renderAt('/minha-conta/dados', Profile, {
       setup: () => loginAs('customer'),
       providers: [
@@ -222,6 +222,15 @@ describe('Dados pessoais', () => {
       $$(fixture, 'button').find((b) => b.textContent?.includes('Trocar senha')) as HTMLElement
     ).click();
     expect(go).toHaveBeenCalledWith('/minha-conta/dados');
+
+    const editName = vi
+      .spyOn(TestBed.inject(AuthService), 'startProfileEdit')
+      .mockImplementation(() => undefined);
+    expect(($(fixture, '[formControlName="name"]') as HTMLInputElement).readOnly).toBe(true);
+    (
+      $$(fixture, 'button').find((b) => b.textContent?.includes('Alterar nome')) as HTMLElement
+    ).click();
+    expect(editName).toHaveBeenCalledWith('/minha-conta/dados');
   });
 
   it('salvar: "Aguarde…" enquanto o back responde e erro do back no formulário', async () => {

@@ -36,6 +36,13 @@
             @if (invalid(data.controls.name)) {
               <small class="f-error">Informe seu nome.</small>
             }
+            @if (auth.usesBff) {
+              <small class="profile__hint">
+                <button type="button" class="profile__link" (click)="editName()">
+                  Alterar nome
+                </button>
+              </small>
+            }
           </label>
 
           <label class="f-field">
