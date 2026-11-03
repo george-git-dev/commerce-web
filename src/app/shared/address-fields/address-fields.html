@@ -16,6 +16,10 @@
     />
     @if (invalid('cep')) {
       <small class="f-error">CEP inválido.</small>
+    } @else if (searching()) {
+      <small class="addr__cep-status" role="status">Buscando endereço…</small>
+    } @else if (cepNotice(); as notice) {
+      <small class="addr__cep-status" role="status">{{ notice }}</small>
     }
   </label>
   <a

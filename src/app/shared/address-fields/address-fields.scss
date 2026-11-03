@@ -6,6 +6,11 @@
   display: block;
 }
 
+.addr__cep-status {
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+}
+
 .addr__cep-help {
   grid-column: span 3;
   align-self: center;

@@ -1,4 +1,6 @@
 import { Component, signal } from '@angular/core';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { FormBuilder, FormControl, ReactiveFormsModule } from '@angular/forms';
 import {
@@ -10,6 +12,8 @@ import {
   textOf,
   type,
 } from '../../testing/test-helpers';
+import { AUTH_MODE } from '../core/config/auth-mode';
+import { apiInterceptor } from '../core/http/api-interceptor';
 import { AddressFields } from './address-fields/address-fields';
 import {
   addressFromForm,
@@ -221,6 +225,51 @@ describe('endereço', () => {
     noNumber.checked = false;
     noNumber.dispatchEvent(new Event('change'));
     expect(group.controls.number.enabled).toBe(true);
+  });
+
+  it('modo bff: mostra "Buscando…", preenche com o que o BFF achou e mostra o aviso quando não acha', async () => {
+    TestBed.configureTestingModule({
+      providers: [
+        ...screenProviders(),
+        { provide: AUTH_MODE, useValue: 'bff' },
+        provideHttpClient(withInterceptors([apiInterceptor])),
+        provideHttpClientTesting(),
+      ],
+    });
+    const backend = TestBed.inject(HttpTestingController);
+    const f = TestBed.createComponent(AddressHost);
+    f.detectChanges();
+    const cep = $(f, 'input[formcontrolname=cep]');
+
+    type(cep, '01310100');
+    f.detectChanges();
+    expect(textOf(f)).toContain('Buscando endereço');
+    backend.expectOne('/api/cep/01310100').flush({
+      cep: '01310100',
+      street: 'Avenida Paulista',
+      district: 'Bela Vista',
+      city: 'São Paulo',
+      state: 'SP',
+    });
+    f.detectChanges();
+    expect(f.componentInstance.group.controls.street.value).toBe('Avenida Paulista');
+    expect(textOf(f)).not.toContain('Buscando endereço');
+
+    type(cep, '69900970');
+    f.detectChanges();
+    backend
+      .expectOne('/api/cep/69900970')
+      .flush(
+        {
+          status: 404,
+          code: 'CEP_NOT_FOUND',
+          detail: 'Não encontramos esse CEP. Confira ou preencha o endereço.',
+        },
+        { status: 404, statusText: 'Not Found' },
+      );
+    f.detectChanges();
+    expect(textOf(f)).toContain('Não encontramos esse CEP');
+    expect(f.componentInstance.cep).toBe('69900970');
   });
 
   it('erro só aparece depois que o campo foi mexido', async () => {

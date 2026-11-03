@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { RouterLink } from '@angular/router';
@@ -64,8 +64,11 @@ export class DeliveryStep {
     // CEP já veio do carrinho: preenche o endereço sem o cliente digitar de novo.
     const address = this.form.controls.address;
     if (isValidCep(address.controls.cep.value) && !address.controls.street.value) {
-      const found = this.cepLookup.lookup(address.controls.cep.value);
-      if (found) address.patchValue(found);
+      // Sem aviso se falhar: o cliente vê os campos vazios e preenche.
+      this.cepLookup
+        .lookup(address.controls.cep.value)
+        .pipe(takeUntilDestroyed())
+        .subscribe({ next: (found) => address.patchValue(found), error: () => undefined });
     }
   }
 

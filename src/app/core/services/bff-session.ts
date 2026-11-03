@@ -10,7 +10,7 @@ import { AuthUser } from '../models/auth';
  * Rotas que JÁ vão para o back de verdade (BFF): não passam pelo back falso
  * (`mockApiInterceptor`). Cada entrega que tira um mock acrescenta a rota aqui.
  */
-export const BFF_PATHS = ['/api/auth/', '/api/me/profile'] as const;
+export const BFF_PATHS = ['/api/auth/', '/api/me/profile', '/api/cep/'] as const;
 
 /** A abertura do site espera o `/api/me`: prazo curto para não travar a primeira tela. */
 export const SESSION_CHECK_TIMEOUT_MS = 5_000;
