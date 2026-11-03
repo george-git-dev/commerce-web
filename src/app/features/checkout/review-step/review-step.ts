@@ -8,6 +8,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { Router, RouterLink } from '@angular/router';
 import { LOCAL_DELIVERY } from '../../../core/config/store-config';
 import { PAYMENT_METHOD_LABELS } from '../../../core/models/order';
+import { AuthService } from '../../../core/services/auth-service';
 import { CartStore } from '../../../core/services/cart-store';
 import { CouponService } from '../../../core/services/coupon-service';
 import { OrderService } from '../../../core/services/order-service';
@@ -37,7 +38,9 @@ export class ReviewStep {
   private readonly api = inject(ShopApi);
 
   private readonly delivery = this.state.delivery.getRawValue();
-  protected readonly recipient = this.delivery.recipient;
+  /** Nome do cliente: vai na nota fiscal e é quem recebe quando o campo ficou vazio. */
+  protected readonly customerName = inject(AuthService).user()?.name ?? '';
+  protected readonly recipient = this.delivery.recipient.trim() || this.customerName;
   protected readonly address = this.delivery.address;
   protected readonly billing = this.state.billing.getRawValue();
   protected readonly inHands = this.state.inHands();
@@ -95,7 +98,8 @@ export class ReviewStep {
         : { recipient: this.recipient, ...addressFromForm(this.address) },
       billing: {
         document: this.billing.document,
-        name: this.billing.sameAsDelivery ? this.recipient : this.billing.name,
+        // Nota em nome de quem compra, nunca de quem recebe (presente).
+        name: this.billing.sameAsDelivery ? this.customerName : this.billing.name,
         address: addressFromForm(this.billing.sameAsDelivery ? this.address : this.billing.address),
       },
       shipping,

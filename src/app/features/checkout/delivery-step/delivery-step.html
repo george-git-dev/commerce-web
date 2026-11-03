@@ -52,17 +52,14 @@
               />
               <span class="delivery__option-text">
                 <strong>
-                  {{ address.recipient }}
+                  {{ address.street }}, {{ address.number }}
                   @if (address.isDefault) {
                     <small class="delivery__tag">Principal</small>
                   }
                 </strong>
-                <small>
-                  {{ address.street }}, {{ address.number }}
-                  @if (address.complement) {
-                    — {{ address.complement }}
-                  }
-                </small>
+                @if (address.complement) {
+                  <small>{{ address.complement }}</small>
+                }
                 <small>
                   {{ address.district }} · {{ address.city }}/{{ address.state }} · CEP
                   {{ address.cep }}
@@ -83,20 +80,8 @@
       }
 
       @if (addressChoice() === null) {
-        <div class="f-grid delivery__recipient" [class.delivery__new]="saved.length">
-          <label class="f-field">
-            Nome de quem vai receber
-            <input
-              formControlName="recipient"
-              autocomplete="name"
-              [attr.aria-invalid]="invalid(form.controls.recipient) || null"
-            />
-            @if (invalid(form.controls.recipient)) {
-              <small class="f-error">Informe o nome completo.</small>
-            }
-          </label>
-        </div>
         <app-address-fields
+          [class.delivery__new]="saved.length"
           idPrefix="entrega"
           [group]="form.controls.address"
           (cepComplete)="onDeliveryCep($event)"
@@ -108,6 +93,22 @@
           </label>
         }
       }
+
+      <!-- Quem recebe é do pedido (presente, trabalho…), não do endereço salvo. -->
+      <div class="f-grid delivery__recipient">
+        <label class="f-field">
+          Quem vai receber? (opcional)
+          <input
+            formControlName="recipient"
+            autocomplete="name"
+            placeholder="Se ficar vazio, vai no seu nome"
+            [attr.aria-invalid]="invalid(form.controls.recipient) || null"
+          />
+          @if (invalid(form.controls.recipient)) {
+            <small class="f-error">Informe o nome completo.</small>
+          }
+        </label>
+      </div>
     </section>
 
     <section class="f-card">

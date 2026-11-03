@@ -17,6 +17,7 @@ import { apiInterceptor } from '../../core/http/api-interceptor';
 import { FailureSimulator } from '../../core/http/failure-simulator';
 import { mockApiInterceptor } from '../../core/http/mock-api-interceptor';
 import { AddressBook } from '../../core/services/address-book';
+import { AuthService } from '../../core/services/auth-service';
 import { CartStore } from '../../core/services/cart-store';
 import { OrderService } from '../../core/services/order-service';
 import { Checkout } from './checkout';
@@ -68,6 +69,36 @@ describe('Checkout', () => {
     await vi.waitFor(() => expect(currentUrl()).toMatch(/^\/pedido\/NP/), { timeout: 3000 });
     expect(TestBed.inject(OrderService).orders().length).toBe(before + 1);
     expect(TestBed.inject(CartStore).count()).toBe(0);
+  });
+
+  /** Confirma um pedido com o endereço salvo, o frete e o CPF; devolve o pedido criado. */
+  const placeWith = async (recipient: string) => {
+    const { fixture } = await openCheckout();
+    type($(fixture, '[formcontrolname=recipient]'), recipient);
+    ($$(fixture, 'app-shipping-options input[type=radio]')[0] as HTMLInputElement).dispatchEvent(
+      new Event('change'),
+    );
+    type($(fixture, '[formcontrolname=document]'), '529.982.247-25');
+    await submit(fixture);
+    await submit(fixture);
+    buttonByText(fixture, 'Confirmar pedido').click();
+    await vi.waitFor(() => expect(currentUrl()).toMatch(/^\/pedido\/NP/), { timeout: 3000 });
+    const orders = TestBed.inject(OrderService).orders();
+    return orders.find((order) => currentUrl().includes(order.number)) ?? orders[0];
+  };
+
+  it('quem recebe vazio: vai o nome do cliente (na entrega e na nota); endereço salvo não guarda', async () => {
+    const order = await placeWith('');
+    const name = TestBed.inject(AuthService).user()?.name;
+    expect(order.address?.recipient).toBe(name);
+    expect(order.billing.name).toBe(name);
+    expect(TestBed.inject(AddressBook).addresses()[0]).not.toHaveProperty('recipient');
+  });
+
+  it('presente: quem recebe é outra pessoa, mas a nota continua em nome de quem compra', async () => {
+    const order = await placeWith('Maria Presenteada');
+    expect(order.address?.recipient).toBe('Maria Presenteada');
+    expect(order.billing.name).toBe(TestBed.inject(AuthService).user()?.name);
   });
 
   it('back fora do ar: aviso, botão volta e a sacola continua', async () => {
@@ -126,7 +157,6 @@ describe('Checkout', () => {
     type($(fixture, '[formcontrolname=document]'), '529.982.247-25');
     await submit(fixture);
     expect(textOf(fixture)).toContain('Informe o CEP para ver as opções');
-    type($(fixture, '[formcontrolname=recipient]'), 'Nova Cliente');
     type($(fixture, 'app-delivery-step [formcontrolname=cep]'), '20040002');
     await settle(fixture);
     type($(fixture, 'app-delivery-step [formcontrolname=number]'), '10');

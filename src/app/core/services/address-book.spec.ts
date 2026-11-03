@@ -3,7 +3,6 @@ import { AddressBook, MAX_ADDRESSES } from './address-book';
 import { AuthService } from './auth-service';
 
 const address = (number: string) => ({
-  recipient: 'Maria Souza',
   cep: '01310-100',
   street: 'Avenida Paulista',
   number,
@@ -47,7 +46,7 @@ describe('AddressBook (endereços da conta, em memória)', () => {
   it('não duplica o mesmo endereço e respeita o limite', () => {
     auth.login('maria@email.com', '12345678');
     const first = book.add(address('1'));
-    expect(book.add({ ...address('1'), recipient: 'Outra pessoa' })?.id).toBe(first?.id);
+    expect(book.add({ ...address('1'), complement: ' ' })?.id).toBe(first?.id);
     for (let n = 2; book.addresses().length < MAX_ADDRESSES; n++) book.add(address(String(n)));
     expect(book.isFull()).toBe(true);
     expect(book.add(address('99'))).toBeNull();

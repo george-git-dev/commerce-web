@@ -117,13 +117,12 @@ describe('Endereços', () => {
     const before = book.addresses().length;
     buttonByText(fixture, 'Adicionar endereço').click();
     await settle(fixture);
-    // Formulário vazio não salva.
-    type($(fixture, '[formControlName="recipient"]'), '');
+    // Formulário vazio não salva. Endereço salvo não tem "quem recebe" (é do pedido).
+    expect($$(fixture, '[formControlName="recipient"]')).toHaveLength(0);
     $(fixture, 'form').dispatchEvent(new Event('submit'));
     await settle(fixture);
     expect($$(fixture, '.f-error').length).toBeGreaterThan(0);
 
-    type($(fixture, '[formControlName="recipient"]'), 'Ana Souza');
     type($(fixture, '[formControlName="cep"]'), '80010-000');
     await settle(fixture);
     type($(fixture, '[formControlName="number"]'), '45');

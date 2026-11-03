@@ -1,13 +1,12 @@
 import { DOCUMENT } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { NonNullableFormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { RouterLink } from '@angular/router';
 import { SavedAddress } from '../../../core/models/order';
 import { AddressBook, MAX_ADDRESSES } from '../../../core/services/address-book';
-import { AuthService } from '../../../core/services/auth-service';
 import { AddressFields } from '../../../shared/address-fields/address-fields';
 import {
   addressFromForm,
@@ -30,30 +29,24 @@ export class Addresses {
   private readonly fb = inject(NonNullableFormBuilder);
   private readonly snackBar = inject(MatSnackBar);
   private readonly document = inject(DOCUMENT);
-  private readonly auth = inject(AuthService);
   protected readonly book = inject(AddressBook);
   protected readonly max = MAX_ADDRESSES;
 
   protected readonly editing = signal<Editing>(null);
 
   protected readonly form = this.fb.group({
-    recipient: ['', [Validators.required, Validators.minLength(3)]],
     address: addressGroup(this.fb),
     makeDefault: [false],
   });
 
-  protected invalid(control: { invalid: boolean; touched: boolean; dirty: boolean }): boolean {
-    return control.invalid && (control.touched || control.dirty);
-  }
-
   protected startNew(): void {
-    this.form.reset({ recipient: this.auth.user()?.name ?? '', makeDefault: false });
+    this.form.reset({ makeDefault: false });
     fillAddressForm(this.form.controls.address);
     this.open('novo');
   }
 
   protected startEdit(address: SavedAddress): void {
-    this.form.reset({ recipient: address.recipient, makeDefault: address.isDefault });
+    this.form.reset({ makeDefault: address.isDefault });
     fillAddressForm(this.form.controls.address, address);
     this.open(address.id);
   }
@@ -67,8 +60,8 @@ export class Addresses {
       this.form.markAllAsTouched();
       return;
     }
-    const { recipient, address, makeDefault } = this.form.getRawValue();
-    const value = { recipient: recipient.trim(), ...addressFromForm(address) };
+    const { address, makeDefault } = this.form.getRawValue();
+    const value = addressFromForm(address);
     const editing = this.editing();
     if (editing === 'novo') {
       if (!this.book.add(value, makeDefault)) {

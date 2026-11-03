@@ -1,6 +1,6 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { SAMPLE_ADDRESS } from '../data/orders-mock';
-import { Address, DeliveryAddress, SavedAddress } from '../models/order';
+import { Address, SavedAddress } from '../models/order';
 import { AuthService } from './auth-service';
 import { onlyCepDigits } from './shipping-service';
 
@@ -37,7 +37,7 @@ export class AddressBook {
     const user = this.auth.user();
     if (!user) return [];
     const list = this.books()[user.email] ?? [
-      { ...SAMPLE_ADDRESS, recipient: user.name, id: 'endereco-exemplo', isDefault: true },
+      { ...SAMPLE_ADDRESS, id: 'endereco-exemplo', isDefault: true },
     ];
     return [...list].sort((a, b) => Number(b.isDefault) - Number(a.isDefault));
   });
@@ -50,7 +50,7 @@ export class AddressBook {
   }
 
   /** Salva um endereço novo. Se já existe igual, devolve o existente; cheio = `null`. */
-  add(address: DeliveryAddress, makeDefault = false): SavedAddress | null {
+  add(address: Address, makeDefault = false): SavedAddress | null {
     const existing = this.addresses().find((saved) => sameAddress(saved, address));
     if (existing) return existing;
     if (this.isFull()) return null;
@@ -64,7 +64,7 @@ export class AddressBook {
     return this.find(id) ?? null;
   }
 
-  update(id: string, address: DeliveryAddress, makeDefault = false): void {
+  update(id: string, address: Address, makeDefault = false): void {
     this.write((list) =>
       withDefault(
         list.map((saved) => (saved.id === id ? { ...saved, ...address } : saved)),

@@ -34,7 +34,8 @@ export class CheckoutState {
   private readonly user = inject(AuthService).user();
 
   readonly delivery = this.fb.group({
-    recipient: [this.user?.name ?? '', [Validators.required, Validators.minLength(3)]],
+    /** Opcional (presente, trabalho…): vazio, vai o nome do cliente. É do pedido, não do endereço. */
+    recipient: ['', [Validators.minLength(3)]],
     address: addressGroup(this.fb, formatCep(this.shipping.cep())),
     /** Endereço novo digitado aqui vai para Minha conta → Endereços. */
     saveToAccount: [true],
@@ -109,13 +110,11 @@ export class CheckoutState {
   chooseAddress(id: string | null): void {
     const saved = id ? this.addressBook.find(id) : undefined;
     this.addressChoice.set(saved?.id ?? null);
-    const { recipient, address } = this.delivery.controls;
+    const { address } = this.delivery.controls;
     if (saved) {
-      recipient.setValue(saved.recipient);
       fillAddressForm(address, saved);
       this.shipping.cep.set(onlyCepDigits(saved.cep));
     } else {
-      recipient.setValue(this.user?.name ?? '');
       fillAddressForm(address);
       // Sem CEP, sem frete: evita mostrar o valor do endereço anterior.
       this.shipping.cep.set('');

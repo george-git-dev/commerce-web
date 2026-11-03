@@ -30,7 +30,7 @@
       }
       — {{ nf.city }}/{{ nf.state }}
     } @else {
-      {{ recipient }} · {{ billingDocument }} · mesmo endereço da entrega
+      {{ customerName }} · {{ billingDocument }} · mesmo endereço da entrega
     }
   </p>
   @if (summary.selectedShipping(); as option) {

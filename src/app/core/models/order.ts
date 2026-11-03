@@ -10,12 +10,16 @@ export interface Address {
   state: string;
 }
 
+/** Endereço de entrega DO PEDIDO: quem recebe é do pedido, não do endereço salvo. */
 export interface DeliveryAddress extends Address {
   recipient: string;
 }
 
-/** Endereço guardado na conta (Minha conta → Endereços). */
-export interface SavedAddress extends DeliveryAddress {
+/**
+ * Endereço guardado na conta (Minha conta → Endereços). Sem "quem recebe": isso é escolhido
+ * em cada pedido (presente, trabalho…) e, vazio, vai o nome do cliente.
+ */
+export interface SavedAddress extends Address {
   id: string;
   isDefault: boolean;
 }

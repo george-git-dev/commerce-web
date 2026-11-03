@@ -105,12 +105,9 @@ export class DeliveryStep {
 
   /** Endereço novo com "Salvar na minha conta": vai para a conta e passa a ser o escolhido. */
   private saveNewAddress(): void {
-    const { recipient, address, saveToAccount } = this.form.getRawValue();
+    const { address, saveToAccount } = this.form.getRawValue();
     if (this.inHands() || this.addressChoice() !== null || !saveToAccount) return;
-    const saved = this.addressBook.add({
-      recipient: recipient.trim(),
-      ...addressFromForm(address),
-    });
+    const saved = this.addressBook.add(addressFromForm(address));
     if (saved) this.addressChoice.set(saved.id);
   }
 }

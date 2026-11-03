@@ -9,19 +9,6 @@
     @if (editing(); as editingId) {
       <form class="f-card" [formGroup]="form" (ngSubmit)="save()" novalidate>
         <h2>{{ editingId === 'novo' ? 'Novo endereço' : 'Editar endereço' }}</h2>
-        <div class="f-grid addresses__recipient">
-          <label class="f-field">
-            Nome de quem vai receber
-            <input
-              formControlName="recipient"
-              autocomplete="name"
-              [attr.aria-invalid]="invalid(form.controls.recipient) || null"
-            />
-            @if (invalid(form.controls.recipient)) {
-              <small class="f-error">Informe o nome completo.</small>
-            }
-          </label>
-        </div>
         <app-address-fields idPrefix="conta" [group]="form.controls.address" />
 
         <label class="addresses__check">
@@ -61,17 +48,15 @@
           @for (address of book.addresses(); track address.id) {
             <li class="address" [class.address--default]="address.isDefault">
               <p class="address__name">
-                <strong>{{ address.recipient }}</strong>
+                <strong>{{ address.street }}, {{ address.number }}</strong>
                 @if (address.isDefault) {
                   <span class="address__tag">Principal</span>
                 }
               </p>
               <p>
-                {{ address.street }}, {{ address.number }}
                 @if (address.complement) {
-                  — {{ address.complement }}
+                  {{ address.complement }}<br />
                 }
-                <br />
                 {{ address.district }} · {{ address.city }}/{{ address.state }}<br />
                 CEP {{ address.cep }}
               </p>
