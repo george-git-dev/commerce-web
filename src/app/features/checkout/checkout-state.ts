@@ -78,13 +78,9 @@ export class CheckoutState {
   });
 
   constructor() {
-    // Começa pelo endereço salvo com o CEP da sacola; senão, pelo principal.
-    const cep = this.shipping.cep();
-    const saved = this.addressBook.addresses();
-    const start =
-      saved.find((address) => onlyCepDigits(address.cep) === cep) ??
-      this.addressBook.defaultAddress();
-    if (start) this.chooseAddress(start.id);
+    // Começa pelo endereço salvo com o CEP da sacola; senão, pelo principal. Sem a lista
+    // (back fora do ar), segue com "Novo endereço" — o aviso já saiu pelo interceptor.
+    this.addressBook.load().subscribe({ next: () => this.chooseStart(), error: () => undefined });
 
     this.billing.controls.address.disable();
     this.billing.controls.sameAsDelivery.valueChanges
@@ -104,6 +100,14 @@ export class CheckoutState {
       this.summary.paymentMethod.set(method);
       this.toggleCardValidators(method === 'cartao');
     });
+  }
+
+  private chooseStart(): void {
+    const cep = this.shipping.cep();
+    const start =
+      this.addressBook.addresses().find((address) => onlyCepDigits(address.cep) === cep) ??
+      this.addressBook.defaultAddress();
+    if (start) this.chooseAddress(start.id);
   }
 
   /** Troca o endereço de entrega: preenche o formulário e recalcula o frete. */

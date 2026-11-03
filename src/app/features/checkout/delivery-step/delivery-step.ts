@@ -61,6 +61,14 @@ export class DeliveryStep {
   );
 
   constructor() {
+    // CEP mexido e incompleto: o frete do CEP anterior some (não dá para escolher frete de outro
+    // endereço). Completo, o `cepComplete` calcula de novo.
+    this.form.controls.address.controls.cep.valueChanges
+      .pipe(takeUntilDestroyed())
+      .subscribe((cep) => {
+        if (!this.inHands() && !isValidCep(cep)) this.shipping.cep.set('');
+      });
+
     // CEP já veio do carrinho: preenche o endereço sem o cliente digitar de novo.
     const address = this.form.controls.address;
     if (isValidCep(address.controls.cep.value) && !address.controls.street.value) {
@@ -107,7 +115,12 @@ export class DeliveryStep {
   private saveNewAddress(): void {
     const { address, saveToAccount } = this.form.getRawValue();
     if (this.inHands() || this.addressChoice() !== null || !saveToAccount) return;
-    const saved = this.addressBook.add(addressFromForm(address));
-    if (saved) this.addressChoice.set(saved.id);
+    // Não segura a compra: se o back recusar (limite, fora do ar), o pedido segue com o endereço digitado.
+    this.addressBook.add(addressFromForm(address)).subscribe({
+      next: (saved) => {
+        if (saved) this.addressChoice.set(saved.id);
+      },
+      error: () => undefined,
+    });
   }
 }

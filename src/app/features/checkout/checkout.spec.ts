@@ -179,6 +179,23 @@ describe('Checkout', () => {
     ).toBe(true);
   });
 
+  it('CEP mexido e incompleto: o frete do CEP anterior some até completar de novo', async () => {
+    const { fixture, state } = await openCheckout('nova.cliente@email.com');
+    state.chooseAddress(null);
+    await settle(fixture);
+    const cep = $(fixture, 'app-delivery-step [formcontrolname=cep]');
+    type(cep, '20040002');
+    await settle(fixture);
+    expect(textOf(fixture)).toContain('R$ 19,90'); // RJ
+    type(cep, '2004000');
+    await settle(fixture);
+    expect(textOf(fixture)).toContain('Informe o CEP para ver as opções');
+    expect(textOf(fixture)).not.toContain('R$ 19,90');
+    type(cep, '90010000');
+    await settle(fixture);
+    expect(textOf(fixture)).toContain('R$ 22,90'); // RS: recalculado
+  });
+
   it('entrega em mãos (conta liberada): sem endereço nem frete; pode voltar para "receber em casa"', async () => {
     const { fixture, state } = await openCheckout('inHands');
     expect(state.inHands()).toBe(true);

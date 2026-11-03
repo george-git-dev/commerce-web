@@ -20,7 +20,9 @@
           <button matButton="outlined" class="ui-cta" type="button" (click)="cancel()">
             Cancelar
           </button>
-          <button matButton="filled" class="ui-cta" type="submit">Salvar endereço</button>
+          <button matButton="filled" class="ui-cta" type="submit" [disabled]="saving.running()">
+            {{ saving.running() ? 'Aguarde…' : 'Salvar endereço' }}
+          </button>
         </div>
       </form>
     } @else {
@@ -43,7 +45,14 @@
         </p>
       }
 
-      @if (book.addresses().length) {
+      @if (loadFailed()) {
+        <p class="addresses__empty">
+          Não conseguimos carregar seus endereços.
+          <button matButton="outlined" type="button" (click)="load()">Tentar de novo</button>
+        </p>
+      } @else if (!loaded()) {
+        <p class="addresses__empty" role="status">Carregando…</p>
+      } @else if (book.addresses().length) {
         <ul class="addresses__list">
           @for (address of book.addresses(); track address.id) {
             <li class="address" [class.address--default]="address.isDefault">
