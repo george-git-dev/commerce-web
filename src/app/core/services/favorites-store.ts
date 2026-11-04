@@ -35,17 +35,24 @@ export class FavoritesStore {
           this.items.set([]);
           return;
         }
-        const stored = (readJson<string[]>(favoritesKey(email)) ?? [])
-          .map((slug) => this.catalog.findBySlug(slug))
-          .filter((product): product is Product => product !== undefined);
+        const slugs = readJson<string[]>(favoritesKey(email)) ?? [];
         // Só soma o que está na tela se ninguém estava logado antes; trocar
         // direto de uma conta para outra não pode misturar as listas.
         const pending = this.owner() === null ? this.items() : [];
-        this.items.set([
-          ...stored,
-          ...pending.filter((product) => !stored.some((item) => item.id === product.id)),
-        ]);
-        this.owner.set(email);
+        // No login de verdade os produtos vêm do back (no `mock`, na hora).
+        this.catalog.ensureLoaded(slugs).subscribe({
+          next: () => {
+            const stored = slugs
+              .map((slug) => this.catalog.findBySlug(slug))
+              .filter((product): product is Product => product !== undefined);
+            this.items.set([
+              ...stored,
+              ...pending.filter((product) => !stored.some((item) => item.id === product.id)),
+            ]);
+            this.owner.set(email);
+          },
+          error: () => undefined,
+        });
       });
     });
 

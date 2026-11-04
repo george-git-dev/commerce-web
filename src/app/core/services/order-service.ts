@@ -2,6 +2,7 @@ import { computed, inject, Injectable, signal } from '@angular/core';
 import { sampleOrders } from '../data/orders-mock';
 import { Order } from '../models/order';
 import { AuthService } from './auth-service';
+import { MOCK_PRODUCTS } from '../data/mock-products';
 import { CatalogService } from './catalog-service';
 
 /**
@@ -20,7 +21,13 @@ export class OrderService {
   readonly orders = computed<readonly Order[]>(() => {
     const user = this.auth.user();
     if (!user) return [];
-    const samples = sampleOrders(user.name, (slug) => this.catalog.findBySlug(slug));
+    // Pedidos ainda são fictícios (B5/B6): no login de verdade o catálogo vem do back e pode não
+    // ter o produto na memória, então os pedidos de exemplo usam o catálogo fictício.
+    const samples = sampleOrders(
+      user.name,
+      (slug) =>
+        this.catalog.findBySlug(slug) ?? MOCK_PRODUCTS.find((product) => product.slug === slug),
+    );
     return [...(this.created()[user.email] ?? []), ...samples];
   });
 

@@ -8,6 +8,8 @@ import {
   effect,
   inject,
   linkedSignal,
+  signal,
+  untracked,
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
@@ -75,11 +77,27 @@ export class ProductDetail {
   private readonly seo = inject(Seo);
 
   constructor() {
+    // Busca o produto (no modo `mock`, já está na memória; no `bff`, vai para o cache do catálogo).
+    effect((onCleanup) => {
+      const slug = this.paramMap().get('slug');
+      if (!slug) return;
+      untracked(() => {
+        if (this.catalog.findBySlug(slug)) return;
+        this.loading.set(true);
+        const request = this.catalog.product(slug).subscribe({
+          next: () => this.loading.set(false),
+          error: () => this.loading.set(false),
+        });
+        onCleanup(() => request.unsubscribe());
+      });
+    });
+
     // Título, descrição, imagem da prévia e dados estruturados (preço, estoque, estrelas).
     effect(() => {
       const product = this.product();
       const path = `/produtos/${this.paramMap().get('slug') ?? ''}`;
       if (!product) {
+        if (this.loading()) return;
         this.seo.update({ title: pageTitle('Produto não encontrado'), noindex: true }, path);
         return;
       }
@@ -106,6 +124,10 @@ export class ProductDetail {
   protected readonly product = computed<Product | undefined>(() =>
     this.catalog.findBySlug(this.paramMap().get('slug')),
   );
+  /** Buscando no back (modo `bff`): não mostra "não encontrado" antes da resposta. */
+  protected readonly loading = signal(false);
+  /** Avaliações só existem no modo simulado por enquanto. */
+  protected readonly reviewsEnabled = this.catalog.reviewsEnabled;
 
   /** Breadcrumb: categoria do produto ("Perfumes", "Hidratantes"…), linkando o catálogo filtrado. */
   protected readonly categoryCrumb = computed(() => {

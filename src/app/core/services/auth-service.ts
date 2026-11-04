@@ -52,7 +52,7 @@ function nameFromEmail(email: string): string {
  * Porta única da sessão para as telas, em dois modos (`AUTH_MODE`):
  * - `bff`: login de verdade. Entrar, criar conta e sair acontecem no
  *   commerce-bff-nani/Keycloak (`startLogin`, `startRegister`, `logout`); ao
- *   abrir o site, `init()` pergunta ao BFF quem está logado (`GET /api/me`).
+ *   abrir o site, `init()` pergunta ao BFF quem está logado (`GET /bff/me`).
  *   Nada da sessão fica no navegador além do cookie HttpOnly do BFF.
  * - `mock`: autenticação SIMULADA (testes e `npm run start:mock`): aceita
  *   qualquer e-mail válido com senha de 8+ e guarda só nome e e-mail no

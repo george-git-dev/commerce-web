@@ -12,10 +12,10 @@ describe('ShopApi (contrato com o back)', () => {
     const backend = TestBed.inject(HttpTestingController);
     api.addCartItem('asad-100', 2).subscribe();
     api.placeOrder([{ variantId: 'asad-100', quantity: 1 }]).subscribe();
-    const cart = backend.expectOne('/api/cart/items');
+    const cart = backend.expectOne('/bff/cart/items');
     expect(cart.request.method).toBe('POST');
     expect(cart.request.body).toEqual({ variantId: 'asad-100', quantity: 2 });
-    const order = backend.expectOne('/api/orders');
+    const order = backend.expectOne('/bff/orders');
     expect(JSON.stringify(order.request.body)).not.toContain('price');
     backend.verify();
   });

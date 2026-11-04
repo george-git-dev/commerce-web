@@ -26,7 +26,7 @@ function samePasswords(group: AbstractControl): ValidationErrors | null {
 
 /**
  * `/minha-conta/dados` — nome, celular, CPF (se faltar) e troca de senha. Os dados vêm do back
- * (`ProfileService` → BFF `/api/me/profile`). Celular e CPF salvam no back; o nome, no login
+ * (`ProfileService` → BFF `/bff/me/profile`). Celular e CPF salvam no back; o nome, no login
  * de verdade, é editado na tela do Keycloak.
  */
 @Component({

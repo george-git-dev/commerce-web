@@ -9,7 +9,7 @@ import { onlyCepDigits } from './shipping-service';
 
 export const MAX_ADDRESSES = 5;
 
-const URL = '/api/me/addresses';
+const URL = '/bff/me/addresses';
 
 /** Endereço como o BFF devolve (`id` numérico). */
 interface ApiAddress extends Address {
@@ -38,7 +38,7 @@ function toBody(address: Address, isDefault: boolean) {
 
 /**
  * Endereços da conta logada (Minha conta → Endereços e checkout).
- * - Modo `bff`: `/api/me/addresses`. As regras são do back (um único principal, limite,
+ * - Modo `bff`: `/bff/me/addresses`. As regras são do back (um único principal, limite,
  *   ordem — principal primeiro); depois de cada mudança a lista é buscada de novo e a tela
  *   só mostra o que o back devolveu.
  * - Modo `mock` (testes e `start:mock`): só em memória, com as mesmas regras simuladas.

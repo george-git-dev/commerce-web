@@ -7,7 +7,7 @@ import { maskCpf, onlyDigits } from '../utils/br-format';
 import { AuthService } from './auth-service';
 
 /**
- * Minha conta → Dados pessoais (`GET /api/me/profile` no BFF). O BFF junta nome e e-mail
+ * Minha conta → Dados pessoais (`GET /bff/me/profile` no BFF). O BFF junta nome e e-mail
  * (Keycloak) com CPF e celular (commerce-api).
  */
 export interface Profile {
@@ -37,7 +37,7 @@ export class ProfileService {
 
   /** Dados reais pelo BFF; no modo `mock` (testes e `start:mock`), do login simulado. */
   load(): Observable<Profile> {
-    if (this.http) return this.http.get<Profile>('/api/me/profile');
+    if (this.http) return this.http.get<Profile>('/bff/me/profile');
     const user = this.auth.user();
     return of({
       name: user?.name ?? '',
@@ -48,12 +48,12 @@ export class ProfileService {
   }
 
   /**
-   * Salva celular e CPF (`PATCH /api/me/profile`) e devolve os dados atualizados. Erro do back
+   * Salva celular e CPF (`PATCH /bff/me/profile`) e devolve os dados atualizados. Erro do back
    * (CPF em outra conta, campo inválido…) chega como `ApiError`, com a mensagem pronta.
    */
   save(changes: ProfileChanges): Observable<Profile> {
     if (this.http) {
-      return this.http.patch<Profile>('/api/me/profile', {
+      return this.http.patch<Profile>('/bff/me/profile', {
         phone: onlyDigits(changes.phone),
         cpf: changes.cpf ? onlyDigits(changes.cpf) : null,
       });

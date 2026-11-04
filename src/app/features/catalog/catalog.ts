@@ -1,6 +1,15 @@
 import { CartActions } from '../../core/services/cart-actions';
 import { NgTemplateOutlet } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  effect,
+  inject,
+  signal,
+  untracked,
+} from '@angular/core';
+import { Subscription } from 'rxjs';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -23,17 +32,14 @@ import {
   ProductSelection,
   VariantKind,
 } from '../../core/models/product';
-import {
-  effectivePrice,
-  hasDeal,
-  hasKind,
-  isAvailable,
-  lowestPrice,
-} from '../../core/utils/product-pricing';
+import { CatalogQuery, CatalogSort } from '../../core/utils/catalog-search';
 import { EmptyState } from '../../shared/empty-state/empty-state';
 import { ProductCard } from '../../shared/product-card/product-card';
 
-type SortOption = 'relevancia' | 'mais-vendidos' | 'menor-preco' | 'maior-preco' | 'avaliacao';
+type SortOption = CatalogSort;
+
+/** Produtos por vez ("Carregar mais" busca a próxima página). */
+export const CATALOG_PAGE_SIZE = 24;
 
 const MAX_PRICE_DIGITS = 5; // até R$ 99.999
 
@@ -47,8 +53,8 @@ function toPrice(value: string | null): number | null {
 }
 
 /**
- * `/produtos`. Dado mockado, via `CatalogService` — a reconexão com a API
- * real de listagem/paginação é uma etapa futura do roadmap.
+ * `/produtos`. Filtro, busca, ordem e página são do `CatalogService` (no login de verdade, do
+ * back): a tela monta a consulta a partir da URL e só mostra o que volta.
  *
  * Os filtros funcionais (gênero, marca, preço, busca) vivem na URL: cada
  * mudança navega com `queryParamsHandling: 'merge'`, o que torna o estado
@@ -75,29 +81,24 @@ export class Catalog {
 
   protected readonly filtersOpen = signal(false);
 
+  /** Opções de filtro que existem na loja (vêm prontas do back no modo `bff`). */
+  private readonly options = toSignal(this.catalog.filterOptions(), { initialValue: null });
+
+  /** Avaliações só existem no modo simulado: sem elas, some o filtro e a ordem por nota. */
+  protected readonly reviewsEnabled = this.catalog.reviewsEnabled;
+
   /** Famílias presentes no catálogo, na ordem da lista oficial. */
   protected readonly familyOptions = computed(() => {
-    const present = new Set(this.catalog.products().flatMap((product) => product.families));
+    const present = new Set(this.options()?.families ?? []);
     return OLFACTORY_FAMILIES.filter((family) => present.has(family));
   });
   protected readonly ratingOptions = [4, 3] as const;
   protected readonly occasionOptions = Object.entries(OCCASION_LABELS) as [Occasion, string][];
 
   /** Selos manuais presentes no catálogo (Exclusivo, Edição limitada…), em ordem alfabética. */
-  protected readonly badgeOptions = computed(() =>
-    [
-      ...new Set(
-        this.catalog
-          .products()
-          .map((product) => product.badge)
-          .filter((badge): badge is string => !!badge),
-      ),
-    ].sort((a, b) => a.localeCompare(b, 'pt-BR')),
-  );
+  protected readonly badgeOptions = computed(() => this.options()?.badges ?? []);
 
-  protected readonly brands = computed(() =>
-    [...new Set(this.catalog.products().map((product) => product.brandName))].sort(),
-  );
+  protected readonly brands = computed(() => this.options()?.brands ?? []);
 
   /**
    * `?categoria=kit` ou `?categoria=hidratante,body-splash` (link "Corpo e banho").
@@ -123,9 +124,11 @@ export class Catalog {
   });
   /** `?familia=Oriental,Floral` — várias valem como "ou". */
   protected readonly families = computed(() => {
-    const value = this.queryParamMap().get(this.params.family);
-    const ids = new Set((value ?? '').split(',').map((family) => family.trim()));
-    return this.familyOptions().filter((family) => ids.has(family));
+    // Direto da URL (não espera as opções do back): a busca sai certa já na primeira vez.
+    const value = this.queryParamMap().get(this.params.family) ?? '';
+    return OLFACTORY_FAMILIES.filter((family) =>
+      value.split(',').some((item) => item.trim() === family),
+    );
   });
   /** `?ocasiao=dia,noite` — várias valem como "ou". */
   protected readonly occasions = computed<readonly Occasion[]>(() => {
@@ -158,10 +161,13 @@ export class Catalog {
   protected readonly bestSellerOnly = computed(
     () => this.queryParamMap().get(this.params.bestSeller) === 'true',
   );
-  /** `?selo=Exclusivo,Edição limitada` — só os que existem no catálogo. */
+  /** `?selo=Exclusivo,Edição limitada`. */
   protected readonly badges = computed(() => {
-    const ids = (this.queryParamMap().get(this.params.badge) ?? '').split(',');
-    return this.badgeOptions().filter((badge) => ids.includes(badge));
+    // Direto da URL (não espera as opções do back); selo que não existe só não acha nada.
+    return (this.queryParamMap().get(this.params.badge) ?? '')
+      .split(',')
+      .map((badge) => badge.trim())
+      .filter(Boolean);
   });
   /** `?tipo=decant` — entra no menu junto com os decants (pós-MVP). */
   protected readonly kind = computed<VariantKind | null>(() => {
@@ -191,96 +197,80 @@ export class Catalog {
       !!this.kind(),
   );
 
-  protected readonly products = computed<readonly Product[]>(() => {
-    const categories = this.selectedCategories();
-    const families = this.families();
-    const occasions = this.occasions();
-    const minRating = this.minRating();
-    const inStockOnly = this.inStockOnly();
-    const gender = this.gender();
-    const brand = this.brand();
-    const min = this.priceMin();
-    const max = this.priceMax();
-    const search = this.search().trim().toLowerCase();
-    const dealOnly = this.dealOnly();
-    const launchOnly = this.launchOnly();
-    const bestSellerOnly = this.bestSellerOnly();
-    const badges = this.badges();
-    const anyHighlight = dealOnly || launchOnly || bestSellerOnly || badges.length > 0;
-    const kind = this.kind();
+  /**
+   * A consulta que a URL pede (sem a página: mudar filtro volta para a primeira). Só conta como
+   * mudança se o conteúdo mudar: as opções de filtro chegando do back recalculam famílias e
+   * selos (mesmos valores), e isso não pode disparar outra busca.
+   */
+  private readonly query = computed<Omit<CatalogQuery, 'page'>>(
+    () => ({
+      categories: this.selectedCategories(),
+      families: this.families(),
+      occasions: this.occasions(),
+      minRating: this.reviewsEnabled ? this.minRating() : null,
+      inStock: this.inStockOnly(),
+      gender: this.gender(),
+      brand: this.brand(),
+      minPrice: this.priceMin(),
+      maxPrice: this.priceMax(),
+      search: this.search(),
+      deal: this.dealOnly(),
+      launch: this.launchOnly(),
+      bestSeller: this.bestSellerOnly(),
+      badges: this.badges(),
+      kind: this.kind(),
+      sort: this.sort(),
+      size: CATALOG_PAGE_SIZE,
+    }),
+    { equal: (a, b) => JSON.stringify(a) === JSON.stringify(b) },
+  );
 
-    let list = this.catalog.products().filter((product) => {
-      if (categories.length && !categories.includes(product.category)) return false;
-      if (families.length && !families.some((family) => product.families.includes(family))) {
-        return false;
-      }
-      // Produto sem ocasião cadastrada não entra quando o filtro está ativo.
-      if (
-        occasions.length &&
-        !occasions.some((occasion) => product.occasions?.includes(occasion))
-      ) {
-        return false;
-      }
-      if (minRating !== null && (product.rating ?? 0) < minRating) return false;
-      if (inStockOnly && !isAvailable(product)) return false;
-      if (gender && product.gender !== gender) return false;
-      if (brand && product.brandName !== brand) return false;
-      // Preço: o produto entra se algum tamanho estiver dentro da faixa.
-      if (
-        (min !== null || max !== null) &&
-        !product.variants.some((variant) => {
-          const price = effectivePrice(variant);
-          return (min === null || price >= min) && (max === null || price <= max);
-        })
-      ) {
-        return false;
-      }
-      // Destaques: dentro do grupo vale "ou" (como nas categorias) —
-      // Lançamentos + Ofertas mostra os dois, não só quem é as duas coisas.
-      if (
-        anyHighlight &&
-        !(
-          (dealOnly && hasDeal(product)) ||
-          (launchOnly && product.launch) ||
-          (bestSellerOnly && product.bestSeller) ||
-          (!!product.badge && badges.includes(product.badge))
-        )
-      ) {
-        return false;
-      }
-      if (kind && !hasKind(product, kind)) return false;
-      if (
-        search &&
-        !`${product.name} ${product.brandName} ${product.families.join(' ')}`
-          .toLowerCase()
-          .includes(search)
-      ) {
-        return false;
-      }
-      return true;
+  /** Produtos já carregados (todas as páginas pedidas até agora). */
+  protected readonly products = signal<readonly Product[]>([]);
+  /** Quantos passam nos filtros, contando as páginas ainda não carregadas. */
+  protected readonly total = signal(0);
+  protected readonly loading = signal(true);
+  protected readonly loadFailed = signal(false);
+  protected readonly hasMore = computed(() => this.products().length < this.total());
+  private page = 0;
+  private request?: Subscription;
+
+  constructor() {
+    // Mudou um filtro (ou a ordem): busca de novo a partir da primeira página.
+    effect(() => {
+      const query = this.query();
+      untracked(() => this.load(query, 0));
     });
+  }
 
-    list = [...list];
-    switch (this.sort()) {
-      case 'mais-vendidos':
-        list.sort((a, b) => (b.soldCount ?? 0) - (a.soldCount ?? 0));
-        break;
-      case 'menor-preco':
-        list.sort((a, b) => lowestPrice(a) - lowestPrice(b));
-        break;
-      case 'maior-preco':
-        list.sort((a, b) => lowestPrice(b) - lowestPrice(a));
-        break;
-      case 'avaliacao':
-        // Empate na média: quem tem mais avaliações vem antes.
-        list.sort(
-          (a, b) =>
-            (b.rating ?? 0) - (a.rating ?? 0) || (b.reviewCount ?? 0) - (a.reviewCount ?? 0),
+  protected loadMore(): void {
+    this.load(this.query(), this.page + 1);
+  }
+
+  protected retry(): void {
+    this.load(this.query(), 0);
+  }
+
+  /** A busca anterior (se ainda não voltou) é cancelada: só vale a última. */
+  private load(query: Omit<CatalogQuery, 'page'>, page: number): void {
+    this.request?.unsubscribe();
+    this.loading.set(true);
+    this.loadFailed.set(false);
+    this.request = this.catalog.search({ ...query, page }).subscribe({
+      next: (result) => {
+        this.products.update((current) =>
+          page === 0 ? result.items : [...current, ...result.items],
         );
-        break;
-    }
-    return list;
-  });
+        this.total.set(result.totalItems);
+        this.page = page;
+        this.loading.set(false);
+      },
+      error: () => {
+        this.loadFailed.set(true);
+        this.loading.set(false);
+      },
+    });
+  }
 
   protected readonly isFavorite = (product: Product): boolean =>
     this.favorites.isFavorite(product.id);

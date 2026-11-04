@@ -49,7 +49,7 @@ export const appConfig: ApplicationConfig = {
     { provide: LOCALE_ID, useValue: 'pt-BR' },
     // Login de verdade (BFF) ou simulado, conforme o ambiente (`npm run start:mock`).
     { provide: AUTH_MODE, useValue: environment.auth },
-    // Antes da primeira tela: quem está logado (`GET /api/me` no modo bff; prazo de 5 s).
+    // Antes da primeira tela: quem está logado (`GET /bff/me` no modo bff; prazo de 5 s).
     provideAppInitializer(() => inject(AuthService).init()),
   ],
 };

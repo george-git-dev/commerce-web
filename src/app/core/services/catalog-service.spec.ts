@@ -1,4 +1,11 @@
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
+import { AUTH_MODE } from '../config/auth-mode';
+import { apiInterceptor } from '../http/api-interceptor';
+import { EMPTY_CATALOG_QUERY } from '../utils/catalog-search';
 import { CatalogService } from './catalog-service';
 
 describe('CatalogService', () => {
@@ -49,5 +56,102 @@ describe('CatalogService', () => {
     expect(page.summary.count).toBe(0);
     expect(page.items).toEqual([]);
     expect(page.hasMore).toBe(false);
+  });
+});
+
+describe('CatalogService (modo bff: a vitrine vem do back)', () => {
+  const asad = {
+    id: 1,
+    slug: 'lattafa-asad',
+    line: 'Asad',
+    subtitle: null,
+    name: 'Asad',
+    description: 'Oriental',
+    brandId: 1,
+    brandName: 'Lattafa',
+    category: 'perfume',
+    gender: 'Masculino',
+    concentration: 'Eau de Parfum',
+    families: ['Oriental'],
+    notes: null,
+    kitItems: [],
+    occasions: ['noite'],
+    launch: false,
+    bestSeller: true,
+    badge: null,
+    soldCount: 10,
+    images: ['img/produtos/a.webp'],
+    variants: [
+      {
+        id: 'lattafa-asad-100',
+        kind: 'frasco',
+        volumeMl: 100,
+        price: 299.9,
+        promoPrice: null,
+        stock: 3,
+      },
+    ],
+  };
+  let catalog: CatalogService;
+  let backend: HttpTestingController;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: AUTH_MODE, useValue: 'bff' },
+        provideHttpClient(withInterceptors([apiInterceptor])),
+        provideHttpClientTesting(),
+        provideRouter([]),
+      ],
+    });
+    catalog = TestBed.inject(CatalogService);
+    backend = TestBed.inject(HttpTestingController);
+  });
+
+  it('busca manda os filtros no formato do back e só os preenchidos', () => {
+    catalog
+      .search({
+        ...EMPTY_CATALOG_QUERY,
+        categories: ['perfume', 'kit'],
+        search: ' oud ',
+        sort: 'menor-preco',
+        inStock: true,
+        page: 1,
+      })
+      .subscribe();
+    const req = backend.expectOne((r) => r.url === '/bff/catalog/products');
+    expect(req.request.params.get('category')).toBe('perfume,kit');
+    expect(req.request.params.get('q')).toBe('oud');
+    expect(req.request.params.get('sort')).toBe('price_asc');
+    expect(req.request.params.get('inStock')).toBe('true');
+    expect(req.request.params.get('page')).toBe('1');
+    expect(req.request.params.has('brand')).toBe(false);
+    expect(req.request.params.has('deal')).toBe(false);
+    req.flush({ items: [asad], page: 1, size: 24, totalItems: 25, totalPages: 2 });
+  });
+
+  it('produto que veio do back fica guardado (nulos viram campos ausentes)', async () => {
+    const found = firstValueFrom(catalog.product('lattafa-asad'));
+    backend.expectOne('/bff/catalog/products/lattafa-asad').flush(asad);
+    const product = await found;
+    expect(product?.notes).toBeUndefined();
+    expect(product?.kitItems).toBeUndefined();
+    expect(product?.variants[0].promoPrice).toBeUndefined();
+    expect(product?.status).toBe('publicado');
+    expect(catalog.findBySlug('lattafa-asad')?.name).toBe('Asad');
+    // Já guardado: não busca de novo.
+    catalog.ensureLoaded(['lattafa-asad']).subscribe();
+    backend.expectNone('/bff/catalog/products/lattafa-asad');
+  });
+
+  it('produto que não existe vira null (sem aviso de erro na tela)', async () => {
+    const found = firstValueFrom(catalog.product('nao-existe'));
+    backend
+      .expectOne('/bff/catalog/products/nao-existe')
+      .flush(
+        { status: 404, code: 'PRODUCT_NOT_FOUND', detail: 'Produto não encontrado.' },
+        { status: 404, statusText: 'Not Found' },
+      );
+    expect(await found).toBeNull();
   });
 });

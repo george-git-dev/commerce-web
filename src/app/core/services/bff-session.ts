@@ -10,12 +10,18 @@ import { AuthUser } from '../models/auth';
  * Rotas que JÁ vão para o back de verdade (BFF): não passam pelo back falso
  * (`mockApiInterceptor`). Cada entrega que tira um mock acrescenta a rota aqui.
  */
-export const BFF_PATHS = ['/api/auth/', '/api/me/profile', '/api/me/addresses', '/api/cep/'] as const;
+export const BFF_PATHS = [
+  '/bff/auth/',
+  '/bff/me/profile',
+  '/bff/me/addresses',
+  '/bff/cep/',
+  '/bff/catalog/',
+] as const;
 
-/** A abertura do site espera o `/api/me`: prazo curto para não travar a primeira tela. */
+/** A abertura do site espera o `/bff/me`: prazo curto para não travar a primeira tela. */
 export const SESSION_CHECK_TIMEOUT_MS = 5_000;
 
-/** Resposta de `GET /api/auth/session` (commerce-bff-nani, `SessaoResponse`). */
+/** Resposta de `GET /bff/auth/session` (commerce-bff-nani, `SessaoResponse`). */
 interface SessionResponse {
   authenticated: boolean;
   user: { id: string; name: string; email: string; roles: string[]; permissions: string[] } | null;
@@ -43,7 +49,7 @@ export class BffSession {
       .set(REQUEST_TIMEOUT, SESSION_CHECK_TIMEOUT_MS);
     try {
       const { user } = await firstValueFrom(
-        this.http.get<SessionResponse>('/api/auth/session', { context }),
+        this.http.get<SessionResponse>('/bff/auth/session', { context }),
       );
       return user ? { name: user.name, email: user.email, roles: knownRoles(user.roles) } : null;
     } catch {
@@ -53,22 +59,22 @@ export class BffSession {
 
   /** Tela de login do Keycloak; depois volta para `returnTo` (caminho interno). */
   login(returnTo: string): void {
-    this.go(`/api/auth/login?returnTo=${encodeURIComponent(returnTo)}`);
+    this.go(`/bff/auth/login?returnTo=${encodeURIComponent(returnTo)}`);
   }
 
   /** Tela de criar conta do Keycloak; depois volta para `returnTo`. */
   register(returnTo: string): void {
-    this.go(`/api/auth/register?returnTo=${encodeURIComponent(returnTo)}`);
+    this.go(`/bff/auth/register?returnTo=${encodeURIComponent(returnTo)}`);
   }
 
   /** Alterar nome na tela de perfil do Keycloak; depois volta para `returnTo`. */
   editProfile(returnTo: string): void {
-    this.go(`/api/auth/profile?returnTo=${encodeURIComponent(returnTo)}`);
+    this.go(`/bff/auth/profile?returnTo=${encodeURIComponent(returnTo)}`);
   }
 
   /** Troca de senha na tela do Keycloak (confere a senha atual); depois volta para `returnTo`. */
   changePassword(returnTo: string): void {
-    this.go(`/api/auth/password?returnTo=${encodeURIComponent(returnTo)}`);
+    this.go(`/bff/auth/password?returnTo=${encodeURIComponent(returnTo)}`);
   }
 
   /**
@@ -79,7 +85,7 @@ export class BffSession {
     const context = new HttpContext().set(SKIP_GLOBAL_ERROR, true);
     try {
       const { redirectUrl } = await firstValueFrom(
-        this.http.post<{ redirectUrl: string }>('/api/auth/logout', null, { context }),
+        this.http.post<{ redirectUrl: string }>('/bff/auth/logout', null, { context }),
       );
       this.go(redirectUrl);
     } catch {

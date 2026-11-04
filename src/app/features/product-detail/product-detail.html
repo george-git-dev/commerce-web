@@ -109,7 +109,9 @@
       <!-- Âncora fora do @defer: o clique nas estrelas rola até aqui mesmo antes de carregar. -->
       <div id="avaliacoes" class="reviews-anchor">
         @defer (on viewport) {
-          <app-product-reviews [product]="item" />
+          @if (reviewsEnabled) {
+            <app-product-reviews [product]="item" />
+          }
         } @placeholder {
           <div class="reviews__placeholder" aria-hidden="true"></div>
         }
@@ -139,6 +141,10 @@
         <div class="related__placeholder" aria-hidden="true"></div>
       }
     </div>
+  </section>
+} @else if (loading()) {
+  <section class="ui-section">
+    <p class="ui-container detail__loading" role="status">Carregando produto…</p>
   </section>
 } @else {
   <section class="ui-section">

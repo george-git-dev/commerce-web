@@ -244,7 +244,7 @@ describe('endereço', () => {
     type(cep, '01310100');
     f.detectChanges();
     expect(textOf(f)).toContain('Buscando endereço');
-    backend.expectOne('/api/cep/01310100').flush({
+    backend.expectOne('/bff/cep/01310100').flush({
       cep: '01310100',
       street: 'Avenida Paulista',
       district: 'Bela Vista',
@@ -258,7 +258,7 @@ describe('endereço', () => {
     type(cep, '69900970');
     f.detectChanges();
     backend
-      .expectOne('/api/cep/69900970')
+      .expectOne('/bff/cep/69900970')
       .flush(
         {
           status: 404,

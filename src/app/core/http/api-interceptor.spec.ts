@@ -47,8 +47,8 @@ describe('proteção global das chamadas ao back', () => {
   });
 
   it('manda X-Request-Id e avisa erro de servidor com o código', async () => {
-    const result = firstValueFrom(http.post('/api/orders', {})).catch((e) => e);
-    const req = backend.expectOne('/api/orders');
+    const result = firstValueFrom(http.post('/bff/orders', {})).catch((e) => e);
+    const req = backend.expectOne('/bff/orders');
     const id = req.request.headers.get('X-Request-Id');
     expect(id).toMatch(/^[0-9A-F]{8}$/);
     req.flush(null, { status: 500, statusText: 'Erro' });
@@ -59,39 +59,39 @@ describe('proteção global das chamadas ao back', () => {
   });
 
   it('POST nunca é repetido sozinho (não duplica pedido)', async () => {
-    const result = firstValueFrom(http.post('/api/orders', {})).catch((e) => e);
-    backend.expectOne('/api/orders').flush(null, { status: 503, statusText: 'Indisponível' });
-    backend.expectNone('/api/orders');
+    const result = firstValueFrom(http.post('/bff/orders', {})).catch((e) => e);
+    backend.expectOne('/bff/orders').flush(null, { status: 503, statusText: 'Indisponível' });
+    backend.expectNone('/bff/orders');
     expect(((await result) as ApiError).status).toBe(503);
   });
 
   it('GET tenta de novo em falha passageira e segue se o back voltar', async () => {
-    const result = firstValueFrom(http.get('/api/products'));
-    backend.expectOne('/api/products').flush(null, { status: 503, statusText: 'Indisponível' });
+    const result = firstValueFrom(http.get('/bff/products'));
+    backend.expectOne('/bff/products').flush(null, { status: 503, statusText: 'Indisponível' });
     await new Promise((r) => setTimeout(r, 600));
-    backend.expectOne('/api/products').flush({ ok: true });
+    backend.expectOne('/bff/products').flush({ ok: true });
     expect(await result).toEqual({ ok: true });
     expect(notified).toHaveLength(0);
   });
 
   it('validação fica com a tela; SKIP_GLOBAL_ERROR silencia o aviso', async () => {
-    const a = firstValueFrom(http.post('/api/cart/items', {})).catch((e) => e);
+    const a = firstValueFrom(http.post('/bff/cart/items', {})).catch((e) => e);
     backend
-      .expectOne('/api/cart/items')
+      .expectOne('/bff/cart/items')
       .flush({ detail: 'Este tamanho acabou de esgotar.' }, { status: 422, statusText: 'x' });
     expect(((await a) as ApiError).message).toBe('Este tamanho acabou de esgotar.');
     const b = firstValueFrom(
-      http.post('/api/orders', {}, { context: new HttpContext().set(SKIP_GLOBAL_ERROR, true) }),
+      http.post('/bff/orders', {}, { context: new HttpContext().set(SKIP_GLOBAL_ERROR, true) }),
     ).catch((e) => e);
-    backend.expectOne('/api/orders').flush(null, { status: 500, statusText: 'x' });
+    backend.expectOne('/bff/orders').flush(null, { status: 500, statusText: 'x' });
     await b;
     expect(notified).toHaveLength(0);
   });
 
   it('mostra a mensagem do back; reserva do front só sem resposta útil', async () => {
-    const a = firstValueFrom(http.post('/api/orders', {})).catch((e) => e);
+    const a = firstValueFrom(http.post('/bff/orders', {})).catch((e) => e);
     backend
-      .expectOne('/api/orders')
+      .expectOne('/bff/orders')
       .flush(
         { code: 'INTERNAL_ERROR', detail: 'Mensagem configurada no back.' },
         { status: 500, statusText: 'x' },
@@ -106,8 +106,8 @@ describe('proteção global das chamadas ao back', () => {
   it('401: sai da conta e avisa que a sessão expirou', async () => {
     const auth = TestBed.inject(AuthService);
     auth.login('ana@email.com', '12345678');
-    const result = firstValueFrom(http.post('/api/orders', {})).catch((e) => e);
-    backend.expectOne('/api/orders').flush(null, { status: 401, statusText: 'x' });
+    const result = firstValueFrom(http.post('/bff/orders', {})).catch((e) => e);
+    backend.expectOne('/bff/orders').flush(null, { status: 401, statusText: 'x' });
     await result;
     expect(auth.user()).toBeNull();
     expect(notified[0]).toContain('sessão expirou');
@@ -115,9 +115,9 @@ describe('proteção global das chamadas ao back', () => {
 
   it('timeout: não fica esperando para sempre', async () => {
     const result = firstValueFrom(
-      http.post('/api/orders', {}, { context: new HttpContext().set(REQUEST_TIMEOUT, 20) }),
+      http.post('/bff/orders', {}, { context: new HttpContext().set(REQUEST_TIMEOUT, 20) }),
     ).catch((e) => e);
-    backend.expectOne('/api/orders');
+    backend.expectOne('/bff/orders');
     const error = (await Promise.race([
       result,
       new Promise((r) => setTimeout(() => r('hang'), 1000)),

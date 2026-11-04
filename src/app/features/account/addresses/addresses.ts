@@ -20,7 +20,7 @@ type Editing = 'novo' | string | null;
 
 /**
  * `/minha-conta/enderecos` — lista, cadastro, edição, remoção e principal. No login de verdade,
- * tudo vem do back (`AddressBook` → BFF `/api/me/addresses`): a tela só mostra o que ele devolve.
+ * tudo vem do back (`AddressBook` → BFF `/bff/me/addresses`): a tela só mostra o que ele devolve.
  */
 @Component({
   selector: 'app-addresses',

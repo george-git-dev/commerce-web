@@ -12,7 +12,7 @@ export interface CepAddress {
   state: string;
 }
 
-/** Resposta do BFF (`GET /api/cep/{cep}`). */
+/** Resposta do BFF (`GET /bff/cep/{cep}`). */
 interface CepResponse extends CepAddress {
   cep: string;
 }
@@ -35,7 +35,7 @@ const REGION_CITY: Record<string, [string, string]> = {
 export const CEP_LOOKUP_TIMEOUT_MS = 6_000;
 
 /**
- * Endereço a partir do CEP. Modo `bff`: `GET /api/cep/{cep}` (o BFF consulta ViaCEP, com
+ * Endereço a partir do CEP. Modo `bff`: `GET /bff/cep/{cep}` (o BFF consulta ViaCEP, com
  * BrasilAPI de reserva, e guarda em cache). Modo `mock`: endereço fictício.
  *
  * Erro (CEP não encontrado, serviço fora do ar) chega como `ApiError` com a frase do back,
@@ -58,7 +58,7 @@ export class CepLookup {
       .set(NO_RETRY, true)
       .set(REQUEST_TIMEOUT, CEP_LOOKUP_TIMEOUT_MS);
     return this.http
-      .get<CepResponse>(`/api/cep/${digits}`, { context })
+      .get<CepResponse>(`/bff/cep/${digits}`, { context })
       .pipe(map(({ street, district, city, state }) => ({ street, district, city, state })));
   }
 }

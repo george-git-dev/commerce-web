@@ -185,21 +185,23 @@
     </div>
   </details>
 
-  <details class="filter-accordion" [open]="minRating() !== null">
-    <summary>Avaliação</summary>
-    <div class="filter-accordion__body">
-      @for (stars of ratingOptions; track stars) {
-        <label class="checkbox">
-          <input
-            type="checkbox"
-            [checked]="minRating() === stars"
-            (change)="setFilter(params.minRating, minRating() === stars ? null : '' + stars)"
-          />
-          {{ stars }} estrelas ou mais
-        </label>
-      }
-    </div>
-  </details>
+  @if (reviewsEnabled) {
+    <details class="filter-accordion" [open]="minRating() !== null">
+      <summary>Avaliação</summary>
+      <div class="filter-accordion__body">
+        @for (stars of ratingOptions; track stars) {
+          <label class="checkbox">
+            <input
+              type="checkbox"
+              [checked]="minRating() === stars"
+              (change)="setFilter(params.minRating, minRating() === stars ? null : '' + stars)"
+            />
+            {{ stars }} estrelas ou mais
+          </label>
+        }
+      </div>
+    </details>
+  }
 
   <details class="filter-accordion" [open]="inStockOnly()">
     <summary>Disponibilidade</summary>
@@ -232,7 +234,11 @@
     </header>
 
     <div class="catalog__toolbar">
-      <span class="catalog__count">{{ products().length }} produto(s) encontrado(s)</span>
+      <span class="catalog__count" role="status">
+        @if (!loading() || products().length) {
+          {{ total() }} produto(s) encontrado(s)
+        }
+      </span>
 
       <div class="catalog__toolbar-actions">
         <button
@@ -252,7 +258,9 @@
             <option value="mais-vendidos">Mais vendidos</option>
             <option value="menor-preco">Menor preço</option>
             <option value="maior-preco">Maior preço</option>
-            <option value="avaliacao">Melhor avaliados</option>
+            @if (reviewsEnabled) {
+              <option value="avaliacao">Melhor avaliados</option>
+            }
           </select>
         </label>
       </div>
@@ -264,7 +272,17 @@
       </aside>
 
       <div class="catalog__results">
-        @if (products().length) {
+        @if (loadFailed()) {
+          <app-empty-state
+            icon="cloud_off"
+            title="Não conseguimos carregar os produtos"
+            message="Confira a conexão e tente de novo."
+            ctaLabel="Tentar de novo"
+            (ctaClick)="retry()"
+          />
+        } @else if (loading() && !products().length) {
+          <p class="catalog__loading" role="status">Carregando produtos…</p>
+        } @else if (products().length) {
           <!-- Título só para leitor de tela: os cards usam h3 (h1 → h2 → h3). -->
           <h2 class="cdk-visually-hidden">Produtos</h2>
           <div class="catalog__grid">
@@ -277,6 +295,19 @@
               />
             }
           </div>
+          @if (hasMore()) {
+            <div class="catalog__more">
+              <button
+                matButton="outlined"
+                class="ui-cta"
+                type="button"
+                [disabled]="loading()"
+                (click)="loadMore()"
+              >
+                {{ loading() ? 'Carregando…' : 'Carregar mais' }}
+              </button>
+            </div>
+          }
         } @else {
           <app-empty-state
             icon="search_off"
@@ -312,6 +343,6 @@
     type="button"
     (click)="filtersOpen.set(false)"
   >
-    Ver {{ products().length }} resultado(s)
+    Ver {{ total() }} resultado(s)
   </button>
 </div>

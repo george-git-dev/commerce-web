@@ -29,7 +29,7 @@ describe('ProfileService (Dados pessoais)', () => {
       ],
     });
     const loaded = firstValueFrom(TestBed.inject(ProfileService).load());
-    const req = TestBed.inject(HttpTestingController).expectOne('/api/me/profile');
+    const req = TestBed.inject(HttpTestingController).expectOne('/bff/me/profile');
     expect(req.request.method).toBe('GET');
     req.flush(ANA);
     expect(await loaded).toEqual(ANA);
@@ -47,7 +47,7 @@ describe('ProfileService (Dados pessoais)', () => {
     const saved = firstValueFrom(
       TestBed.inject(ProfileService).save({ name: 'Ana', phone: '(11) 98765-4321', cpf: '' }),
     );
-    const req = TestBed.inject(HttpTestingController).expectOne('/api/me/profile');
+    const req = TestBed.inject(HttpTestingController).expectOne('/bff/me/profile');
     expect(req.request.method).toBe('PATCH');
     expect(req.request.body).toEqual({ phone: '11987654321', cpf: null });
     req.flush(ANA);

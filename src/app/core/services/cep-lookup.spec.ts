@@ -37,7 +37,7 @@ describe('CepLookup', () => {
   it('modo bff: busca no BFF só com os números', async () => {
     const backend = setUpBff();
     const found = firstValueFrom(TestBed.inject(CepLookup).lookup('01310-100'));
-    const req = backend.expectOne('/api/cep/01310100');
+    const req = backend.expectOne('/bff/cep/01310100');
     expect(req.request.method).toBe('GET');
     req.flush({
       cep: '01310100',
@@ -60,7 +60,7 @@ describe('CepLookup', () => {
     const error = vi.spyOn(notifier, 'error');
     const result = firstValueFrom(TestBed.inject(CepLookup).lookup('01310100')).catch((e) => e);
     backend
-      .expectOne('/api/cep/01310100')
+      .expectOne('/bff/cep/01310100')
       .flush(
         {
           status: 404,
@@ -80,7 +80,7 @@ describe('CepLookup', () => {
     const error = vi.spyOn(TestBed.inject(Notifier), 'error');
     const result = firstValueFrom(TestBed.inject(CepLookup).lookup('01310100')).catch((e) => e);
     backend
-      .expectOne('/api/cep/01310100')
+      .expectOne('/bff/cep/01310100')
       .flush(
         {
           status: 503,

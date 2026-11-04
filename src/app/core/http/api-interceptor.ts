@@ -7,8 +7,8 @@ import { Notifier } from '../services/notifier';
 import { NO_RETRY, REQUEST_TIMEOUT, SKIP_GLOBAL_ERROR } from './api-context';
 import { isTransient, newRequestId, showsGlobally, toApiError } from './api-errors';
 
-/** Prefixo das chamadas ao nosso back (Fase 2: mesmo domínio, via CloudFront → API). */
-export const API_PREFIX = '/api/';
+/** Prefixo das chamadas ao nosso back: o BFF (mesmo domínio, via CloudFront → BFF). Não é a commerce-api. */
+export const API_PREFIX = '/bff/';
 
 /**
  * Proteção global das chamadas ao back:

@@ -11,13 +11,13 @@ import { Observable } from 'rxjs';
 export class ShopApi {
   private readonly http = inject(HttpClient);
 
-  /** `POST /api/cart/items` — o back confere estoque e devolve o carrinho. */
+  /** `POST /bff/cart/items` — o back confere estoque e devolve o carrinho. */
   addCartItem(variantId: string, quantity = 1): Observable<unknown> {
-    return this.http.post('/api/cart/items', { variantId, quantity });
+    return this.http.post('/bff/cart/items', { variantId, quantity });
   }
 
-  /** `POST /api/orders` — o back recalcula tudo e cria o pedido (sem nova tentativa). */
+  /** `POST /bff/orders` — o back recalcula tudo e cria o pedido (sem nova tentativa). */
   placeOrder(items: readonly { variantId: string; quantity: number }[]): Observable<unknown> {
-    return this.http.post('/api/orders', { items });
+    return this.http.post('/bff/orders', { items });
   }
 }

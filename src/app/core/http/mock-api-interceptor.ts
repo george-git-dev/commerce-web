@@ -25,7 +25,7 @@ const BACK_PROBLEMS: Record<Exclude<keyof typeof STATUS, 'offline'>, object> = {
 };
 
 /**
- * Back FALSO (Fase 1): responde às chamadas `/api/...` com sucesso depois de um
+ * Back FALSO (Fase 1): responde às chamadas `/bff/...` com sucesso depois de um
  * pequeno atraso — ou com a falha que o `FailureSimulator` mandar. Fica por
  * último na cadeia, para timeout/nova tentativa/avisos valerem como no back real.
  * Fase 2: sai daqui e as chamadas vão para o Spring. Sessão e login (`BFF_PATHS`)

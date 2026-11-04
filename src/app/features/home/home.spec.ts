@@ -35,4 +35,14 @@ describe('Home', () => {
 
     expect(compiled.querySelectorAll('app-product-card').length).toBeGreaterThan(0);
   });
+
+  it('destaques (lançamentos) e mais vendidos não repetem a mesma vitrine', async () => {
+    const fixture = TestBed.createComponent(Home);
+    await fixture.whenStable();
+    const grids = (fixture.nativeElement as HTMLElement).querySelectorAll('.products__grid');
+    const names = (grid: Element) =>
+      [...grid.querySelectorAll('app-product-card h3')].map((title) => title.textContent?.trim());
+    expect(names(grids[0])).toHaveLength(4);
+    expect(names(grids[0])).not.toEqual(names(grids[1]));
+  });
 });

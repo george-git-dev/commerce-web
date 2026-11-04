@@ -1,6 +1,17 @@
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { AUTH_MODE } from '../../core/config/auth-mode';
 import { TestBed } from '@angular/core/testing';
-import { $, $$, currentUrl, renderAt, settle, textOf, type } from '../../../testing/test-helpers';
+import {
+  $,
+  $$,
+  buttonByText,
+  currentUrl,
+  renderAt,
+  settle,
+  textOf,
+  type,
+} from '../../../testing/test-helpers';
 import { apiInterceptor } from '../../core/http/api-interceptor';
 import { mockApiInterceptor } from '../../core/http/mock-api-interceptor';
 import { Product } from '../../core/models/product';
@@ -13,7 +24,7 @@ import {
   isAvailable,
   lowestPrice,
 } from '../../core/utils/product-pricing';
-import { Catalog } from './catalog';
+import { Catalog, CATALOG_PAGE_SIZE } from './catalog';
 
 const http = provideHttpClient(withInterceptors([apiInterceptor, mockApiInterceptor]));
 const open = (url: string) => renderAt(url, Catalog, { path: 'produtos', providers: [http] });
@@ -51,13 +62,20 @@ describe('Catálogo', () => {
     it(`filtro ?${query} mostra só o que bate`, async () => {
       const { fixture } = await open(`/produtos?${query}`);
       const expected = all().filter(rule).length;
-      expect($$(fixture, 'app-product-card')).toHaveLength(expected);
+      // A contagem é de todos; os cards, só da primeira página.
+      expect(textOf(fixture)).toContain(`${expected} produto(s) encontrado(s)`);
+      expect($$(fixture, 'app-product-card')).toHaveLength(Math.min(expected, CATALOG_PAGE_SIZE));
     });
   }
 
   it('sem filtro mostra tudo; ordenação por menor e maior preço', async () => {
     const { fixture } = await open('/produtos?ordenar=menor-preco');
+    expect($$(fixture, 'app-product-card')).toHaveLength(CATALOG_PAGE_SIZE);
+    // "Carregar mais" traz o resto, na mesma ordem.
+    buttonByText(fixture, 'Carregar mais').click();
+    await settle(fixture);
     expect($$(fixture, 'app-product-card')).toHaveLength(all().length);
+    expect(textOf(fixture)).not.toContain('Carregar mais');
     const cheapest = [...all()].sort((a, b) => lowestPrice(a) - lowestPrice(b))[0];
     expect(names(fixture)[0]).toBe(cheapest.name);
     TestBed.resetTestingModule();
@@ -140,5 +158,31 @@ describe('Catálogo', () => {
     expect(filters.filtersOpen()).toBe(true);
     $$(fixture, '[aria-label*="Fechar"], .filters__backdrop')[0]?.click();
     await settle(fixture);
+  });
+
+  it('modo bff: abre com UMA busca só (as opções de filtro chegando não buscam de novo)', async () => {
+    const { fixture } = await renderAt('/produtos?familia=Oriental', Catalog, {
+      providers: [
+        { provide: AUTH_MODE, useValue: 'bff' },
+        provideHttpClient(withInterceptors([apiInterceptor])),
+        provideHttpClientTesting(),
+      ],
+    });
+    const backend = TestBed.inject(HttpTestingController);
+    backend.expectOne('/bff/catalog/filters').flush({
+      categories: ['perfume'],
+      brands: ['Lattafa'],
+      families: ['Oriental'],
+      occasions: [],
+      genders: [],
+      badges: [],
+      minPrice: null,
+      maxPrice: null,
+    });
+    await settle(fixture);
+    const searches = backend.match((req) => req.url === '/bff/catalog/products');
+    expect(searches.filter((req) => !req.cancelled)).toHaveLength(1);
+    expect(searches.filter((req) => req.cancelled)).toHaveLength(0);
+    searches[0].flush({ items: [], page: 0, size: 24, totalItems: 0, totalPages: 0 });
   });
 });

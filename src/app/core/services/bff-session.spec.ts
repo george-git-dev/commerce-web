@@ -59,10 +59,10 @@ describe('login de verdade (modo bff)', () => {
 
   afterEach(() => backend.verify());
 
-  /** Abre o site com o BFF respondendo `/api/auth/session`. */
+  /** Abre o site com o BFF respondendo `/bff/auth/session`. */
   const open = async (respond: (req: ReturnType<typeof backend.expectOne>) => void) => {
     const started = auth.init();
-    respond(backend.expectOne('/api/auth/session'));
+    respond(backend.expectOne('/bff/auth/session'));
     await started;
   };
 
@@ -107,10 +107,10 @@ describe('login de verdade (modo bff)', () => {
     auth.startPasswordChange('/minha-conta/dados');
     auth.startProfileEdit('/minha-conta/dados');
     expect(visited).toEqual([
-      '/api/auth/login?returnTo=%2Ffinalizar-compra%3Fetapa%3D2',
-      '/api/auth/register?returnTo=%2Fminha-conta',
-      '/api/auth/password?returnTo=%2Fminha-conta%2Fdados',
-      '/api/auth/profile?returnTo=%2Fminha-conta%2Fdados',
+      '/bff/auth/login?returnTo=%2Ffinalizar-compra%3Fetapa%3D2',
+      '/bff/auth/register?returnTo=%2Fminha-conta',
+      '/bff/auth/password?returnTo=%2Fminha-conta%2Fdados',
+      '/bff/auth/profile?returnTo=%2Fminha-conta%2Fdados',
     ]);
   });
 
@@ -118,7 +118,7 @@ describe('login de verdade (modo bff)', () => {
     await open((req) => req.flush(ANA));
     auth.logout();
     expect(auth.isLoggedIn()).toBe(false);
-    const req = backend.expectOne('/api/auth/logout');
+    const req = backend.expectOne('/bff/auth/logout');
     expect(req.request.method).toBe('POST');
     req.flush({ redirectUrl: 'http://localhost:8180/auth/realms/nani/logout?x=1' });
     await vi.waitFor(() =>
@@ -128,7 +128,7 @@ describe('login de verdade (modo bff)', () => {
 
   it('sair com o BFF fora do ar: volta para o início, sem aviso', async () => {
     auth.logout();
-    backend.expectOne('/api/auth/logout').flush(null, { status: 500, statusText: 'Erro' });
+    backend.expectOne('/bff/auth/logout').flush(null, { status: 500, statusText: 'Erro' });
     await vi.waitFor(() => expect(visited).toEqual(['/']));
     expect(notified).toEqual([]);
   });
@@ -136,13 +136,13 @@ describe('login de verdade (modo bff)', () => {
   it('sessão expirada em outra chamada: limpa aqui e vai para o login, sem chamar o logout do BFF', async () => {
     await open((req) => req.flush(ANA));
     TestBed.inject(FailureSimulator).mode.set('sessao');
-    const failed = await firstValueFrom(TestBed.inject(HttpClient).post('/api/orders', {})).catch(
+    const failed = await firstValueFrom(TestBed.inject(HttpClient).post('/bff/orders', {})).catch(
       () => 'erro',
     );
     expect(failed).toBe('erro');
     expect(auth.isLoggedIn()).toBe(false);
     expect(notified).toEqual(['Sua sessão expirou. Entre de novo para continuar.']);
-    backend.expectNone('/api/auth/logout');
+    backend.expectNone('/bff/auth/logout');
   });
 
   describe('telas de login', () => {
@@ -159,8 +159,8 @@ describe('login de verdade (modo bff)', () => {
       expect(run('/login?retorno=/carrinho')).toBe(false);
       expect(run('/login?retorno=//site-falso.com')).toBe(false);
       expect(visited).toEqual([
-        '/api/auth/login?returnTo=%2Fcarrinho',
-        '/api/auth/login?returnTo=%2Fminha-conta',
+        '/bff/auth/login?returnTo=%2Fcarrinho',
+        '/bff/auth/login?returnTo=%2Fminha-conta',
       ]);
     });
 

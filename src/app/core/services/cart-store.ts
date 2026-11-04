@@ -33,7 +33,12 @@ interface StoredLine {
 @Injectable({ providedIn: 'root' })
 export class CartStore {
   private readonly catalog = inject(CatalogService);
-  private readonly lines = signal<readonly CartLine[]>(this.restore());
+  private readonly lines = signal<readonly CartLine[]>([]);
+  /**
+   * Sacola salva já remontada. Até lá não grava nada: no login de verdade os produtos vêm do back,
+   * e gravar a sacola ainda vazia apagaria a que estava salva.
+   */
+  private readonly restored = signal(false);
 
   readonly items = this.lines.asReadonly();
   readonly count = computed(() => this.lines().reduce((sum, line) => sum + line.quantity, 0));
@@ -42,7 +47,10 @@ export class CartStore {
   );
 
   constructor() {
+    this.reload();
+
     effect(() => {
+      if (!this.restored()) return;
       const stored: StoredLine[] = this.lines().map((line) => ({
         slug: line.product.slug,
         variantId: line.variant.id,
@@ -53,7 +61,7 @@ export class CartStore {
 
     // Outra aba mexeu na sacola: atualiza esta também.
     const onStorage = (event: StorageEvent) => {
-      if (event.key === CART_STORAGE_KEY) this.lines.set(this.restore());
+      if (event.key === CART_STORAGE_KEY) this.reload();
     };
     globalThis.addEventListener?.('storage', onStorage);
     inject(DestroyRef).onDestroy(() => globalThis.removeEventListener?.('storage', onStorage));
@@ -97,9 +105,22 @@ export class CartStore {
     this.lines.update((lines) => lines.filter((line) => line.variant.id !== variantId));
   }
 
-  /** Remonta a sacola salva a partir do catálogo atual. */
-  private restore(): CartLine[] {
+  /** Busca os produtos da sacola salva (no `mock`, na hora) e remonta. */
+  private reload(): void {
     const stored = readJson<StoredLine[]>(CART_STORAGE_KEY);
+    const slugs = Array.isArray(stored) ? stored.map((item) => item?.slug).filter(Boolean) : [];
+    this.catalog.ensureLoaded(slugs).subscribe({
+      next: () => {
+        this.lines.set(this.restore(stored));
+        this.restored.set(true);
+      },
+      // Back fora do ar: não remonta nem grava por cima (a sacola salva continua lá).
+      error: () => undefined,
+    });
+  }
+
+  /** Remonta a sacola salva a partir do catálogo atual. */
+  private restore(stored: StoredLine[] | null): CartLine[] {
     if (!Array.isArray(stored)) return [];
     const lines: CartLine[] = [];
     for (const item of stored) {

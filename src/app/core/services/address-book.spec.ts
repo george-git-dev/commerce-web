@@ -125,7 +125,7 @@ describe('AddressBook (modo bff: o back é a fonte)', () => {
   it('carrega do BFF na ordem do back (sem endereço de exemplo) e com id em texto', () => {
     expect(book.addresses()).toHaveLength(0);
     book.load().subscribe();
-    backend.expectOne('/api/me/addresses').flush([
+    backend.expectOne('/bff/me/addresses').flush([
       { ...ana, id: 7, isDefault: true },
       { ...ana, number: '2', id: 3, isDefault: false },
     ]);
@@ -136,34 +136,34 @@ describe('AddressBook (modo bff: o back é a fonte)', () => {
   it('cadastrar manda para o BFF e busca a lista de novo (o back escolhe o principal)', () => {
     let created: unknown;
     book.add(ana).subscribe((saved) => (created = saved));
-    const post = backend.expectOne({ method: 'POST', url: '/api/me/addresses' });
+    const post = backend.expectOne({ method: 'POST', url: '/bff/me/addresses' });
     expect(post.request.body).toEqual({ ...ana, isDefault: false });
     post.flush({ ...ana, id: 9, isDefault: true });
     backend
-      .expectOne({ method: 'GET', url: '/api/me/addresses' })
+      .expectOne({ method: 'GET', url: '/bff/me/addresses' })
       .flush([{ ...ana, id: 9, isDefault: true }]);
     expect(created).toEqual({ ...ana, id: '9', isDefault: true });
   });
 
   it('tornar principal é um PUT com isDefault; remover é DELETE; os dois recarregam a lista', () => {
     book.load().subscribe();
-    backend.expectOne('/api/me/addresses').flush([
+    backend.expectOne('/bff/me/addresses').flush([
       { ...ana, id: 7, isDefault: true },
       { ...ana, number: '2', id: 3, isDefault: false },
     ]);
 
     book.setDefault('3').subscribe();
-    const put = backend.expectOne({ method: 'PUT', url: '/api/me/addresses/3' });
+    const put = backend.expectOne({ method: 'PUT', url: '/bff/me/addresses/3' });
     expect(put.request.body.isDefault).toBe(true);
     put.flush({});
     backend
-      .expectOne({ method: 'GET', url: '/api/me/addresses' })
+      .expectOne({ method: 'GET', url: '/bff/me/addresses' })
       .flush([{ ...ana, number: '2', id: 3, isDefault: true }]);
 
     book.remove('7').subscribe();
-    backend.expectOne({ method: 'DELETE', url: '/api/me/addresses/7' }).flush(null);
+    backend.expectOne({ method: 'DELETE', url: '/bff/me/addresses/7' }).flush(null);
     backend
-      .expectOne({ method: 'GET', url: '/api/me/addresses' })
+      .expectOne({ method: 'GET', url: '/bff/me/addresses' })
       .flush([{ ...ana, number: '2', id: 3, isDefault: true }]);
     expect(book.addresses()).toHaveLength(1);
     backend.verify();
